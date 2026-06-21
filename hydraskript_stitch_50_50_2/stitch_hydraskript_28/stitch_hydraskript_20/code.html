@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript Style Training Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#9c3cf6",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white transition-colors duration-300">
+<div class="layout-container flex h-full min-h-screen flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-[#312839] px-6 py-3 bg-white dark:bg-background-dark z-20 sticky top-0">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center">
+<svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-white text-xl font-bold tracking-tight">HydraSkript</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-white text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-white text-sm font-medium hover:text-primary transition-colors" href="#">Projects</a>
+<a class="text-primary text-sm font-medium border-b-2 border-primary pb-1" href="#">Style Center</a>
+<a class="text-slate-600 dark:text-white text-sm font-medium hover:text-primary transition-colors" href="#">Library</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<label class="hidden sm:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full">
+<div class="text-[#ab9cba] flex bg-slate-100 dark:bg-[#312839] items-center justify-center pl-4 rounded-l-xl">
+<span class="material-symbols-outlined text-lg">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 rounded-r-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-slate-100 dark:bg-[#312839] placeholder:text-slate-400 dark:placeholder:text-[#ab9cba] px-4 text-base font-normal leading-normal" placeholder="Search voices..."/>
+</div>
+</label>
+<button class="flex min-w-[100px] cursor-pointer items-center justify-center rounded-xl h-10 px-4 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95">
+                    Save Style
+                </button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/50" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCGPEgSc3s53yhq_7AAXWKleizCJFq_6wqur5NcTCftT4CEzrRZ1PWVdg6wqAgGB-Gol-xqivDIhXusVYBlaK-9yqulPF2NBjH2ki5VktYtxkuIbJXQXa2hMf5Xyd4fnTwkHUiqavwrbejsRFJly-AxAoZO13BfhfZnmZ2ktugIk6j3iw9x07FviX0nKano55kMQcX_bdGC5cYDbJJ546uQ84Y_qEkQJr-1zWawEWZgrlEoIEit_D5S6osJkE7D0Xa0UJUyNZpm1loX");'></div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Left Side Panel: Style Config -->
+<aside class="w-80 border-r border-slate-200 dark:border-[#312839] bg-white dark:bg-background-dark p-6 overflow-y-auto no-scrollbar flex flex-col gap-8">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-white text-lg font-bold">Style Configuration</h1>
+<p class="text-slate-500 dark:text-[#ab9cba] text-xs">Define the soul of your narrator.</p>
+</div>
+<!-- Identity Fields -->
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-[#ab9cba]">Voice Name</label>
+<input class="bg-slate-50 dark:bg-[#312839] border-none rounded-lg text-white p-3 focus:ring-1 focus:ring-primary" type="text" value="The Noir Author"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-[#ab9cba]">Description</label>
+<textarea class="bg-slate-50 dark:bg-[#312839] border-none rounded-lg text-white p-3 h-24 text-sm resize-none focus:ring-1 focus:ring-primary" placeholder="Gritty, cynical, and atmospheric prose.">Gritty, cynical, and atmospheric prose with hard-boiled detective vibes.</textarea>
+</div>
+</div>
+<!-- Sliders Section -->
+<div class="flex flex-col gap-6 pt-4 border-t border-slate-100 dark:border-[#312839]">
+<div class="flex flex-col gap-3">
+<div class="flex justify-between text-xs font-medium text-slate-400">
+<span>Tone: Formal</span>
+<span class="text-primary font-bold">Casual</span>
+</div>
+<input class="w-full accent-primary h-1.5 bg-slate-200 dark:bg-[#483b54] rounded-lg appearance-none cursor-pointer" type="range"/>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex justify-between text-xs font-medium text-slate-400">
+<span>Length: Short</span>
+<span class="text-primary font-bold">Long</span>
+</div>
+<input class="w-full accent-primary h-1.5 bg-slate-200 dark:bg-[#483b54] rounded-lg appearance-none cursor-pointer" type="range"/>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex justify-between text-xs font-medium text-slate-400">
+<span>Pacing: Slow</span>
+<span class="text-primary font-bold">Fast</span>
+</div>
+<input class="w-full accent-primary h-1.5 bg-slate-200 dark:bg-[#483b54] rounded-lg appearance-none cursor-pointer" type="range"/>
+</div>
+</div>
+<!-- Tags Section -->
+<div class="flex flex-col gap-3">
+<label class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-[#ab9cba]">Descriptors</label>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-primary/20 text-primary border border-primary/30 rounded text-xs font-bold">Noir</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-[#312839] text-slate-500 dark:text-white rounded text-xs">Cynical</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-[#312839] text-slate-500 dark:text-white rounded text-xs">Hard-boiled</span>
+<span class="px-2 py-1 bg-primary/20 text-primary border border-primary/30 rounded text-xs font-bold">First Person</span>
+<span class="px-2 py-1 bg-slate-100 dark:bg-[#312839] text-slate-500 dark:text-white rounded text-xs">Metaphorical</span>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="flex-1 bg-background-light dark:bg-background-dark p-8 overflow-y-auto pb-40">
+<div class="max-w-4xl mx-auto flex flex-col gap-8">
+<!-- Heading -->
+<div class="flex justify-between items-end gap-4">
+<div class="flex flex-col gap-2">
+<h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Authorial Engine</h2>
+<p class="text-slate-500 dark:text-[#ab9cba] text-lg">Refine the core logic that drives this specific voice.</p>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-[#312839] text-white rounded-xl text-sm font-bold hover:bg-slate-200 dark:hover:bg-[#483b54] transition-colors">
+<span class="material-symbols-outlined text-base">ios_share</span>
+                            Export Profile
+                        </button>
+</div>
+<!-- Upload Area -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2 text-slate-900 dark:text-white">
+<span class="material-symbols-outlined">upload_file</span>
+<h3 class="text-lg font-bold">Training Data</h3>
+</div>
+<div class="flex flex-col items-center gap-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-[#483b54] bg-white/5 dark:bg-[#312839]/20 px-6 py-12 hover:border-primary/50 transition-colors">
+<div class="flex max-w-[480px] flex-col items-center gap-2">
+<p class="text-slate-900 dark:text-white text-lg font-bold text-center">Upload Source Material</p>
+<p class="text-slate-500 dark:text-[#ab9cba] text-sm text-center">
+                                    Support for <span class="text-primary font-bold">.pdf</span>, <span class="text-primary font-bold">.docx</span>, or <span class="text-primary font-bold">.epub</span> files.
+                                </p>
+</div>
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center rounded-xl h-11 px-6 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20">
+                                Browse Files
+                            </button>
+</div>
+<!-- Mini Progress Bar Example -->
+<div class="flex flex-col gap-2 p-4 bg-white dark:bg-background-dark border border-slate-200 dark:border-[#312839] rounded-xl">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm font-bold">check_circle</span>
+<p class="text-xs font-medium text-slate-700 dark:text-white">Noir_Anthology_Vol1.pdf</p>
+</div>
+<p class="text-primary text-xs font-bold">Processed</p>
+</div>
+<div class="h-1 rounded bg-slate-200 dark:bg-[#483b54]">
+<div class="h-1 rounded bg-primary" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+<!-- Prime Directives Section -->
+<div class="flex flex-col gap-6 pt-4">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-slate-900 dark:text-white">
+<span class="material-symbols-outlined">rule</span>
+<h3 class="text-lg font-bold">Prime Directives</h3>
+</div>
+<button class="text-primary text-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-base">add</span> Add Directive
+                            </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Directive Card 1 -->
+<div class="p-5 rounded-xl bg-white dark:bg-[#251b2e] border border-slate-200 dark:border-[#483b54] flex flex-col gap-4">
+<div class="flex justify-between">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">Logic: Behavioral</span>
+<span class="material-symbols-outlined text-slate-400 text-sm cursor-pointer">close</span>
+</div>
+<h4 class="text-sm font-bold text-slate-900 dark:text-white">System Actions Reporting</h4>
+<p class="text-xs text-slate-500 dark:text-[#ab9cba]">The narrator should report system actions (dice rolls, failures) as part of the internal monologue.</p>
+<div class="p-3 bg-slate-100 dark:bg-black/20 rounded-lg italic text-xs text-slate-500 dark:text-[#ab9cba]">
+                                    "The lock clicked, but not because of skill. A lucky roll of the bones, a nat 20 in a world of zeros."
+                                </div>
+</div>
+<!-- Directive Card 2 -->
+<div class="p-5 rounded-xl bg-white dark:bg-[#251b2e] border border-slate-200 dark:border-[#483b54] flex flex-col gap-4">
+<div class="flex justify-between">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">Style: Prose</span>
+<span class="material-symbols-outlined text-slate-400 text-sm cursor-pointer">close</span>
+</div>
+<h4 class="text-sm font-bold text-slate-900 dark:text-white">Metaphorical Weather</h4>
+<p class="text-xs text-slate-500 dark:text-[#ab9cba]">The environment must always reflect the character's internal misery or cynicism.</p>
+<div class="p-3 bg-slate-100 dark:bg-black/20 rounded-lg italic text-xs text-slate-500 dark:text-[#ab9cba]">
+                                    "The rain didn't wash away the filth; it just turned the city into a giant, wet tomb."
+                                </div>
+</div>
+<!-- Directive Card 3 -->
+<div class="p-5 rounded-xl bg-white dark:bg-[#251b2e] border border-slate-200 dark:border-[#483b54] flex flex-col gap-4">
+<div class="flex justify-between">
+<span class="text-xs font-bold text-primary uppercase tracking-widest">Style: Dialogue</span>
+<span class="material-symbols-outlined text-slate-400 text-sm cursor-pointer">close</span>
+</div>
+<h4 class="text-sm font-bold text-slate-900 dark:text-white">Short Sentence Structure</h4>
+<p class="text-xs text-slate-500 dark:text-[#ab9cba]">Limit complex sentences. Use periods like bullets.</p>
+<div class="p-3 bg-slate-100 dark:bg-black/20 rounded-lg italic text-xs text-slate-500 dark:text-[#ab9cba]">
+                                    "She walked in. I looked up. The world ended. Just like that."
+                                </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Test Generator Footer -->
+<footer class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-slate-200 dark:border-[#312839] p-4 px-8 flex flex-col gap-4 z-30">
+<div class="max-w-6xl mx-auto w-full flex items-center justify-between gap-8">
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex items-center gap-4">
+<p class="text-xs font-bold text-slate-400 dark:text-[#ab9cba] uppercase tracking-tighter">Live Test Generator</p>
+<div class="h-[1px] flex-1 bg-slate-200 dark:bg-[#312839]"></div>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 bg-slate-100 dark:bg-[#312839] hover:bg-primary hover:text-white transition-all rounded-lg text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-base">bolt</span> Action
+                        </button>
+<button class="px-4 py-2 bg-slate-100 dark:bg-[#312839] hover:bg-primary hover:text-white transition-all rounded-lg text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-base">favorite</span> Romantic
+                        </button>
+<button class="px-4 py-2 bg-slate-100 dark:bg-[#312839] hover:bg-primary hover:text-white transition-all rounded-lg text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-base">visibility</span> Reveal
+                        </button>
+<button class="px-4 py-2 bg-slate-100 dark:bg-[#312839] hover:bg-primary hover:text-white transition-all rounded-lg text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-base">psychology</span> Emotional
+                        </button>
+</div>
+</div>
+<div class="w-2/3 h-20 bg-slate-50 dark:bg-black/40 rounded-xl p-3 relative group overflow-hidden border border-slate-200 dark:border-[#312839]">
+<div class="absolute top-2 right-3 flex items-center gap-2">
+<span class="size-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-[10px] text-primary font-bold uppercase">AI Preview</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-[#ab9cba] italic line-clamp-2 pr-12">
+                        "The smoke from my cigarette curled like a question mark in the stagnant air. She stood in the doorway, a shadow silhouetted against the neon glare of the 'Open' sign. I knew she was trouble before she even opened her mouth..."
+                    </p>
+<button class="absolute bottom-2 right-2 text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Regenerate</button>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

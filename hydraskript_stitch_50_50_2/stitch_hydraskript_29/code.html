@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Global Library Command Center | HydraSkript</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#000000",
+                        "surface-dark": "#0a1112",
+                        "accent-purple": "#8a2be2",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .command-glow:focus-within {
+            box-shadow: 0 0 15px rgba(19, 200, 236, 0.4);
+            border-color: #13c8ec;
+        }
+        .action-gradient {
+            background: linear-gradient(135deg, #8a2be2 0%, #13c8ec 100%);
+        }
+        .stat-card-border {
+            border: 1px solid rgba(19, 200, 236, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #283639;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-solid border-[#283639] px-6 py-3 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-4 text-white">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight tracking-tight">HydraSkript</h2>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="flex items-center gap-8">
+<a class="text-white text-sm font-medium hover:text-primary transition-colors" href="#">Command</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">Library</a>
+<a class="text-white text-sm font-medium hover:text-primary transition-colors" href="#">Analytics</a>
+<a class="text-white text-sm font-medium hover:text-primary transition-colors" href="#">Workflows</a>
+</nav>
+<div class="h-6 w-px bg-[#283639]"></div>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-lg h-10 px-4 action-gradient text-white text-sm font-bold tracking-wide">
+<span class="truncate">Create New</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full border-2 border-primary/30 size-10" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHamP4QUNQxbyJv3kn8-unnX_9o6KDL8LT8Qkw4L_w2j51D8zYfUNtAEaWasBg5Rrn6oNYnARR5qgTzpSUunnlIzr4VVCmHzgP8X8eW8b8iXvDhZ9SHMwZ11zOnTknE6DcdNKRPaa0u_pKcJCwfzljFlE38UW2jym24KyOfAH8mRZjzBHVUYM2-erGdyvgH8rfQYDuO6k_AuJsrZxh3cVE_7Yy5NmcW2rz1NwK3x8QNtAGkLgcN-peUG_hd7MoPHvyhBvfdLmTf65e");'></div>
+</div>
+</div>
+</header>
+<!-- Main Dashboard Body -->
+<main class="flex flex-1 overflow-hidden">
+<!-- Sidebar Filters -->
+<aside class="w-72 bg-background-light dark:bg-background-dark border-r border-[#283639] flex flex-col custom-scrollbar overflow-y-auto">
+<div class="p-6">
+<div class="mb-8">
+<h3 class="text-white text-xs font-bold uppercase tracking-widest mb-4 opacity-50">Global Stats</h3>
+<div class="flex flex-col gap-3">
+<div class="stat-card-border bg-surface-dark/50 p-3 rounded-lg">
+<p class="text-primary text-xl font-bold leading-none">1.2M</p>
+<p class="text-[#9db4b9] text-[10px] uppercase font-bold mt-1">Total Words</p>
+</div>
+<div class="stat-card-border bg-surface-dark/50 p-3 rounded-lg">
+<p class="text-primary text-xl font-bold leading-none">42</p>
+<p class="text-[#9db4b9] text-[10px] uppercase font-bold mt-1">Books Completed</p>
+</div>
+<div class="stat-card-border bg-surface-dark/50 p-3 rounded-lg">
+<p class="text-primary text-xl font-bold leading-none">120h</p>
+<p class="text-[#9db4b9] text-[10px] uppercase font-bold mt-1">Audio Hours</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div>
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-white text-sm font-bold">Advanced Filters</h3>
+<span class="material-symbols-outlined text-xs text-primary cursor-pointer">tune</span>
+</div>
+<p class="text-[#9db4b9] text-xs font-normal mb-4">Refine your massive archive</p>
+<div class="flex flex-col gap-1">
+<!-- Filter Item -->
+<div class="group flex items-center justify-between px-3 py-2 rounded-lg hover:bg-surface-dark cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-[#9db4b9] group-hover:text-primary">folder</span>
+<p class="text-white text-sm font-medium">Genre</p>
+</div>
+<span class="material-symbols-outlined text-xs text-[#9db4b9]">chevron_right</span>
+</div>
+<!-- Filter Item Active -->
+<div class="flex flex-col gap-2 p-3 bg-surface-dark rounded-lg border border-[#283639]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-primary">verified</span>
+<p class="text-white text-sm font-bold">Publication Status</p>
+</div>
+<div class="ml-7 flex flex-col gap-2 mt-1">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded bg-background-dark border-primary text-primary focus:ring-primary size-3" type="checkbox"/>
+<span class="text-xs text-[#9db4b9]">Published</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="rounded bg-background-dark border-[#283639] text-primary focus:ring-primary size-3" type="checkbox"/>
+<span class="text-xs text-[#9db4b9]">Draft</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="rounded bg-background-dark border-[#283639] text-primary focus:ring-primary size-3" type="checkbox"/>
+<span class="text-xs text-[#9db4b9]">Generating</span>
+</label>
+</div>
+</div>
+<!-- Filter Item -->
+<div class="group flex items-center justify-between px-3 py-2 rounded-lg hover:bg-surface-dark cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-[#9db4b9] group-hover:text-primary">calendar_month</span>
+<p class="text-white text-sm font-medium">Date Modified</p>
+</div>
+<span class="material-symbols-outlined text-xs text-[#9db4b9]">chevron_right</span>
+</div>
+<!-- Filter Item -->
+<div class="group flex items-center justify-between px-3 py-2 rounded-lg hover:bg-surface-dark cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sm text-[#9db4b9] group-hover:text-primary">palette</span>
+<p class="text-white text-sm font-medium">Author Style</p>
+</div>
+<span class="material-symbols-outlined text-xs text-[#9db4b9]">chevron_right</span>
+</div>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 border border-[#283639] hover:bg-surface-dark py-2 rounded-lg text-[#9db4b9] text-sm transition-all mt-4">
+<span class="material-symbols-outlined text-sm">restart_alt</span>
+                        Reset Filters
+                    </button>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<section class="flex-1 flex flex-col overflow-hidden bg-background-dark">
+<!-- Command Center Search Area -->
+<div class="p-8 border-b border-[#283639]">
+<div class="max-w-4xl mx-auto flex flex-col gap-6">
+<div class="flex flex-col">
+<h1 class="text-2xl font-bold tracking-tight mb-2">Library Command Center</h1>
+<p class="text-[#9db4b9] text-sm">Deep Search engine enabled across 1.2M words.</p>
+</div>
+<div class="relative w-full">
+<label class="command-glow flex flex-col h-16 w-full border border-[#283639] bg-surface-dark rounded-xl transition-all duration-300">
+<div class="flex w-full flex-1 items-stretch">
+<div class="text-[#9db4b9] flex items-center justify-center pl-6">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 bg-transparent border-none text-white focus:ring-0 px-4 text-lg font-normal placeholder:text-[#3b4f54]" placeholder="Deep Search: find names, phrases, or styles within your archive..."/>
+<div class="flex items-center gap-3 pr-6">
+<span class="text-[10px] font-bold text-primary px-2 py-1 bg-primary/10 rounded uppercase tracking-widest">Deep Engine ON</span>
+<div class="h-6 w-px bg-[#283639]"></div>
+<button class="text-[#9db4b9] hover:text-white transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+</label>
+</div>
+<!-- Filter Chips -->
+<div class="flex items-center justify-between">
+<div class="flex gap-2 flex-wrap">
+<button class="flex h-9 items-center justify-center gap-x-2 rounded-lg bg-primary text-black px-5 text-sm font-bold">
+                                All Assets
+                            </button>
+<button class="flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#283639] hover:bg-surface-dark border border-transparent hover:border-primary/30 text-white px-5 text-sm font-medium transition-all">
+                                Books
+                            </button>
+<button class="flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#283639] hover:bg-surface-dark border border-transparent hover:border-primary/30 text-white px-5 text-sm font-medium transition-all">
+                                Audiobooks
+                            </button>
+<button class="flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#283639] hover:bg-surface-dark border border-transparent hover:border-primary/30 text-white px-5 text-sm font-medium transition-all">
+                                Styles
+                            </button>
+<button class="flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#283639] hover:bg-surface-dark border border-transparent hover:border-primary/30 text-white px-5 text-sm font-medium transition-all">
+                                Cover Art
+                            </button>
+</div>
+<div class="flex items-center bg-surface-dark rounded-lg p-1 border border-[#283639]">
+<button class="p-1.5 bg-[#283639] rounded text-primary">
+<span class="material-symbols-outlined text-sm">grid_view</span>
+</button>
+<button class="p-1.5 text-[#9db4b9] hover:text-white">
+<span class="material-symbols-outlined text-sm">format_list_bulleted</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Library Grid -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+<div class="max-w-6xl mx-auto">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- High Density Card -->
+<div class="group relative flex flex-col bg-surface-dark/40 border border-[#283639] hover:border-primary/50 rounded-xl overflow-hidden transition-all duration-300">
+<div class="relative h-48 w-full bg-[#111]">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Cyberpunk style book cover art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoA3U1SpQhXimh1XCKyfCB8FfRsffWkcnyfyCb0QKo4AIWxEFx1rvJSjtDqujmHSNmFeVLP6X52EmfoEhhxXSpFHvAl3CbvPE7M8fBMkvUHEaEBZkCoBqLiHhVFZux0NGYOOe7sEBRogtfpqHVFoWKhCjoMgcwEfD0wFkaysokF13-K21XG7hvHQU06K30tlQUJ9Le-XW8mEtCpSdDN0aAJp5la98FQVejaFHXdwyKwd7h95duqjHM5jqX_x9YuDFJv0HxRvTwi5oq"/>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">Published</span>
+</div>
+<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md p-1 rounded-lg border border-white/10 flex gap-2">
+<span class="material-symbols-outlined text-sm text-white hover:text-primary cursor-pointer">edit</span>
+<span class="material-symbols-outlined text-sm text-white hover:text-primary cursor-pointer">ios_share</span>
+<span class="material-symbols-outlined text-sm text-white hover:text-primary cursor-pointer">content_copy</span>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-3">
+<div>
+<h4 class="text-white font-bold text-sm line-clamp-1">Neon Paradox: The Archive</h4>
+<p class="text-[#9db4b9] text-xs">Modern Sci-Fi Noir Style</p>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-black/40 p-2 rounded border border-[#283639]">
+<p class="text-[9px] uppercase font-bold text-[#3b4f54]">Words</p>
+<p class="text-xs text-white">125,402</p>
+</div>
+<div class="bg-black/40 p-2 rounded border border-[#283639]">
+<p class="text-[9px] uppercase font-bold text-[#3b4f54]">Credits</p>
+<p class="text-xs text-primary">3.2k</p>
+</div>
+</div>
+</div>
+</div>
+<!-- High Density Card 2 -->
+<div class="group relative flex flex-col bg-surface-dark/40 border border-[#283639] hover:border-primary/50 rounded-xl overflow-hidden transition-all duration-300">
+<div class="relative h-48 w-full bg-[#111]">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Ancient fantasy book cover art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAD_SAoHVFM8tkZztBR4WdyD4n-VMJ4DOJ-3BJfarZR-vS6ocXL-NqD1GHjYmNIkBP_KLdBK9-Yzu3V6FKZ-Rs2EZXKeBKiHz8DNbxGfkPxUHHhpfeCb8aKt1jTtP5yk3Dd7rVK2jjc0aoIVbDiGtDsZM-mUZKjWYM5EwQLCsA1khQ-TLJwzDCJtooXGn85UkI7EYslpvCNNyYi94iWa85mbmfHp6aOEjKM-fK2TINhvUHXd8y1DvAwA0oQnuvDX3Qh4GB6LU6xTkRO"/>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-accent-purple text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Generating</span>
+</div>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-100">
+<div class="flex flex-col items-center gap-2">
+<div class="w-24 h-1 bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 75%"></div>
+</div>
+<span class="text-[10px] text-primary font-bold">75% Complete</span>
+</div>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-3">
+<div>
+<h4 class="text-white font-bold text-sm line-clamp-1">The Last Alchemist</h4>
+<p class="text-[#9db4b9] text-xs">High Fantasy Style</p>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-black/40 p-2 rounded border border-[#283639]">
+<p class="text-[9px] uppercase font-bold text-[#3b4f54]">Words</p>
+<p class="text-xs text-white">42,150</p>
+</div>
+<div class="bg-black/40 p-2 rounded border border-[#283639]">
+<p class="text-[9px] uppercase font-bold text-[#3b4f54]">Credits</p>
+<p class="text-xs text-primary">1.1k</p>
+</div>
+</div>
+</div>
+</div>
+<!-- High Density Card 3 -->
+<div class="group relative flex flex-col bg-surface-dark/40 border border-[#283639] hover:border-primary/50 rounded-xl overflow-hidden transition-all duration-300">
+<div class="relative h-48 w-full bg-[#111]">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Cinematic thriller movie poster style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQXYQbTX-bKTSLWebHpjxXZ9Cv_An2sIk7Os-jskK5Tc4UgZqBQjdBfL0DWAUphE7zsT-vlTJOtyxsfRp8r4EtbSzlhtg-cSXpcdI2GZtT4n7WwH7g2CdU19y4k9w3jltpfbYSUN3yU6M9rUrOC9CDPW8eHVd6Np-74MzA0l6sVmK_fveXYP5RkoJ9utv25iJzaY_g_lASZu3KDWJ8aqYf1uiKJC-95UxneAAfPXazw5nT1IOyLJqOeSYtbLhd_wwOMDI2yN0B3YW7"/>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-white/10 text-white/50 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Draft</span>
+</div>
+<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md p-1 rounded-lg border border-white/10 flex gap-2">
+<span class="material-symbols-outlined text-sm text-white hover:text-primary cursor-pointer">edit</span>
+<span class="material-symbols-outlined text-sm text-white hover:text-primary cursor-pointer">archive</span>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-3">
+<div>
+<h4 class="text-white font-bold text-sm line-clamp-1">Shadow Protocol</h4>
+<p class="text-[#9db4b9] text-xs">Techno Thriller</p>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-black/40 p-2 rounded border border-[#283639]">
+<p class="text-[9px] uppercase font-bold text-[#3b4f54]">Words</p>
+<p class="text-xs text-white">8,400</p>
+</div>
+<div class="bg-black/40 p-2 rounded border border-[#283639]">
+<p class="text-[9px] uppercase font-bold text-[#3b4f54]">Credits</p>
+<p class="text-xs text-primary">0.2k</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Add New Asset Placeholder -->
+<div class="group flex flex-col items-center justify-center bg-transparent border-2 border-dashed border-[#283639] hover:border-primary/30 rounded-xl min-h-[240px] transition-all cursor-pointer">
+<div class="flex flex-col items-center gap-2 text-[#283639] group-hover:text-primary/50 transition-colors">
+<span class="material-symbols-outlined text-3xl">add_circle</span>
+<p class="text-xs font-bold uppercase tracking-widest">New Archive Entry</p>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group relative flex flex-col bg-surface-dark/40 border border-[#283639] hover:border-primary/50 rounded-xl overflow-hidden transition-all duration-300">
+<div class="relative h-48 w-full bg-[#111]">
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Classic library book spine aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnOzAgIF_P4gM-JZSITCJvmJjMAxs3D-aE6SwOpW57Iy8Oa9hZ_fG6Q7n-nBL4fkF00DXTQrk1igM3tHgzmXQhuGmcy70W9pfwALVxUNt0QqAl7931w_-04oCgiaYX_aZffAbo6ommEp9ArHJr-vt13OB1sIOLzjdza5_hznmDuF-CHzAmnIBFL-j2iO8219xmTQMRtsWGLxH_2XoDArENOWfh0I7IC2jksVA-wbyhIX4IMpEuMdBHRoofoo9nu4465ONSsgGzI4Yb"/>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded uppercase">Published</span>
+</div>
+</div>
+<div class="p-4 flex flex-col gap-3">
+<div>
+<h4 class="text-white font-bold text-sm line-clamp-1">History of the Void</h4>
+<p class="text-[#9db4b9] text-xs">Expository Non-Fiction</p>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<div class="bg-black/40 p-2 rounded border border-[#283639]">
+<p class="text-[9px] uppercase font-bold text-[#3b4f54]">Words</p>
+<p class="text-xs text-white">88,200</p>
+</div>
+<div class="bg-black/40 p-2 rounded border border-[#283639]">
+<p class="text-[9px] uppercase font-bold text-[#3b4f54]">Credits</p>
+<p class="text-xs text-primary">2.1k</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Quick Stats / Action Bar -->
+<div class="px-8 py-3 bg-surface-dark border-t border-[#283639] flex items-center justify-between text-[11px] font-bold text-[#3b4f54] uppercase tracking-widest">
+<div class="flex gap-6">
+<span class="flex items-center gap-2"><span class="size-1.5 bg-primary rounded-full"></span> 1,248,391 Total Words Managed</span>
+<span class="flex items-center gap-2"><span class="size-1.5 bg-[#8a2be2] rounded-full"></span> 42 Completed Projects</span>
+<span class="flex items-center gap-2"><span class="size-1.5 bg-white/20 rounded-full"></span> Active Session: 04:21:00</span>
+</div>
+<div class="flex gap-4">
+<button class="hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">download</span> Export Entire Library
+                    </button>
+<button class="hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">settings</span> Archive Settings
+                    </button>
+</div>
+</div>
+</section>
+</main>
+</body></html>

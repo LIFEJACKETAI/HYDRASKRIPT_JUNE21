@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript Support Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#050a0b",
+                        "card-dark": "#1a1f20",
+                        "surface-dark": "#2a2a2a",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .text-gradient {
+            background: linear-gradient(90deg, #13c8ec 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glow-border:focus-within {
+            box-shadow: 0 0 15px rgba(19, 200, 236, 0.4);
+            border-color: #13c8ec;
+        }
+        .glass-panel {
+            background: rgba(26, 31, 32, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(157, 180, 185, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-white font-display min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 border-b border-white/10 bg-background-dark/80 backdrop-blur-md px-6 md:px-20 py-4">
+<div class="max-w-[1200px] mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<span class="text-xl font-bold tracking-tight">HydraSkript</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium text-white/70 hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-medium text-white/70 hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="text-sm font-medium text-white/70 hover:text-primary transition-colors" href="#">API Reference</a>
+<a class="text-sm font-medium text-white/70 hover:text-primary transition-colors" href="#">Pricing</a>
+<button class="bg-primary text-background-dark px-5 py-2 rounded-lg text-sm font-bold tracking-wide hover:opacity-90 transition-opacity">
+                    SIGN IN
+                </button>
+</nav>
+</div>
+</header>
+<main class="max-w-[1200px] mx-auto px-6 py-12 md:py-24">
+<!-- Hero Section -->
+<section class="text-center mb-16">
+<h1 class="text-4xl md:text-6xl font-bold mb-6 text-gradient tracking-tight">Support &amp; Help Center</h1>
+<p class="text-white/60 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+                Harness the power of AI to solve your creative blocks. Explore documentation or ask the Hydra directly.
+            </p>
+<div class="max-w-3xl mx-auto relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary to-blue-600 rounded-xl blur opacity-25 group-focus-within:opacity-50 transition duration-500"></div>
+<div class="relative flex items-center bg-surface-dark border border-white/10 rounded-xl overflow-hidden glow-border transition-all duration-300">
+<div class="pl-6 text-primary">
+<span class="material-symbols-outlined text-3xl">search</span>
+</div>
+<input class="w-full bg-transparent border-none focus:ring-0 text-white placeholder:text-white/40 py-5 px-6 text-lg" placeholder="Ask the Hydra: How do I train a new style?" type="text"/>
+<button class="bg-primary/10 hover:bg-primary/20 text-primary font-bold px-8 py-5 transition-colors border-l border-white/5">
+                        SEARCH
+                    </button>
+</div>
+</div>
+</section>
+<!-- Help Categories Grid -->
+<section class="mb-24">
+<div class="flex items-center justify-between mb-8 px-2">
+<h2 class="text-2xl font-bold">Help Categories</h2>
+<a class="text-primary text-sm font-medium flex items-center gap-1 hover:underline" href="#">
+                    View all guides <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-dark p-8 rounded-xl border border-white/5 hover:border-primary/40 transition-all group cursor-pointer">
+<div class="bg-primary/10 text-primary size-14 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">rocket_launch</span>
+</div>
+<h3 class="text-xl font-bold mb-2">Getting Started</h3>
+<p class="text-white/50 text-sm leading-relaxed">Essential setup guides and quickstart tutorials for new users.</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-dark p-8 rounded-xl border border-white/5 hover:border-primary/40 transition-all group cursor-pointer">
+<div class="bg-primary/10 text-primary size-14 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">payments</span>
+</div>
+<h3 class="text-xl font-bold mb-2">Credit &amp; Billing</h3>
+<p class="text-white/50 text-sm leading-relaxed">Manage your subscription tiers, usage limits, and payment methods.</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-dark p-8 rounded-xl border border-white/5 hover:border-primary/40 transition-all group cursor-pointer">
+<div class="bg-primary/10 text-primary size-14 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">psychology</span>
+</div>
+<h3 class="text-xl font-bold mb-2">AI Training Mastery</h3>
+<p class="text-white/50 text-sm leading-relaxed">Deep dive into advanced style training and model fine-tuning.</p>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-dark p-8 rounded-xl border border-white/5 hover:border-primary/40 transition-all group cursor-pointer">
+<div class="bg-primary/10 text-primary size-14 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">ios_share</span>
+</div>
+<h3 class="text-xl font-bold mb-2">Exporting &amp; Audio</h3>
+<p class="text-white/50 text-sm leading-relaxed">Master output formats, voice synthesis, and platform integrations.</p>
+</div>
+</div>
+</section>
+<!-- Top Articles Section -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-24">
+<div class="lg:col-span-2">
+<h2 class="text-2xl font-bold mb-8 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">article</span>
+                    Most Read Articles
+                </h2>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-5 bg-card-dark/40 rounded-lg hover:bg-card-dark transition-colors border border-white/5 group">
+<div class="flex items-center gap-4">
+<span class="text-primary/40 font-bold text-xl group-hover:text-primary transition-colors">01</span>
+<div>
+<h4 class="font-medium text-white/90">Maximizing Credit Efficiency</h4>
+<p class="text-xs text-white/40 mt-1">Updated 2 days ago • 5 min read</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-white/20 group-hover:text-white/80 transition-colors">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-5 bg-card-dark/40 rounded-lg hover:bg-card-dark transition-colors border border-white/5 group">
+<div class="flex items-center gap-4">
+<span class="text-primary/40 font-bold text-xl group-hover:text-primary transition-colors">02</span>
+<div>
+<h4 class="font-medium text-white/90">The Art of the Story Bible</h4>
+<p class="text-xs text-white/40 mt-1">Updated 1 week ago • 12 min read</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-white/20 group-hover:text-white/80 transition-colors">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-5 bg-card-dark/40 rounded-lg hover:bg-card-dark transition-colors border border-white/5 group">
+<div class="flex items-center gap-4">
+<span class="text-primary/40 font-bold text-xl group-hover:text-primary transition-colors">03</span>
+<div>
+<h4 class="font-medium text-white/90">Optimizing Voice Synthesis Nodes</h4>
+<p class="text-xs text-white/40 mt-1">Updated 4 days ago • 8 min read</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-white/20 group-hover:text-white/80 transition-colors">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="bg-gradient-to-br from-card-dark to-background-dark p-8 rounded-xl border border-primary/20 flex flex-col items-center text-center">
+<div class="bg-primary/20 p-4 rounded-full mb-6">
+<span class="material-symbols-outlined text-primary text-4xl">support_agent</span>
+</div>
+<h3 class="text-xl font-bold mb-4">Need Human Eyes?</h3>
+<p class="text-white/60 text-sm mb-8">
+                    If our AI can't crack the code, our elite support team is ready to step in and assist with your workflow.
+                </p>
+<button class="w-full py-3 px-6 rounded-lg border border-white/20 hover:bg-white hover:text-background-dark transition-all font-bold tracking-tight">
+                    CONTACT HUMAN SUPPORT
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="border-t border-white/10 py-12 px-6 bg-background-dark">
+<div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-2 text-white/40">
+<div class="size-6">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+</svg>
+</div>
+<span class="text-sm">© 2024 HydraSkript Systems. All rights reserved.</span>
+</div>
+<div class="flex gap-8 text-white/40 text-sm">
+<a class="hover:text-primary" href="#">Status</a>
+<a class="hover:text-primary" href="#">Terms of Service</a>
+<a class="hover:text-primary" href="#">Privacy Policy</a>
+</div>
+</div>
+</footer>
+<!-- AI Chat Widget (Bottom Right) -->
+<div class="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-4">
+<!-- Chat Window -->
+<div class="glass-panel w-[360px] h-[500px] rounded-2xl shadow-2xl flex flex-col overflow-hidden hidden md:flex border border-primary/30">
+<div class="p-4 bg-gradient-to-r from-primary/20 to-blue-500/20 border-b border-white/10 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-primary rounded-full flex items-center justify-center text-background-dark">
+<span class="material-symbols-outlined">smart_toy</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Hydra AI Assistant</h4>
+<div class="flex items-center gap-1.5">
+<div class="size-1.5 bg-green-500 rounded-full animate-pulse"></div>
+<span class="text-[10px] text-white/60">Ready to help</span>
+</div>
+</div>
+</div>
+<button class="text-white/40 hover:text-white">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 p-6 space-y-4 overflow-y-auto">
+<div class="bg-primary/10 rounded-lg p-3 text-sm text-white/90 max-w-[85%] self-start border border-primary/20">
+                    Welcome to the HydraSkript Support Hub! I am your AI assistant. How can I assist your workflow today?
+                </div>
+<div class="bg-surface-dark/50 rounded-lg p-3 text-sm text-white/90 max-w-[85%] self-end ml-auto border border-white/5">
+                    Help me understand how to setup a Story Bible.
+                </div>
+<div class="bg-primary/10 rounded-lg p-3 text-sm text-white/90 max-w-[85%] self-start border border-primary/20">
+                    Excellent choice. A Story Bible acts as the foundational knowledge base for your AI model. Would you like a step-by-step guide?
+                </div>
+</div>
+<div class="p-4 bg-card-dark/80 border-t border-white/10">
+<div class="relative">
+<input class="w-full bg-background-dark border border-white/10 rounded-full py-3 px-5 text-sm focus:border-primary focus:ring-0" placeholder="Type a message..." type="text"/>
+<button class="absolute right-2 top-1.5 size-8 bg-primary rounded-full flex items-center justify-center text-background-dark hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Toggle Button -->
+<button class="size-16 rounded-full bg-primary text-background-dark shadow-[0_0_20px_rgba(19,200,236,0.5)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl font-bold">chat_bubble</span>
+</button>
+</div>
+</body></html>

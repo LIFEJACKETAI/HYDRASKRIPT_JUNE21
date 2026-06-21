@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>New Project Setup Wizard | HydraSkript</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#a855f7",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .custom-range::-webkit-slider-runnable-track {
+            background: #312839;
+            height: 8px;
+            border-radius: 4px;
+        }
+        .custom-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            background: #a855f7;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -8px;
+            border: 3px solid #191022;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-solid border-slate-200 dark:border-[#312839] px-10 py-4 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-white text-xl font-bold tracking-tight">HydraSkript</h2>
+</div>
+<div class="flex flex-1 justify-end gap-4">
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-slate-200 dark:bg-[#312839] text-slate-700 dark:text-white">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-slate-200 dark:bg-[#312839] text-slate-700 dark:text-white">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/50" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB8vNfMoDZgBN-H_rMiq2R0O12J69WVK06DY1TX4Qb1oVGuhvki4PabO_x1SyKjSgrTfmtM47gWD3qtNlG5UhVGX8rT-Ag5CBfYFfdChd0JuvczzynHAfdk2rK6QIW89ehIn5EBwdZM7uXEweYu4tQ7ANAAGducyMa4F2W_tWZmZ-0WfBcw3sjQz9d9xTWAnwMMAHJpOiy6MKfRuQGU_QJYNILkjCs3QXmMEWZvpBlr04P3oJHYvsagTRTZvIdflYjDg3N3jaALkOWF");'></div>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center py-12 px-6 overflow-y-auto">
+<div class="max-w-[1024px] w-full space-y-8">
+<!-- Global Progress Bar -->
+<div class="flex flex-col gap-3 px-4 mb-12">
+<div class="flex gap-6 justify-between items-end">
+<div>
+<h3 class="text-slate-900 dark:text-white text-2xl font-bold">New Project Setup</h3>
+<p class="text-slate-500 dark:text-[#ab9cba] text-sm">Defining the DNA of your masterpiece</p>
+</div>
+<p class="text-primary text-sm font-bold tracking-widest">STEP 2 OF 3: STORY BIBLE</p>
+</div>
+<div class="rounded-full bg-slate-200 dark:bg-[#483b54] h-2.5 overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 66%;"></div>
+</div>
+</div>
+<!-- Wizard Content Sections -->
+<div class="grid grid-cols-1 gap-12">
+<!-- Step 1 Overlay (Faded/Completed State Simulation) -->
+<section class="opacity-50 pointer-events-none border border-slate-200 dark:border-[#312839] rounded-xl p-8 bg-white dark:bg-[#211b27]">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-green-500">check_circle</span>
+<h2 class="text-xl font-bold">1. Identity</h2>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div>
+<p class="text-xs uppercase text-slate-500 mb-1">Project Title</p>
+<p class="text-lg font-medium">The Neon Chronicles</p>
+</div>
+<div>
+<p class="text-xs uppercase text-slate-500 mb-1">Genre</p>
+<p class="text-lg font-medium">Cyberpunk Noir</p>
+</div>
+</div>
+</section>
+<!-- Step 2 Active: Story Bible -->
+<section class="border-2 border-primary rounded-xl p-8 bg-white dark:bg-[#211b27] shadow-2xl shadow-primary/5">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="text-2xl font-bold mb-2">2. Story Bible</h2>
+<p class="text-slate-500 dark:text-[#ab9cba]">Flesh out the core pillars of your world.</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-3 transition-all transform hover:scale-105 shadow-lg shadow-primary/25">
+<span class="material-symbols-outlined">mic</span>
+                            Upload Voice Note
+                        </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-[#ab9cba]">Characters</label>
+<textarea class="w-full h-48 rounded-xl bg-slate-50 dark:bg-[#191022] border border-slate-200 dark:border-[#483b54] p-4 focus:ring-2 focus:ring-primary focus:border-primary text-slate-900 dark:text-white resize-none" placeholder="Describe your protagonist, antagonist, and key supporting cast..."></textarea>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-[#ab9cba]">Settings &amp; World</label>
+<textarea class="w-full h-48 rounded-xl bg-slate-50 dark:bg-[#191022] border border-slate-200 dark:border-[#483b54] p-4 focus:ring-2 focus:ring-primary focus:border-primary text-slate-900 dark:text-white resize-none" placeholder="The atmospheric rules, locations, and history of your story..."></textarea>
+</div>
+</div>
+<div class="mt-8 flex items-center justify-between p-4 bg-slate-100 dark:bg-[#312839] rounded-lg">
+<div class="flex items-center gap-4">
+<div class="p-2 bg-primary/20 rounded-lg">
+<span class="material-symbols-outlined text-primary">description</span>
+</div>
+<div>
+<p class="text-sm font-bold">Transcription status</p>
+<p class="text-xs text-slate-500 dark:text-[#ab9cba]">Waiting for voice input...</p>
+</div>
+</div>
+<span class="text-xs font-mono text-slate-400">0%</span>
+</div>
+</section>
+<!-- Step 3 Preview: AI-Generated Outline -->
+<section class="border border-slate-200 dark:border-[#312839] rounded-xl p-8 bg-white dark:bg-[#211b27]">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h2 class="text-2xl font-bold mb-2">3. The Outline</h2>
+<p class="text-slate-500 dark:text-[#ab9cba]">AI-generated structure. Drag to reorder, click to edit.</p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 text-sm font-medium border border-slate-300 dark:border-[#483b54] rounded-lg hover:bg-slate-50 dark:hover:bg-[#312839]">Regenerate</button>
+<button class="px-4 py-2 text-sm font-bold bg-primary text-white rounded-lg shadow-md shadow-primary/20">Approve Outline</button>
+</div>
+</div>
+<div class="space-y-3">
+<!-- Outline Item 1 -->
+<div class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-[#191022] border border-slate-200 dark:border-[#312839] rounded-xl hover:border-primary/50 transition-colors cursor-grab active:cursor-grabbing">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">drag_indicator</span>
+<span class="w-8 text-sm font-mono text-slate-500">01</span>
+<input class="bg-transparent border-none focus:ring-0 text-lg font-bold flex-1 p-0" type="text" value="The Awakening"/>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-slate-400 hover:text-white"><span class="material-symbols-outlined text-[20px]">add</span></button>
+<button class="p-1 text-slate-400 hover:text-red-400"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</div>
+</div>
+<!-- Outline Item 2 (Nested/Expanded) -->
+<div class="space-y-2">
+<div class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-[#191022] border-2 border-primary/30 rounded-xl cursor-grab active:cursor-grabbing">
+<span class="material-symbols-outlined text-primary">drag_indicator</span>
+<span class="w-8 text-sm font-mono text-primary">02</span>
+<input class="bg-transparent border-none focus:ring-0 text-lg font-bold flex-1 p-0" type="text" value="Shadow of the City"/>
+<span class="material-symbols-outlined text-primary">expand_less</span>
+</div>
+<div class="ml-16 space-y-2">
+<div class="p-3 bg-slate-100 dark:bg-[#312839]/30 border-l-4 border-primary rounded-r-lg text-sm flex justify-between items-center">
+<span>Protagonist discovers the encrypted shard in the sub-sector.</span>
+<span class="material-symbols-outlined text-[18px] text-slate-500">edit</span>
+</div>
+<div class="p-3 bg-slate-100 dark:bg-[#312839]/30 border-l-4 border-primary/50 rounded-r-lg text-sm flex justify-between items-center">
+<span>First encounter with the Enforcer squad near the docks.</span>
+<span class="material-symbols-outlined text-[18px] text-slate-500">edit</span>
+</div>
+</div>
+</div>
+<!-- Outline Item 3 -->
+<div class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-[#191022] border border-slate-200 dark:border-[#312839] rounded-xl hover:border-primary/50 transition-colors cursor-grab">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">drag_indicator</span>
+<span class="w-8 text-sm font-mono text-slate-500">03</span>
+<input class="bg-transparent border-none focus:ring-0 text-lg font-bold flex-1 p-0" type="text" value="The Oracle's Gamble"/>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-slate-400 hover:text-white"><span class="material-symbols-outlined text-[20px]">add</span></button>
+<button class="p-1 text-slate-400 hover:text-red-400"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</div>
+</div>
+<!-- Skeleton for remaining 27 chapters -->
+<div class="p-4 flex items-center justify-center border border-dashed border-slate-300 dark:border-[#483b54] rounded-xl text-slate-400 italic text-sm">
+                            27 more chapters generated... Scroll to view all
+                        </div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Sticky Navigation Footer -->
+<footer class="sticky bottom-0 w-full border-t border-slate-200 dark:border-[#312839] bg-white dark:bg-[#191022]/95 backdrop-blur-md px-10 py-5">
+<div class="max-w-[1024px] mx-auto flex justify-between items-center">
+<button class="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+                Back to Step 1
+            </button>
+<div class="flex items-center gap-6">
+<div class="text-right">
+<p class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Progress Saved</p>
+<p class="text-xs text-green-500">Synced to Cloud</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-10 py-4 rounded-xl font-bold text-lg shadow-xl shadow-primary/30 transform active:scale-95 transition-all">
+                    Approve to Proceed
+                </button>
+</div>
+</div>
+</footer>
+<!-- Hidden Step 1 Details (For Reference/Toggle Simulation) -->
+<div class="hidden">
+<label class="text-white text-base font-medium">Target Length (Pages)</label>
+<input class="custom-range w-full appearance-none bg-transparent" max="400" min="50" type="range" value="150"/>
+<div class="flex justify-between text-xs text-slate-400 mt-2">
+<span>90 (Short Story)</span>
+<span>150 (Novella)</span>
+<span>200+ (Epic)</span>
+</div>
+</div>
+</body></html>

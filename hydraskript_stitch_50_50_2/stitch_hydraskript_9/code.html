@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript | Dashboard &amp; Auth</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#a855f7",
+                        "accent-cyan": "#06b6d4",
+                        "accent-blue": "#3b82f6",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#09090b",
+                        "card-dark": "#151118",
+                        "border-dark": "#312839",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .neo-border {
+            border: 2px solid #312839;
+        }
+        .neo-border-primary {
+            border: 2px solid #a855f7;
+        }
+        .gradient-multi {
+            background: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #06b6d4 100%);
+        }
+        .gradient-multi-border {
+            position: relative;
+            background: #151118;
+            background-clip: padding-box;
+            border: 2px solid transparent;
+        }
+        .gradient-multi-border::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -2px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, #3b82f6, #a855f7, #06b6d4);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-64 flex-shrink-0 border-r border-border-dark bg-card-dark flex flex-col justify-between p-6">
+<div class="space-y-8">
+<div class="flex items-center gap-3">
+<div class="size-8 gradient-multi rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm">bolt</span>
+</div>
+<div>
+<h1 class="text-xl font-bold leading-none tracking-tight">HydraSkript</h1>
+<p class="text-xs text-slate-400 font-medium uppercase tracking-widest">AI Book Engine</p>
+</div>
+</div>
+<nav class="space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-white gradient-multi-border shadow-lg shadow-primary/10" href="#">
+<span class="material-symbols-outlined">folder</span>
+<span class="font-bold">Projects</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-accent-cyan transition-colors">psychology</span>
+<span class="font-medium group-hover:text-slate-200">Style Training</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-accent-blue transition-colors">cloud_download</span>
+<span class="font-medium group-hover:text-slate-200">Export Hub</span>
+</a>
+</nav>
+</div>
+<div class="space-y-4">
+<div class="p-4 rounded-xl bg-gradient-to-br from-accent-blue/10 via-primary/10 to-accent-cyan/10 border border-white/10">
+<p class="text-xs font-bold text-accent-cyan uppercase tracking-wider mb-1">Pro Plan</p>
+<p class="text-sm text-slate-300 mb-3">Unlimited AI chapters &amp; priority training.</p>
+<div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+<div class="gradient-multi h-full w-3/4"></div>
+</div>
+</div>
+<button class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-bold transition-all border border-border-dark">
+                Settings
+            </button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-y-auto">
+<header class="h-20 border-b border-border-dark flex items-center justify-between px-8 bg-card-dark/50 backdrop-blur-md sticky top-0 z-10">
+<div class="flex items-center gap-4">
+<h2 class="text-lg font-bold">Dashboard</h2>
+<span class="px-3 py-1 bg-white/5 rounded-full text-xs text-slate-400 border border-border-dark font-mono">v2.4.0</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-4 py-2 bg-accent-cyan/10 rounded-xl border border-accent-cyan/30">
+<span class="material-symbols-outlined text-accent-cyan text-xl">token</span>
+<span class="text-sm font-bold text-accent-cyan">1,250 Credits</span>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-border-dark">
+<div class="text-right">
+<p class="text-sm font-bold">Alex Rivera</p>
+<p class="text-xs text-slate-400">Pro Member</p>
+</div>
+<div class="size-10 rounded-full p-[2px] gradient-multi overflow-hidden">
+<div class="size-full rounded-full overflow-hidden border-2 border-card-dark">
+<img class="w-full h-full object-cover" data-alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQPJtCFZzIqn70rNP5pbt5D3fiqOxcRuQaJItbPxWFGw7McYwsE_SYN33Jamit2vONkCUkfcsQEs1dy0DFUvC6hHWHP-jUAsytrNHUGrgdKyaqK599qy4yPK9X_Y38KFT2rFy8-gr91Hm9kF2P9f4UCEkdjUJfzgg0G-Z5w8UarkM_UGpb4cm4dg_BoG_hZKFGEt9gtH_H86HUgRna3vQqRWZmmn7zeEXQMKZfbTPwwqX5OrsNBpaIyTqsH8tW30Tu_ryCc-4sGFLs"/>
+</div>
+</div>
+</div>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="p-6 rounded-2xl bg-card-dark neo-border flex flex-col gap-1">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-400 font-medium">Total Words</span>
+<span class="material-symbols-outlined text-accent-cyan">auto_stories</span>
+</div>
+<p class="text-4xl font-bold tracking-tight text-accent-cyan">124,500</p>
+<p class="text-xs text-emerald-400 font-medium flex items-center gap-1 mt-2">
+<span class="material-symbols-outlined text-sm">trending_up</span> +12% from last week
+                    </p>
+</div>
+<div class="p-6 rounded-2xl bg-card-dark neo-border flex flex-col gap-1">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-400 font-medium">Books Completed</span>
+<span class="material-symbols-outlined text-primary">verified</span>
+</div>
+<p class="text-4xl font-bold tracking-tight">8</p>
+<p class="text-xs text-slate-400 font-medium mt-2">2 currently in drafting</p>
+</div>
+<div class="p-6 rounded-2xl bg-card-dark neo-border flex flex-col gap-1">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-400 font-medium">Audio Hours</span>
+<span class="material-symbols-outlined text-accent-blue">record_voice_over</span>
+</div>
+<p class="text-4xl font-bold tracking-tight">14.5</p>
+<p class="text-xs text-emerald-400 font-medium flex items-center gap-1 mt-2">
+<span class="material-symbols-outlined text-sm">play_circle</span> AI Voice "Atlas"
+                    </p>
+</div>
+</div>
+<div class="flex items-center justify-between pt-4">
+<h3 class="text-2xl font-bold tracking-tight">Your Book Projects</h3>
+<button class="gradient-multi px-8 py-4 rounded-xl flex items-center gap-3 text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+<span class="material-symbols-outlined">add_circle</span>
+                    Create New Book
+                </button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<div class="group bg-card-dark rounded-2xl neo-border overflow-hidden flex flex-col hover:border-primary/50 transition-all cursor-pointer">
+<div class="aspect-[2/3] relative bg-slate-800">
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" data-alt="Abstract purple book cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa7ZHHoMOiun_mrE9qD4iLiRzVzElE8wHm-HmCa3i3Oil8vTXtdXcKqJaUsKyE_J5YVCYnTOOCR7nS5W7yPbR1I3jmKfZIrYpK4oqS1DfVQB-IuArOMfY3YbQtwTK5IAQ1td83vZ8upwBYuWYgE8vwIzxFJHEmyIi3voLpJHpeJJ_d21U03lMJCph4mvy4NwqeGaG-H0bZmNvZiUbQ7jasQtVHEf89XpGHuKke-P3juXv2Lxqi3jhwsFfJ_zvSbWvxzwZBaspBf9Gx"/>
+<div class="absolute inset-0 bg-gradient-to-t from-card-dark via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4">
+<span class="px-2 py-1 bg-primary text-[10px] font-black uppercase tracking-widest rounded shadow-lg">Drafting</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-1">
+<h4 class="font-bold text-lg group-hover:text-primary transition-colors">The Neural Frontier</h4>
+<p class="text-sm text-slate-400 font-medium">Hard Sci-Fi • 42k words</p>
+<div class="mt-4 flex items-center justify-between text-xs text-slate-500 font-medium">
+<span>Updated 2h ago</span>
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</div>
+</div>
+</div>
+<div class="group bg-card-dark rounded-2xl neo-border overflow-hidden flex flex-col hover:border-accent-cyan/50 transition-all cursor-pointer">
+<div class="aspect-[2/3] relative bg-slate-800">
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" data-alt="Minimalist orange book cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1LlKvfj3-6amO8NfPF1qAhrHvjzPnB1RkkvXpN256xeK6BX0WGkEQXWzy5Oq_PqnJs2R7jbPYsKWSAVB_U11u0CiCRLWtZ3Sy3WUUMqRucorQqNVJy3UG9VLAtjH36w3SmoPZQ6iPEG_R4WX0MeOJqIjbDMUbEnXPjEcSEq9cdqVfWYStTw4NEXRVckok_q4G3A17WwPYkuvGIQzkku3sGMkuDDaYKlsSF5v9S9BU4gpXilv7oGI_Ou4qC5vfULiZ2w9nE2xQ3Yh3"/>
+<div class="absolute inset-0 bg-gradient-to-t from-card-dark via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4">
+<span class="px-2 py-1 bg-accent-cyan text-[10px] font-black uppercase tracking-widest rounded text-black shadow-lg">Completed</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-1">
+<h4 class="font-bold text-lg group-hover:text-accent-cyan transition-colors">Silicon Whispers</h4>
+<p class="text-sm text-slate-400 font-medium">Thriller • 89k words</p>
+<div class="mt-4 flex items-center justify-between text-xs text-slate-500 font-medium">
+<span>Updated May 12</span>
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</div>
+</div>
+</div>
+<div class="group bg-card-dark rounded-2xl neo-border overflow-hidden flex flex-col hover:border-accent-blue/50 transition-all cursor-pointer">
+<div class="aspect-[2/3] relative bg-slate-800">
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-90 transition-opacity" data-alt="Cyberpunk neon book cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcy5fLUFIMP5iw1q1OpadfaIvParUj5r09Cg0xfsHBrOt-JeCYh_njPHbURPYRcS1V3yoidUp6B2w4Rn8h1DnvHaTKy4XeRTWpMHCnyh9DYHnTcmSkHa32Jtp6JlqHs9ivJ4Z-sQdV-2a1p3iuRxyh_F-r1-4PJQxLtLcRHM8P9eAd7TIxu24VpyLd_RohBN7AYWIaY9KMbxqy7VglVKeAnFJxzmQMe3giE3UyvbGKNdAGfRLPS5sdibQy0soyXytcs1dpkj43zoqv"/>
+<div class="absolute inset-0 bg-gradient-to-t from-card-dark via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4">
+<span class="px-2 py-1 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded shadow-lg">Training</span>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-1">
+<h4 class="font-bold text-lg group-hover:text-accent-blue transition-colors">Echoes of Tomorrow</h4>
+<p class="text-sm text-slate-400 font-medium">Cyberpunk • 12k words</p>
+<div class="mt-4 flex items-center justify-between text-xs text-slate-500 font-medium">
+<span>Updated 1d ago</span>
+<span class="material-symbols-outlined text-sm">more_horiz</span>
+</div>
+</div>
+</div>
+<div class="group bg-card-dark rounded-2xl border-2 border-dashed border-border-dark flex items-center justify-center flex-col p-8 hover:border-accent-cyan/50 transition-all cursor-pointer">
+<div class="size-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-accent-cyan/10 transition-colors">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-accent-cyan transition-colors">add_box</span>
+</div>
+<p class="font-bold text-slate-400 group-hover:text-white transition-colors">Start New Story</p>
+<p class="text-xs text-slate-500 mt-2 text-center max-w-[150px]">Let AI help you outline and draft your next bestseller.</p>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-none opacity-0 invisible" id="auth-overlay"></div>
+<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] w-full max-w-md p-8 bg-card-dark rounded-2xl neo-border shadow-2xl">
+<div class="text-center mb-8">
+<div class="size-16 gradient-multi rounded-2xl flex items-center justify-center mx-auto mb-4 neo-border-primary border-white/20">
+<span class="material-symbols-outlined text-white text-3xl">bolt</span>
+</div>
+<h2 class="text-3xl font-black tracking-tighter mb-2">Welcome Back</h2>
+<p class="text-slate-400 font-medium">Continue your literary journey with AI.</p>
+</div>
+<div class="space-y-4">
+<button class="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-white text-black font-bold hover:bg-slate-200 transition-colors border-2 border-slate-300">
+<svg class="size-5" viewBox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+                Continue with Google
+            </button>
+<button class="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#24292e] text-white font-bold hover:bg-[#2f363d] transition-colors border-2 border-white/20">
+<svg class="size-5 fill-current" viewBox="0 0 24 24">
+<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.011-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.627-5.373-12-12-12"></path>
+</svg>
+                Continue with GitHub
+            </button>
+</div>
+<div class="relative my-8">
+<div class="absolute inset-0 flex items-center"><div class="w-full border-t border-border-dark"></div></div>
+<div class="relative flex justify-center text-xs uppercase font-black"><span class="bg-card-dark px-2 text-slate-500 tracking-widest">Or login with email</span></div>
+</div>
+<form class="space-y-4">
+<input class="w-full px-5 py-4 rounded-xl bg-white/5 border-2 border-border-dark focus:border-accent-cyan focus:ring-0 transition-colors font-medium text-white" placeholder="Email address" type="email"/>
+<button class="w-full py-4 rounded-xl gradient-multi text-white font-bold hover:brightness-110 transition-all shadow-lg shadow-primary/20" type="submit">
+                Sign In
+            </button>
+</form>
+<div class="mt-6 text-center text-sm">
+<span class="text-slate-400">New to HydraSkript?</span>
+<a class="text-accent-cyan font-bold hover:underline ml-1" href="#">Create an account</a>
+</div>
+<button class="absolute -top-4 -right-4 size-10 bg-border-dark rounded-full border-2 border-white/10 flex items-center justify-center hover:bg-red-500/20 hover:border-red-500 transition-all cursor-pointer pointer-events-auto" onclick="this.parentElement.style.display='none'">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+
+</body></html>

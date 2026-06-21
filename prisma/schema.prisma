@@ -1,0 +1,162 @@
+// HydraSkript - AI Book Generation Platform
+// Prisma Schema (SQLite)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique
+  name      String   @default("Anonymous Author")
+  credits   Int      @default(100) // Start with 100 free credits
+  tier      String   @default("starter") // starter, author, publisher, studio
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  books         Book[]
+  styleProfiles StyleProfile[]
+  mediaAssets   MediaAsset[]
+  jobs          Job[]
+  creditLedger  CreditLedger[]
+
+  @@map("profiles")
+}
+
+model StyleProfile {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId       String   @db.Uuid
+  name          String
+  description   String   @default("")
+  exemplarTexts String   @default("[]") // JSON array of text samples
+  embedding     String   @default("[]") // JSON array of 768 floats (average embedding)
+  systemPrompt  String   @default("")   // Generated "Write like this" instruction
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  books Book[]
+
+  @@map("style_profiles")
+}
+
+model Book {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId              String   @db.Uuid
+  title                String
+  genre                String   @default("fiction")
+  targetAudience       String   @default("adult") // adult, 0-5, 6-9, 10-14
+  maxPages             Int      @default(600)      // Computed from targetAudience in app logic
+  styleProfileId       String?  @db.Uuid
+  status               String   @default("draft")  // draft, outlining, awaiting_outline_approval, writing, awaiting_chapter_approval, finalizing, completed, failed
+  totalCreditsEstimated Int     @default(0)
+  totalCreditsCharged  Int      @default(0)
+  visualIdentityUrl    String?  // URL to the approved character reference sheet
+  coloringTheme        String?  // For coloring books: mandalas, undersea-creatures, birds, etc.
+  adventureType        String?  // For kids books: farm, school, fair, boat, forest, beach, space, zoo, castle, city
+  characterNames       String   @default("[]") // JSON array: [mainCharacter, ...friendNames] up to 5 names
+  outline              String   @default("{}")     // JSON: { title, chapters: [{title, synopsis, wordTarget}] }
+  coverImageUrl        String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relations
+  owner        Profile       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  styleProfile StyleProfile? @relation(fields: [styleProfileId], references: [id], onDelete: SetNull)
+  chapters     Chapter[]
+  mediaAssets  MediaAsset[]
+  jobs         Job[]
+
+  @@map("books")
+}
+
+model Chapter {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bookId           String   @db.Uuid
+  index            Int      // 0-based
+  title            String   @default("")
+  synopsis         String   @default("")  // From outline
+  wordTarget       Int      @default(1500)
+  content          String   @default("")
+  wordCount        Int      @default(0)   // Computed in app logic
+  status           String   @default("pending") // pending, writing, reviewing, completed, failed
+  approvalStatus     String   @default("pending") // pending, approved, rejected
+  generationJobId  String?
+  charactersIntroduced String @default("[]") // JSON array
+  summaryForNext   String   @default("")  // Summary for continuity
+  illustrationUrl  String?  // Generated image URL
+  illustrationPrompt String @default("") // The prompt used to generate the illustration
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, index])
+  @@map("chapters")
+}
+
+model MediaAsset {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId     String   @db.Uuid
+  bookId      String?  @db.Uuid
+  assetType   String   // cover, illustration, coloring_page, audiobook_chapter, audiobook_complete, pdf_export
+  storagePath String   // Local file path or URL
+  publicUrl   String   // Accessible URL
+  metadata    String   @default("{}") // JSON: {duration, dimensions, chapterIndex, etc}
+  createdAt   DateTime @default(now())
+
+  // Relations
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  book  Book?   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@map("media_assets")
+}
+
+model Job {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bookId           String?   @db.Uuid
+  ownerId          String    @db.Uuid
+  jobType          String    // write_chapter, generate_image, generate_audiobook, export_pdf, generate_outline
+  status           String    @default("queued") // queued, active, completed, failed
+  progressMessage  String    @default("Queued...")
+  progressPercent  Int       @default(0)
+  creditsReserved  Int       @default(0) // Held in escrow
+  creditsConsumed  Int       @default(0)
+  errorMessage     String?
+  stepIndex        Int       @default(0) // For idempotency: which step is this
+  result           String    @default("{}") // JSON result data
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+
+  // Relations
+  owner         Profile        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  book          Book?          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  creditLedger  CreditLedger[]
+
+  @@map("jobs")
+}
+
+model CreditLedger {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId String   @db.Uuid
+  amount    Int      // negative for spend, positive for purchase/refund
+  reason    String
+  jobId     String?  @db.Uuid
+  createdAt DateTime @default(now())
+
+  // Relations
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  job     Job?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@map("credit_ledger")
+}

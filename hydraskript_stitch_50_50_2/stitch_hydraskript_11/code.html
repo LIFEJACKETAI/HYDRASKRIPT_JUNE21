@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#a855f7",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#151118",
+                        "card-dark": "#1d1724",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #151118;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #483b54;
+            border-radius: 10px;
+        }
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-primary/10 bg-background-light dark:bg-background-dark flex flex-col h-screen sticky top-0">
+<div class="p-6 flex flex-col gap-8 h-full">
+<div class="flex items-center gap-3">
+<div class="bg-primary size-10 rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">water_drop</span>
+</div>
+<div>
+<h1 class="text-lg font-bold tracking-tight">HydraSkript</h1>
+<p class="text-xs text-slate-500 dark:text-primary/60 font-medium">Internal Ops</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary border border-primary/20" href="#">
+<span class="material-symbols-outlined fill-[1]">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium text-sm">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined">queue</span>
+<span class="font-medium text-sm">Queue Control</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-medium text-sm">System Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-primary/5 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium text-sm">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-primary/10">
+<div class="flex items-center gap-3 mb-4">
+<div class="size-8 rounded-full bg-slate-800 border border-primary/30" data-alt="Admin user avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBeevyD5XsrEXL8ajoKCReBl8FHO56PY3Mmj_QGLLzssWF-EfbkRbNVXQVv0-02sj0fYTuWjmeIC1zvxmoSNXnbHBqNVK5G9OxEJxowStQrSNTe1ftF8I5L86ioTIQOqZcq8q7lkCHEdDGmmzuUcEupBrMK3qv7wvyqHKk-Ra7CtGRmawoNkKsqgpMulw0ZEqrzvznDB8dIDQsdYHUAxAGqMWxNH2U6K_0ltAZPFylt3sqhatCuQ9RtYUs5c_DJeMJv-Tz0wJCdInSC'); background-size: cover;"></div>
+<div class="flex flex-col">
+<p class="text-sm font-bold">Admin-042</p>
+<p class="text-[10px] uppercase tracking-wider text-slate-500">Superuser</p>
+</div>
+</div>
+<button class="w-full py-2 bg-primary/20 hover:bg-primary/30 text-primary text-xs font-bold rounded-lg transition-all">
+                    SUPPORT
+                </button>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-x-hidden">
+<!-- Top Heading Area -->
+<header class="p-8 pb-4">
+<div class="flex flex-wrap justify-between items-end gap-4">
+<div class="flex flex-col gap-2">
+<h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Admin Dashboard</h2>
+<p class="text-slate-500 dark:text-slate-400">Real-time system monitoring and global administrative control.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg">
+<div class="size-2 bg-emerald-500 rounded-full status-pulse"></div>
+<span class="text-xs font-bold uppercase tracking-widest">Live Status</span>
+</div>
+<button class="size-10 flex items-center justify-center bg-slate-200 dark:bg-card-dark rounded-lg hover:bg-primary/20 transition-all text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Stats Row -->
+<section class="px-8 py-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Active Users</p>
+<span class="text-emerald-500 text-xs font-bold">+12.4%</span>
+</div>
+<p class="text-3xl font-bold leading-tight">12,842</p>
+<div class="h-1 bg-primary/10 rounded-full mt-2 overflow-hidden">
+<div class="w-[72%] h-full bg-primary shadow-[0_0_8px_rgba(168,85,247,0.5)]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Words Generated</p>
+<span class="text-emerald-500 text-xs font-bold">+5.4%</span>
+</div>
+<p class="text-3xl font-bold leading-tight">4.2M</p>
+<div class="h-1 bg-primary/10 rounded-full mt-2 overflow-hidden">
+<div class="w-[54%] h-full bg-primary shadow-[0_0_8px_rgba(168,85,247,0.5)]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 shadow-sm">
+<div class="flex justify-between items-start">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Storage Used</p>
+<span class="text-orange-500 text-xs font-bold">+2.1%</span>
+</div>
+<p class="text-3xl font-bold leading-tight">84.2 GB</p>
+<div class="h-1 bg-primary/10 rounded-full mt-2 overflow-hidden">
+<div class="w-[84%] h-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]"></div>
+</div>
+</div>
+</section>
+<!-- System Health Section -->
+<section class="px-8 py-4">
+<h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span>
+                System Health
+            </h3>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- OpenRouter Card -->
+<div class="bg-white dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-primary/10">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-3">
+<div class="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
+<span class="font-bold text-sm">OpenRouter</span>
+</div>
+<span class="text-xs text-slate-500 font-mono tracking-tighter">LATENCY: 45ms</span>
+</div>
+<div class="h-24 flex items-end gap-1">
+<!-- Simplified bar chart logic for visualization -->
+<div class="flex-1 bg-emerald-500/20 h-[60%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500/20 h-[50%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500/20 h-[65%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500/20 h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500/20 h-[55%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500 h-[30%] rounded-t-sm shadow-[0_0_5px_#10b981]"></div>
+</div>
+</div>
+<!-- FAL.ai Card -->
+<div class="bg-white dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-primary/10">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-3">
+<div class="size-2 rounded-full bg-orange-500 shadow-[0_0_8px_#f59e0b]"></div>
+<span class="font-bold text-sm">FAL.ai</span>
+</div>
+<span class="text-xs text-slate-500 font-mono tracking-tighter">LATENCY: 120ms</span>
+</div>
+<div class="h-24 flex items-end gap-1">
+<div class="flex-1 bg-orange-500/20 h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-orange-500/20 h-[30%] rounded-t-sm"></div>
+<div class="flex-1 bg-orange-500/20 h-[50%] rounded-t-sm"></div>
+<div class="flex-1 bg-orange-500/20 h-[70%] rounded-t-sm"></div>
+<div class="flex-1 bg-orange-500/20 h-[85%] rounded-t-sm"></div>
+<div class="flex-1 bg-orange-500 h-[90%] rounded-t-sm shadow-[0_0_5px_#f59e0b]"></div>
+</div>
+</div>
+<!-- Gemini TTS Card -->
+<div class="bg-white dark:bg-card-dark rounded-xl p-6 border border-slate-200 dark:border-primary/10">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-3">
+<div class="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
+<span class="font-bold text-sm">Gemini TTS</span>
+</div>
+<span class="text-xs text-slate-500 font-mono tracking-tighter">LATENCY: 85ms</span>
+</div>
+<div class="h-24 flex items-end gap-1">
+<div class="flex-1 bg-emerald-500/20 h-[20%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500/20 h-[25%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500/20 h-[20%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500/20 h-[30%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500/20 h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-emerald-500 h-[35%] rounded-t-sm shadow-[0_0_5px_#10b981]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Two Column Layout: User Management & Queue Control -->
+<section class="px-8 py-4 grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+<!-- User Management -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h3 class="text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">manage_accounts</span>
+                        User Management
+                    </h3>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="bg-white dark:bg-card-dark border-slate-200 dark:border-primary/10 rounded-lg pl-10 pr-4 py-2 text-xs focus:ring-primary focus:border-primary w-64 outline-none" placeholder="Search ID or Email..." type="text"/>
+</div>
+</div>
+<div class="bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/10 overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-white/5 text-[10px] uppercase tracking-wider text-slate-500">
+<th class="px-4 py-3 font-bold">User</th>
+<th class="px-4 py-3 font-bold">Tier</th>
+<th class="px-4 py-3 font-bold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="border-t border-slate-100 dark:border-primary/5 hover:bg-slate-50 dark:hover:bg-primary/5">
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary/20 rounded-full flex items-center justify-center text-[10px] font-bold">JD</div>
+<div>
+<p class="font-bold">John Doe</p>
+<p class="text-xs text-slate-500">j.doe@proton.me</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded uppercase">Pro</span>
+</td>
+<td class="px-4 py-3 text-right space-x-2">
+<button class="px-3 py-1 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 rounded text-[10px] font-bold transition-all">BAN</button>
+<button class="px-3 py-1 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 rounded text-[10px] font-bold transition-all">DELETE</button>
+</td>
+</tr>
+<tr class="border-t border-slate-100 dark:border-primary/5 hover:bg-slate-50 dark:hover:bg-primary/5">
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-slate-200 dark:bg-white/10 rounded-full flex items-center justify-center text-[10px] font-bold">SK</div>
+<div>
+<p class="font-bold">Sarah King</p>
+<p class="text-xs text-slate-500">king@gmail.com</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<span class="px-2 py-1 bg-slate-500/10 text-slate-500 text-[10px] font-bold rounded uppercase">Free</span>
+</td>
+<td class="px-4 py-3 text-right space-x-2">
+<button class="px-3 py-1 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 rounded text-[10px] font-bold transition-all">BAN</button>
+<button class="px-3 py-1 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 rounded text-[10px] font-bold transition-all">DELETE</button>
+</td>
+</tr>
+<tr class="border-t border-slate-100 dark:border-primary/5 hover:bg-slate-50 dark:hover:bg-primary/5">
+<td class="px-4 py-3">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-indigo-500/20 rounded-full flex items-center justify-center text-[10px] font-bold text-indigo-500">AL</div>
+<div>
+<p class="font-bold">Alex L.</p>
+<p class="text-xs text-slate-500">alex@startup.io</p>
+</div>
+</div>
+</td>
+<td class="px-4 py-3">
+<span class="px-2 py-1 bg-indigo-500/10 text-indigo-500 text-[10px] font-bold rounded uppercase">Enterprise</span>
+</td>
+<td class="px-4 py-3 text-right space-x-2">
+<button class="px-3 py-1 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 rounded text-[10px] font-bold transition-all">BAN</button>
+<button class="px-3 py-1 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 rounded text-[10px] font-bold transition-all">DELETE</button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-3 border-t border-slate-100 dark:border-primary/5 flex justify-center">
+<button class="text-[11px] font-bold text-primary hover:underline">VIEW ALL 12,842 USERS</button>
+</div>
+</div>
+</div>
+<!-- Queue Control -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h3 class="text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">reorder</span>
+                        Queue Control
+                    </h3>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 bg-slate-200 dark:bg-card-dark text-slate-600 dark:text-slate-300 rounded text-[10px] font-bold flex items-center gap-1 hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-sm">pause</span> PAUSE
+                        </button>
+<button class="px-3 py-1.5 bg-rose-500/10 text-rose-500 rounded text-[10px] font-bold flex items-center gap-1 hover:bg-rose-500/20 transition-all border border-rose-500/20">
+<span class="material-symbols-outlined text-sm">delete_sweep</span> FLUSH
+                        </button>
+</div>
+</div>
+<div class="bg-white dark:bg-card-dark rounded-xl border border-slate-200 dark:border-primary/10 flex flex-col h-[320px] shadow-sm">
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-3">
+<!-- Task Item -->
+<div class="bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 p-3 rounded-lg flex items-center gap-4">
+<div class="bg-primary/20 p-2 rounded text-primary">
+<span class="material-symbols-outlined text-lg">description</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="text-xs font-bold truncate">task_gen_84729.json</p>
+<span class="text-[9px] text-slate-500 font-mono tracking-tighter">FAL.AI / SDXL</span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex-1 h-1 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="w-[45%] h-full bg-primary"></div>
+</div>
+<span class="text-[10px] font-mono text-primary font-bold">45%</span>
+</div>
+</div>
+<button class="text-slate-400 hover:text-white"><span class="material-symbols-outlined text-base">close</span></button>
+</div>
+<div class="bg-emerald-500/5 border border-emerald-500/10 p-3 rounded-lg flex items-center gap-4">
+<div class="bg-emerald-500/20 p-2 rounded text-emerald-500">
+<span class="material-symbols-outlined text-lg">history_edu</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="text-xs font-bold truncate">creative_story_99.txt</p>
+<span class="text-[9px] text-emerald-500 font-mono tracking-tighter">OPENROUTER / GPT-4</span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Completed</span>
+</div>
+</div>
+<button class="px-2 py-1 bg-emerald-500 text-white rounded text-[9px] font-bold">RETRY</button>
+</div>
+<div class="bg-rose-500/5 border border-rose-500/10 p-3 rounded-lg flex items-center gap-4">
+<div class="bg-rose-500/20 p-2 rounded text-rose-500">
+<span class="material-symbols-outlined text-lg">voice_chat</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="text-xs font-bold truncate">voice_over_batch_01.mp3</p>
+<span class="text-[9px] text-rose-500 font-mono tracking-tighter">GEMINI / TTS-V2</span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[10px] text-rose-500 font-bold uppercase tracking-wider">Connection Refused (503)</span>
+</div>
+</div>
+<button class="px-2 py-1 bg-rose-500 text-white rounded text-[9px] font-bold">RETRY</button>
+</div>
+<div class="bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 p-3 rounded-lg flex items-center gap-4 opacity-60">
+<div class="bg-slate-500/20 p-2 rounded text-slate-500">
+<span class="material-symbols-outlined text-lg">description</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="text-xs font-bold truncate">legacy_task_382.json</p>
+<span class="text-[9px] text-slate-500 font-mono tracking-tighter">QUEUED</span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-3 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/5 text-center">
+<p class="text-[10px] text-slate-500 font-bold">48 ACTIVE TASKS IN QUEUE</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Global Footer Notification simulation -->
+<div class="fixed bottom-6 right-6 flex flex-col gap-3 pointer-events-none">
+<div class="bg-background-dark border border-primary/30 p-4 rounded-lg shadow-2xl flex items-center gap-4 pointer-events-auto transform translate-y-0 opacity-100 transition-all">
+<div class="bg-emerald-500 size-2 rounded-full status-pulse"></div>
+<p class="text-xs font-medium">Real-time sync established with Cluster A-12</p>
+<button class="text-slate-500 hover:text-white"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FUN ON THE FARM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Georgia', 'Times New Roman', serif; background: #1a1a1a; color: #333; }
+    
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 20px auto;
+      background: white;
+      padding: 40px;
+      page-break-after: always;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .cover-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      color: white;
+    }
+    
+    .cover-image {
+      max-width: 100%;
+      max-height: 60%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    
+    .cover-title {
+      font-size: 2.5em;
+      margin-top: 30px;
+      text-align: center;
+      background: linear-gradient(135deg, #a855f7, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .cover-genre {
+      font-size: 1.2em;
+      color: #999;
+      margin-top: 10px;
+    }
+    
+    .children-page {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .illustration-section {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50%;
+      padding-bottom: 10px;
+    }
+    
+    .chapter-illustration {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    
+    .text-section {
+      flex: 1;
+      padding-top: 10px;
+      border-top: 2px solid #e5e5e5;
+    }
+    
+    .coloring-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .coloring-illustration {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+    
+    .adult-page {
+      line-height: 1.8;
+    }
+    
+    .chapter-title {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #1a1a1a;
+      border-bottom: 2px solid #a855f7;
+      padding-bottom: 10px;
+    }
+    
+    .chapter-content {
+      font-size: 1.1em;
+      line-height: 1.8;
+      text-align: justify;
+    }
+    
+    .chapter-content p {
+      margin-bottom: 1em;
+      text-indent: 1.5em;
+    }
+    
+    .chapter-content p:first-child {
+      text-indent: 0;
+    }
+    
+    .page-number {
+      position: absolute;
+      bottom: 20px;
+      right: 40px;
+      font-size: 0.9em;
+      color: #999;
+    }
+    
+    @media print {
+      .page { margin: 0; box-shadow: none; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page cover-page">
+         <img src="/assets/covers/cover_pixar_1777847833619_gkx9ji.png" alt="FUN ON THE FARM Cover" class="cover-image" />
+         <h1 class="cover-title">FUN ON THE FARM</h1>
+       </div>
+  
+        <div class="page children-page">
+          <div class="illustration-section">
+            <img src="/assets/illustrations/illustration_pixar_1777847866304_m138ca.png" alt="Hello, Farm Friends!" class="chapter-illustration" />
+          </div>
+          <div class="text-section">
+            <h2 class="chapter-title">Hello, Farm Friends!</h2>
+            <div class="chapter-content"><p>Sun is up. Farm wakes up. Cow says moo. Cow eats grass. Pig says oink. Pig rolls in mud. Horse says neigh. Horse eats hay. All are friends. Farm is happy. Sun is bright. Day is new.</p></div>
+          </div>
+          <div class="page-number">1</div>
+        </div>
+      
+
+        <div class="page children-page">
+          <div class="illustration-section">
+            <img src="/assets/illustrations/illustration_pixar_1777847903667_kncthb.png" alt="Barnyard Breakfast" class="chapter-illustration" />
+          </div>
+          <div class="text-section">
+            <h2 class="chapter-title">Barnyard Breakfast</h2>
+            <div class="chapter-content"><p>Farmer Ted brings food. The animals are happy. The chickens peck at seeds. Peck, peck, peck! The goats munch hay. Munch, munch, munch! The ducks splash in water. Splash, splash, splash! All the animals eat. They love their breakfast. The farmer smiles. The farm is awake. Fun on the farm has begun.</p></div>
+          </div>
+          <div class="page-number">2</div>
+        </div>
+      
+
+        <div class="page children-page">
+          <div class="illustration-section">
+            <img src="/assets/illustrations/illustration_pixar_1777847938673_j4wxwt.png" alt="Playtime in the Meadow" class="chapter-illustration" />
+          </div>
+          <div class="text-section">
+            <h2 class="chapter-title">Playtime in the Meadow</h2>
+            <div class="chapter-content"><p>The animals run to the meadow. The grass is green and soft. Ted follows with a big smile.</p>
+<p>"Let's play!" Ted says.</p>
+<p>The cow jumps high. The pig rolls fast. The sheep skip and hop. All the animals laugh and play.</p>
+<p>Ted claps his hands. "Good job!" he says.</p>
+<p>The sun shines bright. The meadow is full of fun. The animals love to play with Ted.</p></div>
+          </div>
+          <div class="page-number">3</div>
+        </div>
+      
+
+        <div class="page children-page">
+          <div class="illustration-section">
+            <img src="/assets/illustrations/illustration_pixar_1777847972398_y9xi95.png" alt="A Little Adventure" class="chapter-illustration" />
+          </div>
+          <div class="text-section">
+            <h2 class="chapter-title">A Little Adventure</h2>
+            <div class="chapter-content"><p>A little kitten wanders in. It is lost. The kitten meows softly. Dog hears the sound. Dog helps the kitten. Cat comes to help too. Cow moos kindly. Pig oinks softly. All animals look for home. They find the house. The kitten's mom is there. The kitten is happy now. All friends cheer.</p></div>
+          </div>
+          <div class="page-number">4</div>
+        </div>
+      
+
+      <div class="page adult-page">
+        <h2 class="chapter-title">Chapter 5: Goodnight, Farm</h2>
+        <div class="chapter-content"><p>Sun sets low. Day is done. Farm animals rest. Kitten curls up. Cow sleeps. Pig snores. Sheep dream. Farmer Ted yawns. "Goodnight, farm," he says. All is calm. All is quiet. Rest well. Fun comes again tomorrow.</p></div>
+        <div class="page-number">5</div>
+      </div>
+    
+</body>
+</html>

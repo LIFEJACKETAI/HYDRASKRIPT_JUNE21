@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript | AI Style Library Marketplace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0a0f10",
+                        "card-bg": "#161e20",
+                        "border-cyan": "#13c8ec",
+                        "accent-purple": "#a855f7",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "sans": ["Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .gradient-text {
+            background: linear-gradient(90deg, #13c8ec, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-border {
+            position: relative;
+            background: #161e20;
+            border-radius: 0.75rem;
+        }
+        .gradient-border::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, #13c8ec, #083344);
+            border-radius: 0.85rem;
+            z-index: -1;
+        }
+        .install-gradient {
+            background: linear-gradient(135deg, #a855f7 0%, #13c8ec 100%);
+        }
+        .checkbox-tick-svg {
+            --checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(10,15,16)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-white font-display min-h-screen">
+<div class="layout-container flex flex-col min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 bg-background-dark/80 backdrop-blur-md px-10 py-4">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="text-primary">
+<svg class="size-8" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold tracking-tight">HydraSkript</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Marketplace</a>
+<a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Styles</a>
+<a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Docs</a>
+<a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Pricing</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 text-xl">search</span>
+<input class="w-full bg-[#1c2a2d] border-none rounded-lg pl-10 py-2 text-sm focus:ring-1 focus:ring-primary placeholder:text-gray-500" placeholder="Search voices..."/>
+</div>
+<button class="bg-primary text-background-dark px-5 py-2 rounded-lg font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">bolt</span> Upgrade
+                </button>
+<div class="size-10 rounded-full border border-primary/30 p-0.5">
+<div class="size-full rounded-full bg-cover bg-center" data-alt="Cyberpunk character profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC5SMcJoft-tLZhiRTjLwztrC6VT6ShpFVuY3WYzwhnxYrkkr8LLXt8w9VBmC_Pbrnx2F0tQOfg5fzxZzQJa0U-DNcsRr-Gjk7zlXcqaYLhA3clshffTK2zGecwTHxMaxyh1HMdYDGzDbPAsx-LQEDOHEFC_sQQ2UgRcx3Tx4dp-p6DxVCNAEz81bBFLMmsZ4blZ5-29sAD6fxrJ4c-AmGiMoFtex6uU_I0a7ojPGFeP8bQMUpp1o2Q7YsPHN-hBiNY49xn4QjMH4Hu');"></div>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Sidebar Filter -->
+<aside class="w-72 border-r border-white/10 bg-background-dark p-8 overflow-y-auto">
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">filter_list</span>
+                        Filters
+                    </h2>
+<button class="text-xs text-primary/70 hover:text-primary underline">Clear all</button>
+</div>
+<!-- Genre Section -->
+<div class="mb-8">
+<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Genre</h3>
+<div class="space-y-1">
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input checked="" class="checkbox-tick-svg h-5 w-5 rounded border-[#3b4f54] border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:outline-none" type="checkbox"/>
+<span class="text-sm text-gray-200 group-hover:text-primary transition-colors">Noir</span>
+</label>
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input class="checkbox-tick-svg h-5 w-5 rounded border-[#3b4f54] border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:outline-none" type="checkbox"/>
+<span class="text-sm text-gray-200 group-hover:text-primary transition-colors">Sci-Fi</span>
+</label>
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input class="checkbox-tick-svg h-5 w-5 rounded border-[#3b4f54] border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:outline-none" type="checkbox"/>
+<span class="text-sm text-gray-200 group-hover:text-primary transition-colors">Romance</span>
+</label>
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input class="checkbox-tick-svg h-5 w-5 rounded border-[#3b4f54] border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:outline-none" type="checkbox"/>
+<span class="text-sm text-gray-200 group-hover:text-primary transition-colors">Gothic</span>
+</label>
+</div>
+</div>
+<!-- Tone Section -->
+<div class="mb-8">
+<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Tone</h3>
+<div class="space-y-1">
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input class="checkbox-tick-svg h-5 w-5 rounded border-[#3b4f54] border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:outline-none" type="checkbox"/>
+<span class="text-sm text-gray-200 group-hover:text-primary transition-colors">Cynical</span>
+</label>
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input checked="" class="checkbox-tick-svg h-5 w-5 rounded border-[#3b4f54] border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:outline-none" type="checkbox"/>
+<span class="text-sm text-gray-200 group-hover:text-primary transition-colors">Poetic</span>
+</label>
+<label class="flex items-center gap-3 py-2 cursor-pointer group">
+<input class="checkbox-tick-svg h-5 w-5 rounded border-[#3b4f54] border-2 bg-transparent text-primary checked:bg-primary checked:border-primary focus:ring-0 focus:outline-none" type="checkbox"/>
+<span class="text-sm text-gray-200 group-hover:text-primary transition-colors">Academic</span>
+</label>
+</div>
+</div>
+<!-- Complexity Section -->
+<div class="mb-8">
+<h3 class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Complexity</h3>
+<div class="relative flex w-full flex-col items-start gap-3 mt-4">
+<div class="flex w-full items-center justify-between">
+<p class="text-xs text-gray-300">Grade Level</p>
+<p class="text-primary text-xs font-bold">Lvl 7</p>
+</div>
+<div class="flex h-4 w-full items-center gap-4">
+<div class="flex h-1.5 flex-1 rounded-full bg-[#1c2a2d]">
+<div class="h-full w-[70%] rounded-full bg-primary relative">
+<div class="absolute -right-2 -top-1.5 size-4 rounded-full bg-white shadow-xl shadow-primary/40 border-2 border-primary"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Marketplace Content -->
+<main class="flex-1 overflow-y-auto p-12 bg-background-dark">
+<!-- Hero Section -->
+<section class="mb-16">
+<div class="flex items-baseline justify-between mb-8">
+<h1 class="text-5xl font-bold gradient-text pb-2">The Stylist's Vault</h1>
+<p class="text-gray-400 text-sm max-w-xs text-right">Discover over 1,400+ pre-trained voices for your next narrative masterpiece.</p>
+</div>
+<!-- Featured Card -->
+<div class="relative group overflow-hidden rounded-2xl border border-primary/20 bg-[#11181a] p-1">
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent"></div>
+<div class="relative bg-background-dark/80 rounded-[14px] p-8 flex flex-col md:flex-row gap-8 items-center border border-white/5">
+<div class="w-full md:w-1/3 aspect-[4/3] rounded-xl overflow-hidden relative">
+<img class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" data-alt="Neon cyberpunk city rainy night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoO31h4Edqhmqe3TOoFPhuP3360uB3sd_dwK45SuS2PoG5W4uNnpB_P9lmYENfu-sG2yTbrO0ee-W8s60nIVI6oTGScFq9bI9t2yq8yTxXoBgXjUhSTDZhXE6bmVGvEqd3C8y_VZwL2PHShUTOo_iU4tJXraWnVJjllMMIZx3FfalkodgGyGCCOJBCFllCQsyymUNv2DTfftdwjfKUwZcHzVN3w4bK5cB2biKzT_s-7QYijgICq0SM4Lci9dtZTvLiJqUkK7trWwt_"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark to-transparent"></div>
+<div class="absolute top-4 left-4 bg-primary/20 backdrop-blur-md text-primary text-[10px] font-bold px-3 py-1 rounded-full border border-primary/40 uppercase tracking-wider">
+                                    Featured Style
+                                </div>
+</div>
+<div class="flex-1">
+<h3 class="text-3xl font-bold text-white mb-2">Cyberpunk Visionary</h3>
+<p class="text-gray-400 text-lg mb-6 leading-relaxed">Synthesizing high-tech jargon with low-life grit. Perfect for sprawling urban dystopias and sensory-overload prose.</p>
+<div class="flex flex-wrap gap-4 mb-8">
+<div class="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-md border border-white/10 text-xs">
+<span class="material-symbols-outlined text-sm text-primary">psychology</span> Technical Logic
+                                    </div>
+<div class="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-md border border-white/10 text-xs">
+<span class="material-symbols-outlined text-sm text-primary">fast_forward</span> High Tempo
+                                    </div>
+<div class="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-md border border-white/10 text-xs">
+<span class="material-symbols-outlined text-sm text-primary">visibility</span> Sensory Rich
+                                    </div>
+</div>
+<div class="flex items-center gap-4">
+<button class="install-gradient text-background-dark px-8 py-3 rounded-lg font-bold hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">download_for_offline</span>
+                                        Install Style
+                                    </button>
+<button class="flex items-center gap-2 px-6 py-3 border border-white/20 hover:border-primary transition-colors rounded-lg font-medium">
+<span class="material-symbols-outlined text-primary">play_circle</span>
+                                        Play Sample
+                                    </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Style Grid -->
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-2xl font-bold flex items-center gap-3">
+                        Popular Repository
+                        <span class="text-xs font-normal text-gray-500 bg-white/5 px-2 py-0.5 rounded border border-white/10">324 Results</span>
+</h2>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded bg-white/5 hover:bg-white/10 text-primary">
+<span class="material-symbols-outlined">grid_view</span>
+</button>
+<button class="p-2 rounded text-gray-500 hover:text-white">
+<span class="material-symbols-outlined">list</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Style Card 1 -->
+<div class="gradient-border group">
+<div class="p-6 h-full flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="text-xl font-bold group-hover:text-primary transition-colors">The Hardboiled Detective</h4>
+<p class="text-xs text-primary/70 font-medium">Genre: Noir • Tone: Cynical</p>
+</div>
+<button class="text-white/40 hover:text-white">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+<p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">
+                                Short, punchy sentences with heavy focus on atmosphere. Utilizes internal monologue and gritty urban metaphors.
+                            </p>
+<div class="bg-black/40 rounded-lg p-3 mb-6 border border-white/5">
+<p class="text-[10px] text-primary uppercase font-bold tracking-tighter mb-1">Directive</p>
+<p class="text-xs italic text-gray-300">"Prioritize sentence fragments. Maximize sensory descriptions of smells and shadows."</p>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 install-gradient text-background-dark py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span> Install
+                                </button>
+<button class="size-10 flex items-center justify-center border border-white/10 hover:border-primary rounded-lg transition-colors group/btn">
+<span class="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Style Card 2 -->
+<div class="gradient-border group">
+<div class="p-6 h-full flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="text-xl font-bold group-hover:text-primary transition-colors">Victorian Dramatist</h4>
+<p class="text-xs text-primary/70 font-medium">Genre: Historical • Tone: Academic</p>
+</div>
+<button class="text-white/40 hover:text-white">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+<p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">
+                                Ornate, multi-layered prose with archaic vocabulary. Focuses on social etiquette and subtle emotional undertones.
+                            </p>
+<div class="bg-black/40 rounded-lg p-3 mb-6 border border-white/5">
+<p class="text-[10px] text-primary uppercase font-bold tracking-tighter mb-1">Directive</p>
+<p class="text-xs italic text-gray-300">"Use polysyllabic adjectives. Avoid contractions. Structure for rhythmic elegance."</p>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 install-gradient text-background-dark py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span> Install
+                                </button>
+<button class="size-10 flex items-center justify-center border border-white/10 hover:border-primary rounded-lg transition-colors group/btn">
+<span class="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Style Card 3 -->
+<div class="gradient-border group">
+<div class="p-6 h-full flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="text-xl font-bold group-hover:text-primary transition-colors">Corporate Ghostwriter</h4>
+<p class="text-xs text-primary/70 font-medium">Genre: Business • Tone: Polished</p>
+</div>
+<button class="text-white/40 hover:text-white">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+<p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">
+                                Professional, persuasive, and data-driven. Excels at converting complex ideas into digestible, executive summaries.
+                            </p>
+<div class="bg-black/40 rounded-lg p-3 mb-6 border border-white/5">
+<p class="text-[10px] text-primary uppercase font-bold tracking-tighter mb-1">Directive</p>
+<p class="text-xs italic text-gray-300">"Maintain active voice. Quantify achievements. Use high-impact verbs."</p>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 install-gradient text-background-dark py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span> Install
+                                </button>
+<button class="size-10 flex items-center justify-center border border-white/10 hover:border-primary rounded-lg transition-colors group/btn">
+<span class="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Style Card 4 -->
+<div class="gradient-border group">
+<div class="p-6 h-full flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="text-xl font-bold group-hover:text-primary transition-colors">Gothic Horrorist</h4>
+<p class="text-xs text-primary/70 font-medium">Genre: Gothic • Tone: Poetic</p>
+</div>
+<button class="text-white/40 hover:text-white">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+<p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">
+                                Atmospheric and melancholic. Focuses on crumbling architecture, weather patterns, and internal rot.
+                            </p>
+<div class="bg-black/40 rounded-lg p-3 mb-6 border border-white/5">
+<p class="text-[10px] text-primary uppercase font-bold tracking-tighter mb-1">Directive</p>
+<p class="text-xs italic text-gray-300">"Personify the environment. Emphasize decay and psychological dread."</p>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 install-gradient text-background-dark py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span> Install
+                                </button>
+<button class="size-10 flex items-center justify-center border border-white/10 hover:border-primary rounded-lg transition-colors group/btn">
+<span class="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Style Card 5 -->
+<div class="gradient-border group">
+<div class="p-6 h-full flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="text-xl font-bold group-hover:text-primary transition-colors">The Satirist</h4>
+<p class="text-xs text-primary/70 font-medium">Genre: Comedy • Tone: Wry</p>
+</div>
+<button class="text-white/40 hover:text-white">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+<p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">
+                                Sharp social commentary hidden within humorous observations. Uses irony and exaggerated tropes to make a point.
+                            </p>
+<div class="bg-black/40 rounded-lg p-3 mb-6 border border-white/5">
+<p class="text-[10px] text-primary uppercase font-bold tracking-tighter mb-1">Directive</p>
+<p class="text-xs italic text-gray-300">"Identify common tropes and subvert them. Maintain a dry, observational distance."</p>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 install-gradient text-background-dark py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span> Install
+                                </button>
+<button class="size-10 flex items-center justify-center border border-white/10 hover:border-primary rounded-lg transition-colors group/btn">
+<span class="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Style Card 6 -->
+<div class="gradient-border group">
+<div class="p-6 h-full flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="text-xl font-bold group-hover:text-primary transition-colors">High Fantasy Chronicler</h4>
+<p class="text-xs text-primary/70 font-medium">Genre: Fantasy • Tone: Epic</p>
+</div>
+<button class="text-white/40 hover:text-white">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+<p class="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">
+                                Grand scale world-building. Focuses on lineage, ancient lore, and the weight of historical destiny.
+                            </p>
+<div class="bg-black/40 rounded-lg p-3 mb-6 border border-white/5">
+<p class="text-[10px] text-primary uppercase font-bold tracking-tighter mb-1">Directive</p>
+<p class="text-xs italic text-gray-300">"Prioritize scale and scope. Use formal, timeless address. Weave in mythology."</p>
+</div>
+<div class="flex gap-3 mt-auto">
+<button class="flex-1 install-gradient text-background-dark py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span> Install
+                                </button>
+<button class="size-10 flex items-center justify-center border border-white/10 hover:border-primary rounded-lg transition-colors group/btn">
+<span class="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Pagination -->
+<div class="mt-20 flex items-center justify-between border-t border-white/10 pt-8 pb-12">
+<p class="text-gray-500 text-sm">Showing 1 to 6 of 324 styles</p>
+<div class="flex gap-2">
+<button class="size-10 flex items-center justify-center rounded border border-white/10 hover:bg-white/5">1</button>
+<button class="size-10 flex items-center justify-center rounded bg-primary text-background-dark font-bold">2</button>
+<button class="size-10 flex items-center justify-center rounded border border-white/10 hover:bg-white/5">3</button>
+<span class="text-gray-600 self-center px-2">...</span>
+<button class="size-10 flex items-center justify-center rounded border border-white/10 hover:bg-white/5">54</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

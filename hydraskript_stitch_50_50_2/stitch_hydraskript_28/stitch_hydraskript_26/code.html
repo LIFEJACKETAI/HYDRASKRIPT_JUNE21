@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Style Match Comparison Tool | HydraSkript</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "secondary-purple": "#6b21a8",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "sans": ["Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Space Grotesk", "Noto Sans", sans-serif;
+        }
+        .gradient-button {
+            background: linear-gradient(135deg, #6b21a8 0%, #13c8ec 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #13c8ec;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-white min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-10 py-3 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-4 text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-bold font-display leading-tight tracking-[-0.015em]">HydraSkript</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-9">
+<a class="text-white/70 hover:text-primary transition-colors text-sm font-medium" href="#">Dashboard</a>
+<a class="text-white/70 hover:text-primary transition-colors text-sm font-medium" href="#">Training Logs</a>
+<a class="text-white/70 hover:text-primary transition-colors text-sm font-medium" href="#">Style Library</a>
+</nav>
+<div class="flex items-center gap-3">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-background-dark text-sm font-bold">
+                    Profile
+                </button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="Avatar of the user in high resolution" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDZZAXujFqNjbF1ieZfTWuQz4QnG_jquwf64895VXMwY5IKad3AlOvXYPBQx6UHjSl12aYM0EoaNVH360zYfT0GBHWUHzoY5mOOYvh89hPIozhxm_xDoJx5rLQeldK8LURpXAhFrwWKvdPEQOpKasrBTNIWX2LMFiozEizqOrhB4uoIzqoVlc9OcEsBACF-vWuah27AiZkOcsejxRg770R8FqtIgBDfKYXXY0JL2q7qWj9LOLRIi4eE0RVGF-dYWp4rjee4UkSwCLAe");'></div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col px-10 py-6 gap-6 overflow-hidden">
+<!-- Breadcrumbs -->
+<div class="flex flex-wrap gap-2 items-center">
+<a class="text-white/60 hover:text-primary text-sm font-medium" href="#">AI Training</a>
+<span class="text-white/30 text-sm font-medium material-symbols-outlined text-[16px]">chevron_right</span>
+<a class="text-white/60 hover:text-primary text-sm font-medium" href="#">Style Training</a>
+<span class="text-white/30 text-sm font-medium material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-white text-sm font-medium">Style Match Comparison</span>
+</div>
+<!-- Page Heading -->
+<div class="flex flex-wrap justify-between items-end gap-3">
+<div class="flex flex-col gap-1">
+<h1 class="text-white text-4xl font-black font-display tracking-tight">Style Match Comparison Tool</h1>
+<p class="text-white/50 text-base font-normal">Session ID: <span class="text-primary font-mono">HYDRA-09</span> — Evaluating mimicry of user-uploaded text profile.</p>
+</div>
+<div class="flex items-center gap-4 pb-2">
+<div class="flex border-b border-white/10 gap-6">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-primary text-white pb-3" href="#">
+<p class="text-sm font-bold tracking-[0.05em]">SIDE-BY-SIDE</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-white/40 hover:text-white/60 pb-3" href="#">
+<p class="text-sm font-bold tracking-[0.05em]">UNIFIED VIEW</p>
+</a>
+</div>
+</div>
+</div>
+<!-- Main Comparison Workspace -->
+<div class="flex-1 grid grid-cols-[1fr_240px_1fr] gap-4 overflow-hidden min-h-0">
+<!-- Left Panel: Original Sample -->
+<div class="flex flex-col glass-panel rounded-xl overflow-hidden border-white/5">
+<div class="bg-white/5 px-5 py-3 flex justify-between items-center border-b border-white/10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-white/40">description</span>
+<h3 class="font-bold text-sm text-white/80 uppercase tracking-widest">Original Source</h3>
+</div>
+<span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/60 font-mono">842 WORDS</span>
+</div>
+<div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-black/20">
+<div class="space-y-4 text-white/90 leading-relaxed font-light text-lg">
+<p class="bg-primary/5 border-l-2 border-primary/40 pl-4 py-1">In the quiet corners of the digital architecture, we find the resonance of logic that transcends mere calculation.</p>
+<p>It isn't simply about the speed of a processor or the capacity of a storage drive; it is the elegance of the algorithm that truly defines our progress. We must look beyond the silicon to find the soul of the machine.</p>
+<p>When the output mirrors the intention of the creator with such high fidelity that the distinction blurs, we have achieved a symbiotic resonance.</p>
+<p>Consider the cadence of a poet versus the clinical precision of a scientist. One seeks to evoke, the other to clarify. Our task is to ensure the AI can inhabit either skin without losing the essential truth of the message it carries.</p>
+</div>
+</div>
+</div>
+<!-- Middle Panel: Metrics Spine -->
+<div class="flex flex-col gap-4">
+<!-- Style Match Circle -->
+<div class="glass-panel rounded-xl p-5 flex flex-col items-center justify-center text-center gap-2 border-primary/20">
+<p class="text-[10px] font-bold text-white/50 tracking-[0.2em] uppercase">Style Match</p>
+<div class="relative size-28 flex items-center justify-center">
+<svg class="size-full -rotate-90" viewbox="0 0 36 36">
+<circle class="stroke-white/10" cx="18" cy="18" fill="none" r="16" stroke-width="2.5"></circle>
+<circle class="stroke-primary" cx="18" cy="18" fill="none" r="16" stroke-dasharray="100" stroke-dashoffset="6" stroke-linecap="round" stroke-width="2.5"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl font-black font-display text-white">94<span class="text-sm text-primary">%</span></span>
+</div>
+</div>
+<p class="text-[10px] text-primary/80 font-medium">EXCELLENT ALIGNMENT</p>
+</div>
+<!-- Metrics Dashboard -->
+<div class="flex-1 glass-panel rounded-xl p-5 flex flex-col gap-6 border-white/5">
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<p class="text-[10px] font-bold text-white/50 tracking-wider uppercase">Vocabulary</p>
+<span class="text-xs font-mono text-primary">HIGH</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full shadow-[0_0_8px_rgba(19,200,236,0.6)]" style="width: 82%"></div>
+</div>
+<p class="text-[10px] text-white/30 italic">Complex word choices match source density.</p>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<p class="text-[10px] font-bold text-white/50 tracking-wider uppercase">Rhythm</p>
+<span class="text-xs font-mono text-primary">FLOWING</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full shadow-[0_0_8px_rgba(19,200,236,0.6)]" style="width: 95%"></div>
+</div>
+<p class="text-[10px] text-white/30 italic">Sentence length variance matches pattern.</p>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<p class="text-[10px] font-bold text-white/50 tracking-wider uppercase">Sentiment</p>
+<span class="text-xs font-mono text-primary">NEUTRAL</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full shadow-[0_0_8px_rgba(19,200,236,0.6)]" style="width: 68%"></div>
+</div>
+<p class="text-[10px] text-white/30 italic">Emotional undertones align at 68%.</p>
+</div>
+<div class="mt-auto pt-4 border-t border-white/5">
+<button class="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all text-xs font-bold text-white/70">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+                            DETAILED REPORT
+                        </button>
+</div>
+</div>
+</div>
+<!-- Right Panel: AI Output -->
+<div class="flex flex-col glass-panel rounded-xl overflow-hidden border-primary/10">
+<div class="bg-primary/10 px-5 py-3 flex justify-between items-center border-b border-primary/20">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined">auto_awesome</span>
+<h3 class="font-bold text-sm uppercase tracking-widest">AI Mimicry Output</h3>
+</div>
+<button class="text-primary/60 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+</button>
+</div>
+<div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-primary/5">
+<div class="space-y-4 text-white/90 leading-relaxed font-light text-lg">
+<p class="bg-primary/10 border-l-2 border-primary pl-4 py-1">Within the hushed pathways of modern computing, we encounter a clarity of purpose that exceeds traditional math.</p>
+<p>The true measure of innovation doesn't lie in clock speeds or disk space; it resides in the artistic structure of the code itself. We have to peer past the hardware to discover the essence of the logic.</p>
+<p>As the result echoes the vision of the designer with such accuracy that they seem identical, we have found a common frequency.</p>
+<p>Observe the flow of a lyricist compared to the clinical rigor of an engineer. One aims to touch, the other to explain. Our goal is to ensure the model can wear either persona while maintaining the core integrity of the data it represents.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Actions -->
+<footer class="p-6 bg-background-dark/90 border-t border-white/10 backdrop-blur-xl flex justify-between items-center">
+<div class="flex items-center gap-4 text-white/40 text-xs uppercase font-bold tracking-[0.1em]">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">history</span> Last Refined: 2m ago</span>
+<span class="w-1 h-1 bg-white/20 rounded-full"></span>
+<span>Version: 2.4.0-Beta</span>
+</div>
+<div class="flex gap-4">
+<button class="min-w-[160px] flex items-center justify-center gap-2 h-12 px-6 rounded-lg border-2 border-primary/50 text-primary hover:bg-primary/10 transition-all font-bold tracking-wider">
+<span class="material-symbols-outlined">tune</span>
+                REFINE TRAINING
+            </button>
+<button class="min-w-[160px] flex items-center justify-center gap-2 h-12 px-8 rounded-lg gradient-button text-white font-black tracking-widest shadow-[0_4px_20px_rgba(19,200,236,0.3)] hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">verified</span>
+                SAVE STYLE
+            </button>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript Landing Page</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#22d3ee",
+                        "accent-blue": "#60a5fa",
+                        "accent-purple": "#a855f7",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#000000",
+                        "card-dark": "#0a0a0a",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                font-family: 'Space Grotesk', sans-serif;
+            }
+        }
+        @layer components {
+            .gradient-text {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-[#60a5fa] to-[#22d3ee];
+            }
+            .gradient-btn {
+                @apply bg-gradient-to-r from-[#60a5fa] to-[#a855f7] hover:opacity-90 transition-opacity;
+            }
+            .gradient-btn-blue {
+                @apply bg-gradient-to-r from-[#60a5fa] to-[#22d3ee] hover:opacity-90 transition-opacity;
+            }
+            .border-gradient {
+                border-image: linear-gradient(to right, #60a5fa, #22d3ee) 1;
+            }
+            .terminal-glow {
+                box-shadow: 0 0 20px rgba(34, 211, 238, 0.1);
+            }
+            .logic-guard {
+                @apply bg-primary/20 border-b border-primary/50 relative cursor-default;
+            }
+            .logic-tooltip {
+                @apply absolute -top-8 left-0 bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-gray-300 antialiased font-display">
+<header class="sticky top-0 z-50 w-full border-b border-white/5 bg-black/80 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-gradient-to-br from-[#60a5fa] to-[#22d3ee] size-8 rounded-lg flex items-center justify-center text-black">
+<span class="material-symbols-outlined font-bold">auto_awesome</span>
+</div>
+<h1 class="text-white text-xl font-bold tracking-tight">HydraSkript</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Pricing</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<button class="gradient-btn-blue text-black px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-primary/20">
+                Get Started Free
+            </button>
+</nav>
+</div>
+</header>
+<main>
+<section class="relative pt-20 pb-24 overflow-hidden min-h-[800px] flex items-center">
+<div class="absolute top-0 right-0 -z-10 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full"></div>
+<div class="absolute -bottom-20 -left-20 -z-10 w-[400px] h-[400px] bg-accent-blue/10 blur-[100px] rounded-full"></div>
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
+<div class="space-y-8">
+<h1 class="text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-white">
+                    Create, Edit &amp; Publish <br/><span class="gradient-text">E-Books &amp; Audiobooks</span> with AI
+                </h1>
+<p class="text-lg text-gray-400 max-w-xl">
+                    The premium all-in-one AI publishing platform. Reimagined for modern creators who demand high-tech precision and creative freedom.
+                </p>
+<div class="flex flex-wrap gap-4">
+<button class="gradient-btn-blue text-black px-8 py-4 rounded-lg font-bold text-lg shadow-xl shadow-primary/20">
+                        Get Started Free
+                    </button>
+<button class="border border-white/20 text-white hover:bg-white/5 px-8 py-4 rounded-lg font-bold text-lg transition-colors">
+                        Explore Features
+                    </button>
+</div>
+</div>
+<div class="relative w-full">
+<div class="bg-card-dark border border-white/10 rounded-xl overflow-hidden shadow-2xl terminal-glow">
+<div class="bg-white/5 border-b border-white/5 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="flex gap-1.5">
+<div class="size-2.5 rounded-full bg-red-500/50"></div>
+<div class="size-2.5 rounded-full bg-yellow-500/50"></div>
+<div class="size-2.5 rounded-full bg-green-500/50"></div>
+</div>
+<span class="ml-4 text-xs font-mono text-gray-500 uppercase tracking-widest">Hydra_Engine_v4.2</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="text-[10px] text-primary/70 font-mono">TOKENS/S: 124.8</span>
+<div class="size-1.5 rounded-full bg-primary animate-pulse"></div>
+</div>
+</div>
+</div>
+<div class="h-1 w-full bg-white/5 relative">
+<div class="absolute inset-y-0 left-0 bg-gradient-to-r from-accent-blue via-primary to-accent-purple w-3/4 shadow-[0_0_10px_rgba(34,211,238,0.5)]"></div>
+</div>
+<div class="p-8 font-serif leading-relaxed text-gray-300 h-[450px] overflow-hidden relative">
+<div class="space-y-6">
+<h2 class="text-2xl text-white font-bold font-display italic">Chapter 14: The Obsidian Tide</h2>
+<p class="text-lg relative">
+                                The city of Elara did not fall with a whimper, but with the crystalline chime of a thousand mirrors shattering at once. High above the Spire of Ardor, the sky had turned a 
+                                <span class="logic-guard group">
+                                    bruised, necrotic violet
+                                    <span class="logic-tooltip">Matching Author Style...</span>
+</span>, 
+                                swirling with the remnants of the Aether Storm.
+                            </p>
+<p class="text-lg">
+                                Kaelen stood at the balcony’s edge, his fingers tracing the cold iron of the railing. Every breath felt like inhaling liquid starlight—sharp, beautiful, and utterly 
+                                <span class="logic-guard group">
+                                    lethal
+                                    <span class="logic-tooltip">Correcting Pacing...</span>
+</span>. 
+                                Below, the streets were no longer veins of commerce but rivers of shadow. The Obsidian Tide had arrived, exactly as the scrolls had prophesied, yet far more 
+                                <span class="logic-guard group">
+                                    terrifying in its silent approach
+                                    <span class="logic-tooltip">Enhancing Imagery...</span>
+</span>.
+                            </p>
+<p class="text-lg border-r-2 border-primary animate-pulse inline-block pr-1">
+                                "We are not the first to face the dark," Elara whispered behind him, her voice a steady anchor in the rising gale. "But we might be the last to remember how the light felt against our skin." She stepped forward, her robes snapping like 
+                            </p>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-card-dark to-transparent"></div>
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
+<div class="bg-black/80 border border-primary/30 backdrop-blur px-4 py-2 rounded-lg flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-sm">psychology</span>
+<span class="text-xs font-mono text-primary uppercase">Narrative Logic Check: OK</span>
+</div>
+<div class="bg-black/80 border border-accent-purple/30 backdrop-blur px-4 py-2 rounded-lg flex items-center gap-3">
+<span class="material-symbols-outlined text-accent-purple text-sm">history_edu</span>
+<span class="text-xs font-mono text-accent-purple uppercase">Tone Sync: 98%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute -right-6 -bottom-6 bg-gradient-to-br from-[#60a5fa] to-[#22d3ee] p-[1px] rounded-xl">
+<div class="bg-black rounded-xl px-6 py-4 flex flex-col items-center">
+<span class="text-2xl font-bold text-white leading-none">5.2k</span>
+<span class="text-[10px] text-gray-500 uppercase tracking-widest">Words/Min</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 bg-white/[0.02]">
+<div class="max-w-7xl mx-auto px-6">
+<div class="mb-16">
+<h2 class="text-3xl font-bold text-white mb-4">Why Choose HydraSkript</h2>
+<p class="text-gray-400">Experience the future of publishing with our comprehensive toolset.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-card-dark border border-white/5 p-8 rounded-xl hover:border-primary/40 transition-all group">
+<div class="w-12 h-12 rounded-full gradient-btn-blue flex items-center justify-center text-black mb-6">
+<span class="material-symbols-outlined">palette</span>
+</div>
+<h3 class="text-white text-xl font-bold mb-3">Modern Design</h3>
+<p class="text-gray-400 text-sm leading-relaxed">Sleek, professional layouts designed for every genre imaginable.</p>
+</div>
+<div class="bg-card-dark border border-white/5 p-8 rounded-xl hover:border-primary/40 transition-all group">
+<div class="w-12 h-12 rounded-full gradient-btn-blue flex items-center justify-center text-black mb-6">
+<span class="material-symbols-outlined">layers</span>
+</div>
+<h3 class="text-white text-xl font-bold mb-3">Multiple Formats</h3>
+<p class="text-gray-400 text-sm leading-relaxed">Export to E-Book, Print, or Audio seamlessly with one click.</p>
+</div>
+<div class="bg-card-dark border border-white/5 p-8 rounded-xl hover:border-primary/40 transition-all group">
+<div class="w-12 h-12 rounded-full gradient-btn-blue flex items-center justify-center text-black mb-6">
+<span class="material-symbols-outlined">auto_fix_high</span>
+</div>
+<h3 class="text-white text-xl font-bold mb-3">Creative Freedom</h3>
+<p class="text-gray-400 text-sm leading-relaxed">Full control over your creative process with AI assistance.</p>
+</div>
+<div class="bg-card-dark border border-white/5 p-8 rounded-xl hover:border-primary/40 transition-all group">
+<div class="w-12 h-12 rounded-full gradient-btn-blue flex items-center justify-center text-black mb-6">
+<span class="material-symbols-outlined">school</span>
+</div>
+<h3 class="text-white text-xl font-bold mb-3">AI Training</h3>
+<p class="text-gray-400 text-sm leading-relaxed">Master AI-assisted writing and design in our training center.</p>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col lg:flex-row items-center gap-16">
+<div class="flex-1 order-2 lg:order-1">
+<div class="aspect-[4/3] bg-gray-900 border border-white/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-8xl text-primary/10">edit_note</span>
+</div>
+</div>
+<div class="flex-1 space-y-8 order-1 lg:order-2">
+<h2 class="text-4xl font-bold text-white leading-tight">Professional Publishing <br/>Made Simple</h2>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="size-8 rounded-full border-2 border-primary flex items-center justify-center text-primary text-xs font-bold">1</div>
+<div class="w-0.5 grow bg-primary/20 my-1"></div>
+</div>
+<div class="pb-6">
+<h4 class="text-white font-bold text-lg border-b-2 border-primary w-fit pb-1 mb-2">Design</h4>
+<p class="text-gray-400">Craft your layout with intuitive drag-and-drop tools and AI suggestions.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="size-8 rounded-full border-2 border-gray-700 flex items-center justify-center text-gray-500 text-xs font-bold">2</div>
+<div class="w-0.5 grow bg-primary/20 my-1"></div>
+</div>
+<div class="pb-6">
+<h4 class="text-white font-bold text-lg mb-2">Multimedia</h4>
+<p class="text-gray-400">Add rich media, interactive elements, and vibrant illustrations.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="size-8 rounded-full border-2 border-gray-700 flex items-center justify-center text-gray-500 text-xs font-bold">3</div>
+</div>
+<div class="pb-6">
+<h4 class="text-white font-bold text-lg mb-2">Export</h4>
+<p class="text-gray-400">One-click publishing to global marketplaces.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24">
+<div class="max-w-7xl mx-auto px-6">
+<div class="flex flex-col lg:flex-row items-center gap-16">
+<div class="flex-1 space-y-8">
+<h2 class="text-4xl font-bold text-white">Immersive Audiobooks</h2>
+<p class="text-gray-400">Convert your written word into professional audio experiences using the world's most advanced AI voices or high-end recording tools.</p>
+<div class="flex flex-wrap gap-8">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full border border-primary/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">mic</span>
+</div>
+<span class="text-white font-medium">Easy Recording</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full border border-primary/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">sync</span>
+</div>
+<span class="text-white font-medium">Perfect Sync</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full border border-primary/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<span class="text-white font-medium">Pro Quality</span>
+</div>
+</div>
+</div>
+<div class="flex-1 w-full">
+<div class="aspect-video bg-gray-900 rounded-xl border border-white/10 flex flex-col items-center justify-center relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
+<div class="w-full px-12 space-y-4 relative z-10">
+<div class="h-1 bg-gray-800 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-accent-blue to-primary w-2/3"></div>
+</div>
+<div class="flex justify-center gap-4">
+<span class="material-symbols-outlined text-4xl text-white">play_circle</span>
+<span class="material-symbols-outlined text-4xl text-gray-600">equalizer</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 relative overflow-hidden border-t border-white/5">
+<div class="absolute inset-0 bg-primary/5 -z-10"></div>
+<div class="max-w-4xl mx-auto px-6 text-center space-y-10">
+<h2 class="text-4xl lg:text-6xl font-bold text-white leading-tight">
+                Ready to Start Your <br/><span class="gradient-text">Publishing Journey?</span>
+</h2>
+<p class="text-xl text-gray-400">Join creators who are using HydraSkript to build their publishing empires.</p>
+<div class="flex flex-wrap justify-center gap-4">
+<button class="gradient-btn-blue text-black px-10 py-4 rounded-lg font-bold text-xl shadow-2xl shadow-primary/20">
+                    Get Started For Free
+                </button>
+<button class="bg-white/5 border border-white/10 text-white hover:bg-white/10 px-10 py-4 rounded-lg font-bold text-xl transition-all">
+                    View Pricing
+                </button>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-black border-t border-white/10 py-12">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="bg-gradient-to-br from-[#60a5fa] to-[#22d3ee] size-6 rounded flex items-center justify-center text-black">
+<span class="material-symbols-outlined text-xs font-bold">auto_awesome</span>
+</div>
+<h3 class="text-white font-bold">HydraSkript</h3>
+</div>
+<div class="flex gap-8 text-sm text-gray-500">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Contact Us</a>
+</div>
+<div class="flex gap-4">
+<a class="text-gray-500 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">public</span>
+</a>
+<a class="text-gray-500 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">brand_awareness</span>
+</a>
+</div>
+</div>
+<div class="text-center mt-12 text-xs text-gray-600">
+        © 2024 HydraSkript. All rights reserved.
+    </div>
+</footer>
+
+</body></html>
