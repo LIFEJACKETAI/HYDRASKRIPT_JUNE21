@@ -1,12 +1,6 @@
-// HydraSkript - Book Generation API Route
-// POST /api/books/[id]/generate - Start book generation
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
-
-function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
-}
+import { getAuthEmail } from '@/lib/auth-helpers';
 
 // POST - Start book generation
 export async function POST(
@@ -15,7 +9,10 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
+    if (!email) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     const profile = await getOrCreateProfile(email);
 
     console.log(`[API] Start generation requested for book ${id} by ${email}`);
