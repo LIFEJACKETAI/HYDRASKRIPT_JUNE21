@@ -2,9 +2,23 @@
 // Handles text-to-speech generation using Google AI Studio (Gemini)
 // Includes text chunking and voice mapping logic
 
+// ... existing imports
 import { saveBase64File, generateFilename, createMediaAsset } from '@/lib/utils/storage';
-import { db } from '@/lib/db';
-import { AUDIOBOOK_VOICES } from '@/types';
+
+/**
+ * Generates a short voice preview for the user to hear before committing.
+ */
+export async function generateVoicePreview(voiceId: string): Promise<{ success: boolean; audioBase64?: string; error?: string }> {
+  const previewText = "Hello! I am your AI narrator. I will bring your story to life with emotion and clarity. Does my voice suit your book?";
+  return generateAudioChunk(previewText, voiceId);
+}
+
+/**
+ * Calls Google AI Studio (Gemini) TTS API...
+ */
+export async function generateAudioChunk(
+// ... rest of function
+
 
 /**
  * Voice configuration for Gemini TTS.

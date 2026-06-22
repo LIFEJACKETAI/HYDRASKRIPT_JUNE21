@@ -71,8 +71,15 @@ export async function generateBookCover(bookId: string, ownerId: string, bookTit
   return generateImage({ prompt: coverPrompt, style, size: '1344x768', ownerId, bookId, assetType: 'cover' });
 }
 
-export async function generateChapterIllustration(bookId: string, ownerId: string, chapterIndex: number, illustrationPrompt: string, style: string = 'pixar'): Promise<GeneratedImageResult> {
-  return generateImage({ prompt: illustrationPrompt, style, size: '1344x768', ownerId, bookId, assetType: 'illustration' });
+export async function generateChapterIllustration(bookId: string, ownerId: string, chapterIndex: number, illustrationPrompt: string, style: string = 'pixar', characterNames?: string[]): Promise<GeneratedImageResult> {
+  // Character Consistency Logic: If we have names, we append a consistency anchor to the prompt
+  let finalPrompt = illustrationPrompt;
+  if (characterNames && characterNames.length > 0) {
+    const hero = characterNames[0];
+    finalPrompt = `Character consistency: The main character is named ${hero}. ${illustrationPrompt}. Ensure ${hero} looks the same as in previous illustrations.`;
+  }
+  
+  return generateImage({ prompt: finalPrompt, style, size: '1344x768', ownerId, bookId, assetType: 'illustration' });
 }
 
 export async function generateColoringPage(bookId: string, ownerId: string, chapterIndex: number, subject: string, theme?: ColoringTheme | null): Promise<GeneratedImageResult> {
