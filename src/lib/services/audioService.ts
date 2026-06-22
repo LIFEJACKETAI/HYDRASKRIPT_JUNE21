@@ -13,11 +13,7 @@ export async function generateVoicePreview(voiceId: string): Promise<{ success: 
   return generateAudioChunk(previewText, voiceId);
 }
 
-/**
- * Calls Google AI Studio (Gemini) TTS API...
- */
-export async function generateAudioChunk(
-// ... rest of function
+
 
 
 /**
