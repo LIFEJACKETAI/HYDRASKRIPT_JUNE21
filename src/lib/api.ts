@@ -22,8 +22,9 @@ async function apiFetch<T>(
       },
     });
 
-    const result = await response.json();
-    return result;
+  const result = await response.json();
+  console.log(`[API DEBUG] ${path} →`, response.status, result);
+  return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Network error';
     console.error(`[API Client] ${path} failed:`, message);

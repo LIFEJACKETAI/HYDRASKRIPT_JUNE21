@@ -1,5 +1,5 @@
-{
+
   "api_key": "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",
-  "model": "google/gemma-4-31b-it",
-  "provider": "openrouter"
+  "baseUrl": "https://api.z.ai/api/paas/v4",
+  "chatId": "default"
 }
