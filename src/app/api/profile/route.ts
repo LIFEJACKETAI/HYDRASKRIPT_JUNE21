@@ -1,19 +1,21 @@
-// HydraSkript - Profile API Route
-// GET /api/profile - Get current user profile
-// PUT /api/profile - Update profile
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
+import { getAuthenticatedUserEmail } from '@/lib/auth-utils';
 
-function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
+async function getAuthEmail(request: NextRequest): Promise<string | null> {
+  const email = await getAuthenticatedUserEmail(request);
+  if (!email) return null;
+  return email;
 }
 
 // GET - Get profile
 export async function GET(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
+    if (!email) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     const profile = await getOrCreateProfile(email);
 
     return NextResponse.json({
@@ -26,6 +28,7 @@ export async function GET(request: NextRequest) {
         tier: profile.tier,
         isAdmin: profile.isAdmin,
         createdAt: profile.createdAt,
+        updatedAt: profile.updatedAt,
       },
     });
   } catch (error) {
@@ -37,7 +40,10 @@ export async function GET(request: NextRequest) {
 // PUT - Update profile
 export async function PUT(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
+    if (!email) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
     const profile = await getOrCreateProfile(email);
 
     const body = await request.json();

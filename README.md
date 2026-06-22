@@ -10,7 +10,7 @@ HydraSkript moves beyond the "black box" of AI generation. It implements a **Dir
 
 - **The Story Blueprint**: Instead of jumping straight to writing, HydraSkript generates a detailed outline. The author can edit plot points, adjust chapter targets, and refine the narrative arc before a single word is written.
 - **Iterative Steering**: The AI writes one chapter at a time. The author reviews the draft, provides feedback, and approves the chapter before the AI proceeds.
-- **Continuity Engine**: Every approved chapter is fed back into the AI's memory, ensuring that plot twists and character developments are remembered throughout the book.
+- **Continuity Engine**:HYDRASKRIPT_JUNE21 Every approved chapter is fed back into the AI's memory, ensuring that plot twists and character developments are remembered throughout the book.
 - **Visual Identity**: Specialized pipelines for children's and coloring books ensure that characters remain visually consistent from the first page to the last.
 
 ---

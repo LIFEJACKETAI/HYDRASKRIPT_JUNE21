@@ -114,10 +114,26 @@ export async function reserveCredits(
       // Read current credits with lock (serializable isolation in SQLite)
       const profile = await tx.profile.findUnique({
         where: { id: profileId },
-        select: { credits: true },
+        select: { credits: true, email: true },
       });
 
-      if (!profile || profile.credits < amount) {
+      if (!profile) return false;
+
+      // ADMIN BYPASS: Unlimited credits for admin@hydraskript.com
+      if (profile.email === 'admin@hydraskript.com') {
+        // We don't deduct anything, but we still record the ledger for tracking
+        await tx.creditLedger.create({
+          data: {
+            profileId,
+            amount: 0,
+            reason: `ADMIN-FREE: ${reason}`,
+            jobId,
+          },
+        });
+        return true;
+      }
+
+      if (profile.credits < amount) {
         return false; // Insufficient funds
       }
 
