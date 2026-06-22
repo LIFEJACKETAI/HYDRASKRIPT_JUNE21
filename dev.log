@@ -2,7 +2,7 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.66:3000
 - Environments: .env.local, .env
-✓ Ready in 728ms
+✓ Ready in 1126ms
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
  We detected multiple lockfiles and selected the directory of /home/c-jay69/package-lock.json as the root directory.
  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
@@ -12,27 +12,24 @@
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 
- GET / 200 in 2.4s (next.js: 299ms, proxy.ts: 1366ms, application-code: 751ms)
+ GET / 200 in 10.7s (next.js: 3.0s, proxy.ts: 1638ms, application-code: 6.0s)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 1584ms (next.js: 217ms, proxy.ts: 339ms, application-code: 1028ms)
+ GET /api/profile 200 in 2.4s (next.js: 330ms, proxy.ts: 988ms, application-code: 1069ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 597ms (next.js: 7ms, proxy.ts: 346ms, application-code: 244ms)
+ GET /api/profile 200 in 609ms (next.js: 8ms, proxy.ts: 338ms, application-code: 262ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
 prisma:query SELECT "public"."chapters"."id", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."status", "public"."chapters"."wordCount", "public"."chapters"."illustrationUrl", "public"."chapters"."bookId" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
- GET /api/books 200 in 1105ms (next.js: 159ms, proxy.ts: 546ms, application-code: 401ms)
- GET /api/credits 200 in 1431ms (next.js: 45ms, proxy.ts: 346ms, application-code: 1040ms)
+ GET /api/books 200 in 1237ms (next.js: 197ms, proxy.ts: 667ms, application-code: 373ms)
 prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/credits 200 in 1579ms (next.js: 75ms, proxy.ts: 380ms, application-code: 1125ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."chapters"."id", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."status", "public"."chapters"."wordCount", "public"."chapters"."illustrationUrl", "public"."chapters"."bookId" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
- GET /api/books 200 in 754ms (next.js: 3ms, proxy.ts: 302ms, application-code: 449ms)
+ GET /api/books 200 in 821ms (next.js: 6ms, proxy.ts: 361ms, application-code: 454ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 634ms (next.js: 7ms, proxy.ts: 312ms, application-code: 315ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query DELETE FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
- DELETE /api/books/7557f228-8193-41ac-8e79-1fab3119d089 200 in 2.6s (next.js: 1756ms, proxy.ts: 507ms, application-code: 300ms)
+ GET /api/credits 200 in 632ms (next.js: 7ms, proxy.ts: 321ms, application-code: 304ms)
