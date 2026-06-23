@@ -15,7 +15,10 @@ import type { TargetAudience } from '@/types';
 export async function POST(request: NextRequest) {
   try {
     const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    if (!email) {
+  return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+}   
+const profile = await getOrCreateProfile(email);
 
     const body = await request.json();
     console.log('[API] Create book request:', JSON.stringify(body));
@@ -46,8 +49,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const book = await db.book.create({
-      data: {
+    const book = await db.book.findUnique ({
+      where: {
+        id: params.id,
         ownerId: profile.id,
         title: input.title,
         genre: input.genre,
