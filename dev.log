@@ -2,5 +2,58 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.66:3000
 - Environments: .env.local, .env
-✓ Ready in 562ms
+✓ Ready in 478ms
 
+ GET / 200 in 809ms (next.js: 114ms, proxy.ts: 229ms, application-code: 466ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET /api/profile 200 in 2.0s (next.js: 188ms, application-code: 1858ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET /api/profile 200 in 233ms (next.js: 4ms, application-code: 229ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/credits 200 in 500ms (next.js: 65ms, application-code: 434ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/credits 200 in 236ms (next.js: 7ms, application-code: 229ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+ GET /api/books 200 in 1237ms (next.js: 126ms, application-code: 1111ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+ GET /api/books 200 in 312ms (next.js: 6ms, application-code: 305ms)
+prisma:query SELECT 1
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
+ GET /api/training/style-profile 200 in 480ms (next.js: 169ms, application-code: 311ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
+ GET /api/training/style-profile 200 in 153ms (next.js: 6ms, application-code: 147ms)
+prisma:query SELECT 1
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[API] Create book failed: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].book.create()` invocation in
+/home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.next/dev/server/chunks/[root-of-the-server]__1wmcaeg._.js:329:154
+
+  326     });
+  327 }
+  328 const profile = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$bookHelpers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getOrCreateProfile"])(email);
+→ 329 const book = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].book.create({
+        data: {
+          title: "tst",
+          genre: "children",
+          targetAudience: "0-5",
+          styleProfileId: undefined,
+          characterNames: [
+            "Victoria",
+            "Dada"
+          ],
+          ~~~~~~~~~~~~
+          outline: "{}",
+          ownerId: "ef8077c4-31cd-4430-b4a3-30a297b46100"
+        }
+      })
+
+Argument `characterNames`: Invalid value provided. Expected String, provided (String, String).
+ POST /api/books 500 in 715ms (next.js: 4ms, application-code: 711ms)

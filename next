@@ -1,0 +1,13 @@
+Command 'dev' not found, did you mean:
+  command 'den' from snap den (1.2.0-0)
+  command 'dex' from deb dex (0.9.0-2)
+  command 'rev' from deb util-linux (2.39.3-9ubuntu6.5)
+  command 'dav' from deb dav-text (0.9.0-2)
+  command 'pev' from deb plc-utils-extra (0.0.6+git20230504.1ba7d5a0-1)
+  command 'mev' from deb gpm (1.20.7-10build1)
+  command 'delv' from deb bind9-dnsutils (1:9.18.39-0ubuntu0.24.04.5)
+  command 'dlv' from deb delve (1.21.2-2)
+  command 'xev' from deb x11-utils (7.7+6)
+  command 'wev' from deb wev (1.0.0-2)
+  command 'ddv' from deb ncbi-tools-x11 (6.1.20170106+dfsg1-10)
+See 'snap info <snapname>' for additional versions.
