@@ -2,7 +2,7 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.66:3000
 - Environments: .env.local, .env
-✓ Ready in 998ms
+✓ Ready in 681ms
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
  We detected multiple lockfiles and selected the directory of /home/c-jay69/package-lock.json as the root directory.
  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
@@ -12,270 +12,39 @@
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 
- GET / 200 in 3.5s (next.js: 532ms, proxy.ts: 1925ms, application-code: 1056ms)
+ GET / 200 in 2.4s (next.js: 340ms, proxy.ts: 1533ms, application-code: 528ms)
+ GET /api/profile 200 in 1728ms (next.js: 254ms, proxy.ts: 342ms, application-code: 1133ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 1881ms (next.js: 374ms, proxy.ts: 221ms, application-code: 1286ms)
+ GET /logo-icon.png 404 in 1579ms (next.js: 1468ms, application-code: 111ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 993ms (next.js: 9ms, proxy.ts: 286ms, application-code: 698ms)
+ GET /api/profile 200 in 530ms (next.js: 12ms, proxy.ts: 303ms, application-code: 215ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."chapters"."id", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."status", "public"."chapters"."wordCount", "public"."chapters"."illustrationUrl", "public"."chapters"."bookId" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1,$2) ORDER BY "public"."chapters"."index" ASC OFFSET $3
+ GET /api/books 200 in 945ms (next.js: 142ms, proxy.ts: 288ms, application-code: 515ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/credits 200 in 1590ms (next.js: 63ms, proxy.ts: 576ms, application-code: 952ms)
+prisma:query SELECT "public"."chapters"."id", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."status", "public"."chapters"."wordCount", "public"."chapters"."illustrationUrl", "public"."chapters"."bookId" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1,$2) ORDER BY "public"."chapters"."index" ASC OFFSET $3
+ GET /api/books 200 in 672ms (next.js: 5ms, proxy.ts: 305ms, application-code: 361ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 1080ms (next.js: 78ms, proxy.ts: 532ms, application-code: 470ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
-prisma:query SELECT "public"."chapters"."id", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."status", "public"."chapters"."wordCount", "public"."chapters"."illustrationUrl", "public"."chapters"."bookId" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
- GET /api/books 200 in 2.0s (next.js: 212ms, proxy.ts: 1208ms, application-code: 617ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
-prisma:query SELECT "public"."chapters"."id", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."status", "public"."chapters"."wordCount", "public"."chapters"."illustrationUrl", "public"."chapters"."bookId" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
- GET /api/books 200 in 424ms (next.js: 7ms, proxy.ts: 159ms, application-code: 257ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/credits 200 in 1683ms (next.js: 5ms, proxy.ts: 363ms, application-code: 1316ms)
-prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET / 200 in 359ms (next.js: 11ms, proxy.ts: 211ms, application-code: 136ms)
- GET /logo-icon.png 404 in 293ms (next.js: 109ms, application-code: 184ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 794ms (next.js: 16ms, proxy.ts: 354ms, application-code: 424ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 528ms (next.js: 7ms, proxy.ts: 216ms, application-code: 305ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 491ms (next.js: 6ms, proxy.ts: 172ms, application-code: 313ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."chapters"."id", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."status", "public"."chapters"."wordCount", "public"."chapters"."illustrationUrl", "public"."chapters"."bookId" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
- GET /api/credits 200 in 526ms (next.js: 6ms, proxy.ts: 186ms, application-code: 334ms)
- GET /api/books 200 in 1025ms (next.js: 18ms, proxy.ts: 499ms, application-code: 507ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
-prisma:query SELECT "public"."chapters"."id", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."status", "public"."chapters"."wordCount", "public"."chapters"."illustrationUrl", "public"."chapters"."bookId" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
- GET /api/books 200 in 580ms (next.js: 7ms, proxy.ts: 192ms, application-code: 381ms)
+ GET /api/credits 200 in 655ms (next.js: 7ms, proxy.ts: 285ms, application-code: 362ms)
 prisma:query SELECT 1
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query DELETE FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
- DELETE /api/books/9a3eb34d-6198-4dd4-a7c6-3486f08176c9 200 in 2.3s (next.js: 1196ms, proxy.ts: 7ms, application-code: 1052ms)
+ DELETE /api/books/58096623-c9ac-4945-8a47-1428baf9ac1a 404 in 1959ms (next.js: 1004ms, proxy.ts: 634ms, application-code: 321ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query DELETE FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+ DELETE /api/books/37eda4e2-5823-4920-9986-db6d1370a2a5 404 in 753ms (next.js: 77ms, proxy.ts: 522ms, application-code: 154ms)
+prisma:query SELECT 1
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
- GET /api/training/style-profile 200 in 1097ms (next.js: 291ms, proxy.ts: 9ms, application-code: 797ms)
+ GET /api/training/style-profile 200 in 984ms (next.js: 65ms, proxy.ts: 614ms, application-code: 305ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
- GET /api/training/style-profile 200 in 234ms (next.js: 7ms, proxy.ts: 11ms, application-code: 216ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-[API] Create book request: {"title":"tst","genre":"children","targetAudience":"0-5","chapterCount":8,"adventureType":"boat","characterNames":["Victoria","daddy"]}
-[API] Validated book input: {"title":"tst","genre":"children","targetAudience":"0-5","chapterCount":8,"adventureType":"boat","characterNames":["Victoria","daddy"]}
-prisma:query INSERT INTO "public"."books" ("ownerId","title","genre","targetAudience","maxPages","styleProfileId","status","totalCreditsEstimated","totalCreditsCharged","coloringTheme","adventureType","characterNames","outline","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
-[API] Book created: fd7c843f-4fed-4ddd-838e-88b1f14c8c82 - "tst" (children, 0-5)
- POST /api/books 201 in 1558ms (next.js: 9ms, proxy.ts: 19ms, application-code: 1530ms)
-⨯ ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  [90m25 |[0m [90m * Maps gender/style to the specific Google AI Studio voice IDs.[0m
-  [90m26 |[0m [90m */[0m
-[31m[1m>[0m [90m27 |[0m [36mexport[0m [36mfunction[0m getVoiceId(gender: [32m'male'[0m | [32m'female'[0m, preferredStyle?:...
-  [90m   |[0m [31m[1m^^^^^^[0m
-  [90m28 |[0m   [36mconst[0m voices = [33mAUDIOBOOK_VOICES[0m.filter(v => v.gender === gender);
-  [90m29 |[0m   [36mif[0m (!preferredStyle) [36mreturn[0m voices[[35m0[0m].id;
-  [90m30 |[0m
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts
-
-
- POST /api/books/fd7c843f-4fed-4ddd-838e-88b1f14c8c82/generate 500 in 2.3s (next.js: 866ms, proxy.ts: 10ms, application-code: 1432ms)
-[browser] ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  25 |  * Maps gender/style to the specific Google AI Studio voice IDs.
-  26 |  */
-> 27 | export function getVoiceId(gender: 'male' | 'female', preferredStyle?:...
-     | ^^^^^^
-  28 |   const voices = AUDIOBOOK_VOICES.filter(v => v.gender === gender);
-  29 |   if (!preferredStyle) return voices[0].id;
-  30 |
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts 
-[browser] ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  25 |  * Maps gender/style to the specific Google AI Studio voice IDs.
-  26 |  */
-> 27 | export function getVoiceId(gender: 'male' | 'female', preferredStyle?:...
-     | ^^^^^^
-  28 |   const voices = AUDIOBOOK_VOICES.filter(v => v.gender === gender);
-  29 |   if (!preferredStyle) return voices[0].id;
-  30 |
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts 
-[browser] ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  25 |  * Maps gender/style to the specific Google AI Studio voice IDs.
-  26 |  */
-> 27 | export function getVoiceId(gender: 'male' | 'female', preferredStyle?:...
-     | ^^^^^^
-  28 |   const voices = AUDIOBOOK_VOICES.filter(v => v.gender === gender);
-  29 |   if (!preferredStyle) return voices[0].id;
-  30 |
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts 
-[browser] ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  25 |  * Maps gender/style to the specific Google AI Studio voice IDs.
-  26 |  */
-> 27 | export function getVoiceId(gender: 'male' | 'female', preferredStyle?:...
-     | ^^^^^^
-  28 |   const voices = AUDIOBOOK_VOICES.filter(v => v.gender === gender);
-  29 |   if (!preferredStyle) return voices[0].id;
-  30 |
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts 
-[browser] ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  25 |  * Maps gender/style to the specific Google AI Studio voice IDs.
-  26 |  */
-> 27 | export function getVoiceId(gender: 'male' | 'female', preferredStyle?:...
-     | ^^^^^^
-  28 |   const voices = AUDIOBOOK_VOICES.filter(v => v.gender === gender);
-  29 |   if (!preferredStyle) return voices[0].id;
-  30 |
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts 
-[browser] [API Client] /books/fd7c843f-4fed-4ddd-838e-88b1f14c8c82/generate failed: Unexpected token '<', "<!DOCTYPE "... is not valid JSON 
-    at apiFetch (src/lib/api.ts:30:13)
-    at async handleSubmit (src/components/book/CreateBookForm.tsx:171:27)
-  28 |   } catch (error) {
-  29 |     const message = error instanceof Error ? error.message : 'Network error';
-> 30 |     console.error(`[API Client] ${path} failed:`, message);
-     |             ^
-  31 |     return { success: false, error: message };
-  32 |   }
-  33 | } (src/lib/api.ts:30:13)
- GET /api/books/fd7c843f-4fed-4ddd-838e-88b1f14c8c82 500 in 350ms (next.js: 156ms, proxy.ts: 52ms, application-code: 142ms)
-[browser] ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  25 |  * Maps gender/style to the specific Google AI Studio voice IDs.
-  26 |  */
-> 27 | export function getVoiceId(gender: 'male' | 'female', preferredStyle?:...
-     | ^^^^^^
-  28 |   const voices = AUDIOBOOK_VOICES.filter(v => v.gender === gender);
-  29 |   if (!preferredStyle) return voices[0].id;
-  30 |
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts 
- GET /api/books/fd7c843f-4fed-4ddd-838e-88b1f14c8c82 500 in 207ms (next.js: 59ms, proxy.ts: 28ms, application-code: 121ms)
-[browser] ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  25 |  * Maps gender/style to the specific Google AI Studio voice IDs.
-  26 |  */
-> 27 | export function getVoiceId(gender: 'male' | 'female', preferredStyle?:...
-     | ^^^^^^
-  28 |   const voices = AUDIOBOOK_VOICES.filter(v => v.gender === gender);
-  29 |   if (!preferredStyle) return voices[0].id;
-  30 |
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts 
-[browser] [API Client] /books/fd7c843f-4fed-4ddd-838e-88b1f14c8c82 failed: Unexpected token '<', "<!DOCTYPE "... is not valid JSON 
-    at apiFetch (src/lib/api.ts:30:13)
-    at async getBook (src/lib/api.ts:134:18)
-    at async BookDetail.useCallback[fetchBook] (src/components/book/BookDetail.tsx:68:18)
-  28 |   } catch (error) {
-  29 |     const message = error instanceof Error ? error.message : 'Network error';
-> 30 |     console.error(`[API Client] ${path} failed:`, message);
-     |             ^
-  31 |     return { success: false, error: message };
-  32 |   }
-  33 | } (src/lib/api.ts:30:13)
-[browser] [API Client] /books/fd7c843f-4fed-4ddd-838e-88b1f14c8c82 failed: Unexpected token '<', "<!DOCTYPE "... is not valid JSON 
-    at apiFetch (src/lib/api.ts:30:13)
-    at async getBook (src/lib/api.ts:134:18)
-    at async BookDetail.useCallback[fetchBook] (src/components/book/BookDetail.tsx:68:18)
-  28 |   } catch (error) {
-  29 |     const message = error instanceof Error ? error.message : 'Network error';
-> 30 |     console.error(`[API Client] ${path} failed:`, message);
-     |             ^
-  31 |     return { success: false, error: message };
-  32 |   }
-  33 | } (src/lib/api.ts:30:13)
-[browser] ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts:27:1
-Expected ident
-  25 |  * Maps gender/style to the specific Google AI Studio voice IDs.
-  26 |  */
-> 27 | export function getVoiceId(gender: 'male' | 'female', preferredStyle?:...
-     | ^^^^^^
-  28 |   const voices = AUDIOBOOK_VOICES.filter(v => v.gender === gender);
-  29 |   if (!preferredStyle) return voices[0].id;
-  30 |
-
-Parsing ecmascript source code failed
-
-Import trace:
-  App Route:
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/audioService.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/registry.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/workers/queue.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/lib/services/bookGenerator.ts
-    ./Documents/GitHub/HYDRASKRIPT_JUNE21/src/app/api/books/[id]/generate/route.ts 
+ GET /api/training/style-profile 200 in 453ms (next.js: 5ms, proxy.ts: 294ms, application-code: 154ms)

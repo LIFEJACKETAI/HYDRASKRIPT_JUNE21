@@ -2,6 +2,7 @@
 // POST /api/books - Create a new book
 // GET /api/books - List user's books
 
+import { getAuthEmail } from '@/lib/auth-helpers';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
@@ -10,15 +11,10 @@ import { CreateBookSchema, validateOrThrow } from '@/lib/llm/schema';
 import { AUDIENCE_CONFIG } from '@/types';
 import type { TargetAudience } from '@/types';
 
-// Simple auth: use email from header (in production, use proper auth)
-function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
-}
-
 // POST - Create a new book
 export async function POST(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const body = await request.json();
@@ -80,7 +76,7 @@ export async function POST(request: NextRequest) {
 // GET - List user's books
 export async function GET(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const books = await db.book.findMany({
