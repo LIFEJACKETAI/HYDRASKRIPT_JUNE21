@@ -14,7 +14,7 @@ function getAuthEmail(request: NextRequest): string {
 // POST - Create a style profile from exemplar texts
 export async function POST(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const body = await request.json();
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 // GET - List style profiles
 export async function GET(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const profiles = await listStyleProfiles(profile.id);
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 // DELETE - Delete a style profile
 export async function DELETE(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const { profileId } = await request.json();

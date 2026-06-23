@@ -17,7 +17,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const body = await request.json();

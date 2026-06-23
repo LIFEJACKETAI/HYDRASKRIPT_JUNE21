@@ -18,7 +18,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const book = await db.book.findUnique({
@@ -59,7 +59,7 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const body = await request.json();
@@ -88,7 +88,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const deleted = await deleteBook(id, profile.id);

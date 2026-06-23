@@ -12,7 +12,7 @@ function getAuthEmail(request: NextRequest): string {
 // GET - Admin dashboard data
 export async function GET(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     if (!profile.isAdmin) {

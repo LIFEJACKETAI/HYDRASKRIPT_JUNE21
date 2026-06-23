@@ -19,7 +19,7 @@ export async function GET(
 ) {
   try {
     const { bookId } = await params;
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     // Verify the book belongs to this user
@@ -106,7 +106,7 @@ export async function POST(
 ) {
   try {
     const { bookId } = await params;
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const book = await db.book.findUnique({

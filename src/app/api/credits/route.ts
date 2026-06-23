@@ -15,7 +15,7 @@ function getAuthEmail(request: NextRequest): string {
 // GET - Get credit balance and recent ledger
 export async function GET(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const balance = await getCreditBalance(profile.id);
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 // POST - Add credits (simulated purchase)
 export async function POST(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const { tier } = await request.json();

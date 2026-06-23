@@ -46,7 +46,7 @@ function chunkText(text: string, maxChars = 4800): string[] {
 
 export async function POST(request: NextRequest) {
   try {
-    const email = getAuthEmail(request);
+    const email = await getAuthEmail(request);
     const profile = await getOrCreateProfile(email);
 
     const body = await request.json();
