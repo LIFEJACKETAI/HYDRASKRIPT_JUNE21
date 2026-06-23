@@ -19,7 +19,7 @@ export async function GET(
     }
     
     const profile = await getOrCreateProfile(email);
-    const bookId = params.id;
+    const { id: bookId } = await params; 
 
     const book = await db.book.findFirst({
       where: { 
