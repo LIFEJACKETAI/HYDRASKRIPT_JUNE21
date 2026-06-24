@@ -116,10 +116,11 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
       outlinePrompt = getColoringOutlinePrompt(coloringTheme, chapterCount);
       outlineUser = getColoringOutlineUserPrompt(book.title, coloringTheme);
     } else {
+      // Safe parsing of characterNames
       const characterNames = Array.isArray(book.characterNames) 
         ? book.characterNames 
-        : (() => { try { return JSON.parse(book.characterNames as any || 
-      ? book.characterNames? book.characterNames'[]') as string[]; } catch { return []; } })();
+        : (() => { try { return JSON.parse((book.characterNames as any) || '[]') as string[]; } catch { return []; } })();
+
       outlinePrompt = getOutlinePrompt(genre, targetAudience, chapterCount, stylePrompt, characterNames.length > 0 ? characterNames : undefined, book.adventureType ?? undefined);
       outlineUser = getOutlineUserPrompt(book.title, genre, targetAudience);
     }
@@ -153,6 +154,7 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
 
   } catch (error) {
     const errMessage = error instanceof Error ? error.message : String(error);
+    console.error("[Queue] OUTLINE GENERATION FAILED:", errMessage); // <-- ADDED LOGGING HERE
     await db.book.update({ where: { id: bookId }, data: { status: 'failed' } });
     await refundCredits(jobId, `Outline failed: ${errMessage}`);
     await jobQueue.updateJobStatus(jobId, { status: 'failed', errorMessage: errMessage, progressMessage: `Failed: ${errMessage}` });
@@ -203,10 +205,11 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       fullSystemPrompt = getColoringChapterPrompt(coloringTheme, chapterIndex, 10); // approximate total chapters
       chapterUser = `Write a brief, poetic description for the coloring page titled "${chapter.title}". Visual subject: ${chapter.synopsis}`;
     } else {
+      // Safe parsing of characterNames
       const characterNames = Array.isArray(book.characterNames) 
         ? book.characterNames 
-        : (() => { try { return JSON.parse(book.characterNames as any || 
-      '[]') as string[]; } catch { return []; } })();
+        : (() => { try { return JSON.parse((book.characterNames as any) || '[]') as string[]; } catch { return []; } })();
+
       const chapterPrompt = getChapterWritePrompt(stylePrompt, book.title, genre, chapterIndex, 10, previousSummary, characterNames.length > 0 ? characterNames : undefined);
       const childrensPrompt = isChildrenBook ? getChildrensChapterPrompt(targetAudience) : '';
       fullSystemPrompt = childrensPrompt ? `${childrensPrompt}\n\n${chapterPrompt}` : chapterPrompt;
@@ -254,6 +257,7 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
 
   } catch (error) {
     const errMessage = error instanceof Error ? error.message : String(error);
+    console.error("[Queue] CHAPTER GENERATION FAILED:", errMessage); // <-- ADDED LOGGING HERE
     await db.chapter.update({
       where: { bookId_index: { bookId, index: chapterIndex } },
       data: { status: 'failed' }
@@ -310,6 +314,7 @@ export async function finalizeBook(bookId: string, ownerId: string, jobId: strin
 
   } catch (error) {
     const errMessage = error instanceof Error ? error.message : String(error);
+    console.error("[Queue] BOOK FINALIZATION FAILED:", errMessage); // <-- ADDED LOGGING HERE
     await db.book.update({ where: { id: bookId }, data: { status: 'failed' } });
     await refundCredits(jobId, `Finalization failed: ${errMessage}`);
     await jobQueue.updateJobStatus(jobId, { status: 'failed', errorMessage: errMessage, progressMessage: `Failed: ${errMessage}` });
