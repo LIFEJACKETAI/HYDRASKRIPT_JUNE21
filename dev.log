@@ -2,67 +2,55 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.66:3000
 - Environments: .env.local, .env
-✓ Ready in 837ms
+✓ Ready in 777ms
 
- GET / 200 in 2.0s (next.js: 142ms, proxy.ts: 533ms, application-code: 1363ms)
- GET / 200 in 163ms (next.js: 10ms, proxy.ts: 19ms, application-code: 134ms)
+ GET / 200 in 1372ms (next.js: 117ms, proxy.ts: 543ms, application-code: 712ms)
+⚠ Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "192.168.0.66".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['192.168.0.66'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / 200 in 136ms (next.js: 7ms, proxy.ts: 16ms, application-code: 113ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 2.4s (next.js: 370ms, application-code: 2.0s)
+ GET /api/profile 200 in 2.0s (next.js: 392ms, application-code: 1611ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 220ms (next.js: 3ms, application-code: 217ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 521ms (next.js: 77ms, application-code: 444ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 256ms (next.js: 6ms, application-code: 250ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
- GET /api/books 200 in 1222ms (next.js: 182ms, application-code: 1040ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
- GET /api/books 200 in 310ms (next.js: 6ms, application-code: 305ms)
- GET /api/profile 401 in 28ms (next.js: 9ms, application-code: 19ms)
- GET /api/profile 401 in 13ms (next.js: 4ms, application-code: 9ms)
- GET / 200 in 176ms (next.js: 10ms, proxy.ts: 15ms, application-code: 150ms)
-prisma:query SELECT 1
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 468ms (next.js: 6ms, application-code: 463ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 228ms (next.js: 4ms, application-code: 223ms)
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT 1
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 407ms (next.js: 7ms, application-code: 401ms)
-prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
- GET /api/books 200 in 475ms (next.js: 14ms, application-code: 460ms)
+ GET /api/profile 200 in 229ms (next.js: 7ms, application-code: 222ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 254ms (next.js: 3ms, application-code: 251ms)
+ GET /api/credits 200 in 491ms (next.js: 76ms, application-code: 415ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/credits 200 in 232ms (next.js: 2ms, application-code: 230ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
- GET /api/books 200 in 299ms (next.js: 5ms, application-code: 294ms)
+ GET /api/books 200 in 1164ms (next.js: 171ms, application-code: 993ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+ GET /api/books 200 in 303ms (next.js: 6ms, application-code: 297ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
- GET /api/training/style-profile 200 in 527ms (next.js: 285ms, application-code: 242ms)
+ GET /api/training/style-profile 200 in 490ms (next.js: 246ms, application-code: 244ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
- GET /api/training/style-profile 200 in 162ms (next.js: 5ms, application-code: 157ms)
+ GET /api/training/style-profile 200 in 159ms (next.js: 7ms, application-code: 153ms)
 prisma:query SELECT 1
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query INSERT INTO "public"."books" ("ownerId","title","genre","targetAudience","maxPages","status","totalCreditsEstimated","totalCreditsCharged","characterNames","outline","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
- POST /api/books 201 in 828ms (next.js: 7ms, application-code: 821ms)
+ POST /api/books 201 in 794ms (next.js: 8ms, application-code: 786ms)
+[API] Start generation requested for book c38bda12-29a2-4806-90dd-dfefa65b68f8 by admin@hydraskript.com
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
-[API] Start generation requested for book 48738619-84ea-41c2-981c-da4f3ec90fe1 by admin@hydraskript.com
-prisma:query BEGIN
 prisma:query SELECT 1
-prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2 WHERE "public"."jobs"."status" = $3
+prisma:query BEGIN
 prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2 WHERE "public"."jobs"."status" = $3
 prisma:query COMMIT
 [Queue] Recovered active jobs from last session.
 prisma:query BEGIN
@@ -73,73 +61,1385 @@ prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits", "pu
 prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
 prisma:query COMMIT
 [Queue] Executing generate_outline job 20fa9486-4931-48bc-a63e-278cdd5d7de1
+[DEBUG] 1. generateOutline started for bookId: 37eda4e2-5823-4920-9986-db6d1370a2a5
 prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
 prisma:query COMMIT
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
 prisma:query UPDATE "public"."books" SET "status" = $1, "totalCreditsEstimated" = $2, "updatedAt" = $3 WHERE ("public"."books"."id" = $4 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
-[Queue] Job dbc28b45-ca58-401b-8452-25e20ed7e24d signaled for processing (generate_outline)
-[API] Generation started for book 48738619-84ea-41c2-981c-da4f3ec90fe1, job: dbc28b45-ca58-401b-8452-25e20ed7e24d
- POST /api/books/48738619-84ea-41c2-981c-da4f3ec90fe1/generate 200 in 3.6s (next.js: 1820ms, application-code: 1785ms)
-prisma:query BEGIN
-prisma:query BEGIN
+[Queue] Job c7ef4db9-528b-4ed8-af37-61951687c9e5 signaled for processing (generate_outline)
+[API] Generation started for book c38bda12-29a2-4806-90dd-dfefa65b68f8, job: c7ef4db9-528b-4ed8-af37-61951687c9e5
+ POST /api/books/c38bda12-29a2-4806-90dd-dfefa65b68f8/generate 200 in 3.4s (next.js: 1733ms, application-code: 1645ms)
 prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
-prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
-prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query BEGIN
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
 prisma:query SELECT "public"."chapters"."id", "public"."chapters"."bookId", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."synopsis", "public"."chapters"."wordTarget", "public"."chapters"."content", "public"."chapters"."wordCount", "public"."chapters"."status", "public"."chapters"."approvalStatus", "public"."chapters"."generationJobId", "public"."chapters"."charactersIntroduced", "public"."chapters"."summaryForNext", "public"."chapters"."illustrationUrl", "public"."chapters"."illustrationPrompt", "public"."chapters"."createdAt", "public"."chapters"."updatedAt" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
-[Queue] Executing generate_outline job 139d425a-b33c-4d61-84ec-11e14cadc111
-prisma:query COMMIT
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."bookId" IN ($1) ORDER BY "public"."jobs"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/books/48738619-84ea-41c2-981c-da4f3ec90fe1 200 in 3.7s (next.js: 2.3s, application-code: 1385ms)
+ GET /api/books/c38bda12-29a2-4806-90dd-dfefa65b68f8 200 in 3.4s (next.js: 1686ms, application-code: 1753ms)
 prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
-prisma:query COMMIT
 [Queue] Executing generate_outline job 139d425a-b33c-4d61-84ec-11e14cadc111
+[DEBUG] 1. generateOutline started for bookId: 58096623-c9ac-4945-8a47-1428baf9ac1a
+prisma:query COMMIT
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
 prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."chapters"."id", "public"."chapters"."bookId", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."synopsis", "public"."chapters"."wordTarget", "public"."chapters"."content", "public"."chapters"."wordCount", "public"."chapters"."status", "public"."chapters"."approvalStatus", "public"."chapters"."generationJobId", "public"."chapters"."charactersIntroduced", "public"."chapters"."summaryForNext", "public"."chapters"."illustrationUrl", "public"."chapters"."illustrationPrompt", "public"."chapters"."createdAt", "public"."chapters"."updatedAt" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."bookId" IN ($1) ORDER BY "public"."jobs"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/books/c38bda12-29a2-4806-90dd-dfefa65b68f8 200 in 532ms (next.js: 81ms, application-code: 451ms)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+prisma:query BEGIN
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query COMMIT
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job 20fa9486-4931-48bc-a63e-278cdd5d7de1 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query BEGIN
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job 20fa9486-4931-48bc-a63e-278cdd5d7de1
+prisma:query COMMIT
+prisma:query COMMIT
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job 139d425a-b33c-4d61-84ec-11e14cadc111 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query BEGIN
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
 prisma:query BEGIN
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job 139d425a-b33c-4d61-84ec-11e14cadc111
+prisma:query COMMIT
 prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
-prisma:query BEGIN
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
 prisma:query COMMIT
 [Queue] Executing generate_outline job 27c7ec72-9270-47da-9496-ee262c9e573b
-prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
-prisma:query SELECT "public"."chapters"."id", "public"."chapters"."bookId", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."synopsis", "public"."chapters"."wordTarget", "public"."chapters"."content", "public"."chapters"."wordCount", "public"."chapters"."status", "public"."chapters"."approvalStatus", "public"."chapters"."generationJobId", "public"."chapters"."charactersIntroduced", "public"."chapters"."summaryForNext", "public"."chapters"."illustrationUrl", "public"."chapters"."illustrationPrompt", "public"."chapters"."createdAt", "public"."chapters"."updatedAt" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
-prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 1. generateOutline started for bookId: d448c6c0-cc2d-42f1-9f54-d5ec3befa85b
 prisma:query BEGIN
-prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."bookId" IN ($1) ORDER BY "public"."jobs"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/books/48738619-84ea-41c2-981c-da4f3ec90fe1 200 in 694ms (next.js: 81ms, application-code: 613ms)
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
 prisma:query COMMIT
 [Queue] Executing generate_outline job 78715ded-d2c0-4b68-9b03-19e2a94c838b
+[DEBUG] 1. generateOutline started for bookId: a118760c-ecac-4a78-9ccb-8a9c1012f519
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query BEGIN
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query BEGIN
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query COMMIT
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+[Queue] Job 27c7ec72-9270-47da-9496-ee262c9e573b failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query COMMIT
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job 78715ded-d2c0-4b68-9b03-19e2a94c838b failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Credits] Already refunded for job 27c7ec72-9270-47da-9496-ee262c9e573b
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job 78715ded-d2c0-4b68-9b03-19e2a94c838b
+prisma:query COMMIT
+prisma:query BEGIN
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query BEGIN
 prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
 prisma:query COMMIT
 [Queue] Executing generate_outline job 58904b9d-256d-43ec-ba37-0cb360ab7fbd
+[DEBUG] 1. generateOutline started for bookId: 0819f9a0-7511-4d3e-9ddf-67aa0217ce5e
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query COMMIT
+[Queue] Executing generate_outline job 58904b9d-256d-43ec-ba37-0cb360ab7fbd
+[DEBUG] 1. generateOutline started for bookId: 0819f9a0-7511-4d3e-9ddf-67aa0217ce5e
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
 prisma:query BEGIN
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query BEGIN
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query COMMIT
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job 58904b9d-256d-43ec-ba37-0cb360ab7fbd failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query SELECT 1
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job 58904b9d-256d-43ec-ba37-0cb360ab7fbd
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job 58904b9d-256d-43ec-ba37-0cb360ab7fbd failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query COMMIT
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job 58904b9d-256d-43ec-ba37-0cb360ab7fbd
+prisma:query BEGIN
+prisma:query COMMIT
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
 prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
-prisma:query BEGIN
 prisma:query COMMIT
 [Queue] Executing generate_outline job e041c445-a449-43f3-8e0e-f203f241f4d2
+[DEBUG] 1. generateOutline started for bookId: 04478048-5767-41a9-bc91-754a3c572f20
+prisma:query BEGIN
+prisma:query SELECT 1
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
 prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
 prisma:query COMMIT
 [Queue] Executing generate_outline job ee3b4979-6a8c-47b4-a2b7-7c39d22209c1
+[DEBUG] 1. generateOutline started for bookId: 88eebc28-ffab-4b24-a65b-c6fc2a8eddba
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
 prisma:query BEGIN
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query BEGIN
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query COMMIT
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job e041c445-a449-43f3-8e0e-f203f241f4d2 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query COMMIT
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job ee3b4979-6a8c-47b4-a2b7-7c39d22209c1 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query BEGIN
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job e041c445-a449-43f3-8e0e-f203f241f4d2
+prisma:query BEGIN
+prisma:query COMMIT
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job ee3b4979-6a8c-47b4-a2b7-7c39d22209c1
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
+prisma:query BEGIN
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+[Queue] Executing generate_outline job dbc28b45-ca58-401b-8452-25e20ed7e24d
+[DEBUG] 1. generateOutline started for bookId: 48738619-84ea-41c2-981c-da4f3ec90fe1
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query COMMIT
+[Queue] Executing generate_outline job dbc28b45-ca58-401b-8452-25e20ed7e24d
+[DEBUG] 1. generateOutline started for bookId: 48738619-84ea-41c2-981c-da4f3ec90fe1
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query BEGIN
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query BEGIN
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query COMMIT
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job dbc28b45-ca58-401b-8452-25e20ed7e24d failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job dbc28b45-ca58-401b-8452-25e20ed7e24d failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job dbc28b45-ca58-401b-8452-25e20ed7e24d
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job dbc28b45-ca58-401b-8452-25e20ed7e24d
+prisma:query BEGIN
+prisma:query COMMIT
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
 prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
 prisma:query BEGIN
 prisma:query COMMIT
-[Queue] Executing generate_outline job dbc28b45-ca58-401b-8452-25e20ed7e24d
+[Queue] Executing generate_outline job c7ef4db9-528b-4ed8-af37-61951687c9e5
+[DEBUG] 1. generateOutline started for bookId: c38bda12-29a2-4806-90dd-dfefa65b68f8
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
-prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query COMMIT
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 1/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 2/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+Error reading or parsing config file at /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.z-ai-config: SyntaxError: Expected ',' or '}' after property value in JSON at position 87 (line 1 column 88)
+    at JSON.parse (<anonymous>)
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Failed to initialize ZAI client: Error: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+    at async getZAI (src/lib/llm/openrouter.ts:12:19)
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:73:13)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  10 | async function getZAI() {
+  11 |   if (!zaiInstance) {
+> 12 |     zaiInstance = await ZAI.create();
+     |                   ^
+  13 |   }
+  14 |   return zaiInstance;
+  15 | }
+[LLM] Attempt 3/3 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+[Queue] OUTLINE GENERATION FAILED: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query COMMIT
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job c7ef4db9-528b-4ed8-af37-61951687c9e5 failed: LLM client initialization failed: Configuration file not found or invalid. Please create .z-ai-config in your project, home directory, or /etc.
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job c7ef4db9-528b-4ed8-af37-61951687c9e5
 prisma:query COMMIT
 prisma:query BEGIN
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
