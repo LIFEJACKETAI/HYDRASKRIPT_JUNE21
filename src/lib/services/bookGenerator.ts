@@ -87,17 +87,25 @@ export async function startBookGeneration(
  * Generates the story blueprint and stops for user approval.
  */
 export async function generateOutline(bookId: string, ownerId: string, jobId: string): Promise<void> {
+  console.log(`[DEBUG] 1. generateOutline started for bookId: ${bookId}`);
+  
   const book = await db.book.findUnique({
     where: { id: bookId },
     include: { styleProfile: true },
   });
 
-  if (!book) throw new Error('Book not found');
+  if (!book) {
+    console.log(`[DEBUG] X. Book not found!`);
+    throw new Error('Book not found');
+  }
 
   try {
+    console.log(`[DEBUG] 2. Updating job status to 10%...`);
     await jobQueue.updateJobStatus(jobId, { progressMessage: 'Generating story blueprint...', progressPercent: 10 });
 
+    console.log(`[DEBUG] 3. Getting style system prompt...`);
     const stylePrompt = await getStyleSystemPrompt(book.styleProfileId);
+    
     const targetAudience = book.targetAudience as TargetAudience;
     const genre = book.genre as Genre;
     const config = AUDIENCE_CONFIG[targetAudience];
@@ -116,7 +124,7 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
       outlinePrompt = getColoringOutlinePrompt(coloringTheme, chapterCount);
       outlineUser = getColoringOutlineUserPrompt(book.title, coloringTheme);
     } else {
-      // Safe parsing of characterNames
+      console.log(`[DEBUG] 4. Parsing character names...`);
       const characterNames = Array.isArray(book.characterNames) 
         ? book.characterNames 
         : (() => { try { return JSON.parse((book.characterNames as any) || '[]') as string[]; } catch { return []; } })();
@@ -125,9 +133,13 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
       outlineUser = getOutlineUserPrompt(book.title, genre, targetAudience);
     }
 
+    console.log(`[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)`);
     const outlineResult = await askLLMJSON<unknown>(outlinePrompt, outlineUser, 0.7);
+    
+    console.log(`[DEBUG] 6. AI responded! Validating schema...`);
     const outline = validateOrThrow(BookOutlineSchema, outlineResult);
 
+    console.log(`[DEBUG] 7. Saving outline to database...`);
     await db.book.update({
       where: { id: bookId },
       data: {
@@ -136,7 +148,7 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
       }
     });
 
-    // Initialize chapters in pending state
+    console.log(`[DEBUG] 8. Initializing empty chapters...`);
     for (let i = 0; i < outline.chapters.length; i++) {
       const ch = outline.chapters[i];
       await db.chapter.upsert({
@@ -146,6 +158,7 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
       });
     }
 
+    console.log(`[DEBUG] 9. Outline complete! Updating job to 100%`);
     await jobQueue.updateJobStatus(jobId, {
       status: 'completed',
       progressMessage: 'Blueprint complete! Please review and approve your outline.',
@@ -154,7 +167,7 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
 
   } catch (error) {
     const errMessage = error instanceof Error ? error.message : String(error);
-    console.error("[Queue] OUTLINE GENERATION FAILED:", errMessage); // <-- ADDED LOGGING HERE
+    console.error("[Queue] OUTLINE GENERATION FAILED:", errMessage);
     await db.book.update({ where: { id: bookId }, data: { status: 'failed' } });
     await refundCredits(jobId, `Outline failed: ${errMessage}`);
     await jobQueue.updateJobStatus(jobId, { status: 'failed', errorMessage: errMessage, progressMessage: `Failed: ${errMessage}` });
