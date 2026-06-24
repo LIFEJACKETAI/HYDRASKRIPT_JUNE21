@@ -4,3 +4,175 @@
 - Environments: .env.local, .env
 ✓ Ready in 607ms
 
+ GET / 200 in 955ms (next.js: 121ms, proxy.ts: 267ms, application-code: 567ms)
+ GET /logo-icon.png 404 in 450ms (next.js: 111ms, proxy.ts: 254ms, application-code: 86ms)
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 104.18.38.10:443, 172.64.149.246:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+ GET /api/profile 401 in 32.2s (next.js: 201ms, application-code: 32.0s)
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 172.64.149.246:443, 104.18.38.10:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 104.18.38.10:443, 172.64.149.246:443, timeout: 10000ms)
+      at ignore-listed frames {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+ GET /api/profile 401 in 34.8s (next.js: 5ms, application-code: 34.8s)
+[browser] TypeError: Failed to fetch
+    at new Promise (<anonymous>)
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+TypeError: fetch failed
+    at ignore-listed frames {
+  [cause]: AggregateError: 
+      at ignore-listed frames {
+    code: 'ETIMEDOUT',
+    [errors]: [ [Error], [Error] ]
+  }
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+Error [AuthRetryableFetchError]: fetch failed
+    at ignore-listed frames {
+  __isAuthError: true,
+  status: 0,
+  code: undefined
+}
+ GET /api/profile 401 in 29.8s (next.js: 6ms, application-code: 29.8s)
+[browser] TypeError: Failed to fetch
+    at handleAuth (src/components/auth/AuthForm.tsx:46:53)
+  44 |       } else {
+  45 |         console.log('[Auth] Calling signInWithPassword...');
+> 46 |         const { data, error } = await supabase.auth.signInWithPassword({
+     |                                                     ^
+  47 |           email,
+  48 |           password,
+  49 |         }); (src/components/auth/AuthForm.tsx:46:33)
+[browser] [Auth] CRITICAL ERROR: AuthRetryableFetchError: Failed to fetch
+    at async handleAuth (src/components/auth/AuthForm.tsx:46:33)
+  44 |       } else {
+  45 |         console.log('[Auth] Calling signInWithPassword...');
+> 46 |         const { data, error } = await supabase.auth.signInWithPassword({
+     |                                 ^
+  47 |           email,
+  48 |           password,
+  49 |         }); (src/components/auth/AuthForm.tsx:58:15)
+[browser] TypeError: Failed to fetch
+[browser] AuthRetryableFetchError: Failed to fetch
