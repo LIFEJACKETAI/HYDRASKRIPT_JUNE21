@@ -2,72 +2,4022 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.66:3000
 - Environments: .env.local, .env
-✓ Ready in 496ms
+✓ Ready in 507ms
 
- GET / 200 in 809ms (next.js: 117ms, proxy.ts: 234ms, application-code: 459ms)
+○ Compiling / ...
+⨯ ./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/BookDetail.tsx:31:1
+Export deleteBook doesn't exist in target module
+  [90m29 |[0m ...[36mm[0m [32m'@/components/ui/dialog'[0m;
+  [90m30 |[0m ...[36mt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m31 |[0m ...[36mt[0m { getBook, deleteBook, startGeneration, exportBook } [36mfrom[0m [32m'@/lib/...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m32 |[0m ...[36mt[0m [36mtype[0m { [33mBookData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m33 |[0m ...[36mt[0m [33mChapterEditor[0m [36mfrom[0m [32m'@/components/book/ChapterEditor'[0m;
+  [90m34 |[0m ...[36mt[0m [33mGenerationProgress[0m [36mfrom[0m [32m'@/components/book/GenerationProgress'[0m;
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/BookDetail.tsx:31:1
+Export deleteBook doesn't exist in target module
+  [90m29 |[0m ...[36mm[0m [32m'@/components/ui/dialog'[0m;
+  [90m30 |[0m ...[36mt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m31 |[0m ...[36mt[0m { getBook, deleteBook, startGeneration, exportBook } [36mfrom[0m [32m'@/lib/...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m32 |[0m ...[36mt[0m [36mtype[0m { [33mBookData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m33 |[0m ...[36mt[0m [33mChapterEditor[0m [36mfrom[0m [32m'@/components/book/ChapterEditor'[0m;
+  [90m34 |[0m ...[36mt[0m [33mGenerationProgress[0m [36mfrom[0m [32m'@/components/book/GenerationProgress'[0m;
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export exportBook doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export exportBook doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/BookDetail.tsx:31:1
+Export exportBook doesn't exist in target module
+  [90m29 |[0m ...[36mm[0m [32m'@/components/ui/dialog'[0m;
+  [90m30 |[0m ...[36mt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m31 |[0m ...[36mt[0m { getBook, deleteBook, startGeneration, exportBook } [36mfrom[0m [32m'@/lib/...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m32 |[0m ...[36mt[0m [36mtype[0m { [33mBookData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m33 |[0m ...[36mt[0m [33mChapterEditor[0m [36mfrom[0m [32m'@/components/book/ChapterEditor'[0m;
+  [90m34 |[0m ...[36mt[0m [33mGenerationProgress[0m [36mfrom[0m [32m'@/components/book/GenerationProgress'[0m;
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/BookDetail.tsx:31:1
+Export exportBook doesn't exist in target module
+  [90m29 |[0m ...[36mm[0m [32m'@/components/ui/dialog'[0m;
+  [90m30 |[0m ...[36mt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m31 |[0m ...[36mt[0m { getBook, deleteBook, startGeneration, exportBook } [36mfrom[0m [32m'@/lib/...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m32 |[0m ...[36mt[0m [36mtype[0m { [33mBookData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m33 |[0m ...[36mt[0m [33mChapterEditor[0m [36mfrom[0m [32m'@/components/book/ChapterEditor'[0m;
+  [90m34 |[0m ...[36mt[0m [33mGenerationProgress[0m [36mfrom[0m [32m'@/components/book/GenerationProgress'[0m;
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export getAdminData doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export getAdminData was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export getAdminData doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export getAdminData was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/BookDetail.tsx:31:1
+Export getBook doesn't exist in target module
+  [90m29 |[0m ...[36mm[0m [32m'@/components/ui/dialog'[0m;
+  [90m30 |[0m ...[36mt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m31 |[0m ...[36mt[0m { getBook, deleteBook, startGeneration, exportBook } [36mfrom[0m [32m'@/lib/...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m32 |[0m ...[36mt[0m [36mtype[0m { [33mBookData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m33 |[0m ...[36mt[0m [33mChapterEditor[0m [36mfrom[0m [32m'@/components/book/ChapterEditor'[0m;
+  [90m34 |[0m ...[36mt[0m [33mGenerationProgress[0m [36mfrom[0m [32m'@/components/book/GenerationProgress'[0m;
+
+The export getBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/BookDetail.tsx:31:1
+Export getBook doesn't exist in target module
+  [90m29 |[0m ...[36mm[0m [32m'@/components/ui/dialog'[0m;
+  [90m30 |[0m ...[36mt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m31 |[0m ...[36mt[0m { getBook, deleteBook, startGeneration, exportBook } [36mfrom[0m [32m'@/lib/...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m32 |[0m ...[36mt[0m [36mtype[0m { [33mBookData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m33 |[0m ...[36mt[0m [33mChapterEditor[0m [36mfrom[0m [32m'@/components/book/ChapterEditor'[0m;
+  [90m34 |[0m ...[36mt[0m [33mGenerationProgress[0m [36mfrom[0m [32m'@/components/book/GenerationProgress'[0m;
+
+The export getBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export getCredits doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export getCredits doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/layout/Sidebar.tsx:18:1
+Export getCredits doesn't exist in target module
+  [90m16 |[0m [36mimport[0m { [33mSeparator[0m } [36mfrom[0m [32m'@/components/ui/separator'[0m;
+  [90m17 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m18 |[0m [36mimport[0m { getCredits } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m19 |[0m [36mimport[0m [36mtype[0m { [33mAppView[0m } [36mfrom[0m [32m'@/lib/store'[0m;
+  [90m20 |[0m
+  [90m21 |[0m [36minterface[0m [33mNavItem[0m {
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/layout/Sidebar.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/layout/Sidebar.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/layout/Sidebar.tsx:18:1
+Export getCredits doesn't exist in target module
+  [90m16 |[0m [36mimport[0m { [33mSeparator[0m } [36mfrom[0m [32m'@/components/ui/separator'[0m;
+  [90m17 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m18 |[0m [36mimport[0m { getCredits } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m19 |[0m [36mimport[0m [36mtype[0m { [33mAppView[0m } [36mfrom[0m [32m'@/lib/store'[0m;
+  [90m20 |[0m
+  [90m21 |[0m [36minterface[0m [33mNavItem[0m {
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/layout/Sidebar.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/layout/Sidebar.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/AudiobookGenerator.tsx:35:1
+Export getJob doesn't exist in target module
+  [90m33 |[0m [36mimport[0m { [33mSeparator[0m } [36mfrom[0m [32m'@/components/ui/separator'[0m;
+  [90m34 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { listBooks, getJob, getUserEmail } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mJobData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m37 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m38 |[0m
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/AudiobookGenerator.tsx:35:1
+Export getJob doesn't exist in target module
+  [90m33 |[0m [36mimport[0m { [33mSeparator[0m } [36mfrom[0m [32m'@/components/ui/separator'[0m;
+  [90m34 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { listBooks, getJob, getUserEmail } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mJobData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m37 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m38 |[0m
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/GenerationProgress.tsx:6:1
+Export getJob doesn't exist in target module
+  [90m4 |[0m [36mimport[0m { [33mLoader2[0m, [33mCheckCircle[0m, [33mAlertCircle[0m } [36mfrom[0m [32m'lucide-react'[0m;
+  [90m5 |[0m [36mimport[0m { [33mProgress[0m } [36mfrom[0m [32m'@/components/ui/progress'[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m { getJob } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mimport[0m [36mtype[0m { [33mJobData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m8 |[0m [36mimport[0m { [33mGENERATION_FLAVOR[0m } [36mfrom[0m [32m'@/types'[0m;
+  [90m9 |[0m
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/GenerationProgress.tsx [Client Component Browser]
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/GenerationProgress.tsx [Client Component SSR]
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/GenerationProgress.tsx:6:1
+Export getJob doesn't exist in target module
+  [90m4 |[0m [36mimport[0m { [33mLoader2[0m, [33mCheckCircle[0m, [33mAlertCircle[0m } [36mfrom[0m [32m'lucide-react'[0m;
+  [90m5 |[0m [36mimport[0m { [33mProgress[0m } [36mfrom[0m [32m'@/components/ui/progress'[0m;
+[31m[1m>[0m [90m6 |[0m [36mimport[0m { getJob } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m7 |[0m [36mimport[0m [36mtype[0m { [33mJobData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m8 |[0m [36mimport[0m { [33mGENERATION_FLAVOR[0m } [36mfrom[0m [32m'@/types'[0m;
+  [90m9 |[0m
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/GenerationProgress.tsx [Client Component Browser]
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/GenerationProgress.tsx [Client Component SSR]
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export getUserEmail doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export getUserEmail doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/AudiobookGenerator.tsx:35:1
+Export getUserEmail doesn't exist in target module
+  [90m33 |[0m [36mimport[0m { [33mSeparator[0m } [36mfrom[0m [32m'@/components/ui/separator'[0m;
+  [90m34 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { listBooks, getJob, getUserEmail } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mJobData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m37 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m38 |[0m
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/AudiobookGenerator.tsx:35:1
+Export getUserEmail doesn't exist in target module
+  [90m33 |[0m [36mimport[0m { [33mSeparator[0m } [36mfrom[0m [32m'@/components/ui/separator'[0m;
+  [90m34 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m35 |[0m [36mimport[0m { listBooks, getJob, getUserEmail } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m36 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mJobData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m37 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m38 |[0m
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/IdeasLab.tsx:33:1
+Export getUserEmail doesn't exist in target module
+  [90m31 |[0m [36mimport[0m { [33mSeparator[0m } [36mfrom[0m [32m'@/components/ui/separator'[0m;
+  [90m32 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m33 |[0m [36mimport[0m { getUserEmail } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m34 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m35 |[0m
+  [90m36 |[0m [90m// ─── Types ──────────────────[0m───────────────────────────────────────...
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/IdeasLab.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/IdeasLab.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/IdeasLab.tsx:33:1
+Export getUserEmail doesn't exist in target module
+  [90m31 |[0m [36mimport[0m { [33mSeparator[0m } [36mfrom[0m [32m'@/components/ui/separator'[0m;
+  [90m32 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m33 |[0m [36mimport[0m { getUserEmail } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m34 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m35 |[0m
+  [90m36 |[0m [90m// ─── Types ──────────────────[0m───────────────────────────────────────...
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/IdeasLab.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/IdeasLab.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export purchaseCredits doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export purchaseCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listStyleProfiles?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/app/page.tsx:43:1
+Export purchaseCredits doesn't exist in target module
+  [90m41 |[0m } [36mfrom[0m [32m'@/components/ui/dialog'[0m;
+  [90m42 |[0m [36mimport[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m43 |[0m [36mimport[0m {
+  [90m   |[0m [31m[1m^^^^^^^[0m
+[31m[1m>[0m [90m44 |[0m   getProfile,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m45 |[0m   listBooks,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m46 |[0m   deleteBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m47 |[0m   getCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m48 |[0m   purchaseCredits,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m49 |[0m   getAdminData,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m50 |[0m   exportBook,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m51 |[0m   getUserEmail,
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^[0m
+[31m[1m>[0m [90m52 |[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m   |[0m [31m[1m^^^^^^^^^^^^^^^^^^^[0m
+  [90m53 |[0m [36mimport[0m [36mtype[0m { [33mBookData[0m, [33mCreditsData[0m, [33mAdminData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m54 |[0m [36mimport[0m { toast } [36mfrom[0m [32m'@/hooks/use-toast'[0m;
+  [90m55 |[0m
+
+The export purchaseCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listStyleProfiles?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/BookDetail.tsx:31:1
+Export startGeneration doesn't exist in target module
+  [90m29 |[0m ...[36mm[0m [32m'@/components/ui/dialog'[0m;
+  [90m30 |[0m ...[36mt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m31 |[0m ...[36mt[0m { getBook, deleteBook, startGeneration, exportBook } [36mfrom[0m [32m'@/lib/...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m32 |[0m ...[36mt[0m [36mtype[0m { [33mBookData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m33 |[0m ...[36mt[0m [33mChapterEditor[0m [36mfrom[0m [32m'@/components/book/ChapterEditor'[0m;
+  [90m34 |[0m ...[36mt[0m [33mGenerationProgress[0m [36mfrom[0m [32m'@/components/book/GenerationProgress'[0m;
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/BookDetail.tsx:31:1
+Export startGeneration doesn't exist in target module
+  [90m29 |[0m ...[36mm[0m [32m'@/components/ui/dialog'[0m;
+  [90m30 |[0m ...[36mt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m31 |[0m ...[36mt[0m { getBook, deleteBook, startGeneration, exportBook } [36mfrom[0m [32m'@/lib/...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m32 |[0m ...[36mt[0m [36mtype[0m { [33mBookData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m33 |[0m ...[36mt[0m [33mChapterEditor[0m [36mfrom[0m [32m'@/components/book/ChapterEditor'[0m;
+  [90m34 |[0m ...[36mt[0m [33mGenerationProgress[0m [36mfrom[0m [32m'@/components/book/GenerationProgress'[0m;
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/CreateBookForm.tsx:19:1
+Export startGeneration doesn't exist in target module
+  [90m17 |[0m ...[36mrt[0m { [33mBadge[0m } [36mfrom[0m [32m'@/components/ui/badge'[0m;
+  [90m18 |[0m ...[36mrt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m19 |[0m ...[36mrt[0m { createBook, startGeneration, listStyleProfiles } [36mfrom[0m [32m'@/lib/a...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m20 |[0m ...[36mrt[0m [36mtype[0m { [33mStyleProfileData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m21 |[0m ...[36mrt[0m [36mtype[0m { [33mTargetAudience[0m, [33mGenre[0m, [33mColoringTheme[0m } [36mfrom[0m [32m'@/types'[0m;
+  [90m22 |[0m ...[36mrt[0m { [33mCREDIT_COSTS[0m, [33mAUDIENCE_CONFIG[0m, [33mCOLORING_THEMES[0m, [33mKIDS_ADVENTURE.[0m..
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/CreateBookForm.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/CreateBookForm.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+
+./src/components/book/CreateBookForm.tsx:19:1
+Export startGeneration doesn't exist in target module
+  [90m17 |[0m ...[36mrt[0m { [33mBadge[0m } [36mfrom[0m [32m'@/components/ui/badge'[0m;
+  [90m18 |[0m ...[36mrt[0m { useAppStore } [36mfrom[0m [32m'@/lib/store'[0m;
+[31m[1m>[0m [90m19 |[0m ...[36mrt[0m { createBook, startGeneration, listStyleProfiles } [36mfrom[0m [32m'@/lib/a...[0m
+  [90m   |[0m    [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m20 |[0m ...[36mrt[0m [36mtype[0m { [33mStyleProfileData[0m } [36mfrom[0m [32m'@/lib/api'[0m;
+  [90m21 |[0m ...[36mrt[0m [36mtype[0m { [33mTargetAudience[0m, [33mGenre[0m, [33mColoringTheme[0m } [36mfrom[0m [32m'@/types'[0m;
+  [90m22 |[0m ...[36mrt[0m { [33mCREDIT_COSTS[0m, [33mAUDIENCE_CONFIG[0m, [33mCOLORING_THEMES[0m, [33mKIDS_ADVENTURE.[0m..
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/CreateBookForm.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/CreateBookForm.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+ GET / 500 in 9.5s (next.js: 9.1s, proxy.ts: 279ms, application-code: 140ms)
+[browser] Uncaught Error: ./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+
+    at <unknown> (Error: ./src/app/page.tsx:43:1)
+    at <unknown> (Error: (./src/app/page.tsx:43:1)
+[browser] ./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export deleteBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export deleteBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export exportBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export exportBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export exportBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export exportBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getAdminData doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getAdminData was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getAdminData doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getAdminData was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export getBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export getBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export getBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export getBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/layout/Sidebar.tsx:18:1
+Export getCredits doesn't exist in target module
+  16 | import { Separator } from '@/components/ui/separator';
+  17 | import { useAppStore } from '@/lib/store';
+> 18 | import { getCredits } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  19 | import type { AppView } from '@/lib/store';
+  20 |
+  21 | interface NavItem {
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/layout/Sidebar.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/layout/Sidebar.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/layout/Sidebar.tsx:18:1
+Export getCredits doesn't exist in target module
+  16 | import { Separator } from '@/components/ui/separator';
+  17 | import { useAppStore } from '@/lib/store';
+> 18 | import { getCredits } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  19 | import type { AppView } from '@/lib/store';
+  20 |
+  21 | interface NavItem {
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/layout/Sidebar.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/layout/Sidebar.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getJob doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getJob doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/GenerationProgress.tsx:6:1
+Export getJob doesn't exist in target module
+  4 | import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+  5 | import { Progress } from '@/components/ui/progress';
+> 6 | import { getJob } from '@/lib/api';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import type { JobData } from '@/lib/api';
+  8 | import { GENERATION_FLAVOR } from '@/types';
+  9 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/GenerationProgress.tsx [Client Component Browser]
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/GenerationProgress.tsx [Client Component SSR]
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/GenerationProgress.tsx:6:1
+Export getJob doesn't exist in target module
+  4 | import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+  5 | import { Progress } from '@/components/ui/progress';
+> 6 | import { getJob } from '@/lib/api';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import type { JobData } from '@/lib/api';
+  8 | import { GENERATION_FLAVOR } from '@/types';
+  9 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/GenerationProgress.tsx [Client Component Browser]
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/GenerationProgress.tsx [Client Component SSR]
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getUserEmail doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getUserEmail doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getUserEmail doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getUserEmail doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/IdeasLab.tsx:33:1
+Export getUserEmail doesn't exist in target module
+  31 | import { Separator } from '@/components/ui/separator';
+  32 | import { useAppStore } from '@/lib/store';
+> 33 | import { getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  34 | import { toast } from '@/hooks/use-toast';
+  35 |
+  36 | // ─── Types ─────────────────────────────────────────────────────────...
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/IdeasLab.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/IdeasLab.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/IdeasLab.tsx:33:1
+Export getUserEmail doesn't exist in target module
+  31 | import { Separator } from '@/components/ui/separator';
+  32 | import { useAppStore } from '@/lib/store';
+> 33 | import { getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  34 | import { toast } from '@/hooks/use-toast';
+  35 |
+  36 | // ─── Types ─────────────────────────────────────────────────────────...
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/IdeasLab.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/IdeasLab.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export purchaseCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export purchaseCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listStyleProfiles?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export purchaseCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export purchaseCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listStyleProfiles?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export startGeneration doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export startGeneration doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/CreateBookForm.tsx:19:1
+Export startGeneration doesn't exist in target module
+  17 | ...rt { Badge } from '@/components/ui/badge';
+  18 | ...rt { useAppStore } from '@/lib/store';
+> 19 | ...rt { createBook, startGeneration, listStyleProfiles } from '@/lib/a...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  20 | ...rt type { StyleProfileData } from '@/lib/api';
+  21 | ...rt type { TargetAudience, Genre, ColoringTheme } from '@/types';
+  22 | ...rt { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, KIDS_ADVENTURE...
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/CreateBookForm.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/CreateBookForm.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/CreateBookForm.tsx:19:1
+Export startGeneration doesn't exist in target module
+  17 | ...rt { Badge } from '@/components/ui/badge';
+  18 | ...rt { useAppStore } from '@/lib/store';
+> 19 | ...rt { createBook, startGeneration, listStyleProfiles } from '@/lib/a...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  20 | ...rt type { StyleProfileData } from '@/lib/api';
+  21 | ...rt type { TargetAudience, Genre, ColoringTheme } from '@/types';
+  22 | ...rt { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, KIDS_ADVENTURE...
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/CreateBookForm.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/CreateBookForm.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export deleteBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export deleteBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export exportBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export exportBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export exportBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export exportBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getAdminData doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getAdminData was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getAdminData doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getAdminData was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export getBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export getBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export getBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export getBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/layout/Sidebar.tsx:18:1
+Export getCredits doesn't exist in target module
+  16 | import { Separator } from '@/components/ui/separator';
+  17 | import { useAppStore } from '@/lib/store';
+> 18 | import { getCredits } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  19 | import type { AppView } from '@/lib/store';
+  20 |
+  21 | interface NavItem {
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/layout/Sidebar.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/layout/Sidebar.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/layout/Sidebar.tsx:18:1
+Export getCredits doesn't exist in target module
+  16 | import { Separator } from '@/components/ui/separator';
+  17 | import { useAppStore } from '@/lib/store';
+> 18 | import { getCredits } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  19 | import type { AppView } from '@/lib/store';
+  20 |
+  21 | interface NavItem {
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/layout/Sidebar.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/layout/Sidebar.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getJob doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getJob doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/GenerationProgress.tsx:6:1
+Export getJob doesn't exist in target module
+  4 | import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+  5 | import { Progress } from '@/components/ui/progress';
+> 6 | import { getJob } from '@/lib/api';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import type { JobData } from '@/lib/api';
+  8 | import { GENERATION_FLAVOR } from '@/types';
+  9 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/GenerationProgress.tsx [Client Component Browser]
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/GenerationProgress.tsx [Client Component SSR]
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/GenerationProgress.tsx:6:1
+Export getJob doesn't exist in target module
+  4 | import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+  5 | import { Progress } from '@/components/ui/progress';
+> 6 | import { getJob } from '@/lib/api';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import type { JobData } from '@/lib/api';
+  8 | import { GENERATION_FLAVOR } from '@/types';
+  9 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/GenerationProgress.tsx [Client Component Browser]
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/GenerationProgress.tsx [Client Component SSR]
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getUserEmail doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getUserEmail doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getUserEmail doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getUserEmail doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/IdeasLab.tsx:33:1
+Export getUserEmail doesn't exist in target module
+  31 | import { Separator } from '@/components/ui/separator';
+  32 | import { useAppStore } from '@/lib/store';
+> 33 | import { getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  34 | import { toast } from '@/hooks/use-toast';
+  35 |
+  36 | // ─── Types ─────────────────────────────────────────────────────────...
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/IdeasLab.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/IdeasLab.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/IdeasLab.tsx:33:1
+Export getUserEmail doesn't exist in target module
+  31 | import { Separator } from '@/components/ui/separator';
+  32 | import { useAppStore } from '@/lib/store';
+> 33 | import { getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  34 | import { toast } from '@/hooks/use-toast';
+  35 |
+  36 | // ─── Types ─────────────────────────────────────────────────────────...
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/IdeasLab.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/IdeasLab.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export purchaseCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export purchaseCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listStyleProfiles?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export purchaseCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export purchaseCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listStyleProfiles?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export startGeneration doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export startGeneration doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/CreateBookForm.tsx:19:1
+Export startGeneration doesn't exist in target module
+  17 | ...rt { Badge } from '@/components/ui/badge';
+  18 | ...rt { useAppStore } from '@/lib/store';
+> 19 | ...rt { createBook, startGeneration, listStyleProfiles } from '@/lib/a...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  20 | ...rt type { StyleProfileData } from '@/lib/api';
+  21 | ...rt type { TargetAudience, Genre, ColoringTheme } from '@/types';
+  22 | ...rt { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, KIDS_ADVENTURE...
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/CreateBookForm.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/CreateBookForm.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/CreateBookForm.tsx:19:1
+Export startGeneration doesn't exist in target module
+  17 | ...rt { Badge } from '@/components/ui/badge';
+  18 | ...rt { useAppStore } from '@/lib/store';
+> 19 | ...rt { createBook, startGeneration, listStyleProfiles } from '@/lib/a...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  20 | ...rt type { StyleProfileData } from '@/lib/api';
+  21 | ...rt type { TargetAudience, Genre, ColoringTheme } from '@/types';
+  22 | ...rt { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, KIDS_ADVENTURE...
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/CreateBookForm.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/CreateBookForm.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export deleteBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export deleteBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export deleteBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export deleteBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listBooks?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export exportBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export exportBook doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export exportBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export exportBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export exportBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getAdminData doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getAdminData was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getAdminData doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getAdminData was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export getBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export getBook was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export getBook doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export getBook was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createBook?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/layout/Sidebar.tsx:18:1
+Export getCredits doesn't exist in target module
+  16 | import { Separator } from '@/components/ui/separator';
+  17 | import { useAppStore } from '@/lib/store';
+> 18 | import { getCredits } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  19 | import type { AppView } from '@/lib/store';
+  20 |
+  21 | interface NavItem {
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/layout/Sidebar.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/layout/Sidebar.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/layout/Sidebar.tsx:18:1
+Export getCredits doesn't exist in target module
+  16 | import { Separator } from '@/components/ui/separator';
+  17 | import { useAppStore } from '@/lib/store';
+> 18 | import { getCredits } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  19 | import type { AppView } from '@/lib/store';
+  20 |
+  21 | interface NavItem {
+
+The export getCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/layout/Sidebar.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/layout/Sidebar.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getJob doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getJob doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/GenerationProgress.tsx:6:1
+Export getJob doesn't exist in target module
+  4 | import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+  5 | import { Progress } from '@/components/ui/progress';
+> 6 | import { getJob } from '@/lib/api';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import type { JobData } from '@/lib/api';
+  8 | import { GENERATION_FLAVOR } from '@/types';
+  9 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/GenerationProgress.tsx [Client Component Browser]
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/GenerationProgress.tsx [Client Component SSR]
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/GenerationProgress.tsx:6:1
+Export getJob doesn't exist in target module
+  4 | import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+  5 | import { Progress } from '@/components/ui/progress';
+> 6 | import { getJob } from '@/lib/api';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import type { JobData } from '@/lib/api';
+  8 | import { GENERATION_FLAVOR } from '@/types';
+  9 |
+
+The export getJob was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/GenerationProgress.tsx [Client Component Browser]
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/GenerationProgress.tsx [Client Component SSR]
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getUserEmail doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export getUserEmail doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getUserEmail doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/AudiobookGenerator.tsx:35:1
+Export getUserEmail doesn't exist in target module
+  33 | import { Separator } from '@/components/ui/separator';
+  34 | import { useAppStore } from '@/lib/store';
+> 35 | import { listBooks, getJob, getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  36 | import type { BookData, JobData } from '@/lib/api';
+  37 | import { toast } from '@/hooks/use-toast';
+  38 |
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/AudiobookGenerator.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/IdeasLab.tsx:33:1
+Export getUserEmail doesn't exist in target module
+  31 | import { Separator } from '@/components/ui/separator';
+  32 | import { useAppStore } from '@/lib/store';
+> 33 | import { getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  34 | import { toast } from '@/hooks/use-toast';
+  35 |
+  36 | // ─── Types ─────────────────────────────────────────────────────────...
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/IdeasLab.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/IdeasLab.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/IdeasLab.tsx:33:1
+Export getUserEmail doesn't exist in target module
+  31 | import { Separator } from '@/components/ui/separator';
+  32 | import { useAppStore } from '@/lib/store';
+> 33 | import { getUserEmail } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  34 | import { toast } from '@/hooks/use-toast';
+  35 |
+  36 | // ─── Types ─────────────────────────────────────────────────────────...
+
+The export getUserEmail was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import getProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/IdeasLab.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/IdeasLab.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export purchaseCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export purchaseCredits was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import listStyleProfiles?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/app/page.tsx:43:1
+Export purchaseCredits doesn't exist in target module
+  41 | } from '@/components/ui/dialog';
+  42 | import { useAppStore } from '@/lib/store';
+> 43 | import {
+     | ^^^^^^^
+> 44 |   getProfile,
+     | ^^^^^^^^^^^^^
+> 45 |   listBooks,
+     | ^^^^^^^^^^^^
+> 46 |   deleteBook,
+     | ^^^^^^^^^^^^^
+> 47 |   getCredits,
+     | ^^^^^^^^^^^^^
+> 48 |   purchaseCredits,
+     | ^^^^^^^^^^^^^^^^^^
+> 49 |   getAdminData,
+     | ^^^^^^^^^^^^^^^
+> 50 |   exportBook,
+     | ^^^^^^^^^^^^^
+> 51 |   getUserEmail,
+     | ^^^^^^^^^^^^^^^
+> 52 | } from '@/lib/api';
+     | ^^^^^^^^^^^^^^^^^^^
+  53 | import type { BookData, CreditsData, AdminData } from '@/lib/api';
+  54 | import { toast } from '@/hooks/use-toast';
+  55 |
+
+The export purchaseCredits was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import listStyleProfiles?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export startGeneration doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/BookDetail.tsx:31:1
+Export startGeneration doesn't exist in target module
+  29 | ...m '@/components/ui/dialog';
+  30 | ...t { useAppStore } from '@/lib/store';
+> 31 | ...t { getBook, deleteBook, startGeneration, exportBook } from '@/lib/...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  32 | ...t type { BookData } from '@/lib/api';
+  33 | ...t ChapterEditor from '@/components/book/ChapterEditor';
+  34 | ...t GenerationProgress from '@/components/book/GenerationProgress';
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/BookDetail.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/BookDetail.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/CreateBookForm.tsx:19:1
+Export startGeneration doesn't exist in target module
+  17 | ...rt { Badge } from '@/components/ui/badge';
+  18 | ...rt { useAppStore } from '@/lib/store';
+> 19 | ...rt { createBook, startGeneration, listStyleProfiles } from '@/lib/a...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  20 | ...rt type { StyleProfileData } from '@/lib/api';
+  21 | ...rt type { TargetAudience, Genre, ColoringTheme } from '@/types';
+  22 | ...rt { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, KIDS_ADVENTURE...
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-client] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/CreateBookForm.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/CreateBookForm.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/components/book/CreateBookForm.tsx:19:1
+Export startGeneration doesn't exist in target module
+  17 | ...rt { Badge } from '@/components/ui/badge';
+  18 | ...rt { useAppStore } from '@/lib/store';
+> 19 | ...rt { createBook, startGeneration, listStyleProfiles } from '@/lib/a...
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  20 | ...rt type { StyleProfileData } from '@/lib/api';
+  21 | ...rt type { TargetAudience, Genre, ColoringTheme } from '@/types';
+  22 | ...rt { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, KIDS_ADVENTURE...
+
+The export startGeneration was not found in module [project]/src/lib/api.ts [app-ssr] (ecmascript).
+Did you mean to import createStyleProfile?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/components/book/CreateBookForm.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/book/CreateBookForm.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component] 
+✓ Compiled in 481ms
+ GET / 200 in 710ms (next.js: 153ms, proxy.ts: 84ms, application-code: 473ms)
+ GET /api/profile 200 in 3.2s (next.js: 1181ms, application-code: 1978ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 1772ms (next.js: 214ms, application-code: 1558ms)
+ GET /api/profile 200 in 251ms (next.js: 8ms, application-code: 243ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
- GET /api/profile 200 in 216ms (next.js: 6ms, application-code: 210ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 447ms (next.js: 69ms, application-code: 379ms)
+ GET /api/credits 200 in 809ms (next.js: 420ms, application-code: 389ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
- GET /api/credits 200 in 230ms (next.js: 5ms, application-code: 225ms)
+ GET /api/credits 200 in 234ms (next.js: 5ms, application-code: 229ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
- GET /api/books 200 in 1108ms (next.js: 118ms, application-code: 990ms)
+ GET /api/books 200 in 1494ms (next.js: 475ms, application-code: 1019ms)
 prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
 prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
- GET /api/books 200 in 280ms (next.js: 5ms, application-code: 275ms)
-⨯ Error [ChunkLoadError]: Failed to load chunk server/chunks/[root-of-the-server]__2061fbp._.js from runtime for chunk server/app/api/training/style-profile/route.js
-    at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3) {
-  page: '/api/training/style-profile',
-  [cause]: SyntaxError: Invalid regular expression: /```(?\:json)?\s*([\s\S]*?)```/: Invalid group
-      at <unknown> (.next/dev/server/chunks/[root-of-the-server]__2061fbp._.js:291)
-      at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3)
-}
- GET /api/training/style-profile 500 in 458ms (next.js: 333ms, application-code: 125ms)
-⨯ Error [ChunkLoadError]: Failed to load chunk server/chunks/[root-of-the-server]__2061fbp._.js from runtime for chunk server/app/api/training/style-profile/route.js
-    at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3) {
-  page: '/api/training/style-profile',
-  [cause]: SyntaxError: Invalid regular expression: /```(?\:json)?\s*([\s\S]*?)```/: Invalid group
-      at <unknown> (.next/dev/server/chunks/[root-of-the-server]__2061fbp._.js:291)
-      at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3)
-}
-[browser] [API Client] /training/style-profile failed: Unexpected token '<', "<!DOCTYPE "... is not valid JSON 
-    at apiFetch (src/lib/api.ts:30:13)
-    at async listStyleProfiles (src/lib/api.ts:221:18)
-  28 |   } catch (error) {
-  29 |     const message = error instanceof Error ? error.message : 'Network error';
-> 30 |     console.error(`[API Client] ${path} failed:`, message);
-     |             ^
-  31 |     return { success: false, error: message };
-  32 |   }
-  33 | } (src/lib/api.ts:30:13)
- GET /api/training/style-profile 500 in 143ms (next.js: 105ms, application-code: 38ms)
-[browser] [API Client] /training/style-profile failed: Unexpected token '<', "<!DOCTYPE "... is not valid JSON 
-    at apiFetch (src/lib/api.ts:30:13)
-    at async listStyleProfiles (src/lib/api.ts:221:18)
-  28 |   } catch (error) {
-  29 |     const message = error instanceof Error ? error.message : 'Network error';
-> 30 |     console.error(`[API Client] ${path} failed:`, message);
-     |             ^
-  31 |     return { success: false, error: message };
-  32 |   }
-  33 | } (src/lib/api.ts:30:13)
-✓ Compiled in 974ms
-✓ Compiled in 244ms
-⨯ Error [ChunkLoadError]: Failed to load chunk server/chunks/[root-of-the-server]__2061fbp._.js from runtime for chunk server/app/api/training/style-profile/route.js
-    at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3) {
-  page: '/api/training/style-profile',
-  [cause]: SyntaxError: Invalid regular expression: /```(?\:json)?\s*([\s\S]*?)```/: Invalid group
-      at <unknown> (.next/dev/server/chunks/[root-of-the-server]__2061fbp._.js:291)
-      at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3)
-}
- GET /api/training/style-profile 500 in 150ms (next.js: 128ms, application-code: 22ms)
-[browser] Uncaught ChunkLoadError: Failed to load chunk server/chunks/[root-of-the-server]__2061fbp._.js from runtime for chunk server/app/api/training/style-profile/route.js
-    at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3)
+ GET /api/books 200 in 288ms (next.js: 5ms, application-code: 283ms)

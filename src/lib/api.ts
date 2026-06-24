@@ -45,6 +45,22 @@ export async function getProfile(): Promise<ProfileData | null> {
   return result.success ? result.data ?? null : null;
 }
 
+export async function getUserEmail(): Promise<string | null> {
+  const profile = await getProfile();
+  return profile?.email ?? null;
+}
+
+export async function setUserEmail(email: string) {
+  return Promise.resolve();
+}
+
+export async function updateProfile(name: string) {
+  return apiFetch<ProfileData>('/profile', {
+    method: 'PUT',
+    body: JSON.stringify({ name }),
+  });
+}
+
 // ─── Books API ────────────────────────────────────────────────────────────────
 
 export interface BookData {
@@ -62,7 +78,7 @@ export interface BookData {
   chapters: ChapterData[];
   styleProfile?: { id: string; name: string };
   jobs?: JobData[];
-  mediaAssets?: MediaMetadata[];
+  mediaAssets?: MediaAssetData[];
   createdAt: string;
   updatedAt: string;
 }
@@ -83,10 +99,11 @@ export interface ChapterData {
   generationJobId: string | null;
 }
 
-export interface JobData {
+export interface MediaAssetData {
   id: string;
-  type: string;
-  status: string;
+  assetType: string;
+  publicUrl: string;
+  metadata: string;
   createdAt: string;
 }
 
@@ -106,10 +123,79 @@ export async function listBooks(): Promise<BookData[]> {
   return result.data ?? [];
 }
 
+export async function getBook(id: string): Promise<BookData | null> {
+  const result = await apiFetch<BookData>(`/books/${id}`);
+  return result.data ?? null;
+}
+
 export async function createBook(input: CreateBookInput) {
   return apiFetch<BookData>('/books', {
     method: 'POST',
     body: JSON.stringify(input),
+  });
+}
+
+export async function deleteBook(id: string) {
+  return apiFetch(`/books/${id}`, { method: 'DELETE' });
+}
+
+export async function startGeneration(bookId: string) {
+  return apiFetch<{ jobId: string; estimatedCredits: number }>(
+    `/books/${bookId}/generate`,
+    { method: 'POST' }
+  );
+}
+
+export async function exportBook(bookId: string) {
+  return apiFetch<{ downloadUrl: string }>(`/books/${bookId}/export`, {
+    method: 'POST',
+  });
+}
+
+// ─── Jobs API ─────────────────────────────────────────────────────────────────
+
+export interface JobData {
+  id: string;
+  jobType: string;
+  status: string;
+  progressMessage: string;
+  progressPercent: number;
+  creditsReserved: number;
+  creditsConsumed: number;
+  errorMessage: string | null;
+  result: Record<string, unknown> | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export async function getJob(jobId: string): Promise<JobData | null> {
+  const result = await apiFetch<JobData>(`/jobs/${jobId}`);
+  return result.data ?? null;
+}
+
+// ─── Credits API ──────────────────────────────────────────────────────────────
+
+export interface CreditsData {
+  credits: number;
+  tier: string;
+  recentTransactions: {
+    id: string;
+    amount: number;
+    reason: string;
+    createdAt: string;
+  }[];
+}
+
+export async function getCredits(): Promise<CreditsData | null> {
+  const result = await apiFetch<CreditsData>('/credits');
+  return result.data ?? null;
+}
+
+export async function purchaseCredits(tier: string) {
+  return apiFetch('/credits', {
+    method: 'POST',
+    body: JSON.stringify({ tier }),
   });
 }
 
@@ -125,7 +211,6 @@ export interface StyleProfileData {
   createdAt: string;
 }
 
-// ✅ FIXED: All paths now use API_BASE
 export async function listStyleProfiles() {
   return apiFetch<{ success: boolean; data: StyleProfileData[] }>('/training/style-profile');
 }
@@ -146,4 +231,36 @@ export async function deleteStyleProfile(profileId: string) {
     method: 'DELETE',
     body: JSON.stringify({ profileId }),
   });
+}
+
+// ─── Admin API ────────────────────────────────────────────────────────────────
+
+export interface AdminData {
+  analytics: {
+    totalUsers: number;
+    totalBooks: number;
+    completedBooks: number;
+    failedBooks: number;
+    totalCreditsConsumed: number;
+    jobStats: { queued: number; active: number; completed: number; failed: number };
+  };
+  jobs: {
+    id: string;
+    jobType: string;
+    status: string;
+    progressMessage: string;
+    progressPercent: number;
+    creditsReserved: number;
+    creditsConsumed: number;
+    errorMessage: string | null;
+    book: { id: string; title: string } | null;
+    owner: { id: string; email: string; name: string };
+    createdAt: string;
+    completedAt: string | null;
+  }[];
+}
+
+export async function getAdminData(): Promise<AdminData | null> {
+  const result = await apiFetch<AdminData>('/admin');
+  return result.data ?? null;
 }
