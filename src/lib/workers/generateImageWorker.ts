@@ -28,8 +28,8 @@ export async function generateImageWorker(jobId: string, assetParams: {
       result = await generateBookCover(bookId, ownerId, 'Book Title', genre || 'fiction', targetAudience || 'adult', coloringTheme);
     } else if (type === 'coloring_page') {
       if (chapterIndex === undefined) throw new Error('chapterIndex is required for coloring pages');
-      // We use the chapter synopsis as the prompt for coloring pages
-      const chapter = await db.chapter.findUnique({ where: { id: chapterIndex } }); // This is a simplification, should be index-based
+      // Find the chapter by its index to get the synopsis
+      const chapter = await db.chapter.findFirst({ where: { bookId, index: chapterIndex } });
       const subject = chapter?.synopsis || 'A beautiful scene';
       result = await generateColoringPage(bookId, ownerId, chapterIndex, subject, coloringTheme);
     } else {
