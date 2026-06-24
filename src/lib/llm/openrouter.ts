@@ -1,17 +1,21 @@
 // HydraSkript - LLM Client
-// Uses z-ai-web-dev-sdk for all text generation (replaces OpenRouter in sandbox)
+// Uses OpenRouter API for all text generation
 // MUST be used in backend code only
 
-import ZAI from 'z-ai-web-dev-sdk';
+import OpenRouter from 'openrouter';
 
-// Singleton pattern for ZAI instance
-let zaiInstance: Awaited<ReturnType<typeof ZAI.create>> | null = null;
+// Singleton pattern for OpenRouter client
+let openrouterClient: OpenRouter | null = null;
 
-async function getZAI() {
-  if (!zaiInstance) {
-    zaiInstance = await ZAI.create();
+function getOpenRouterClient(): OpenRouter {
+  if (!openrouterClient) {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENROUTER_API_KEY is not set in environment variables');
+    }
+    openrouterClient = new OpenRouter({ apiKey });
   }
-  return zaiInstance;
+  return openrouterClient;
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────
@@ -30,8 +34,7 @@ async function withRetry<T>(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const result = await fn();
-      return result;
+      return await fn();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`[LLM] Attempt ${attempt}/${maxAttempts} failed:`, lastError.message);
@@ -49,7 +52,7 @@ async function withRetry<T>(
 // ─── Core Chat Completion ─────────────────────────────────────────────────────
 
 export interface ChatMessage {
-  role: 'assistant' | 'user';
+  role: 'assistant' | 'user' | 'system';
   content: string;
 }
 
@@ -57,46 +60,42 @@ export interface CompletionOptions {
   messages: ChatMessage[];
   temperature?: number;
   maxTokens?: number;
+  model?: string;
   retries?: number;
 }
 
 /**
- * Generate a chat completion using the LLM.
- * Uses z-ai-web-dev-sdk with retry logic.
+ * Generate a chat completion using OpenRouter.
  */
 export async function generateCompletion(options: CompletionOptions): Promise<string> {
-  const { messages, temperature = 0.7, retries = 3 } = options;
+  const { messages, temperature = 0.7, maxTokens, model, retries = 3 } = options;
 
   return withRetry(async () => {
-    let zai;
-    try {
-      zai = await getZAI();
-    } catch (initError) {
-      console.error('[LLM] Failed to initialize ZAI client:', initError);
-      throw new Error(`LLM client initialization failed: ${initError instanceof Error ? initError.message : String(initError)}`);
-    }
+    const client = getOpenRouterClient();
+    const openrouterModel = model || process.env.OPENROUTER_MODEL || 'gemma 4 31b it:free';
 
-    let completion;
     try {
-      completion = await zai.chat.completions.create({
+      const completion = await client.chat.completions.create({
+        model: openrouterModel,
         messages: messages.map(m => ({
           role: m.role,
           content: m.content,
         })),
-        thinking: { type: 'disabled' },
+        temperature,
+        max_tokens: maxTokens,
       });
+
+      const response = completion.choices?.[0]?.message?.content;
+
+      if (!response || response.trim().length === 0) {
+        throw new Error('Empty response from LLM');
+      }
+
+      return response;
     } catch (apiError) {
       console.error('[LLM] API call failed:', apiError instanceof Error ? apiError.message : String(apiError));
       throw new Error(`LLM API call failed: ${apiError instanceof Error ? apiError.message : String(apiError)}`);
     }
-
-    const response = completion.choices?.[0]?.message?.content;
-
-    if (!response || response.trim().length === 0) {
-      throw new Error('Empty response from LLM');
-    }
-
-    return response;
   }, { maxAttempts: retries });
 }
 
@@ -104,7 +103,6 @@ export async function generateCompletion(options: CompletionOptions): Promise<st
 
 /**
  * Generate a completion and parse as JSON.
- * Uses lower temperature for more deterministic output.
  */
 export async function generateJSON<T>(
   options: CompletionOptions
@@ -112,7 +110,7 @@ export async function generateJSON<T>(
   // Add instruction to output JSON
   const messages: ChatMessage[] = [
     ...options.messages,
-    { role: 'user' as const, content: 'IMPORTANT: Respond with valid JSON only. No markdown, no code fences, no extra text. Just the JSON object.' },
+    { role: 'system', content: 'IMPORTANT: Respond with valid JSON only. No markdown, no code fences, no extra text. Just the JSON object.' },
   ];
 
   const response = await generateCompletion({
@@ -121,11 +119,11 @@ export async function generateJSON<T>(
     temperature: options.temperature ?? 0.2,
   });
 
-  // Try to extract JSON from response (handle markdown code fences)
+  // Try to extract JSON from response
   let jsonStr = response.trim();
 
   // Strip markdown code fences if present
-  const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const jsonMatch = jsonStr.match(/```(?\:json)?\s*([\s\S]*?)```/);
   if (jsonMatch) {
     jsonStr = jsonMatch[1].trim();
   }
@@ -133,7 +131,6 @@ export async function generateJSON<T>(
   try {
     return JSON.parse(jsonStr) as T;
   } catch {
-    // Try to find the first { and last } to extract JSON
     const firstBrace = jsonStr.indexOf('{');
     const lastBrace = jsonStr.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace !== -1) {
@@ -147,11 +144,8 @@ export async function generateJSON<T>(
   }
 }
 
-// ─── Convenience: Simple Prompt ───────────────────────────────────────────────
+// ─── Convenience Functions ──────────────────────────────────────────────────
 
-/**
- * Quick one-shot generation with system + user prompt.
- */
 export async function askLLM(
   systemPrompt: string,
   userPrompt: string,
@@ -159,16 +153,13 @@ export async function askLLM(
 ): Promise<string> {
   return generateCompletion({
     messages: [
-      { role: 'assistant', content: systemPrompt },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
     temperature,
   });
 }
 
-/**
- * Quick one-shot JSON generation with system + user prompt.
- */
 export async function askLLMJSON<T>(
   systemPrompt: string,
   userPrompt: string,
@@ -176,7 +167,7 @@ export async function askLLMJSON<T>(
 ): Promise<T> {
   return generateJSON<T>({
     messages: [
-      { role: 'assistant', content: systemPrompt },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
     temperature,

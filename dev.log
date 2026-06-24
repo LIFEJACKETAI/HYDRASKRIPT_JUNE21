@@ -2,177 +2,199 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.66:3000
 - Environments: .env.local, .env
-✓ Ready in 607ms
+✓ Ready in 633ms
 
- GET / 200 in 955ms (next.js: 121ms, proxy.ts: 267ms, application-code: 567ms)
- GET /logo-icon.png 404 in 450ms (next.js: 111ms, proxy.ts: 254ms, application-code: 86ms)
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 104.18.38.10:443, 172.64.149.246:443, timeout: 10000ms)
-      at ignore-listed frames {
-    code: 'UND_ERR_CONNECT_TIMEOUT'
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-Error [AuthRetryableFetchError]: fetch failed
-    at ignore-listed frames {
-  __isAuthError: true,
-  status: 0,
-  code: undefined
-}
-Error [AuthRetryableFetchError]: fetch failed
-    at ignore-listed frames {
-  __isAuthError: true,
-  status: 0,
-  code: undefined
-}
- GET /api/profile 401 in 32.2s (next.js: 201ms, application-code: 32.0s)
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 172.64.149.246:443, 104.18.38.10:443, timeout: 10000ms)
-      at ignore-listed frames {
-    code: 'UND_ERR_CONNECT_TIMEOUT'
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: Error [ConnectTimeoutError]: Connect Timeout Error (attempted addresses: 104.18.38.10:443, 172.64.149.246:443, timeout: 10000ms)
-      at ignore-listed frames {
-    code: 'UND_ERR_CONNECT_TIMEOUT'
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-Error [AuthRetryableFetchError]: fetch failed
-    at ignore-listed frames {
-  __isAuthError: true,
-  status: 0,
-  code: undefined
-}
-Error [AuthRetryableFetchError]: fetch failed
-    at ignore-listed frames {
-  __isAuthError: true,
-  status: 0,
-  code: undefined
-}
- GET /api/profile 401 in 34.8s (next.js: 5ms, application-code: 34.8s)
-[browser] TypeError: Failed to fetch
-    at new Promise (<anonymous>)
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-TypeError: fetch failed
-    at ignore-listed frames {
-  [cause]: AggregateError: 
-      at ignore-listed frames {
-    code: 'ETIMEDOUT',
-    [errors]: [ [Error], [Error] ]
-  }
-}
-Error [AuthRetryableFetchError]: fetch failed
-    at ignore-listed frames {
-  __isAuthError: true,
-  status: 0,
-  code: undefined
-}
-Error [AuthRetryableFetchError]: fetch failed
-    at ignore-listed frames {
-  __isAuthError: true,
-  status: 0,
-  code: undefined
-}
- GET /api/profile 401 in 29.8s (next.js: 6ms, application-code: 29.8s)
-[browser] TypeError: Failed to fetch
-    at handleAuth (src/components/auth/AuthForm.tsx:46:53)
-  44 |       } else {
-  45 |         console.log('[Auth] Calling signInWithPassword...');
-> 46 |         const { data, error } = await supabase.auth.signInWithPassword({
-     |                                                     ^
-  47 |           email,
-  48 |           password,
-  49 |         }); (src/components/auth/AuthForm.tsx:46:33)
-[browser] [Auth] CRITICAL ERROR: AuthRetryableFetchError: Failed to fetch
-    at async handleAuth (src/components/auth/AuthForm.tsx:46:33)
-  44 |       } else {
-  45 |         console.log('[Auth] Calling signInWithPassword...');
-> 46 |         const { data, error } = await supabase.auth.signInWithPassword({
-     |                                 ^
-  47 |           email,
-  48 |           password,
-  49 |         }); (src/components/auth/AuthForm.tsx:58:15)
-[browser] TypeError: Failed to fetch
-[browser] AuthRetryableFetchError: Failed to fetch
+ GET / 200 in 826ms (next.js: 99ms, proxy.ts: 300ms, application-code: 427ms)
+ GET /logo-icon.png 404 in 405ms (next.js: 104ms, proxy.ts: 222ms, application-code: 79ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET /api/profile 200 in 2.5s (next.js: 185ms, application-code: 2.3s)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET /api/profile 200 in 217ms (next.js: 7ms, application-code: 210ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/credits 200 in 437ms (next.js: 41ms, application-code: 396ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE "public"."credit_ledger"."profileId" = $1 ORDER BY "public"."credit_ledger"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/credits 200 in 253ms (next.js: 5ms, application-code: 248ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+ GET /api/books 200 in 1073ms (next.js: 74ms, application-code: 999ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+ GET /api/books 200 in 290ms (next.js: 3ms, application-code: 287ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
+ GET /api/training/style-profile 200 in 383ms (next.js: 142ms, application-code: 241ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
+ GET /api/training/style-profile 200 in 161ms (next.js: 6ms, application-code: 156ms)
+prisma:query SELECT 1
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."books" ("ownerId","title","genre","targetAudience","maxPages","status","totalCreditsEstimated","totalCreditsCharged","characterNames","outline","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+ POST /api/books 201 in 854ms (next.js: 11ms, application-code: 843ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[API] Start generation requested for book f7e67c94-4af9-45cb-85bd-aaaab83c977b by admin@hydraskript.com
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2 WHERE "public"."jobs"."status" = $3
+prisma:query COMMIT
+[Queue] Recovered active jobs from last session.
+prisma:query BEGIN
+prisma:query INSERT INTO "public"."jobs" ("bookId","ownerId","jobType","status","progressMessage","progressPercent","creditsReserved","creditsConsumed","stepIndex","result","createdAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query BEGIN
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits", "public"."profiles"."email" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "startedAt" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Executing generate_outline job 53d22557-323f-4027-8c09-a7ce0dafae75
+[DEBUG] 1. generateOutline started for bookId: f7e67c94-4af9-45cb-85bd-aaaab83c977b
+prisma:query COMMIT
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query COMMIT
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[DEBUG] 2. Updating job status to 10%...
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."books" SET "status" = $1, "totalCreditsEstimated" = $2, "updatedAt" = $3 WHERE ("public"."books"."id" = $4 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+[Queue] Job 53d22557-323f-4027-8c09-a7ce0dafae75 signaled for processing (generate_outline)
+[API] Generation started for book f7e67c94-4af9-45cb-85bd-aaaab83c977b, job: 53d22557-323f-4027-8c09-a7ce0dafae75
+ POST /api/books/f7e67c94-4af9-45cb-85bd-aaaab83c977b/generate 200 in 2.4s (next.js: 955ms, application-code: 1469ms)
+prisma:query UPDATE "public"."jobs" SET "progressMessage" = $1, "progressPercent" = $2 WHERE ("public"."jobs"."id" = $3 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[DEBUG] 3. Getting style system prompt...
+[DEBUG] 4. Parsing character names...
+[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query BEGIN
+prisma:query SELECT "public"."chapters"."id", "public"."chapters"."bookId", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."synopsis", "public"."chapters"."wordTarget", "public"."chapters"."content", "public"."chapters"."wordCount", "public"."chapters"."status", "public"."chapters"."approvalStatus", "public"."chapters"."generationJobId", "public"."chapters"."charactersIntroduced", "public"."chapters"."summaryForNext", "public"."chapters"."illustrationUrl", "public"."chapters"."illustrationPrompt", "public"."chapters"."createdAt", "public"."chapters"."updatedAt" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+Failed to make API request: Error: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:81:20)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  79 |     let completion;
+  80 |     try {
+> 81 |       completion = await zai.chat.completions.create({
+     |                    ^
+  82 |         messages: messages.map(m => ({
+  83 |           role: m.role,
+  84 |           content: m.content,
+[LLM] API call failed: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+[LLM] Attempt 1/3 failed: LLM API call failed: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+ GET /api/books/f7e67c94-4af9-45cb-85bd-aaaab83c977b 200 in 2.6s (next.js: 1194ms, application-code: 1368ms)
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."bookId" IN ($1) ORDER BY "public"."jobs"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt" FROM "public"."books" WHERE ("public"."books"."id" = $1 AND "public"."books"."ownerId" = $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."chapters"."id", "public"."chapters"."bookId", "public"."chapters"."index", "public"."chapters"."title", "public"."chapters"."synopsis", "public"."chapters"."wordTarget", "public"."chapters"."content", "public"."chapters"."wordCount", "public"."chapters"."status", "public"."chapters"."approvalStatus", "public"."chapters"."generationJobId", "public"."chapters"."charactersIntroduced", "public"."chapters"."summaryForNext", "public"."chapters"."illustrationUrl", "public"."chapters"."illustrationPrompt", "public"."chapters"."createdAt", "public"."chapters"."updatedAt" FROM "public"."chapters" WHERE "public"."chapters"."bookId" IN ($1) ORDER BY "public"."chapters"."index" ASC OFFSET $2
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."bookId" IN ($1) ORDER BY "public"."jobs"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /api/books/f7e67c94-4af9-45cb-85bd-aaaab83c977b 200 in 470ms (next.js: 53ms, application-code: 418ms)
+Failed to make API request: Error: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:81:20)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  79 |     let completion;
+  80 |     try {
+> 81 |       completion = await zai.chat.completions.create({
+     |                    ^
+  82 |         messages: messages.map(m => ({
+  83 |           role: m.role,
+  84 |           content: m.content,
+[LLM] API call failed: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+[LLM] Attempt 2/3 failed: LLM API call failed: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+Failed to make API request: Error: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+    at async withRetry.maxAttempts (src/lib/llm/openrouter.ts:81:20)
+    at async withRetry (src/lib/llm/openrouter.ts:33:22)
+    at async generateJSON (src/lib/llm/openrouter.ts:118:20)
+    at async generateOutline (src/lib/services/bookGenerator.ts:137:27)
+    at async generate_outline (src/lib/workers/registry.ts:15:5)
+    at async PersistentJobQueue.processNext (src/lib/workers/queue.ts:91:7)
+  79 |     let completion;
+  80 |     try {
+> 81 |       completion = await zai.chat.completions.create({
+     |                    ^
+  82 |         messages: messages.map(m => ({
+  83 |           role: m.role,
+  84 |           content: m.content,
+[LLM] API call failed: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+[LLM] Attempt 3/3 failed: LLM API call failed: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+[Queue] OUTLINE GENERATION FAILED: LLM API call failed: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+prisma:query UPDATE "public"."books" SET "status" = $1, "updatedAt" = $2 WHERE ("public"."books"."id" = $3 AND 1=1) RETURNING "public"."books"."id", "public"."books"."ownerId", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."maxPages", "public"."books"."styleProfileId", "public"."books"."status", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."visualIdentityUrl", "public"."books"."coloringTheme", "public"."books"."adventureType", "public"."books"."characterNames", "public"."books"."outline", "public"."books"."coverImageUrl", "public"."books"."createdAt", "public"."books"."updatedAt"
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."ownerId", "public"."jobs"."creditsReserved" FROM "public"."jobs" WHERE ("public"."jobs"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."credits" FROM "public"."profiles" WHERE ("public"."profiles"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."profiles" SET "credits" = $1, "updatedAt" = $2 WHERE ("public"."profiles"."id" = $3 AND 1=1) RETURNING "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt"
+prisma:query INSERT INTO "public"."credit_ledger" ("profileId","amount","reason","jobId","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt"
+prisma:query COMMIT
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+[Queue] Job 53d22557-323f-4027-8c09-a7ce0dafae75 failed: LLM API call failed: API request failed with status 404: {"error":{"message":"No endpoints found for .","code":404},"user_id":"user_2iRFIaVzFESxhm0ZLu9fF6KO7yJ"}
+prisma:query UPDATE "public"."jobs" SET "status" = $1, "progressMessage" = $2, "errorMessage" = $3 WHERE ("public"."jobs"."id" = $4 AND 1=1) RETURNING "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt"
+prisma:query BEGIN
+prisma:query SELECT "public"."credit_ledger"."id", "public"."credit_ledger"."profileId", "public"."credit_ledger"."amount", "public"."credit_ledger"."reason", "public"."credit_ledger"."jobId", "public"."credit_ledger"."createdAt" FROM "public"."credit_ledger" WHERE ("public"."credit_ledger"."jobId" = $1 AND "public"."credit_ledger"."reason"::text LIKE $2) LIMIT $3 OFFSET $4
+[Credits] Already refunded for job 53d22557-323f-4027-8c09-a7ce0dafae75
+prisma:query COMMIT
+prisma:query BEGIN
+prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
+prisma:query COMMIT
+prisma:query SELECT 1
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
+ GET /api/training/style-profile 200 in 312ms (next.js: 4ms, application-code: 307ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."style_profiles"."id", "public"."style_profiles"."name", "public"."style_profiles"."description", "public"."style_profiles"."systemPrompt", "public"."style_profiles"."exemplarTexts", "public"."style_profiles"."createdAt" FROM "public"."style_profiles" WHERE "public"."style_profiles"."ownerId" = $1 ORDER BY "public"."style_profiles"."createdAt" DESC OFFSET $2
+ GET /api/training/style-profile 200 in 155ms (next.js: 4ms, application-code: 151ms)
+prisma:query SELECT 1
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[API] Create book failed: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].book.create()` invocation in
+/home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.next/dev/server/chunks/[root-of-the-server]__1wmcaeg._.js:329:154
+
+  326     });
+  327 }
+  328 const profile = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$bookHelpers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getOrCreateProfile"])(email);
+→ 329 const book = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].book.create({
+        data: {
+          title: "test31",
+          genre: "coloring",
+          targetAudience: "adult",
+          styleProfileId: undefined,
+          characterNames: "[]",
+                          ~~~~
+          outline: "{}",
+          ownerId: "ef8077c4-31cd-4430-b4a3-30a297b46100"
+        }
+      })
+
+Argument `characterNames`: Invalid value provided. Expected BookCreatecharacterNamesInput or String[], provided String.
+ POST /api/books 500 in 602ms (next.js: 5ms, application-code: 597ms)
+prisma:query SELECT 1
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[API] Create book failed: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].book.create()` invocation in
+/home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/.next/dev/server/chunks/[root-of-the-server]__1wmcaeg._.js:329:154
+
+  326     });
+  327 }
+  328 const profile = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2f$bookHelpers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getOrCreateProfile"])(email);
+→ 329 const book = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["db"].book.create({
+        data: {
+          title: "test31",
+          genre: "coloring",
+          targetAudience: "adult",
+          styleProfileId: undefined,
+          characterNames: "[]",
+                          ~~~~
+          outline: "{}",
+          ownerId: "ef8077c4-31cd-4430-b4a3-30a297b46100"
+        }
+      })
+
+Argument `characterNames`: Invalid value provided. Expected BookCreatecharacterNamesInput or String[], provided String.
+ POST /api/books 500 in 542ms (next.js: 4ms, application-code: 537ms)
