@@ -116,9 +116,10 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
       outlinePrompt = getColoringOutlinePrompt(coloringTheme, chapterCount);
       outlineUser = getColoringOutlineUserPrompt(book.title, coloringTheme);
     } else {
-      const characterNames = (() => {
-        try { return JSON.parse(book.characterNames || '[]') as string[]; } catch { return []; }
-      })();
+      const characterNames = Array.isArray(book.characterNames) 
+        ? book.characterNames 
+        : (() => { try { return JSON.parse(book.characterNames as any || 
+      ? book.characterNames? book.characterNames'[]') as string[]; } catch { return []; } })();
       outlinePrompt = getOutlinePrompt(genre, targetAudience, chapterCount, stylePrompt, characterNames.length > 0 ? characterNames : undefined, book.adventureType ?? undefined);
       outlineUser = getOutlineUserPrompt(book.title, genre, targetAudience);
     }
@@ -202,9 +203,10 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       fullSystemPrompt = getColoringChapterPrompt(coloringTheme, chapterIndex, 10); // approximate total chapters
       chapterUser = `Write a brief, poetic description for the coloring page titled "${chapter.title}". Visual subject: ${chapter.synopsis}`;
     } else {
-      const characterNames = (() => {
-        try { return JSON.parse(book.characterNames || '[]') as string[]; } catch { return []; }
-      })();
+      const characterNames = Array.isArray(book.characterNames) 
+        ? book.characterNames 
+        : (() => { try { return JSON.parse(book.characterNames as any || 
+      '[]') as string[]; } catch { return []; } })();
       const chapterPrompt = getChapterWritePrompt(stylePrompt, book.title, genre, chapterIndex, 10, previousSummary, characterNames.length > 0 ? characterNames : undefined);
       const childrensPrompt = isChildrenBook ? getChildrensChapterPrompt(targetAudience) : '';
       fullSystemPrompt = childrensPrompt ? `${childrensPrompt}\n\n${chapterPrompt}` : chapterPrompt;

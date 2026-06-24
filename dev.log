@@ -132,3 +132,21 @@ prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jo
 prisma:query COMMIT
 prisma:query SELECT "public"."jobs"."id", "public"."jobs"."bookId", "public"."jobs"."ownerId", "public"."jobs"."jobType", "public"."jobs"."status", "public"."jobs"."progressMessage", "public"."jobs"."progressPercent", "public"."jobs"."creditsReserved", "public"."jobs"."creditsConsumed", "public"."jobs"."errorMessage", "public"."jobs"."stepIndex", "public"."jobs"."result", "public"."jobs"."startedAt", "public"."jobs"."completedAt", "public"."jobs"."createdAt" FROM "public"."jobs" WHERE "public"."jobs"."status" = $1 ORDER BY "public"."jobs"."createdAt" ASC LIMIT $2 OFFSET $3
 prisma:query COMMIT
+prisma:query SELECT 1
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+ GET /api/books 200 in 1058ms (next.js: 6ms, application-code: 1052ms)
+prisma:query SELECT "public"."profiles"."id", "public"."profiles"."email", "public"."profiles"."name", "public"."profiles"."credits", "public"."profiles"."tier", "public"."profiles"."isAdmin", "public"."profiles"."createdAt", "public"."profiles"."updatedAt" FROM "public"."profiles" WHERE ("public"."profiles"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."books"."genre", "public"."books"."targetAudience", "public"."books"."status", "public"."books"."coverImageUrl", "public"."books"."totalCreditsEstimated", "public"."books"."totalCreditsCharged", "public"."books"."createdAt", COALESCE("aggr_selection_0_Chapter"."_aggr_count_chapters", 0) AS "_aggr_count_chapters" FROM "public"."books" LEFT JOIN (SELECT "public"."chapters"."bookId", COUNT(*) AS "_aggr_count_chapters" FROM "public"."chapters" WHERE 1=1 GROUP BY "public"."chapters"."bookId") AS "aggr_selection_0_Chapter" ON ("public"."books"."id" = "aggr_selection_0_Chapter"."bookId") WHERE "public"."books"."ownerId" = $1 ORDER BY "public"."books"."createdAt" DESC OFFSET $2
+ GET /api/books 200 in 451ms (next.js: 6ms, application-code: 446ms)
+ DELETE /api/books/37eda4e2-5823-4920-9986-db6d1370a2a5 405 in 71ms (next.js: 60ms, application-code: 10ms)
+[browser] [API Client] /books/37eda4e2-5823-4920-9986-db6d1370a2a5 failed: Failed to execute 'json' on 'Response': Unexpected end of JSON input 
+    at apiFetch (src/lib/api.ts:30:13)
+    at async handleDelete (src/app/page.tsx:318:20)
+  28 |   } catch (error) {
+  29 |     const message = error instanceof Error ? error.message : 'Network error';
+> 30 |     console.error(`[API Client] ${path} failed:`, message);
+     |             ^
+  31 |     return { success: false, error: message };
+  32 |   }
+  33 | } (src/lib/api.ts:30:13)
