@@ -217,9 +217,11 @@ export interface StyleProfileData {
   createdAt: string;
 }
 
-export async function listStyleProfiles(): Promise<StyleProfileData[]> {
-  const result = await apiFetch<StyleProfileData[]>('/training/style-profile');
-  return result.data ?? [];
+
+export async function listStyleProfiles() {
+  return apiFetch(`${API_BASE_URL}/training/style-profile`);
+  //                     ^^^^^^^^
+  //                     This should include /api
 }
 
 export async function createStyleProfile(input: {

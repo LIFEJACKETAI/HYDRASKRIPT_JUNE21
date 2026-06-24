@@ -60,3 +60,4 @@ prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."b
   32 |   }
   33 | } (src/lib/api.ts:30:13)
 ✓ Compiled in 974ms
+✓ Compiled in 244ms
