@@ -83,6 +83,13 @@ export default function BookDetail() {
     toast({ title: 'Generation complete!', description: 'Your book has been generated.' });
   }, [fetchBook, setIsGenerating, setActiveJobId]);
 
+  const handleGenerationError = useCallback((error: string) => {
+    setIsGenerating(false);
+    setActiveJobId(null);
+    setGenerationJobId(null);
+    toast({ title: 'Generation failed', description: error, variant: 'destructive' });
+  }, [setIsGenerating, setActiveJobId]);
+
   const handleApproveOutline = async (updatedOutline: any) => {
     try {
       const response = await fetch(`/api/books/${selectedBookId}/approve`, {
