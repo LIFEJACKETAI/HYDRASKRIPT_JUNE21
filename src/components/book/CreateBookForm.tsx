@@ -70,6 +70,11 @@ export default function CreateBookForm() {
   const handleGenreChange = (value: string) => {
     setGenre(value);
     if (value !== 'coloring') setColoringTheme('');
+    
+    // If user selects 'children', auto-set target audience to a kids range if it's currently 'adult'
+    if (value === 'children' && targetAudience === 'adult') {
+      setTargetAudience('6-9'); // Default to the middle kids range
+    }
   };
 
   useEffect(() => { listStyleProfiles().then(setStyleProfiles); }, []);
