@@ -2,7 +2,7 @@
 // Centralized API client for all frontend-to-backend communication
 // Integrated with Supabase Auth for secure session management
 
-const API_BASE = '/api';
+const API_BASE_URL = '/api';
 
 // In production, we rely on the Supabase session stored in cookies.
 // The middleware handles the protection of the routes.
