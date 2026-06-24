@@ -1,21 +1,21 @@
 // HydraSkript - LLM Client
-// Uses OpenRouter API for all text generation
+// Uses OpenRouter REST API directly (no SDK required)
 // MUST be used in backend code only
 
-import OpenRouter from 'openrouter';
+// ─── Configuration ─────────────────────────────────────────────────────────────
 
-// Singleton pattern for OpenRouter client
-let openrouterClient: OpenRouter | null = null;
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-function getOpenRouterClient(): OpenRouter {
-  if (!openrouterClient) {
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
-      throw new Error('OPENROUTER_API_KEY is not set in environment variables');
-    }
-    openrouterClient = new OpenRouter({ apiKey });
+function getApiKey(): string {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENROUTER_API_KEY is not set in environment variables');
   }
-  return openrouterClient;
+  return apiKey;
+}
+
+function getModel(): string {
+  return process.env.OPENROUTER_MODEL || 'anthropic/claude-3-haiku';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────
@@ -65,33 +65,47 @@ export interface CompletionOptions {
 }
 
 /**
- * Generate a chat completion using OpenRouter.
+ * Generate a chat completion using OpenRouter REST API.
  */
 export async function generateCompletion(options: CompletionOptions): Promise<string> {
   const { messages, temperature = 0.7, maxTokens, model, retries = 3 } = options;
+  const apiKey = getApiKey();
+  const openrouterModel = model || getModel();
 
   return withRetry(async () => {
-    const client = getOpenRouterClient();
-    const openrouterModel = model || process.env.OPENROUTER_MODEL || 'gemma 4 31b it:free';
-
     try {
-      const completion = await client.chat.completions.create({
-        model: openrouterModel,
-        messages: messages.map(m => ({
-          role: m.role,
-          content: m.content,
-        })),
-        temperature,
-        max_tokens: maxTokens,
+      const response = await fetch(OPENROUTER_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'http://localhost:3000', // Required by OpenRouter
+          'X-Title': 'HydraSkript', // Optional but recommended
+        },
+        body: JSON.stringify({
+          model: openrouterModel,
+          messages,
+          temperature,
+          max_tokens: maxTokens,
+        }),
       });
 
-      const response = completion.choices?.[0]?.message?.content;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `OpenRouter API error: ${response.status} ${response.statusText}` +
+          (errorData.error?.message ? ` - ${errorData.error.message}` : '')
+        );
+      }
 
-      if (!response || response.trim().length === 0) {
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+
+      if (!content || content.trim().length === 0) {
         throw new Error('Empty response from LLM');
       }
 
-      return response;
+      return content;
     } catch (apiError) {
       console.error('[LLM] API call failed:', apiError instanceof Error ? apiError.message : String(apiError));
       throw new Error(`LLM API call failed: ${apiError instanceof Error ? apiError.message : String(apiError)}`);
@@ -101,13 +115,7 @@ export async function generateCompletion(options: CompletionOptions): Promise<st
 
 // ─── Structured JSON Completion ───────────────────────────────────────────────
 
-/**
- * Generate a completion and parse as JSON.
- */
-export async function generateJSON<T>(
-  options: CompletionOptions
-): Promise<T> {
-  // Add instruction to output JSON
+export async function generateJSON<T>(options: CompletionOptions): Promise<T> {
   const messages: ChatMessage[] = [
     ...options.messages,
     { role: 'system', content: 'IMPORTANT: Respond with valid JSON only. No markdown, no code fences, no extra text. Just the JSON object.' },
@@ -119,14 +127,9 @@ export async function generateJSON<T>(
     temperature: options.temperature ?? 0.2,
   });
 
-  // Try to extract JSON from response
   let jsonStr = response.trim();
-
-  // Strip markdown code fences if present
   const jsonMatch = jsonStr.match(/```(?\:json)?\s*([\s\S]*?)```/);
-  if (jsonMatch) {
-    jsonStr = jsonMatch[1].trim();
-  }
+  if (jsonMatch) jsonStr = jsonMatch[1].trim();
 
   try {
     return JSON.parse(jsonStr) as T;

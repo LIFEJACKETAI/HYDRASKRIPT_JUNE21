@@ -156,3 +156,70 @@ Import trace:
     ./src/app/api/training/style-profile/route.ts
 
 https://nextjs.org/docs/messages/module-not-found 
+[browser] ./src/lib/llm/openrouter.ts:5:1
+Module not found: Can't resolve 'openrouter'
+  3 | // MUST be used in backend code only
+  4 |
+> 5 | import OpenRouter from 'openrouter';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | // Singleton pattern for OpenRouter client
+  8 | let openrouterClient: OpenRouter | null = null;
+
+Import trace:
+  App Route:
+    ./src/lib/llm/openrouter.ts
+    ./src/lib/services/styleAnalyzer.ts
+    ./src/app/api/training/style-profile/route.ts
+
+https://nextjs.org/docs/messages/module-not-found 
+[browser] ./src/lib/llm/openrouter.ts:5:1
+Module not found: Can't resolve 'openrouter'
+  3 | // MUST be used in backend code only
+  4 |
+> 5 | import OpenRouter from 'openrouter';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | // Singleton pattern for OpenRouter client
+  8 | let openrouterClient: OpenRouter | null = null;
+
+Import trace:
+  App Route:
+    ./src/lib/llm/openrouter.ts
+    ./src/lib/services/styleAnalyzer.ts
+    ./src/app/api/training/style-profile/route.ts
+
+https://nextjs.org/docs/messages/module-not-found 
+[Server HMR] Update failed, full reload needed: SyntaxError: Invalid regular expression: /```(?\:json)?\s*([\s\S]*?)```/: Invalid group
+    at eval (<anonymous>)
+[Server HMR] Listener error: SyntaxError: Invalid regular expression: /```(?\:json)?\s*([\s\S]*?)```/: Invalid group
+    at eval (<anonymous>)
+ GET / 500 in 146ms (next.js: 50ms, proxy.ts: 78ms, application-code: 17ms)
+ GET / 500 in 63ms (next.js: 11ms, proxy.ts: 9ms, application-code: 43ms)
+ GET / 500 in 37ms (next.js: 15ms, proxy.ts: 10ms, application-code: 12ms)
+ GET / 500 in 51ms (next.js: 23ms, proxy.ts: 9ms, application-code: 19ms)
+[browser] Uncaught Error: ./src/lib/llm/openrouter.ts:5:1
+Module not found: Can't resolve 'openrouter'
+  3 | // MUST be used in backend code only
+  4 |
+> 5 | import OpenRouter from 'openrouter';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | // Singleton pattern for OpenRouter client
+  8 | let openrouterClient: OpenRouter | null = null;
+
+
+
+Import trace:
+  App Route:
+    ./src/lib/llm/openrouter.ts
+    ./src/lib/services/styleAnalyzer.ts
+    ./src/app/api/training/style-profile/route.ts
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/lib/llm/openrouter.ts:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/lib/llm/openrouter.ts:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
