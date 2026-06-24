@@ -1,11 +1,7 @@
 // HydraSkript - API Client
 // Centralized API client for all frontend-to-backend communication
-// Integrated with Supabase Auth for secure session management
 
-const API_BASE_URL = '/api';
-
-// In production, we rely on the Supabase session stored in cookies.
-// The middleware handles the protection of the routes.
+const API_BASE = '/api';
 
 // ─── Fetch Helper ─────────────────────────────────────────────────────────────
 
@@ -22,9 +18,9 @@ async function apiFetch<T>(
       },
     });
 
-  const result = await response.json();
-  console.log(`[API DEBUG] ${path} →`, response.status, result);
-  return result;
+    const result = await response.json();
+    console.log(`[API DEBUG] ${path} →`, response.status, result);
+    return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Network error';
     console.error(`[API Client] ${path} failed:`, message);
@@ -49,25 +45,6 @@ export async function getProfile(): Promise<ProfileData | null> {
   return result.success ? result.data ?? null : null;
 }
 
-export async function getUserEmail(): Promise<string | null> {
-  const profile = await getProfile();
-  return profile?.email ?? null;
-}
-
-export async function setUserEmail(email: string) {
-  // In the new Supabase architecture, user identity is managed via cookies/sessions.
-  // We don't manually "set" the email in the API; instead, we clear the session.
-  // This function is kept for compatibility with the Navbar's handleSignOut.
-  return Promise.resolve();
-}
-
-export async function updateProfile(name: string) {
-  return apiFetch<ProfileData>('/profile', {
-    method: 'PUT',
-    body: JSON.stringify({ name }),
-  });
-}
-
 // ─── Books API ────────────────────────────────────────────────────────────────
 
 export interface BookData {
@@ -85,7 +62,7 @@ export interface BookData {
   chapters: ChapterData[];
   styleProfile?: { id: string; name: string };
   jobs?: JobData[];
-  mediaAssets?: MediaAssetData[];
+  mediaAssets?: MediaMetadata[];
   createdAt: string;
   updatedAt: string;
 }
@@ -106,11 +83,10 @@ export interface ChapterData {
   generationJobId: string | null;
 }
 
-export interface MediaAssetData {
+export interface JobData {
   id: string;
-  assetType: string;
-  publicUrl: string;
-  metadata: string;
+  type: string;
+  status: string;
   createdAt: string;
 }
 
@@ -130,78 +106,10 @@ export async function listBooks(): Promise<BookData[]> {
   return result.data ?? [];
 }
 
-export async function getBook(id: string): Promise<BookData | null> {
-  const result = await apiFetch<BookData>(`/books/${id}`);
-  return result.data ?? null;
-}
-
 export async function createBook(input: CreateBookInput) {
   return apiFetch<BookData>('/books', {
     method: 'POST',
     body: JSON.stringify(input),
-  });
-}
-
-export async function deleteBook(id: string) {
-  return apiFetch(`/books/${id}`, { method: 'DELETE' });
-}
-
-export async function startGeneration(bookId: string) {
-  return apiFetch<{ jobId: string; estimatedCredits: number }>(`/books/${bookId}/generate`, {
-    method: 'POST',
-  });
-}
-
-export async function exportBook(bookId: string) {
-  return apiFetch<{ downloadUrl: string }>(`/books/${bookId}/export`, {
-    method: 'POST',
-  });
-}
-
-// ─── Jobs API ─────────────────────────────────────────────────────────────────
-
-export interface JobData {
-  id: string;
-  jobType: string;
-  status: string;
-  progressMessage: string;
-  progressPercent: number;
-  creditsReserved: number;
-  creditsConsumed: number;
-  errorMessage: string | null;
-  result: Record<string, unknown> | null;
-  startedAt: string | null;
-  completedAt: string | null;
-  createdAt: string;
-}
-
-export async function getJob(jobId: string): Promise<JobData | null> {
-  const result = await apiFetch<JobData>(`/jobs/${jobId}`);
-  return result.data ?? null;
-}
-
-// ─── Credits API ──────────────────────────────────────────────────────────────
-
-export interface CreditsData {
-  credits: number;
-  tier: string;
-  recentTransactions: {
-    id: string;
-    amount: number;
-    reason: string;
-    createdAt: string;
-  }[];
-}
-
-export async function getCredits(): Promise<CreditsData | null> {
-  const result = await apiFetch<CreditsData>('/credits');
-  return result.data ?? null;
-}
-
-export async function purchaseCredits(tier: string) {
-  return apiFetch('/credits', {
-    method: 'POST',
-    body: JSON.stringify({ tier }),
   });
 }
 
@@ -217,11 +125,9 @@ export interface StyleProfileData {
   createdAt: string;
 }
 
-
+// ✅ FIXED: All paths now use API_BASE
 export async function listStyleProfiles() {
-  return apiFetch(`${API_BASE_URL}/training/style-profile`);
-  //                     ^^^^^^^^
-  //                     This should include /api
+  return apiFetch<{ success: boolean; data: StyleProfileData[] }>('/training/style-profile');
 }
 
 export async function createStyleProfile(input: {
@@ -240,36 +146,4 @@ export async function deleteStyleProfile(profileId: string) {
     method: 'DELETE',
     body: JSON.stringify({ profileId }),
   });
-}
-
-// ─── Admin API ────────────────────────────────────────────────────────────────
-
-export interface AdminData {
-  analytics: {
-    totalUsers: number;
-    totalBooks: number;
-    completedBooks: number;
-    failedBooks: number;
-    totalCreditsConsumed: number;
-    jobStats: { queued: number; active: number; completed: number; failed: number };
-  };
-  jobs: {
-    id: string;
-    jobType: string;
-    status: string;
-    progressMessage: string;
-    progressPercent: number;
-    creditsReserved: number;
-    creditsConsumed: number;
-    errorMessage: string | null;
-    book: { id: string; title: string } | null;
-    owner: { id: string; email: string; name: string };
-    createdAt: string;
-    completedAt: string | null;
-  }[];
-}
-
-export async function getAdminData(): Promise<AdminData | null> {
-  const result = await apiFetch<AdminData>('/admin');
-  return result.data ?? null;
 }

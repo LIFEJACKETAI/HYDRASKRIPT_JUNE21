@@ -61,3 +61,13 @@ prisma:query SELECT "public"."books"."id", "public"."books"."title", "public"."b
   33 | } (src/lib/api.ts:30:13)
 ✓ Compiled in 974ms
 ✓ Compiled in 244ms
+⨯ Error [ChunkLoadError]: Failed to load chunk server/chunks/[root-of-the-server]__2061fbp._.js from runtime for chunk server/app/api/training/style-profile/route.js
+    at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3) {
+  page: '/api/training/style-profile',
+  [cause]: SyntaxError: Invalid regular expression: /```(?\:json)?\s*([\s\S]*?)```/: Invalid group
+      at <unknown> (.next/dev/server/chunks/[root-of-the-server]__2061fbp._.js:291)
+      at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3)
+}
+ GET /api/training/style-profile 500 in 150ms (next.js: 128ms, application-code: 22ms)
+[browser] Uncaught ChunkLoadError: Failed to load chunk server/chunks/[root-of-the-server]__2061fbp._.js from runtime for chunk server/app/api/training/style-profile/route.js
+    at Object.<anonymous> (.next/dev/server/app/api/training/style-profile/route.js:6:3)

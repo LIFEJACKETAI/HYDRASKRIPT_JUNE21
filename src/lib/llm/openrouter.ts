@@ -128,7 +128,7 @@ export async function generateJSON<T>(options: CompletionOptions): Promise<T> {
   });
 
   let jsonStr = response.trim();
-  const jsonMatch = jsonStr.match(/```(?\:json)?\s*([\s\S]*?)```/);
+    const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (jsonMatch) jsonStr = jsonMatch[1].trim();
 
   try {
