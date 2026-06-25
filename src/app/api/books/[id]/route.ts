@@ -10,7 +10,7 @@ import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 // GET /api/books/[id] - Get a single book
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const email = await getAuthEmail(request);
@@ -46,6 +46,32 @@ export async function GET(
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] Get book failed:', message);
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
+
+// DELETE /api/books/[id] - Delete a book
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const email = await getAuthEmail(request);
+    if (!email) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    const profile = await getOrCreateProfile(email);
+    const { id: bookId } = await params;
+
+    const result = await db.book.delete({
+      where: { id: bookId },
+    });
+
+    return NextResponse.json({ success: true, data: result });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[API] Delete book failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
