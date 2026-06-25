@@ -56,7 +56,9 @@ export async function generateImage(options: GenerateImageOptions): Promise<Gene
 export async function generateBookCover(bookId: string, ownerId: string, bookTitle: string, genre: string, targetAudience: string, coloringTheme?: string | null): Promise<GeneratedImageResult> {
   const isChildrenBook = ['0-5', '6-9', '10-14'].includes(targetAudience);
   const isColoringBook = genre === 'coloring';
-  const style = isColoringBook ? 'lineart-adult' : 'pixar';
+  const style = isColoringBook 
+    ? (isChildrenBook ? 'lineart' : 'lineart-adult') 
+    : 'pixar';
 
   let coverPrompt: string;
   if (isColoringBook && coloringTheme && COLORING_THEMES[coloringTheme as ColoringTheme]) {

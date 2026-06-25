@@ -101,7 +101,7 @@ export async function POST(
         const jobId = await jobQueue.createJob({
           bookId: id,
           ownerId: profile.id,
-          jobType: 'export_pdf',
+          jobType: "finalize_book",
           creditsReserved: 0,
         });
 
@@ -109,7 +109,7 @@ export async function POST(
         const bookWithCredits = await db.book.findUnique({ where: { id } });
         const totalCredits = bookWithCredits?.totalCreditsEstimated || 0;
 
-        await jobQueue.startJob(jobId, 'export_pdf', async () => {
+        await jobQueue.startJob(jobId, "finalize_book", async () => {
           await finalizeBook(id, profile.id, jobId, totalCredits);
         });
 
