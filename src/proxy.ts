@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Next.js 16 requires either a named export `proxy` or a default export
-export function proxy(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   // your logic here
   return NextResponse.next()
 }
