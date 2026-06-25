@@ -2,7 +2,7 @@
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.66:3000
 - Environments: .env.local, .env
-✓ Ready in 1514ms
+✓ Ready in 469ms
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
  We detected multiple lockfiles and selected the directory of /home/c-jay69/package-lock.json as the root directory.
  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
@@ -10,8 +10,4 @@
  Detected additional lockfiles: 
    * /home/c-jay69/Documents/GitHub/HYDRASKRIPT_JUNE21/package-lock.json
 
-⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 
-SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>)
-[?25h
