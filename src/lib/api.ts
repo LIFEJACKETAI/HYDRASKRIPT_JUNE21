@@ -212,7 +212,7 @@ export interface StyleProfileData {
 }
 
 export async function listStyleProfiles(): Promise<StyleProfileData[]> {
-  const result = await apiFetch<{ success: boolean; data: StyleProfileData[] }>('/training/style-profile');
+  const result = await apiFetch<StyleProfileData[]>('/training/style-profile');
   return result.data ?? [];
 }
 
