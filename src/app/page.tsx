@@ -833,39 +833,124 @@ function ExportHubView() {
 
 // ─── UI Gallery View ─────────────────────────────────────────────────────────
 
-const STITCH_FILES = Array.from({ length: 60 }, (_, i) => {
-  const n = String(i + 1).padStart(2, '0');
-  return { id: i + 1, name: `Stitch ${i + 1}`, file: `/stitch/stitch_${n}.html` };
-});
+// All 60 actual stitch files from /public/stitch — real filenames, real display names
+const STITCH_FILES = [
+  { file: '/stitch/ai-powered_support_&_documentation_1.html',  name: 'AI Support & Docs 1',          category: 'AI Tools' },
+  { file: '/stitch/ai-powered_support_&_documentation_2.html',  name: 'AI Support & Docs 2',          category: 'AI Tools' },
+  { file: '/stitch/ai_cover_designer.html',                     name: 'AI Cover Designer',            category: 'AI Tools' },
+  { file: '/stitch/ai_style_library_marketplace.html',          name: 'AI Style Library Marketplace', category: 'AI Tools' },
+  { file: '/stitch/audiobook_studio_&_mastering_suite.html',    name: 'Audiobook Studio & Mastering', category: 'Audio' },
+  { file: '/stitch/audiobook_studio_and_export_hub.html',       name: 'Audiobook Studio & Export',    category: 'Audio' },
+  { file: '/stitch/book_marketing_kit_generator_1.html',        name: 'Book Marketing Kit 1',         category: 'Marketing' },
+  { file: '/stitch/book_marketing_kit_generator_2.html',        name: 'Book Marketing Kit 2',         category: 'Marketing' },
+  { file: '/stitch/dashboard_and_authentication_1.html',        name: 'Dashboard & Auth 1',           category: 'Dashboard' },
+  { file: '/stitch/dashboard_and_authentication_2.html',        name: 'Dashboard & Auth 2',           category: 'Dashboard' },
+  { file: '/stitch/direct-to-reader_author_storefront.html',    name: 'Author Storefront',            category: 'Marketing' },
+  { file: '/stitch/distraction-free_ai_editor_1.html',          name: 'AI Editor 1',                  category: 'Editor' },
+  { file: '/stitch/distraction-free_ai_editor_2.html',          name: 'AI Editor 2',                  category: 'Editor' },
+  { file: '/stitch/export_hub_with_live_preview.html',          name: 'Export Hub Live Preview',      category: 'Export' },
+  { file: '/stitch/generation_and_consistency_monitor.html',    name: 'Generation Monitor',           category: 'Dashboard' },
+  { file: '/stitch/global_library_command_center.html',         name: 'Global Library Command',       category: 'Dashboard' },
+  { file: '/stitch/hydraskript_landing_page_1.html',            name: 'Landing Page 1',               category: 'Landing' },
+  { file: '/stitch/hydraskript_landing_page_2.html',            name: 'Landing Page 2',               category: 'Landing' },
+  { file: '/stitch/hydraskript_landing_page_3.html',            name: 'Landing Page 3',               category: 'Landing' },
+  { file: '/stitch/hydraskript_pricing_plans_1.html',           name: 'Pricing Plans 1',              category: 'Landing' },
+  { file: '/stitch/hydraskript_pricing_plans_2.html',           name: 'Pricing Plans 2',              category: 'Landing' },
+  { file: '/stitch/internal_admin_dashboard.html',              name: 'Internal Admin Dashboard',     category: 'Dashboard' },
+  { file: '/stitch/mobile_dashboard_view.html',                 name: 'Mobile Dashboard',             category: 'Dashboard' },
+  { file: '/stitch/narrative_timeline_monitor.html',            name: 'Narrative Timeline',           category: 'Editor' },
+  { file: '/stitch/new_project_setup_wizard.html',              name: 'Project Setup Wizard',         category: 'Editor' },
+  { file: '/stitch/sentence_rhythm_&_flow_visualizer.html',     name: 'Sentence Rhythm Visualizer',   category: 'Editor' },
+  { file: '/stitch/story_bible_profiles.html',                  name: 'Story Bible Profiles',         category: 'Editor' },
+  { file: '/stitch/style_match_comparison_tool.html',           name: 'Style Match Comparison',       category: 'AI Tools' },
+  { file: '/stitch/style_training_center.html',                 name: 'Style Training Center',        category: 'AI Tools' },
+  { file: '/stitch/universe_&_series_architect.html',           name: 'Universe & Series Architect',  category: 'Editor' },
+  { file: '/stitch/stitch_hydraskript_1.html',   name: 'Stitch 1',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_2.html',   name: 'Stitch 2',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_3.html',   name: 'Stitch 3',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_4.html',   name: 'Stitch 4',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_5.html',   name: 'Stitch 5',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_6.html',   name: 'Stitch 6',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_7.html',   name: 'Stitch 7',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_8.html',   name: 'Stitch 8',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_9.html',   name: 'Stitch 9',  category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_10.html',  name: 'Stitch 10', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_11.html',  name: 'Stitch 11', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_12.html',  name: 'Stitch 12', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_13.html',  name: 'Stitch 13', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_14.html',  name: 'Stitch 14', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_15.html',  name: 'Stitch 15', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_16.html',  name: 'Stitch 16', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_17.html',  name: 'Stitch 17', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_18.html',  name: 'Stitch 18', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_19.html',  name: 'Stitch 19', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_20.html',  name: 'Stitch 20', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_21.html',  name: 'Stitch 21', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_22.html',  name: 'Stitch 22', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_23.html',  name: 'Stitch 23', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_24.html',  name: 'Stitch 24', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_25.html',  name: 'Stitch 25', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_26.html',  name: 'Stitch 26', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_27.html',  name: 'Stitch 27', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_28.html',  name: 'Stitch 28', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_29.html',  name: 'Stitch 29', category: 'Components' },
+  { file: '/stitch/stitch_hydraskript_30.html',  name: 'Stitch 30', category: 'Components' },
+];
+
+const GALLERY_CATEGORIES = ['All', ...Array.from(new Set(STITCH_FILES.map((f) => f.category))).sort()];
 
 function UIGalleryView() {
-  const [search, setSearch] = useState('');
-  const [preview, setPreview] = useState<string | null>(null);
+  const [search, setSearch]       = useState('');
+  const [category, setCategory]   = useState('All');
+  const [preview, setPreview]     = useState<{ file: string; name: string } | null>(null);
 
-  const filtered = STITCH_FILES.filter((f) =>
-    f.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = STITCH_FILES.filter((f) => {
+    const matchSearch   = f.name.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = category === 'All' || f.category === category;
+    return matchSearch && matchCategory;
+  });
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">UI Component Gallery</h1>
-        <p className="text-slate-400 text-sm mt-1">60 stitch UI templates — click any to preview fullscreen.</p>
+        <p className="text-slate-400 text-sm mt-1">
+          {STITCH_FILES.length} stitch UI templates — click any to preview fullscreen.
+        </p>
       </div>
 
-      <input
-        type="text"
-        placeholder="Search..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-xs px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
-      />
+      {/* Search + category filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          placeholder="Search templates..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full sm:max-w-xs px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+        />
+        <div className="flex flex-wrap gap-2">
+          {GALLERY_CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                category === cat
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
 
+      {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {filtered.map((f) => (
           <button
-            key={f.id}
-            onClick={() => setPreview(f.file)}
+            key={f.file}
+            onClick={() => setPreview(f)}
             className="group relative rounded-xl border border-white/10 overflow-hidden bg-[#0d0d10] hover:border-purple-500/50 transition-all aspect-[4/3]"
           >
             <iframe
@@ -875,23 +960,33 @@ function UIGalleryView() {
               style={{ transform: 'scale(0.35)', transformOrigin: 'top left', width: '285%', height: '285%' }}
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-end">
-              <span className="w-full text-center text-xs text-white/0 group-hover:text-white/90 pb-2 transition-all font-medium">
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex flex-col items-center justify-end pb-2 px-1">
+              <span className="text-center text-xs text-white/0 group-hover:text-white/90 transition-all font-medium leading-tight">
                 {f.name}
+              </span>
+              <span className="text-[10px] text-purple-400/0 group-hover:text-purple-400/80 transition-all mt-0.5">
+                {f.category}
               </span>
             </div>
           </button>
         ))}
       </div>
 
+      {filtered.length === 0 && (
+        <div className="text-center py-16 text-slate-500 text-sm">No templates match your search.</div>
+      )}
+
       {/* Fullscreen preview modal */}
       {preview && (
         <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-            <span className="text-sm text-slate-300 font-medium">{preview}</span>
-            <div className="flex gap-3">
+            <div>
+              <span className="text-sm text-white font-semibold">{preview.name}</span>
+              <span className="ml-2 text-xs text-purple-400">{STITCH_FILES.find(f => f.file === preview.file)?.category}</span>
+            </div>
+            <div className="flex gap-3 items-center">
               <a
-                href={preview}
+                href={preview.file}
                 target="_blank"
                 rel="noreferrer"
                 className="text-xs text-cyan-400 hover:underline"
@@ -906,7 +1001,7 @@ function UIGalleryView() {
               </button>
             </div>
           </div>
-          <iframe src={preview} title="Preview" className="flex-1 w-full" />
+          <iframe src={preview.file} title={preview.name} className="flex-1 w-full" />
         </div>
       )}
     </div>
