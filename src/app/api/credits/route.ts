@@ -9,7 +9,7 @@ import { addCredits, getCreditBalance } from '@/lib/utils/credits';
 import { TIER_CONFIG, type Tier } from '@/types';
 
 function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
+  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
 }
 
 // GET - Get credit balance and recent ledger

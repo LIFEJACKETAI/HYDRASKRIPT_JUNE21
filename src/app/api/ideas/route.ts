@@ -7,7 +7,7 @@ import { askLLMJSON } from '@/lib/llm/openrouter';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 
 function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
+  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
 }
 
 // ─── Response Shape Types ──────────────────────────────────────────────────────

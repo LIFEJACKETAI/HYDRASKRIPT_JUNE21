@@ -8,7 +8,7 @@ import { exportBookAsEPUB } from '@/lib/services/epubService';
 import { exportBookAsDOCX } from '@/lib/services/docxService';
 
 function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
+  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
 }
 
 // POST - Export book

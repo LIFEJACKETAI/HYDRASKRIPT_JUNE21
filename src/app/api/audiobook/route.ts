@@ -8,7 +8,7 @@ import { jobQueue } from '@/lib/workers/queue';
 import { CREDIT_COSTS } from '@/types';
 
 function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
+  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
 }
 
 // ─── Chunk text into pieces within Google TTS limit ───────────────────────────

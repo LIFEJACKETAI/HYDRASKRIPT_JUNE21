@@ -8,7 +8,7 @@ import { createStyleProfile, listStyleProfiles, deleteStyleProfile } from '@/lib
 import { CreateStyleProfileSchema, validateOrThrow } from '@/lib/llm/schema';
 
 function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
+  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
 }
 
 // POST - Create a style profile from exemplar texts

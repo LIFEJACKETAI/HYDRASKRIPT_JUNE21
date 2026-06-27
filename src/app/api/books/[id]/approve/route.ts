@@ -8,7 +8,7 @@ import { generateChapter, finalizeBook } from '@/lib/services/bookGenerator';
 import { jobQueue } from '@/lib/workers/queue';
 
 function getAuthEmail(request: NextRequest): string {
-  return request.headers.get('x-user-email') || 'demo@hydraskript.com';
+  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
 }
 
 export async function POST(
