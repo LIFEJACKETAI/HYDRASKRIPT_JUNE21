@@ -4,6 +4,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { exportBookAsPDF } from '@/lib/services/exportService';
+import { exportBookAsEPUB } from '@/lib/services/epubService';
+import { exportBookAsDOCX } from '@/lib/services/docxService';
 
 function getAuthEmail(request: NextRequest): string {
   return request.headers.get('x-user-email') || 'demo@hydraskript.com';
@@ -36,29 +38,26 @@ export async function POST(
 
     // ── EPUB ─────────────────────────────────────────────────────────────────
     if (format === 'epub') {
-      // TODO: Implement full EPUB generation (e.g. epub-gen-memory or custom builder)
-      // For now return a clear stub so the UI doesn't silently 404
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'EPUB export is not yet available — coming soon.',
-          code: 'EPUB_NOT_IMPLEMENTED',
-        },
-        { status: 501 }
-      );
+      const result = await exportBookAsEPUB(id, profile.id);
+      if (!result.success) {
+        return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+      }
+      return NextResponse.json({
+        success: true,
+        data: { downloadUrl: result.publicUrl, format: 'epub' },
+      });
     }
 
     // ── DOCX ─────────────────────────────────────────────────────────────────
     if (format === 'docx') {
-      // TODO: Implement DOCX generation (e.g. docx npm package)
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'DOCX export is not yet available — coming soon.',
-          code: 'DOCX_NOT_IMPLEMENTED',
-        },
-        { status: 501 }
-      );
+      const result = await exportBookAsDOCX(id, profile.id);
+      if (!result.success) {
+        return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+      }
+      return NextResponse.json({
+        success: true,
+        data: { downloadUrl: result.publicUrl, format: 'docx' },
+      });
     }
 
     // ── Unknown format ────────────────────────────────────────────────────────
