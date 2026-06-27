@@ -46,12 +46,11 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
     });
     const previousSummary = prevChapter?.summaryForNext || 'This is the beginning of the story.';
 
-    // characterNames is a Postgres String[] — Prisma returns it as a JS array directly
+    // characterNames is a Postgres String[] — Prisma always returns it as a JS string[].
+    // No JSON.parse needed; that would throw on a real array value.
     const characterNames: string[] = Array.isArray(book.characterNames)
       ? (book.characterNames as string[])
-      : (() => {
-          try { return JSON.parse((book.characterNames as unknown as string) || '[]') as string[]; } catch { return []; }
-        })();
+      : [];
 
     // 3. Prompt Construction
     // Get total chapters from book outline for accurate progress reporting

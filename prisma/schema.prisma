@@ -62,7 +62,7 @@ model Book {
   visualIdentityUrl    String?  // URL to the approved character reference sheet
   coloringTheme        String?  // For coloring books: mandalas, undersea-creatures, birds, etc.
   adventureType        String?  // For kids books: farm, school, fair, boat, forest, beach, space, zoo, castle, city
-  characterNames       String[]   @default([]) // JSON array: [mainCharacter, ...friendNames] up to 5 names
+  characterNames       String[]   @default([]) // Postgres native array: [mainCharacter, ...friendNames] up to 5 names
   outline              String   @default("{}")     // JSON: { title, chapters: [{title, synopsis, wordTarget}] }
   coverImageUrl        String?
   createdAt            DateTime @default(now())

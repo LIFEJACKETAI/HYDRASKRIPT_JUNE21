@@ -125,9 +125,10 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
       outlineUser = getColoringOutlineUserPrompt(book.title, coloringTheme);
     } else {
       console.log(`[DEBUG] 4. Parsing character names...`);
-      const characterNames = Array.isArray(book.characterNames) 
-        ? book.characterNames 
-        : (() => { try { return JSON.parse((book.characterNames as any) || '[]') as string[]; } catch { return []; } })();
+      // characterNames is Postgres String[] — Prisma returns a JS array directly, never a JSON string
+      const characterNames: string[] = Array.isArray(book.characterNames)
+        ? (book.characterNames as string[])
+        : [];
 
       outlinePrompt = getOutlinePrompt(genre, targetAudience, chapterCount, stylePrompt, characterNames.length > 0 ? characterNames : undefined, book.adventureType ?? undefined);
       outlineUser = getOutlineUserPrompt(book.title, genre, targetAudience);
@@ -218,10 +219,10 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       fullSystemPrompt = getColoringChapterPrompt(coloringTheme, chapterIndex, 10); // approximate total chapters
       chapterUser = `Write a brief, poetic description for the coloring page titled "${chapter.title}". Visual subject: ${chapter.synopsis}`;
     } else {
-      // Safe parsing of characterNames
-      const characterNames = Array.isArray(book.characterNames) 
-        ? book.characterNames 
-        : (() => { try { return JSON.parse((book.characterNames as any) || '[]') as string[]; } catch { return []; } })();
+      // characterNames is Postgres String[] — Prisma returns a JS array directly, never a JSON string
+      const characterNames: string[] = Array.isArray(book.characterNames)
+        ? (book.characterNames as string[])
+        : [];
 
       const chapterPrompt = getChapterWritePrompt(stylePrompt, book.title, genre, chapterIndex, 10, previousSummary, characterNames.length > 0 ? characterNames : undefined);
       const childrensPrompt = isChildrenBook ? getChildrensChapterPrompt(targetAudience) : '';
