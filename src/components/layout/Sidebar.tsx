@@ -12,6 +12,7 @@ import {
   Download,
   Zap,
   ChevronLeft,
+  LayoutGrid,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/lib/store';
@@ -33,6 +34,7 @@ const navItems: NavItem[] = [
   { icon: Headphones,      label: 'Audiobook',      view: 'audiobook',       color: 'text-cyan-400' },
   { icon: Palette,         label: 'Style Training', view: 'style-training',  color: 'text-pink-400' },
   { icon: Download,        label: 'Export Hub',     view: 'export-hub',      color: 'text-blue-400' },
+  { icon: LayoutGrid,      label: 'UI Gallery',     view: 'ui-gallery',      color: 'text-emerald-400' },
   { icon: Coins,           label: 'Credits',        view: 'credits',         color: 'text-amber-400' },
   { icon: Shield,          label: 'Admin',          view: 'admin', adminOnly: true, color: 'text-red-400' },
 ];

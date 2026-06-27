@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Universe &amp; Series Architect | HydraSkript</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .neural-line {
+            background: linear-gradient(90deg, rgba(19, 200, 236, 0.5) 0%, rgba(19, 200, 236, 0.1) 100%);
+            box-shadow: 0 0 8px rgba(19, 200, 236, 0.4);
+        }
+        .node-glow {
+            box-shadow: 0 0 15px rgba(19, 200, 236, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #283639;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-white overflow-hidden h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-6 py-3 bg-background-dark">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-6">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 4H30.6666V17.3334H17.3334V30.6666H4V44H44V4Z" fill="currentColor"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold leading-tight tracking-tight bg-gradient-to-r from-primary to-cyan-200 bg-clip-text text-transparent">
+                    The Aetheria Universe Architect
+                </h1>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" href="#">Universe Graph</a>
+<a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" href="#">Timeline Explorer</a>
+<a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" href="#">Sync Manager</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<label class="flex items-center min-w-40 h-10 max-w-64 relative">
+<span class="material-symbols-outlined absolute left-3 text-white/40 text-sm">search</span>
+<input class="w-full h-full rounded-lg text-white focus:outline-0 focus:ring-1 focus:ring-primary border-none bg-white/5 pl-10 pr-4 text-sm font-normal placeholder:text-white/30" placeholder="Search universe..."/>
+</label>
+<button class="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#101f22] text-sm font-bold tracking-tight hover:brightness-110 transition-all">
+<span>New Volume</span>
+</button>
+<button class="flex items-center justify-center rounded-lg size-10 bg-white/5 text-white hover:bg-white/10">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-white/10 mx-2"></div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border border-primary/30" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDMRk81SsoeMpnxqsQPa_8JIQxZ5_wXWIpNo8R2hVFbW4qcNE3BW07A90ryvpDl9Z3_3_YSLNxm07WLBXxSGQjoMl9XcXy6acjOWvHRZhU98wU-WcpLmssfSCcD9tJAciCP-GvE5UEXhr1VncmVzjpWsJvyuly0X4ARKJ4iJkZGR4xhKEtS17kg6HhEXLTCBJ7mi9cUBmz3Sy3agFeJMraYuHnqhdXx6OQcnxVstzLnDQwh6zIGVBSUBvEkvnBqvKfdqO6PcbFiVFKp");'></div>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex flex-1 overflow-hidden">
+<!-- Left Sidebar: Shared Entities -->
+<aside class="w-72 bg-background-dark border-r border-white/10 flex flex-col shrink-0">
+<div class="p-4 flex flex-col gap-1 border-b border-white/10">
+<h2 class="text-white text-sm font-semibold uppercase tracking-wider">Shared Entities</h2>
+<p class="text-white/40 text-xs">Synchronized across 4 volumes</p>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-2">
+<!-- Character Section -->
+<div class="mb-4">
+<button class="flex items-center justify-between w-full px-3 py-2 text-primary/80 text-xs font-bold uppercase tracking-widest">
+<span>Universal Characters</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<div class="space-y-1 mt-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 border border-white/5 hover:border-primary/30 group cursor-pointer">
+<span class="material-symbols-outlined text-primary text-lg">person</span>
+<div class="flex-1 overflow-hidden">
+<p class="text-white text-sm font-medium truncate">Aris of Aetheria</p>
+<p class="text-white/40 text-[10px]">Protagonist • 3 Volumes</p>
+</div>
+<span class="material-symbols-outlined text-green-400 text-xs opacity-0 group-hover:opacity-100">sync</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-white/40 text-lg">person</span>
+<p class="text-white/70 text-sm font-medium">The Silent Oracle</p>
+</div>
+</div>
+</div>
+<!-- Lore Section -->
+<div class="mb-4">
+<button class="flex items-center justify-between w-full px-3 py-2 text-primary/80 text-xs font-bold uppercase tracking-widest">
+<span>Core Lore</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<div class="space-y-1 mt-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-white/40 text-lg">auto_stories</span>
+<p class="text-white/70 text-sm font-medium">The Mana Eclipse</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-white/40 text-lg">history_edu</span>
+<p class="text-white/70 text-sm font-medium">First Era Laws</p>
+</div>
+</div>
+</div>
+<!-- Locations Section -->
+<div class="mb-4">
+<button class="flex items-center justify-between w-full px-3 py-2 text-primary/80 text-xs font-bold uppercase tracking-widest">
+<span>Persistent Locations</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<div class="space-y-1 mt-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-white/40 text-lg">location_on</span>
+<p class="text-white/70 text-sm font-medium">The Iron Citadel</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-white/40 text-lg">map</span>
+<p class="text-white/70 text-sm font-medium">Sky-Isle Archipelago</p>
+</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-white/10">
+<button class="w-full flex items-center justify-center gap-2 bg-primary/10 border border-primary/30 text-primary py-2 rounded-lg text-sm font-semibold hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-lg">sync</span>
+                    Sync Universe
+                </button>
+</div>
+</aside>
+<!-- Center Area: Knowledge Graph Visualization -->
+<section class="flex-1 relative bg-[radial-gradient(circle_at_center,_#1a2d31_0%,_#101f22_100%)] overflow-hidden flex flex-col">
+<div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#13c8ec 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
+<!-- Graph Canvas (Mockup) -->
+<div class="flex-1 relative flex items-center justify-center">
+<!-- Central Node -->
+<div class="absolute z-20 flex flex-col items-center group cursor-move">
+<div class="w-24 h-24 rounded-full bg-primary flex items-center justify-center node-glow border-4 border-[#101f22]">
+<span class="material-symbols-outlined text-4xl text-[#101f22]">menu_book</span>
+</div>
+<div class="mt-4 bg-background-dark/80 backdrop-blur px-4 py-1.5 rounded-full border border-primary/40">
+<span class="text-sm font-bold text-white tracking-wide">GLOBAL STORY BIBLE</span>
+</div>
+</div>
+<!-- Neural Connection Lines (SVGs) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<line class="opacity-50" stroke="#13c8ec" stroke-dasharray="4" stroke-width="2" x1="50%" x2="30%" y1="50%" y2="30%"></line>
+<line class="opacity-80" stroke="#13c8ec" stroke-width="2" x1="50%" x2="70%" y1="50%" y2="30%"></line>
+<line class="opacity-30" stroke="#13c8ec" stroke-dasharray="6" stroke-width="1.5" x1="50%" x2="75%" y1="50%" y2="60%"></line>
+<line class="opacity-80" stroke="#13c8ec" stroke-width="2" x1="50%" x2="25%" y1="50%" y2="70%"></line>
+</svg>
+<!-- Book Node 1 -->
+<div class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/20 hover:border-primary transition-all group-hover:scale-110">
+<span class="material-symbols-outlined text-2xl text-white/60 group-hover:text-primary">library_books</span>
+</div>
+<p class="mt-2 text-xs font-medium text-white/60 group-hover:text-white uppercase tracking-tighter">Volume I: The Awakening</p>
+</div>
+<!-- Book Node 2 -->
+<div class="absolute top-1/4 right-1/4 translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-primary/60 node-glow group-hover:scale-110 transition-all">
+<span class="material-symbols-outlined text-2xl text-primary">auto_stories</span>
+</div>
+<p class="mt-2 text-xs font-medium text-white uppercase tracking-tighter">Volume II: Shifting Skies</p>
+</div>
+<!-- Entity Node: Character -->
+<div class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 z-10 flex flex-col items-center group cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-white/5 backdrop-blur flex items-center justify-center border border-white/20 hover:border-primary transition-all group-hover:scale-110">
+<span class="material-symbols-outlined text-xl text-white/40 group-hover:text-primary">person</span>
+</div>
+<p class="mt-2 text-[10px] font-medium text-white/40 uppercase tracking-tighter">Aris of Aetheria</p>
+</div>
+<!-- Connection Arc Overlay (Interaction Example) -->
+<div class="absolute top-[40%] right-[35%] z-30 bg-[#1c2527] border border-primary/50 p-4 rounded-xl shadow-2xl max-w-xs scale-90 opacity-0 hover:opacity-100 transition-opacity">
+<div class="flex items-center justify-between mb-3">
+<h4 class="text-xs font-bold text-primary uppercase">Character Arc Link</h4>
+<span class="material-symbols-outlined text-xs text-white/40">open_in_new</span>
+</div>
+<p class="text-[11px] leading-relaxed text-white/80">
+                        Aris's development in <span class="text-primary font-medium">Volume II</span> shifts from reluctant heir to militant leader. Key turning point: The Siege of Citadel.
+                    </p>
+<div class="mt-3 h-1 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-2/3"></div>
+</div>
+<p class="mt-1 text-[9px] text-white/40 uppercase">Arc Completion: 65%</p>
+</div>
+</div>
+<!-- Canvas Controls -->
+<div class="absolute bottom-6 left-6 flex gap-2">
+<button class="bg-white/5 hover:bg-white/10 p-2 rounded-lg border border-white/10"><span class="material-symbols-outlined">zoom_in</span></button>
+<button class="bg-white/5 hover:bg-white/10 p-2 rounded-lg border border-white/10"><span class="material-symbols-outlined">zoom_out</span></button>
+<button class="bg-white/5 hover:bg-white/10 p-2 rounded-lg border border-white/10"><span class="material-symbols-outlined">center_focus_strong</span></button>
+<div class="w-[1px] bg-white/10 mx-1"></div>
+<button class="bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_list</span> Layout: Organic
+                </button>
+</div>
+</section>
+<!-- Right Sidebar: Conflict Checker -->
+<aside class="w-80 bg-background-dark border-l border-white/10 flex flex-col shrink-0">
+<div class="p-4 flex flex-col gap-1 border-b border-white/10">
+<div class="flex items-center justify-between">
+<h2 class="text-white text-sm font-semibold uppercase tracking-wider">Continuity Conflicts</h2>
+<span class="bg-red-500/20 text-red-400 text-[10px] font-bold px-2 py-0.5 rounded-full">3 Alerts</span>
+</div>
+<p class="text-white/40 text-xs">Real-time universe scan active</p>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+<!-- Critical Error -->
+<div class="bg-red-500/5 border border-red-500/20 rounded-xl p-3 flex flex-col gap-2 relative group hover:bg-red-500/10 transition-all">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-red-400">warning</span>
+<div class="flex-1">
+<h3 class="text-white text-xs font-bold leading-tight">Timeline Contradiction</h3>
+<p class="text-white/60 text-[11px] mt-1">
+                                Aris is <span class="text-white font-medium">25 yrs old</span> in Book 1 (Year 100), but described as <span class="text-white font-medium">27 yrs old</span> in Book 2 (Year 105).
+                            </p>
+</div>
+</div>
+<div class="flex gap-2 mt-2">
+<button class="text-[9px] font-bold uppercase bg-red-400/20 text-red-400 px-2 py-1 rounded hover:bg-red-400/30">Fix Now</button>
+<button class="text-[9px] font-bold uppercase text-white/40 px-2 py-1 hover:text-white transition-colors">Ignore</button>
+</div>
+</div>
+<!-- Warning -->
+<div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 flex flex-col gap-2 group hover:bg-amber-500/10 transition-all">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400">lightbulb</span>
+<div class="flex-1">
+<h3 class="text-white text-xs font-bold leading-tight">Lore Inconsistency</h3>
+<p class="text-white/60 text-[11px] mt-1">
+                                'The Mana Eclipse' is cited as occurring in the 2nd Era in Book 3, contradicting the 'First Era Laws' lore entry.
+                            </p>
+</div>
+</div>
+</div>
+<!-- Resolved / Info -->
+<div class="bg-primary/5 border border-primary/20 rounded-xl p-3 flex flex-col gap-2 opacity-60">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">check_circle</span>
+<div class="flex-1">
+<h3 class="text-white text-xs font-bold leading-tight">Location Synchronized</h3>
+<p class="text-white/60 text-[11px] mt-1">
+                                'The Iron Citadel' floorplan changes in Volume IV updated to Universal Lore.
+                            </p>
+</div>
+</div>
+</div>
+<!-- Another Critical Error -->
+<div class="bg-red-500/5 border border-red-500/20 rounded-xl p-3 flex flex-col gap-2 relative group hover:bg-red-500/10 transition-all">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-red-400">error</span>
+<div class="flex-1">
+<h3 class="text-white text-xs font-bold leading-tight">Character Death Conflict</h3>
+<p class="text-white/60 text-[11px] mt-1">
+                                Lord Malakor is listed as 'Deceased' in Book 2, but appears in a dialogue scene in Book 3 Chapter 12.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer for conflicts -->
+<div class="p-4 border-t border-white/10 bg-black/10">
+<div class="flex items-center gap-2 mb-3">
+<div class="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-4/5"></div>
+</div>
+<span class="text-[10px] text-white/40 font-bold">80% CONSISTENT</span>
+</div>
+<button class="w-full text-xs text-white/60 font-medium py-2 hover:text-white transition-colors border border-white/10 rounded-lg">View Full Report</button>
+</div>
+</aside>
+</main>
+<!-- Bottom Status Bar -->
+<footer class="h-8 bg-[#101f22] border-t border-white/5 flex items-center justify-between px-6 text-[10px] text-white/40 font-medium uppercase tracking-widest">
+<div class="flex gap-6 items-center">
+<span class="flex items-center gap-1.5"><span class="size-1.5 bg-green-500 rounded-full"></span> HydraSkript Core Online</span>
+<span>Version 2.4.0-Architect</span>
+</div>
+<div class="flex gap-4">
+<span>Last Synced: 2m ago</span>
+<span class="text-primary/60">4 Books Connected</span>
+<span>CPU: 12% | Neural Map: Active</span>
+</div>
+</footer>
+</body></html>

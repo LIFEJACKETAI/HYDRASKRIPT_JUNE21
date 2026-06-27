@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript Audiobook Studio &amp; Mastering Suite</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#000000",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #111;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #283639;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #13c8ec;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #a855f7 0%, #13c8ec 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #7c3aed 0%, #13c8ec 100%);
+        }
+        .wave-bar {
+            width: 3px;
+            background: #13c8ec;
+            border-radius: 1px;
+            transition: height 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white selection:bg-primary/30">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#283639] bg-black/80 backdrop-blur-md px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-white">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-bold tracking-tight">HydraSkript</h2>
+</div>
+<label class="flex items-center min-w-64 h-10">
+<div class="flex w-full items-center rounded-lg bg-[#283639] px-3">
+<span class="material-symbols-outlined text-[#9db4b9] text-xl">search</span>
+<input class="form-input w-full border-none bg-transparent text-white focus:ring-0 placeholder:text-[#9db4b9] text-sm" placeholder="Search Studio..."/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-6">
+<nav class="flex gap-6 text-sm font-medium text-[#9db4b9]">
+<a class="hover:text-white transition-colors" href="#">Library</a>
+<a class="hover:text-white transition-colors" href="#">Workspace</a>
+<a class="text-white border-b-2 border-primary pb-1" href="#">Audiobook Studio</a>
+<a class="hover:text-white transition-colors" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4 border-l border-[#283639] pl-6">
+<button class="flex items-center justify-center rounded-lg h-10 px-4 bg-primary text-black text-sm font-bold hover:brightness-110 transition-all">
+                    Upgrade Pro
+                </button>
+<div class="bg-center bg-cover rounded-full size-9 border-2 border-primary/20" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBG9XyeS2UcROIhw-U2EL0L7XfxKsOpcOfEoHl9bm7yrMexz4g9Xc4bcOrmN548WmpOYetFX-PTVQlQ5nPoOHDOVUEQoql7CSMiCttx56luaNl_KtMZoinajht0MLz8xWdKH1gURybnNDD9FRh6P9bFNl9ah5qcSNjtVRQGFM9NR8ooWzR_ppFnewPsVuMtL0TwYCrOMzYkzxtzXgCIVtsFSn9NxH1axYbgUMBtMEzyjg51xS5aPnhOHFIdsvyMDrF7l22RXwtB9D4e");'></div>
+</div>
+</div>
+</header>
+<main class="flex h-[calc(100vh-140px)] w-full">
+<!-- Left Column: Chapter List -->
+<aside class="w-80 border-r border-[#283639] flex flex-col bg-black">
+<div class="p-5 border-b border-[#283639]">
+<h1 class="text-white text-lg font-bold leading-none">Cosmic Tales</h1>
+<p class="text-[#9db4b9] text-xs mt-2 uppercase tracking-widest font-semibold">Master Project · 14 Chapters</p>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+<!-- Chapter Ready -->
+<div class="p-3 rounded-lg bg-[#283639] border border-primary/30 group cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs text-primary font-bold">CHAPTER 1</span>
+<span class="flex items-center gap-1 text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">
+<span class="material-symbols-outlined text-xs">check_circle</span> READY
+                        </span>
+</div>
+<p class="text-white text-sm font-medium">The Awakening</p>
+<p class="text-[#9db4b9] text-xs mt-1">12:45 • Mastered</p>
+</div>
+<!-- Chapter Processing -->
+<div class="p-3 rounded-lg bg-black/40 border border-[#283639] hover:border-primary/20 group cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs text-[#9db4b9] font-bold">CHAPTER 2</span>
+<span class="flex items-center gap-1 text-[10px] bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full font-bold animate-pulse">
+<span class="material-symbols-outlined text-xs">sync</span> PROCESSING
+                        </span>
+</div>
+<p class="text-white text-sm font-medium">Hidden Paths</p>
+<p class="text-[#9db4b9] text-xs mt-1">08:22 • Rendering...</p>
+</div>
+<!-- Chapters Pending -->
+<div class="p-3 rounded-lg bg-black/40 border border-transparent hover:border-[#283639] group cursor-pointer opacity-60 hover:opacity-100 transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs text-[#9db4b9] font-bold">CHAPTER 3</span>
+<span class="text-[10px] bg-[#283639] text-[#9db4b9] px-2 py-0.5 rounded-full font-bold">PENDING</span>
+</div>
+<p class="text-white text-sm font-medium">Final Stand</p>
+<p class="text-[#9db4b9] text-xs mt-1">--:-- • No Audio</p>
+</div>
+<div class="p-3 rounded-lg bg-black/40 border border-transparent hover:border-[#283639] group cursor-pointer opacity-60 hover:opacity-100 transition-all">
+<div class="flex justify-between items-start mb-1">
+<span class="text-xs text-[#9db4b9] font-bold">CHAPTER 4</span>
+<span class="text-[10px] bg-[#283639] text-[#9db4b9] px-2 py-0.5 rounded-full font-bold">PENDING</span>
+</div>
+<p class="text-white text-sm font-medium">Epilogue</p>
+<p class="text-[#9db4b9] text-xs mt-1">--:-- • No Audio</p>
+</div>
+<button class="w-full flex items-center justify-center gap-2 p-3 rounded-lg border-2 border-dashed border-[#283639] text-[#9db4b9] hover:text-white hover:border-primary/50 transition-all">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+<span class="text-sm font-medium">Add New Chapter</span>
+</button>
+</div>
+</aside>
+<!-- Center Column: Narration Preview & Voice Grid -->
+<section class="flex-1 flex flex-col bg-black overflow-hidden">
+<!-- Audiobook Mastering Headline -->
+<div class="px-8 pt-6">
+<h2 class="gradient-text text-3xl font-bold tracking-tight">Audiobook Mastering</h2>
+<div class="flex gap-8 border-b border-[#283639] mt-6">
+<a class="border-b-2 border-white text-white pb-3 pt-2 text-sm font-bold tracking-wide" href="#">Narrator Profiles</a>
+<a class="text-[#9db4b9] hover:text-white pb-3 pt-2 text-sm font-bold tracking-wide transition-colors" href="#">Recent Voices</a>
+<a class="text-[#9db4b9] hover:text-white pb-3 pt-2 text-sm font-bold tracking-wide transition-colors" href="#">Favorites</a>
+</div>
+</div>
+<!-- Voice Selection Grid -->
+<div class="px-8 py-4 overflow-y-auto custom-scrollbar flex-shrink-0" style="max-height: 400px;">
+<div class="grid grid-cols-4 gap-4">
+<!-- Voice Item -->
+<div class="bg-[#111] border border-[#283639] p-3 rounded-lg hover:border-primary group transition-all cursor-pointer">
+<div class="relative w-full aspect-square rounded-md overflow-hidden mb-3">
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-primary text-4xl">play_circle</span>
+</div>
+<img class="w-full h-full object-cover" data-alt="Portrait of smooth male narrator Aiden" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr8f5GkAuf_btR1vbAjNuXuBTv6Gw3znbeEqAhYvYml-6f-b86MYrqz80OdcRCkGZvfwCPCepjRz7Gfn-RHTjkEJPjBCaeYdMWxmv_LJtgUADoBBofGW3LQgxYxljIpUOhQehqefrCLny-2850InE0rpsGj4xU6RGq2WAh4A_fcsS2arFx8HB7eInCqRhtV-8E9gLtPBDnsQzycbTVftPEflhlUZZgbqCCv5QAarIpt_2swBO9HWG7RuhQmXK384Qgfu-M_lgiM0LK"/>
+</div>
+<p class="text-white text-sm font-semibold truncate">Aiden - Smooth</p>
+<p class="text-[#9db4b9] text-xs">Calm, Professional</p>
+</div>
+<!-- Voice Item -->
+<div class="bg-[#111] border border-[#283639] p-3 rounded-lg hover:border-primary group transition-all cursor-pointer">
+<div class="relative w-full aspect-square rounded-md overflow-hidden mb-3">
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-primary text-4xl">play_circle</span>
+</div>
+<img class="w-full h-full object-cover" data-alt="Portrait of dramatic female narrator Elena" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzf6wemoAj08uQoSMLKjBGl8yxMar0FUdZMP2sVj0DvBxeShSWC5ckKQ_skSot1SKGXB68gm7K1sglwcHf65cBFkltaI1P07T-RfpNLIPK1byzSATVxP3gOw4BPiEvijfasvhs50iFNqJwTFhPdwvyQC-SAun1TtkyvjVBX7tH32JEM5mMBZVWh3FKgsB-MF0ECaq-ctNKnkFJpD6NDCAQzi78YlvMZEYrcnOIk91OTNWlnrgNx4YbAnSCRPF1hiBKPk2S5J7U5OyG"/>
+</div>
+<p class="text-white text-sm font-semibold truncate">Elena - Fiction</p>
+<p class="text-[#9db4b9] text-xs">Emotional, Intense</p>
+</div>
+<!-- Voice Item -->
+<div class="bg-[#111] border border-[#283639] p-3 rounded-lg hover:border-primary group transition-all cursor-pointer">
+<div class="relative w-full aspect-square rounded-md overflow-hidden mb-3">
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-primary text-4xl">play_circle</span>
+</div>
+<img class="w-full h-full object-cover" data-alt="Portrait of authoritative male narrator Marcus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPZGm7FUu0W6klbIrumhcDp8tVU9GlWJbwBfB-8whWm7PyZU0QRXOKbxw8MIs7Wc90ZRwEWs8meZM3WhvqrOUOLIZgH4JBGcCYwViFRp6liXa59Yu2gil5qbrfdUsHI7BWCo-bByfu69dMKl0sN7y5cTcpDAqfXIlpk1zhOxKBiAR80RjDiML7TgEJMvkfaIhZW1lTR161h3rSrHXnWwuxFis_Q0U2cbhGrd3fYAkAVGtzw0h1JW39J0UOndJcnM0w3i_5WD3oEsVm"/>
+</div>
+<p class="text-white text-sm font-semibold truncate">Marcus - Deep Bass</p>
+<p class="text-[#9db4b9] text-xs">Authoritative, Warm</p>
+</div>
+<!-- Voice Item -->
+<div class="bg-[#111] border border-[#283639] p-3 rounded-lg hover:border-primary group transition-all cursor-pointer">
+<div class="relative w-full aspect-square rounded-md overflow-hidden mb-3">
+<div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-primary text-4xl">play_circle</span>
+</div>
+<img class="w-full h-full object-cover" data-alt="Portrait of cheerful narrator Sienna" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgsxAs8Gz30iWfFy804Ka4pdA_iiCiSJKZM9VMXYYjiyQV4haEINE3rHHUDfvAKRLtLn6tx5OukmwI_1w5AfY2pS7ZU87d9qRQJJekHyny_Mv7ujkWZ6edP5FSi0XrOV-FQGJqFqL5ISarFp-Nf8gd7JUEvLCPXXXbUDADylw5IBAfZLyYY6Im0MMhDMDGXcBg9DbC-05tcvnfpo1pnC6QVJW746f0aYGD1mEtCiPIZ1Jq6HkQ2e8Hkx5NhxTh6TPMY2MYPZ06vTjX"/>
+</div>
+<p class="text-white text-sm font-semibold truncate">Sienna - Bright</p>
+<p class="text-[#9db4b9] text-xs">Cheerful, Clear</p>
+</div>
+</div>
+</div>
+<!-- Waveform Visualizer -->
+<div class="flex-1 px-8 pb-8 flex flex-col justify-end">
+<div class="bg-[#111] rounded-xl border border-[#283639] p-6 h-48 flex items-center gap-1 relative overflow-hidden group">
+<div class="absolute top-4 left-6 text-xs text-primary font-bold uppercase tracking-widest flex items-center gap-2">
+<span class="size-2 bg-primary rounded-full animate-pulse"></span>
+                        Live Visualizer: Chapter 1
+                    </div>
+<!-- Waveform Bars -->
+<div class="flex-1 flex items-center justify-center gap-[2px] h-32">
+<div class="wave-bar h-12"></div><div class="wave-bar h-24"></div><div class="wave-bar h-16"></div><div class="wave-bar h-8"></div>
+<div class="wave-bar h-32"></div><div class="wave-bar h-20"></div><div class="wave-bar h-24"></div><div class="wave-bar h-14"></div>
+<div class="wave-bar h-28"></div><div class="wave-bar h-18"></div><div class="wave-bar h-32"></div><div class="wave-bar h-20"></div>
+<div class="wave-bar h-12"></div><div class="wave-bar h-24"></div><div class="wave-bar h-16"></div><div class="wave-bar h-8"></div>
+<div class="wave-bar h-32"></div><div class="wave-bar h-20"></div><div class="wave-bar h-24"></div><div class="wave-bar h-14"></div>
+<div class="wave-bar h-28"></div><div class="wave-bar h-18"></div><div class="wave-bar h-32"></div><div class="wave-bar h-20"></div>
+<div class="wave-bar h-12"></div><div class="wave-bar h-24"></div><div class="wave-bar h-16"></div><div class="wave-bar h-8"></div>
+<div class="wave-bar h-32"></div><div class="wave-bar h-20"></div><div class="wave-bar h-24"></div><div class="wave-bar h-14"></div>
+<div class="wave-bar h-28"></div><div class="wave-bar h-18"></div><div class="wave-bar h-32"></div><div class="wave-bar h-20"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: Mastering Suite -->
+<aside class="w-80 border-l border-[#283639] bg-black p-6 flex flex-col gap-8 custom-scrollbar overflow-y-auto">
+<h3 class="text-white text-sm font-bold uppercase tracking-widest">Mastering Suite</h3>
+<!-- Controls Group -->
+<div class="space-y-6">
+<!-- Narration Speed -->
+<div class="space-y-3">
+<div class="flex justify-between">
+<label class="text-xs text-[#9db4b9] font-medium uppercase">Narration Speed</label>
+<span class="text-primary text-xs font-bold">1.25x</span>
+</div>
+<input class="w-full h-1 bg-[#283639] rounded-lg appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+<!-- Pitch -->
+<div class="space-y-3">
+<div class="flex justify-between">
+<label class="text-xs text-[#9db4b9] font-medium uppercase">Pitch Adjustment</label>
+<span class="text-primary text-xs font-bold">-0.5</span>
+</div>
+<input class="w-full h-1 bg-[#283639] rounded-lg appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+<!-- Pause Duration -->
+<div class="space-y-3">
+<div class="flex justify-between">
+<label class="text-xs text-[#9db4b9] font-medium uppercase">Pause Duration</label>
+<span class="text-primary text-xs font-bold">0.8s</span>
+</div>
+<input class="w-full h-1 bg-[#283639] rounded-lg appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+</div>
+<!-- Background Ambience -->
+<div class="space-y-4">
+<label class="text-xs text-[#9db4b9] font-medium uppercase">Background Ambience</label>
+<div class="grid grid-cols-2 gap-2">
+<button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary text-primary text-xs font-bold">
+<span class="material-symbols-outlined text-sm">water_drop</span> Rain
+                    </button>
+<button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#283639] border border-transparent text-[#9db4b9] text-xs font-bold hover:text-white">
+<span class="material-symbols-outlined text-sm">local_library</span> Library
+                    </button>
+<button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#283639] border border-transparent text-[#9db4b9] text-xs font-bold hover:text-white">
+<span class="material-symbols-outlined text-sm">coffee</span> Cafe
+                    </button>
+<button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#283639] border border-transparent text-[#9db4b9] text-xs font-bold hover:text-white">
+<span class="material-symbols-outlined text-sm">wind_power</span> Wind
+                    </button>
+</div>
+<div class="pt-2">
+<div class="flex justify-between mb-2">
+<label class="text-[10px] text-[#9db4b9] uppercase">Mix Level</label>
+<span class="text-white text-[10px]">12%</span>
+</div>
+<input class="w-full h-1 bg-[#283639] rounded-lg appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+</div>
+<!-- Toggles -->
+<div class="space-y-4 pt-4 border-t border-[#283639]">
+<div class="flex items-center justify-between">
+<span class="text-xs text-white">Breath Removal</span>
+<div class="w-8 h-4 bg-primary rounded-full relative">
+<div class="size-3 bg-white rounded-full absolute top-0.5 right-0.5"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-white">Dynamic Compression</span>
+<div class="w-8 h-4 bg-[#283639] rounded-full relative">
+<div class="size-3 bg-white rounded-full absolute top-0.5 left-0.5"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-white">Normalize Volume</span>
+<div class="w-8 h-4 bg-primary rounded-full relative">
+<div class="size-3 bg-white rounded-full absolute top-0.5 right-0.5"></div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Global Footer Audio Player -->
+<footer class="fixed bottom-0 left-0 right-0 h-20 bg-[#111]/95 backdrop-blur-xl border-t border-[#283639] px-6 flex items-center justify-between z-50">
+<!-- Playback Controls -->
+<div class="flex items-center gap-6 w-1/3">
+<div class="flex items-center gap-4">
+<button class="text-[#9db4b9] hover:text-white"><span class="material-symbols-outlined">replay_5</span></button>
+<button class="bg-white text-black size-10 rounded-full flex items-center justify-center hover:scale-105 transition-all">
+<span class="material-symbols-outlined fill-1">play_arrow</span>
+</button>
+<button class="text-[#9db4b9] hover:text-white"><span class="material-symbols-outlined">forward_5</span></button>
+</div>
+<div class="flex flex-col">
+<span class="text-white text-xs font-bold">Chapter 1: The Awakening</span>
+<span class="text-[#9db4b9] text-[10px]">Narrator: Aiden</span>
+</div>
+</div>
+<!-- Progress Slider -->
+<div class="flex items-center gap-4 w-1/3 px-10">
+<span class="text-[10px] text-[#9db4b9]">04:12</span>
+<div class="flex-1 h-1 bg-[#283639] rounded-full relative overflow-hidden">
+<div class="absolute inset-y-0 left-0 bg-primary w-1/3"></div>
+</div>
+<span class="text-[10px] text-[#9db4b9]">12:45</span>
+</div>
+<!-- Actions -->
+<div class="flex items-center justify-end gap-6 w-1/3">
+<div class="flex items-center gap-2 text-[#9db4b9]">
+<span class="material-symbols-outlined text-lg">volume_up</span>
+<div class="w-20 h-1 bg-[#283639] rounded-full">
+<div class="h-full bg-white w-2/3"></div>
+</div>
+</div>
+<button class="gradient-bg px-6 py-3 rounded-lg text-white text-sm font-bold flex items-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">download</span>
+                Download Full Audiobook (MP3/M4B)
+            </button>
+</div>
+</footer>
+</body></html>

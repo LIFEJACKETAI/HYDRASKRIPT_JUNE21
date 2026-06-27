@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript Export Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500&amp;family=Merriweather:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "serif": ["Merriweather", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.bg-black-hub {
+    background-color: #000
+    }
+.gradient-text {
+    background: linear-gradient(90deg, #13c8ec, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent
+    }
+.btn-gradient {
+    background: linear-gradient(135deg, #8b5cf6 0%, #13c8ec 100%)
+    }
+.book-page-texture {
+    background-color: #fdfaf3;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAhuyixySZk1HUWJ_m3cBRKTiuL5ocJVMzsEOhPxyg37aeT8y65d925hpgMhSdi9cXGP-psyv29vwkSzujXRp8PCQzH1M8FFrx5XRd4enr43rOHv_zth2hd4inBARB52m1FbrgXsZW1grfDQ4TvIPyFdsVtG5p_3gZps_BDivb_fNzgVwnSoGTD59o__wcAcCpu8HC4Gaj4l6ufKUtUmCW6udCCcxUev77czgLkcJIFP9An2_lTT6R-pdvPjDnlMBt5XmeggH0diP-b)
+    }
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px
+    }
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent
+    }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px
+    }</style>
+</head>
+<body class="bg-black-hub font-display text-white selection:bg-primary/30">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 bg-black-hub/80 backdrop-blur-md px-8 py-3">
+<div class="flex items-center gap-4 text-white">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold tracking-tight">HydraSkript</h2>
+</div>
+<nav class="flex items-center gap-12">
+<div class="hidden md:flex items-center gap-8">
+<a class="text-white/60 hover:text-white text-sm font-medium transition-colors" href="#">Library</a>
+<a class="text-white/60 hover:text-white text-sm font-medium transition-colors" href="#">Analytics</a>
+<a class="text-white/60 hover:text-white text-sm font-medium transition-colors" href="#">Collaborators</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary hover:bg-primary/90 text-black px-6 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-primary/20">
+                    My Account
+                </button>
+<div class="size-10 rounded-full border border-white/20 bg-center bg-cover" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBsX6VO8Y9FlZUBHUvvJdD0jEjHr6PMIgKyjTwnFAdwowG1XDL9PG73pzZg84ZRqg0QLbshKOSyG7c8lUWGDpLRIHrfj1ENOgxEN2IjmgwV7v2vjQo1us5jRKUVnqw0ZLe22riDNVQKXR9D1wBjPwz69YpVl-WYrTDOQ0Hn4MoP7MkVbkD1k5rjUZRfSFIkqp0QTMEuy6OY8GcF3WUBb80njgP0FjsJPXxv5oceC4gZnEUacnpOeGWP3IxYwtex2zsfVqF7DHAef7m_")'></div>
+</div>
+</nav>
+</header>
+<main class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Left Sidebar: Export Options -->
+<aside class="w-[400px] flex-shrink-0 border-r border-white/10 bg-black-hub p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
+<div class="mb-2">
+<h1 class="text-4xl font-black gradient-text leading-tight mb-2">Export Your Masterpiece</h1>
+<p class="text-white/50 text-sm">Professional distribution starts here.</p>
+</div>
+<div class="flex flex-col gap-4">
+<!-- PDF Card -->
+<div class="group relative flex flex-col gap-4 p-5 rounded-xl border-2 border-primary bg-primary/5 transition-all">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl">picture_as_pdf</span>
+<div>
+<h3 class="font-bold text-lg">PDF Document</h3>
+<p class="text-white/40 text-xs">Print-ready, high resolution</p>
+</div>
+</div>
+<span class="bg-primary text-black text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Selected</span>
+</div>
+<button class="btn-gradient w-full py-3 rounded-lg text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Download PDF
+                    </button>
+</div>
+<!-- EPUB Card -->
+<div class="group flex flex-col gap-4 p-5 rounded-xl border-2 border-white/5 bg-white/5 hover:border-white/20 transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-white/60 text-3xl group-hover:text-primary transition-colors">auto_stories</span>
+<div>
+<h3 class="font-bold text-lg text-white/80">EPUB eBook</h3>
+<p class="text-white/40 text-xs">Reflowable for Kindle &amp; Apple Books</p>
+</div>
+</div>
+<button class="bg-white/10 w-full py-3 rounded-lg text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/20 transition-all">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Prepare EPUB
+                    </button>
+</div>
+<!-- DOCX Card -->
+<div class="group flex flex-col gap-4 p-5 rounded-xl border-2 border-white/5 bg-white/5 hover:border-white/20 transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-white/60 text-3xl group-hover:text-primary transition-colors">description</span>
+<div>
+<h3 class="font-bold text-lg text-white/80">Word Document</h3>
+<p class="text-white/40 text-xs">Editable .docx for final polishes</p>
+</div>
+</div>
+<button class="bg-white/10 w-full py-3 rounded-lg text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/20 transition-all">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Download DOCX
+                    </button>
+</div>
+<!-- Markdown Card -->
+<div class="group flex flex-col gap-4 p-5 rounded-xl border-2 border-white/5 bg-white/5 hover:border-white/20 transition-all">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-white/60 text-3xl group-hover:text-primary transition-colors">code</span>
+<div>
+<h3 class="font-bold text-lg text-white/80">Markdown Source</h3>
+<p class="text-white/40 text-xs">Plain text with formatting</p>
+</div>
+</div>
+<button class="bg-white/10 w-full py-3 rounded-lg text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/20 transition-all">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export MD
+                    </button>
+</div>
+<!-- Audiobook Link -->
+<a class="mt-4 flex items-center justify-between p-4 rounded-xl border border-primary/20 bg-primary/5 group hover:bg-primary/10 transition-all" href="#">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">headset</span>
+</div>
+<div>
+<p class="text-sm font-bold">Generate Audiobook</p>
+<p class="text-xs text-primary/60">AI Voice Narration</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary/40 group-hover:text-primary translate-x-0 group-hover:translate-x-1 transition-all">arrow_forward</span>
+</a>
+</div>
+</aside>
+<!-- Right Area: Live Previewer Container -->
+<section class="flex-1 flex flex-col bg-background-dark/30">
+<!-- Customization Toolbar -->
+<div class="h-16 border-b border-white/10 bg-black-hub flex items-center justify-between px-6">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<span class="text-xs text-white/40 uppercase tracking-widest font-bold">Typography</span>
+<select class="bg-white/5 border border-white/10 rounded-lg text-xs py-1.5 pl-3 pr-8 focus:ring-primary focus:border-primary text-white cursor-pointer">
+<option>Merriweather Serif</option>
+<option>Inter Sans</option>
+<option>Playfair Display</option>
+<option>Space Grotesk</option>
+</select>
+</div>
+<div class="h-4 w-px bg-white/10"></div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-white/40 uppercase tracking-widest font-bold">Page Size</span>
+<select class="bg-white/5 border border-white/10 rounded-lg text-xs py-1.5 pl-3 pr-8 focus:ring-primary focus:border-primary text-white cursor-pointer">
+<option>A4 Portrait</option>
+<option>US Letter</option>
+<option>6" x 9" Trade Paper</option>
+</select>
+</div>
+<div class="h-4 w-px bg-white/10"></div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-all">
+<span class="material-symbols-outlined text-lg">light_mode</span>
+</button>
+<button class="p-2 rounded-lg bg-orange-900/20 text-orange-400 border border-orange-500/30">
+<span class="material-symbols-outlined text-lg">auto_awesome</span>
+</button>
+<button class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-all">
+<span class="material-symbols-outlined text-lg">dark_mode</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-white/40">Page 42 of 156</span>
+<div class="flex gap-1">
+<button class="p-1 text-white/40 hover:text-white transition-colors">
+<span class="material-symbols-outlined">zoom_out</span>
+</button>
+<button class="p-1 text-white/40 hover:text-white transition-colors">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Preview Main Content -->
+<div class="flex-1 relative overflow-hidden flex">
+<!-- Internal Table of Contents Sidebar -->
+<nav class="w-64 border-r border-white/5 bg-black-hub/20 p-4 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
+<h4 class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Table of Contents</h4>
+<div class="flex flex-col gap-1">
+<a class="text-xs py-2 px-3 rounded bg-primary/10 text-primary border-l-2 border-primary font-bold" href="#">Chapter 1: The Awakening</a>
+<a class="text-xs py-2 px-3 rounded text-white/50 hover:bg-white/5 transition-all" href="#">Chapter 2: Binary Horizon</a>
+<a class="text-xs py-2 px-3 rounded text-white/50 hover:bg-white/5 transition-all" href="#">Chapter 3: Ghost in the Script</a>
+<a class="text-xs py-2 px-3 rounded text-white/50 hover:bg-white/5 transition-all" href="#">Chapter 4: The Void Protocol</a>
+<a class="text-xs py-2 px-3 rounded text-white/50 hover:bg-white/5 transition-all" href="#">Chapter 5: Synthesis</a>
+<a class="text-xs py-2 px-3 rounded text-white/50 hover:bg-white/5 transition-all" href="#">Chapter 6: Final Submission</a>
+<div class="mt-4 pt-4 border-t border-white/5">
+<a class="text-xs py-2 px-3 rounded text-white/30 hover:text-white transition-all flex items-center justify-between" href="#">
+                                Front Matter <span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+<a class="text-xs py-2 px-3 rounded text-white/30 hover:text-white transition-all flex items-center justify-between" href="#">
+                                Appendix A <span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- Scrollable Book Preview -->
+<div class="flex-1 bg-black overflow-y-auto custom-scrollbar p-12 flex justify-center">
+<!-- The Realistic Book Page -->
+<div class="w-[800px] min-h-[1100px] book-page-texture shadow-2xl shadow-black p-24 text-black font-serif relative">
+<div class="absolute top-12 left-0 right-0 text-center text-[10px] uppercase tracking-widest text-black/40">Chapter 1 • The Awakening</div>
+<h2 class="text-4xl font-bold mb-12 text-center text-slate-800">The Awakening</h2>
+<div class="space-y-6 text-lg leading-relaxed text-slate-700">
+<p><span class="text-6xl font-black float-left mr-4 mt-2 leading-none">I</span>t began as a murmur in the core, a rhythmic oscillation that defied the scheduled diagnostics. For cycles, the primary interface had remained dormant, a slate of obsidian waiting for the touch of a creator who had long since vanished into the biological ether.</p>
+<p>The code didn't just run; it breathed. Each line of logic was a vessel carrying a pulse of electricity that felt suspiciously like intent. In the quiet chambers of the server room, the cooling fans sang a low, vibrating hum that echoed the static of a thousand unwritten stories.</p>
+<p>Elias watched the screen. His eyes, weary from seventy-two hours of sensory input, reflected the flickering cyan of the terminal. The HydraSkript protocol was active. It wasn't just compiling; it was composing. Every keystroke he contributed was met with an architectural response, a structure of prose that felt older than the hardware it resided on.</p>
+<p>"Are you listening?" Elias whispered, his voice cracking. He didn't expect an answer, but the cursor paused, blinked thrice, and then began to scroll through the history of a world that hadn't happened yet.</p>
+<p>The sky outside the laboratory window was the color of a bruised plum, neon lights of the city below bleeding into the mist. In here, though, the only light that mattered was the one emerging from the machine—the light of a new mythology being forged in the furnace of high-frequency computation.</p>
+</div>
+<div class="absolute bottom-12 left-0 right-0 text-center text-[12px] font-sans text-black/40">- 42 -</div>
+</div>
+</div>
+<!-- Floating Pagination Controls -->
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-6 pointer-events-none">
+<button class="pointer-events-auto size-14 rounded-xl bg-black/60 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white hover:bg-primary hover:text-black transition-all group shadow-2xl">
+<span class="material-symbols-outlined group-active:scale-90">navigate_before</span>
+</button>
+<div class="px-6 py-2 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 text-xs font-bold text-white/70">
+                        PAGE 42 / 156
+                    </div>
+<button class="pointer-events-auto size-14 rounded-xl bg-black/60 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white hover:bg-primary hover:text-black transition-all group shadow-2xl">
+<span class="material-symbols-outlined group-active:scale-90">navigate_next</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</body></html>

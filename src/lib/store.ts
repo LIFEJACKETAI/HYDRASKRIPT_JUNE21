@@ -16,6 +16,7 @@ export type AppView =
   | 'ideas-lab'
   | 'credits'
   | 'export-hub'
+  | 'ui-gallery'
   | 'pricing'
   | 'admin';
 

@@ -831,6 +831,88 @@ function ExportHubView() {
   );
 }
 
+// ─── UI Gallery View ─────────────────────────────────────────────────────────
+
+const STITCH_FILES = Array.from({ length: 60 }, (_, i) => {
+  const n = String(i + 1).padStart(2, '0');
+  return { id: i + 1, name: `Stitch ${i + 1}`, file: `/stitch/stitch_${n}.html` };
+});
+
+function UIGalleryView() {
+  const [search, setSearch] = useState('');
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const filtered = STITCH_FILES.filter((f) =>
+    f.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-white">UI Component Gallery</h1>
+        <p className="text-slate-400 text-sm mt-1">60 stitch UI templates — click any to preview fullscreen.</p>
+      </div>
+
+      <input
+        type="text"
+        placeholder="Search..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full max-w-xs px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+      />
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {filtered.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setPreview(f.file)}
+            className="group relative rounded-xl border border-white/10 overflow-hidden bg-[#0d0d10] hover:border-purple-500/50 transition-all aspect-[4/3]"
+          >
+            <iframe
+              src={f.file}
+              title={f.name}
+              className="w-full h-full pointer-events-none"
+              style={{ transform: 'scale(0.35)', transformOrigin: 'top left', width: '285%', height: '285%' }}
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-end">
+              <span className="w-full text-center text-xs text-white/0 group-hover:text-white/90 pb-2 transition-all font-medium">
+                {f.name}
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Fullscreen preview modal */}
+      {preview && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <span className="text-sm text-slate-300 font-medium">{preview}</span>
+            <div className="flex gap-3">
+              <a
+                href={preview}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-cyan-400 hover:underline"
+              >
+                Open in new tab ↗
+              </a>
+              <button
+                onClick={() => setPreview(null)}
+                className="text-slate-400 hover:text-white text-xs px-3 py-1 rounded-lg border border-white/10 hover:border-white/30 transition-all"
+              >
+                Close ✕
+              </button>
+            </div>
+          </div>
+          <iframe src={preview} title="Preview" className="flex-1 w-full" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Admin View ──────────────────────────────────────────────────────────────
 
 function AdminView() {
@@ -1012,6 +1094,7 @@ export default function HomePage() {
       case 'credits':       return <CreditsView />;
       case 'pricing':       return <CreditsView />;
       case 'export-hub':    return <ExportHubView />;
+      case 'ui-gallery':    return <UIGalleryView />;
       case 'admin':         return <AdminView />;
       default:              return <DashboardView />;
     }

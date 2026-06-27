@@ -46,19 +46,30 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
     });
     const previousSummary = prevChapter?.summaryForNext || 'This is the beginning of the story.';
 
-    const characterNames = (() => {
-      try { return JSON.parse(book.characterNames || '[]') as string[]; } catch { return []; }
-    })();
+    // characterNames is a Postgres String[] — Prisma returns it as a JS array directly
+    const characterNames: string[] = Array.isArray(book.characterNames)
+      ? (book.characterNames as string[])
+      : (() => {
+          try { return JSON.parse((book.characterNames as unknown as string) || '[]') as string[]; } catch { return []; }
+        })();
 
     // 3. Prompt Construction
+    // Get total chapters from book outline for accurate progress reporting
+    let totalChapters = 0;
+    try {
+      const outlineData = JSON.parse(book.outline || '{}');
+      totalChapters = outlineData?.chapters?.length ?? 0;
+    } catch {}
+    if (totalChapters === 0) {
+      totalChapters = await db.chapter.count({ where: { bookId: book.id } });
+    }
+
     const chapterPrompt = getChapterWritePrompt(
       stylePrompt,
       book.title,
       book.genre,
       chapter.index,
-      // We don't know total chapters here easily, so we pass the index
-      // In a real system, we'd pass totalChapters from the job metadata
-      0, // placeholder for total
+      totalChapters,
       previousSummary,
       characterNames.length > 0 ? characterNames : undefined
     );

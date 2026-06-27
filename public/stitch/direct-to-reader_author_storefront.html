@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript | Direct-to-Reader Storefront</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#7f0df2",
+                "accent-cyan": "#00f2ff",
+                "background-light": "#f7f5f8",
+                "background-dark": "#050505",
+                "card-dark": "#120a1a",
+              },
+              fontFamily: {
+                "display": ["Manrope", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .gradient-border {
+            background: linear-gradient(to right, #7f0df2, #00f2ff);
+            padding: 1px;
+        }
+        .cta-gradient {
+            background: linear-gradient(135deg, #7f0df2 0%, #00f2ff 100%);
+        }
+        .glass-nav {
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .cyan-glow {
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-300">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 glass-nav border-b border-white/10">
+<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-bold tracking-tight">HydraSkript</h2>
+</div>
+<nav class="hidden md:flex items-center gap-10">
+<a class="text-white/70 hover:text-white text-sm font-medium transition-colors" href="#">Library</a>
+<a class="text-white/70 hover:text-white text-sm font-medium transition-colors" href="#">About Author</a>
+<a class="text-white/70 hover:text-white text-sm font-medium transition-colors flex items-center gap-2" href="#">
+                    Cart
+                    <span class="bg-primary/20 text-primary px-1.5 py-0.5 rounded text-[10px]">2</span>
+</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-white/70 hover:text-white transition-colors">search</button>
+<div class="h-6 w-px bg-white/10 mx-2"></div>
+<button class="flex items-center justify-center rounded-lg h-10 px-6 bg-primary text-white text-sm font-bold transition-all hover:shadow-[0_0_20px_rgba(127,13,242,0.4)]">
+                    Login
+                </button>
+</div>
+</div>
+</header>
+<main class="pt-20">
+<!-- HeroSection -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+<div class="relative group">
+<div class="absolute -inset-4 bg-primary/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="relative w-full aspect-[4/5] bg-center bg-no-repeat bg-cover rounded-xl shadow-2xl transform lg:rotate-[-4deg] hover:rotate-0 transition-all duration-500 border border-white/5" data-alt="3D render of a cyberpunk book cover titled Neon Shadows" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAEO5Op2rGnz3jBKw9ORphBH0febrIlRhLqTKF--CE_bEKEnmwRz6lAHZiigNxIhlFt0jpUPfRBv3ykP-3m8HlIBrWAOdSXWBDki1LbGQZ-z41eWMnMynK-JnkJXMHr3Dm5_7zDZh10O7SH0jc6XOBGCs-WnekIQliz97vIO_BVZN20ElWj1fMais3YhMm_W-S1cZY8NHQhaSfRb8w953NfhdUAOwK1nM9jyJNNQ8WYSCVssBQRscCTjHq4WUc0QT66G-k5yzyLRnl7");'>
+</div>
+</div>
+<div class="flex flex-col gap-8">
+<div class="flex flex-col gap-4">
+<span class="text-accent-cyan text-sm font-bold tracking-widest uppercase">New Release</span>
+<h1 class="text-white text-5xl md:text-7xl font-extrabold leading-tight tracking-tight">
+                            Neon <span class="text-transparent bg-clip-text cta-gradient">Shadows</span>
+</h1>
+<div class="flex items-center gap-2">
+<div class="flex text-accent-cyan">
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="material-symbols-outlined text-sm">star</span>
+<span class="material-symbols-outlined text-sm">star</span>
+</div>
+<span class="text-white/60 text-sm">(4.9/5 from 1,200 readers)</span>
+</div>
+<p class="text-white/70 text-lg leading-relaxed max-w-lg">
+                            Immerse yourself in the latest cyberpunk masterpiece. A journey through the digital void that will leave you breathless. The secrets of the mainframe are waiting.
+                        </p>
+</div>
+<div class="flex flex-wrap gap-4">
+<button class="cta-gradient text-white h-14 px-10 rounded-lg font-bold text-lg shadow-lg hover:scale-105 transition-transform">
+                            Buy Now • $14.99
+                        </button>
+<button class="border border-white/10 hover:bg-white/5 text-white h-14 px-8 rounded-lg font-bold transition-colors">
+                            Read Preview
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- SectionHeader: Shelf -->
+<section class="max-w-7xl mx-auto px-6 pt-10">
+<div class="flex items-end justify-between border-b border-white/10 pb-6 mb-10">
+<div>
+<h2 class="text-white text-3xl font-bold tracking-tight">The Book Shelf</h2>
+<p class="text-white/50 text-sm mt-1">Explore all works in the HydraSkript universe.</p>
+</div>
+<button class="text-accent-cyan text-sm font-bold hover:underline flex items-center gap-1">
+                    View All <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</button>
+</div>
+<!-- ImageGrid / Book Shelf -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Book 1 -->
+<div class="group flex flex-col gap-4">
+<div class="relative overflow-hidden rounded-xl aspect-[3/4] border border-white/5 transition-transform duration-300 hover:-translate-y-2">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for The Data Breach" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAgQyL5fA0oVp7vrCYbGzx9wQP8xksJVOsnQPtJn8icrAQedM3KqfbgF1IqjsrLtIWqTRiD_tJpdUABbmgsqjBPw8TlFVBJMPQNdTxgsogp9qe9eqJ01TQu-8a9o7CPT9c2uiobCawHYHkEyUrCIqdhjH4eGtLKZT2qLEDS5wcaFgMzOv6NXdOlkR-MGN3Uo7GDwarJsRcWUBGl2HUOsh3mi4Q8gUmZdnTeca9YziF1bmv_EykjeWT8B3-hvV1WNeSTkg7K00dLGVAn");'></div>
+<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform">Quick View</button>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-white font-bold text-lg">The Data Breach</h3>
+<div class="flex justify-between items-center">
+<p class="text-primary font-bold">$12.99 <span class="text-white/30 font-normal">or 130 Credits</span></p>
+<button class="text-white/40 hover:text-accent-cyan transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Book 2 -->
+<div class="group flex flex-col gap-4">
+<div class="relative overflow-hidden rounded-xl aspect-[3/4] border border-white/5 transition-transform duration-300 hover:-translate-y-2">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for Cipher's Edge" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDcUEofpNoAV2w-UCAoLRTnMB7wzD5h9WAlPxu_FW_GD5r1V0estKf001MoFjoMmF_7ZY9aVzMydf0ZOrN4cIRU2BwqmbTnQ5c02zRjO2PDtsoh0e3ehIoJYRaYwA0ty6LUsk4URG6WuvZODyFeGyzcVcy3ApJxnYjosUJejKIITVonrEpzgPvT9OxPY1Ewkii1_N8xurqJsOgKH5CgTpss8FRG8rc0qBBBbaFIYZ5u6kVF7ggjYVEAQAZuY10QP_PLkoYJJAnnR01t");'></div>
+<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform">Quick View</button>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-white font-bold text-lg">Cipher's Edge</h3>
+<div class="flex justify-between items-center">
+<p class="text-primary font-bold">$10.99 <span class="text-white/30 font-normal">or 110 Credits</span></p>
+<button class="text-white/40 hover:text-accent-cyan transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Book 3 -->
+<div class="group flex flex-col gap-4">
+<div class="relative overflow-hidden rounded-xl aspect-[3/4] border border-white/5 transition-transform duration-300 hover:-translate-y-2">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for Virtual Requiem" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuClO9a_NAx4JcGIacZ7DC3cNWhYZ-GsYsKxL7lXqdqpkTwt9mjo21jloPkSRh8boFfWE3zRFqMh_LqRu1L6hOI9I3Ww_68H-IW8j828RWbDxb1ZSbmBMUevDSvMsPpf9Yr3upcRk2ZHKoIfAEhgkFGfXuuNvM2FgeflBGJHeu9O5I3QiXr8zLT7fJeoj-keVcNEq80DUrRr9K0NxtOOXDCaG2z6rlS9fxRPkNN5PpZ0D7rrJ7X3xJ9PRGe6N8f9ap0puE2lPN3ZMVir");'></div>
+<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform">Quick View</button>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-white font-bold text-lg">Virtual Requiem</h3>
+<div class="flex justify-between items-center">
+<p class="text-primary font-bold">$14.99 <span class="text-white/30 font-normal">or 150 Credits</span></p>
+<button class="text-white/40 hover:text-accent-cyan transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Book 4 -->
+<div class="group flex flex-col gap-4">
+<div class="relative overflow-hidden rounded-xl aspect-[3/4] border border-white/5 transition-transform duration-300 hover:-translate-y-2">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for System Failure" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD08RAk8yNgPyr7ROm-lAUpXSevPvsLqJB5M_bR5SBKjzA-mD2OzDDiyWQtGPNb93NJ7DO5bW8ymJQkI-qSdZC3wBB5mlVliyPkZz-sAPNh7NRDY55e7rR4_XboWTOMO-URsRxGUE9ERXx2MzEtmvwAoZVDrq9oGbSDsGWRkkPWFDvX5fZ8-2bFxLJS5TCHccEPj3b8XXnvppRqvCEJdfH-JuBqHMKE6JzKdp_E8AlS_LXPiukTjLnUnHNhquFJ75kWW-viF4Opc_jb");'></div>
+<div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform">Quick View</button>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-white font-bold text-lg">System Failure</h3>
+<div class="flex justify-between items-center">
+<p class="text-primary font-bold">$9.99 <span class="text-white/30 font-normal">or 100 Credits</span></p>
+<button class="text-white/40 hover:text-accent-cyan transition-colors">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Reader Community: Reviews -->
+<section class="max-w-7xl mx-auto px-6 py-24">
+<h2 class="text-white text-2xl font-bold mb-10 text-center">Recent Reviews</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-card-dark p-8 rounded-xl border border-white/5 relative">
+<span class="material-symbols-outlined text-accent-cyan text-4xl absolute -top-4 -left-2 cyan-glow">format_quote</span>
+<p class="text-white/70 italic mb-6">"Absolute game changer for cyberpunk fans. The world-building in Neon Shadows is unlike anything I've read this decade."</p>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Reader avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDh55PqyjNiw3NY0aYHv1FyEXsTqn80rgq01nxb8rZr-KKcVRLQFKAxH7IFxY2huhlojAjH2qJ02RUJ5PQfVbZSczjc91g8untAt_CoVtYKJVrTmJTXFQzBP47-Z8BhCwQYP33OBOq2XFL9QFIAbR-5VAcFxLH6ytuxihbBZ1XlyndC566lh6M7g0XgPvikcGdYIpzfSbKrOtMp-0aIxfYSiU1anpJI7OejL2QlChElXXmF1eWNzNu_vxY0ST7L8g2gPKSf5Ihp9fav')"></div>
+<div>
+<p class="text-white font-bold text-sm">Elena Vance</p>
+<p class="text-white/30 text-xs">Verified Reader</p>
+</div>
+</div>
+</div>
+<div class="bg-card-dark p-8 rounded-xl border border-white/5 relative">
+<span class="material-symbols-outlined text-accent-cyan text-4xl absolute -top-4 -left-2 cyan-glow">format_quote</span>
+<p class="text-white/70 italic mb-6">"HydraSkript consistently delivers. Buying direct is so much smoother and I love supporting the author directly."</p>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Reader avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBRBfPTWTtfii6209G9t3XCKOHt0cGGE6lc9Jr2mP56R-8_XjNuiErqekCJfrTOsO8WH3Y34F6Lcsqc5zQ-ZaF2LTUdKXA4qyXK_U8kIYyf5MJguzI-WavFP8ZsSawBDXateH1hzWsVmAqWX9KsWOIGlXJHErLFSWaNbyoIFFbPOVpJsNAwCePhwJ1u673K20i5RWJS1J_O0YToWDywR9Kr_fYr2o-TTZReCBfri_1Oc9tw9q63ni0GOqqR6sVYzy9PB-kGvqDc5Q71')"></div>
+<div>
+<p class="text-white font-bold text-sm">Marcus K.</p>
+<p class="text-white/30 text-xs">Collector Tier</p>
+</div>
+</div>
+</div>
+<div class="bg-card-dark p-8 rounded-xl border border-white/5 relative">
+<span class="material-symbols-outlined text-accent-cyan text-4xl absolute -top-4 -left-2 cyan-glow">format_quote</span>
+<p class="text-white/70 italic mb-6">"The digital reader on this site is phenomenal. Clean, fast, and works perfectly on my tablet."</p>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Reader avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCFPZcQCNjJxcTEtyyzXjOy9-Ux2zLj5lz92yJ3BAvoNk4aang9Yt3OMg4tKS2RYe0-RGHTDiYPS47yosgXrL-KicyBJbXFQemdcZrLWzLh0yuHh-xiJJ-QM3SFXzQTZvdOzOXzoggk7QvaqX1BLzU-kgrnWUb9bsCpopf9_Xwr0Wri_MJjxCqKloKhiWLotwmKWoxTAWxdR38kb0GKi_P5n2P9EIfifSsijqxCgRD4dCsuFQTTE8r6fJ3VtSmW0JSYi5ggg8PbxGhu')"></div>
+<div>
+<p class="text-white font-bold text-sm">Sarah Chen</p>
+<p class="text-white/30 text-xs">Early Access Member</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Subscriber CTA: Inner Circle -->
+<section class="max-w-7xl mx-auto px-6 pb-24">
+<div class="gradient-border rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(127,13,242,0.15)]">
+<div class="bg-background-dark p-12 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10">
+<div class="max-w-xl text-center md:text-left">
+<h2 class="text-white text-3xl md:text-4xl font-black mb-4 tracking-tight">Join the <span class="text-accent-cyan">Inner Circle</span></h2>
+<p class="text-white/60 text-lg">Get early access to new chapters, exclusive short stories, and the first look at the upcoming series lore.</p>
+</div>
+<div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+<input class="bg-white/5 border border-white/10 rounded-lg px-6 h-14 w-full sm:w-80 text-white focus:outline-none focus:border-accent-cyan transition-colors" placeholder="Enter your email" type="email"/>
+<button class="cta-gradient h-14 px-8 rounded-lg font-bold text-white whitespace-nowrap hover:shadow-[0_0_20px_rgba(0,242,255,0.3)] transition-all">
+                            Join Now
+                        </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="border-t border-white/5 py-16 px-6">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
+<div class="flex flex-col items-center md:items-start gap-4">
+<div class="flex items-center gap-3 text-white/40">
+<div class="size-6">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+</svg>
+</div>
+<span class="font-bold uppercase tracking-widest text-xs">Powered by HydraSkript</span>
+</div>
+<p class="text-white/30 text-xs">© 2024 HydraSkript Publications. All rights reserved.</p>
+</div>
+<div class="flex gap-8 text-white/50 text-sm">
+<a class="hover:text-white transition-colors" href="#">Privacy</a>
+<a class="hover:text-white transition-colors" href="#">Terms</a>
+<a class="hover:text-white transition-colors" href="#">Support</a>
+</div>
+<div class="flex gap-4">
+<a class="size-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all" href="#">
+<svg class="size-5 fill-current" viewbox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.25 2.25h6.634l4.704 6.22z"></path></svg>
+</a>
+<a class="size-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all" href="#">
+<svg class="size-5 fill-current" viewbox="0 0 24 24"><path d="M20.3 4.043c-.8.323-1.6.54-2.4.647.9-.54 1.6-1.4 1.9-2.481-.8.431-1.8.754-2.7.97-.8-.862-1.8-1.401-3-1.401-2.3 0-4.1 1.832-4.1 4.095 0 .323.03.647.09.97C5.1 6.738 2.1 5.014.1 2.32c-.3.647-.5 1.293-.5 2.047 0 1.4.7 2.695 1.8 3.45-.7-.043-1.3-.215-1.9-.54v.054c0 1.94 1.4 3.557 3.3 3.988-.3.086-.7.13-.1.13-.3 0-.5-.043-.8-.086.5 1.51 1.9 2.59 3.6 2.633-1.3 1.077-3 1.723-4.9 1.723-.3 0-.6-.043-.9-.086C2.2 21.36 4.3 22 6.5 22c7.8 0 12-6.464 12-12.066v-.54c.9-.646 1.6-1.4 2.1-2.25v-.1z"></path></svg>
+</a>
+<a class="size-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-all" href="#">
+<svg class="size-5 fill-current" viewbox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"></path></svg>
+</a>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Narrative Timeline Monitor - HydraSkript</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#000000",
+                        "grid-color": "#1a1a1a",
+                        "danger": "#ff4d4d",
+                        "warning": "#ffa500"
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    backgroundImage: {
+                        'grid-pattern': 'linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px)',
+                    },
+                    backgroundSize: {
+                        'grid-size': '40px 40px',
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #000;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #283639;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #13c8ec;
+        }
+        .node-pulse {
+            box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 77, 77, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0); }
+        }
+    </style>
+</head>
+<body class="bg-background-dark font-display text-white selection:bg-primary/30">
+<!-- Main Layout Wrapper -->
+<div class="flex h-screen w-full flex-col overflow-hidden bg-grid-pattern bg-grid-size">
+<!-- Header (TopNavBar Component Style) -->
+<header class="flex items-center justify-between border-b border-white/10 bg-background-dark/80 backdrop-blur-md px-6 py-3 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-8 rounded-lg bg-primary text-black">
+<span class="material-symbols-outlined font-bold">timeline</span>
+</div>
+<div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-tight">Narrative Timeline Monitor</h2>
+<p class="text-primary text-[10px] uppercase tracking-widest font-bold">HydraSkript Engine v2.4</p>
+</div>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-white text-sm font-medium hover:text-primary transition-colors" href="#">Overview</a>
+<a class="text-primary text-sm font-medium border-b-2 border-primary pb-1" href="#">Timeline</a>
+<a class="text-white/60 text-sm font-medium hover:text-white transition-colors" href="#">Characters</a>
+<a class="text-white/60 text-sm font-medium hover:text-white transition-colors" href="#">Conflicts</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/40 text-sm">search</span>
+<input class="bg-white/5 border border-white/10 rounded-lg pl-9 pr-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-64" placeholder="Search events or scenes..."/>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-black text-sm font-bold px-4 py-2 rounded-lg transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                    Save State
+                </button>
+<div class="size-8 rounded-full border border-primary/50 p-0.5">
+<div class="w-full h-full rounded-full bg-cover bg-center" data-alt="User profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBGZerGHawAnBkP1CFjjEJycq8ew1Gs_KUYhUulZFEnbpMqmiljo6U927gdXCAuZufsRriET6VqzqrMYR9gPtWo_in-UILqn3wMWY6Mw1k1kFOC2I4CsSFSO8P9nezCb_9_2VAGMDl3E4Os1yny7D-psou5s5a8rHsclIGQodRXUqwGNJ7tMyOMewjJ52Fg854wbS9CWl7bw-PDYkhuNccZGTue12dmX74OR5RT3oWEAq0HLGIlzX-2q-mkrnNl_ZE5zumQ8-N9nXql')"></div>
+</div>
+</div>
+</header>
+<!-- Main Workspace -->
+<div class="flex flex-1 overflow-hidden relative">
+<!-- Sidebar (SideNavBar Style) -->
+<aside class="w-64 border-r border-white/10 bg-background-dark flex flex-col justify-between p-4 z-40">
+<div class="space-y-6">
+<div>
+<h3 class="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-3 px-2">Project Arcs</h3>
+<div class="space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 text-primary">
+<span class="material-symbols-outlined text-[20px]">layers</span>
+<span class="text-sm font-medium">Main Questline</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/60 hover:bg-white/5 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="text-sm font-medium">B-Plot: The Rebels</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/60 hover:bg-white/5 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+<span class="text-sm font-medium">World Lore</span>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-white/40 text-[10px] uppercase font-bold tracking-widest mb-3 px-2">Filters</h3>
+<div class="flex flex-wrap gap-2 px-2">
+<span class="px-2 py-1 bg-white/5 rounded border border-white/10 text-[10px] text-white/60 cursor-pointer hover:border-primary/50 transition-colors">Show Characters</span>
+<span class="px-2 py-1 bg-white/5 rounded border border-white/10 text-[10px] text-white/60 cursor-pointer hover:border-primary/50 transition-colors">Show Locations</span>
+<span class="px-2 py-1 bg-primary/20 rounded border border-primary/50 text-[10px] text-primary">Warnings Only</span>
+</div>
+</div>
+</div>
+<div class="bg-white/5 rounded-xl p-4 border border-white/10">
+<p class="text-xs text-white/40 mb-2">Integrity Score</p>
+<div class="flex items-end gap-2">
+<span class="text-2xl font-bold text-primary">92%</span>
+<span class="text-xs text-danger flex items-center mb-1">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+                            -3%
+                        </span>
+</div>
+<div class="w-full h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
+<div class="h-full bg-primary" style="width: 92%"></div>
+</div>
+</div>
+</aside>
+<!-- Main Timeline View (Horizontal Scrollable) -->
+<main class="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar bg-background-dark/50 relative">
+<!-- Headline/Meta Text Context -->
+<div class="absolute top-8 left-8 z-10">
+<h1 class="text-3xl font-bold tracking-tight text-white mb-1">Story Consistency Timeline</h1>
+<p class="text-white/40 text-sm">Real-time narrative thread monitoring &amp; error detection.</p>
+</div>
+<!-- Timeline Spine -->
+<div class="relative h-full flex items-center min-w-[2500px] px-20">
+<!-- The Main Spine Line -->
+<div class="absolute top-1/2 left-0 w-full h-[2px] bg-white/10 -translate-y-1/2"></div>
+<div class="absolute top-1/2 left-0 w-1/3 h-[2px] bg-primary -translate-y-1/2 shadow-[0_0_10px_rgba(19,200,236,0.4)]"></div>
+<!-- Timeline Nodes -->
+<div class="flex items-center gap-[150px] relative z-20 pt-20">
+<!-- Node 1: Stable -->
+<div class="relative group cursor-pointer">
+<div class="absolute -top-12 left-1/2 -translate-x-1/2 text-center w-32">
+<span class="text-[10px] font-bold text-white/40 uppercase tracking-tighter">Chapter 1</span>
+<p class="text-xs font-medium text-white group-hover:text-primary transition-colors">The First Arrival</p>
+</div>
+<div class="size-6 rounded-full bg-background-dark border-2 border-primary flex items-center justify-center transition-all group-hover:scale-125">
+<div class="size-2 rounded-full bg-primary"></div>
+</div>
+</div>
+<!-- Node 2: Warning -->
+<div class="relative group cursor-pointer">
+<div class="absolute -top-16 left-1/2 -translate-x-1/2 text-center w-40">
+<div class="inline-flex items-center gap-1 bg-warning/20 text-warning px-2 py-0.5 rounded text-[9px] font-bold uppercase mb-1">
+<span class="material-symbols-outlined text-[12px]">warning</span> Minor Loop
+                                </div>
+<p class="text-xs font-medium text-white group-hover:text-warning transition-colors">Marketplace Meeting</p>
+</div>
+<div class="size-6 rounded-full bg-background-dark border-2 border-warning flex items-center justify-center transition-all group-hover:scale-125">
+<div class="size-2 rounded-full bg-warning"></div>
+</div>
+<div class="absolute top-1/2 left-full w-[150px] h-[1px] border-t border-dashed border-warning/50 -translate-y-1/2"></div>
+</div>
+<!-- Node 3: ERROR (Conflict) -->
+<div class="relative group cursor-pointer">
+<div class="absolute -top-24 left-1/2 -translate-x-1/2 text-center w-48 p-2 bg-danger/10 border border-danger/30 rounded-lg backdrop-blur-sm">
+<span class="text-[9px] font-bold text-danger uppercase">Spatial Conflict Detected</span>
+<p class="text-xs font-bold text-white">Scene 12: Escape Plan</p>
+<p class="text-[10px] text-white/60 leading-tight mt-1">Character 'Elara' exists in Citadel and Harbor simultaneously.</p>
+</div>
+<div class="size-8 rounded-full bg-background-dark border-2 border-danger flex items-center justify-center transition-all node-pulse scale-110">
+<span class="material-symbols-outlined text-danger text-[18px]">error</span>
+</div>
+<div class="absolute -bottom-10 left-1/2 -translate-x-1/2">
+<span class="text-[10px] font-mono text-danger/60">ERROR_ID: SC-042</span>
+</div>
+</div>
+<!-- Node 4: Stable -->
+<div class="relative group cursor-pointer">
+<div class="absolute -top-12 left-1/2 -translate-x-1/2 text-center w-32">
+<span class="text-[10px] font-bold text-white/40 uppercase tracking-tighter">Chapter 2</span>
+<p class="text-xs font-medium text-white">The Great Betrayal</p>
+</div>
+<div class="size-6 rounded-full bg-background-dark border-2 border-primary/40 flex items-center justify-center group-hover:border-primary transition-all">
+<div class="size-2 rounded-full bg-primary/40 group-hover:bg-primary"></div>
+</div>
+</div>
+<!-- Node 5: Connection -->
+<div class="relative group cursor-pointer">
+<div class="size-4 rounded-full bg-white/20 hover:bg-primary/60 transition-colors"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+<p class="text-[10px] text-white/40">Draft Point</p>
+</div>
+</div>
+<!-- More filler nodes -->
+<div class="size-4 rounded-full bg-white/10"></div>
+<div class="size-4 rounded-full bg-white/10"></div>
+<div class="size-6 rounded-full border-2 border-white/20"></div>
+<div class="size-4 rounded-full bg-white/10"></div>
+</div>
+</div>
+<!-- Minimap Navigation -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[600px] h-12 bg-black/80 border border-white/10 backdrop-blur-xl rounded-xl flex items-center px-4 gap-2">
+<div class="w-full h-2 bg-white/5 rounded-full relative overflow-hidden">
+<div class="absolute inset-y-0 left-0 w-1/4 bg-primary/20"></div>
+<div class="absolute h-full w-20 bg-primary/40 border-x border-primary rounded" style="left: 10%"></div>
+<!-- Tiny pips -->
+<div class="absolute top-1/2 left-[5%] -translate-y-1/2 size-1 bg-primary rounded-full"></div>
+<div class="absolute top-1/2 left-[12%] -translate-y-1/2 size-1 bg-warning rounded-full"></div>
+<div class="absolute top-1/2 left-[25%] -translate-y-1/2 size-1 bg-danger rounded-full"></div>
+<div class="absolute top-1/2 left-[40%] -translate-y-1/2 size-1 bg-white/40 rounded-full"></div>
+</div>
+<span class="text-[10px] font-mono text-white/40 whitespace-nowrap">VIEW: ARC_01_GLOBAL</span>
+</div>
+</main>
+<!-- AI Fix Side Panel (Right Drawer) -->
+<aside class="w-80 border-l border-white/10 bg-background-dark/95 backdrop-blur-xl flex flex-col z-50">
+<div class="p-6 border-b border-white/10 flex items-center justify-between">
+<div>
+<h2 class="text-white font-bold">Conflict Analysis</h2>
+<p class="text-xs text-danger">Scene 12 Conflict</p>
+</div>
+<button class="size-8 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+<div class="space-y-2">
+<label class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Issue Breakdown</label>
+<div class="bg-danger/5 border border-danger/20 rounded-lg p-3">
+<p class="text-xs text-white leading-relaxed">
+<span class="text-danger font-bold">Spatial Paradox:</span> Elara enters the "Citadel" at 14:00 (Scene 11), but is also described preparing a ship at the "Harbor" (Scene 12) which is 30 miles away. Travel time is unaccounted for.
+                            </p>
+</div>
+</div>
+<div class="space-y-4">
+<label class="text-[10px] uppercase font-bold text-white/40 tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary">auto_awesome</span>
+                            AI Suggested Fixes
+                        </label>
+<!-- Suggestion 1 -->
+<div class="group bg-white/5 border border-white/10 p-3 rounded-lg hover:border-primary transition-all cursor-pointer">
+<h4 class="text-xs font-bold text-primary mb-1">Insert Time Gap</h4>
+<p class="text-[10px] text-white/60">Shift Scene 12 to 18:00. This allows a 4-hour travel window between the Citadel and Harbor.</p>
+<button class="mt-3 w-full py-1.5 bg-primary/20 hover:bg-primary text-primary hover:text-black text-[10px] font-bold rounded transition-all">Apply Solution</button>
+</div>
+<!-- Suggestion 2 -->
+<div class="group bg-white/5 border border-white/10 p-3 rounded-lg hover:border-primary transition-all cursor-pointer">
+<h4 class="text-xs font-bold text-primary mb-1">Character Swap</h4>
+<p class="text-[10px] text-white/60">Reassign Harbor actions in Scene 12 to 'Kael'. Maintains the timeline while keeping Elara at the Citadel.</p>
+<button class="mt-3 w-full py-1.5 bg-primary/20 hover:bg-primary text-primary hover:text-black text-[10px] font-bold rounded transition-all">Apply Solution</button>
+</div>
+<!-- Suggestion 3 -->
+<div class="group bg-white/5 border border-white/10 p-3 rounded-lg hover:border-primary transition-all cursor-pointer">
+<h4 class="text-xs font-bold text-primary mb-1">Introduction of Fast-Travel</h4>
+<p class="text-[10px] text-white/60 text-italic italic opacity-60">Requires adding lore item: 'The Rift Stones'.</p>
+<button class="mt-3 w-full py-1.5 bg-primary/20 hover:bg-primary text-primary hover:text-black text-[10px] font-bold rounded transition-all">Apply Solution</button>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-white/10 bg-white/5">
+<div class="flex gap-2">
+<button class="flex-1 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors">Ignore</button>
+<button class="flex-1 py-2 rounded-lg border border-primary text-primary hover:bg-primary hover:text-black text-xs font-bold transition-all">Edit Manually</button>
+</div>
+</div>
+</aside>
+</div>
+<!-- Footer Bar -->
+<footer class="h-8 border-t border-white/10 bg-background-dark/80 flex items-center justify-between px-6 z-50">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-green-500"></div>
+<span class="text-[10px] font-mono text-white/40">SYSTEM READY</span>
+</div>
+<div class="h-3 w-[1px] bg-white/10"></div>
+<span class="text-[10px] font-mono text-white/40 uppercase">Nodes: 142</span>
+<span class="text-[10px] font-mono text-danger/60 uppercase">Conflicts: 03</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-[10px] font-mono text-white/40">CPU: 12%</span>
+<span class="text-[10px] font-mono text-white/40">MEM: 1.2GB</span>
+</div>
+</footer>
+</div>
+</body></html>

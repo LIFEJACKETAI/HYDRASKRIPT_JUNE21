@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HydraSkript Story Bible | Profiles</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#000000", // Dark mode as black per request
+                        "surface-dark": "#101f22",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .cyan-glow {
+            box-shadow: 0 0 15px rgba(19, 200, 236, 0.4);
+        }
+        .sidebar-active {
+            border-left: 4px solid #13c8ec;
+            background: linear-gradient(90deg, rgba(19, 200, 236, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+        }
+        .gradient-header {
+            background: linear-gradient(90deg, #3b82f6 0%, #13c8ec 100%);
+        }
+        .portrait-border {
+            border: 2px solid #13c8ec;
+            box-shadow: 0 0 10px rgba(19, 200, 236, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-white min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between border-b border-white/10 px-6 py-4 bg-background-light dark:bg-background-dark sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 29.8826 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1993 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-white">Hydra<span class="text-primary">Skript</span></h1>
+</div>
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/50 text-xl">search</span>
+<input class="w-full bg-white/5 border border-white/10 rounded-lg py-1.5 pl-10 pr-4 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Search Lore..." type="text"/>
+</div>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-sm font-medium text-white/70 hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-medium text-white border-b-2 border-primary pb-1" href="#">Story Bible</a>
+<a class="text-sm font-medium text-white/70 hover:text-primary transition-colors" href="#">Editor</a>
+<div class="flex items-center gap-2 border-l border-white/10 ml-4 pl-4">
+<button class="p-2 hover:bg-white/5 rounded-lg transition-colors"><span class="material-symbols-outlined text-white/70">notifications</span></button>
+<div class="size-8 rounded-full bg-gradient-to-tr from-primary to-blue-600 border border-white/20" data-alt="User avatar placeholder"></div>
+</div>
+</nav>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="w-64 border-r border-white/10 flex flex-col justify-between p-4 bg-background-light dark:bg-background-dark">
+<div class="flex flex-col gap-6">
+<div>
+<h2 class="text-white text-xs font-bold uppercase tracking-widest px-3 mb-4 opacity-50">Story Bible</h2>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg sidebar-active group" href="#">
+<span class="material-symbols-outlined text-primary text-[20px]">person</span>
+<span class="text-sm font-semibold text-white">Characters</span>
+<div class="ml-auto size-2 bg-primary rounded-full cyan-glow"></div>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all text-white/60 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]">map</span>
+<span class="text-sm font-medium">Locations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all text-white/60 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="text-sm font-medium">Objects</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all text-white/60 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+<span class="text-sm font-medium">Themes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all text-white/60 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+<span class="text-sm font-medium">History</span>
+</a>
+</nav>
+</div>
+<div>
+<h2 class="text-white text-xs font-bold uppercase tracking-widest px-3 mb-4 opacity-50">Lore Status</h2>
+<div class="px-3">
+<div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-3/4 cyan-glow"></div>
+</div>
+<p class="text-[10px] mt-2 text-white/40">75% consistency achieved</p>
+</div>
+</div>
+</div>
+<div class="p-3 bg-white/5 rounded-xl border border-white/5">
+<p class="text-xs text-white/60 mb-2">Workspace: <span class="text-white font-bold">Project Neo</span></p>
+<button class="w-full py-1.5 text-xs bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white font-medium">Switch Project</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark/50">
+<!-- ProfileHeader -->
+<div class="p-8 border-b border-white/5">
+<div class="max-w-5xl mx-auto">
+<div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+<div class="relative">
+<div class="w-40 h-40 portrait-border rounded-xl bg-surface-dark overflow-hidden bg-cover bg-center" data-alt="AI generated character portrait placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCilywdhdKOvLx_xin38MIXk2OJA-2-OsX4uxr5WHOFtWUCm5VFHc4Ye5SXGxs_owFLbwgPpqdC_JWwzRTaAYDmqWIME5afjatT_1bvCr7-GpEk-GJXG-yXfFR1SeaVkyswPXEBl-riWbarD_c6YjdmUbhwoLafdEth5rgia3WPFScEmLyJWeZaucY7BrmS3zeI6oxhuWezZRa1xlkIcYpWO_kbuUCxyWpmuspk5S8Vx-lcFN-otPlnSg-yhAk6VHqNf4qn7I5TBPUo");'>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-primary text-black px-2 py-0.5 rounded text-[10px] font-bold tracking-tighter uppercase">Verified AI</div>
+</div>
+<div class="flex-1 text-center md:text-left">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+<div>
+<h2 class="text-4xl font-bold tracking-tight text-white mb-1">The Protagonist</h2>
+<div class="flex items-center gap-3 justify-center md:justify-start">
+<span class="px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-xs font-bold uppercase tracking-widest">Main Character</span>
+<span class="text-white/40 text-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                                            Updated 2 hours ago
+                                        </span>
+</div>
+</div>
+<div class="flex items-center gap-3 justify-center">
+<button class="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all font-bold text-sm">
+<span class="material-symbols-outlined text-lg">edit</span>
+                                        Edit Profile
+                                    </button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-black hover:bg-primary/80 rounded-lg transition-all font-bold text-sm cyan-glow">
+<span class="material-symbols-outlined text-lg">database</span>
+                                        Export Lore
+                                    </button>
+</div>
+</div>
+<p class="text-white/60 max-w-2xl text-lg leading-relaxed">
+                                A drifting visionary lost in the neon sprawl of Neo-Eden, carrying a secret that could dismantle the existing neural hierarchy.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Content Grid -->
+<div class="max-w-5xl mx-auto p-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Motivation Section -->
+<div class="space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">target</span>
+<h3 class="text-lg font-bold text-white uppercase tracking-wider">Motivation</h3>
+</div>
+<div class="bg-surface-dark border border-white/10 p-5 rounded-xl">
+<textarea class="w-full bg-transparent border-none p-0 text-white/80 focus:ring-0 resize-none min-h-[120px] leading-relaxed" placeholder="Describe the character's core drive...">Driven by the need to find the architect of the neural network that claimed their family. They seek truth at the cost of personal safety, even if that truth leads to digital extinction.</textarea>
+</div>
+</div>
+<!-- Physical Traits Section -->
+<div class="space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">visibility</span>
+<h3 class="text-lg font-bold text-white uppercase tracking-wider">Physical Traits</h3>
+</div>
+<div class="bg-surface-dark border border-white/10 p-5 rounded-xl">
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-semibold border border-primary/30">Cyber-enhanced eyes</span>
+<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-semibold border border-primary/30">Stealth cloak</span>
+<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-semibold border border-primary/30">Neural jack (base of neck)</span>
+<span class="bg-white/5 text-white/50 px-3 py-1 rounded-full text-xs font-semibold border border-white/10">+ Add Trait</span>
+</div>
+<textarea class="w-full bg-transparent border-none p-0 text-white/80 focus:ring-0 resize-none min-h-[60px] text-sm leading-relaxed" placeholder="Additional visual details...">Stands at 180cm. Usually wears high-collar synth-leather jackets. Movement is calculated and precise.</textarea>
+</div>
+</div>
+<!-- Secrets Section (Special Accent) -->
+<div class="md:col-span-2 space-y-4 mt-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-purple-400">lock</span>
+<h3 class="text-lg font-bold text-white uppercase tracking-wider">Secrets &amp; Hidden Lore</h3>
+</div>
+<div class="bg-gradient-to-br from-[#101f22] to-[#1a1022] border border-purple-500/30 p-6 rounded-xl relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-8xl text-purple-500">security</span>
+</div>
+<label class="block mb-4">
+<p class="text-purple-300 text-xs font-bold uppercase tracking-widest mb-2">Confidential Information</p>
+<textarea class="w-full bg-black/40 border border-purple-500/20 rounded-lg p-4 text-white/80 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all min-h-[100px] leading-relaxed">The Protagonist is not biological; they are the first successful "Neural Ghost" – a consciousness uploaded from a dying body, though they believe themselves to be human.</textarea>
+</label>
+<p class="text-[10px] text-purple-400/60 italic font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">info</span> 
+                                These details are used by the AI to maintain narrative tension but are not disclosed to players early.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Action Button -->
+<button class="fixed bottom-8 right-8 gradient-header text-black p-4 rounded-full shadow-2xl flex items-center justify-center group cyan-glow hover:scale-110 transition-transform z-[60]">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">add</span>
+<span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 group-hover:ml-2 font-bold whitespace-nowrap">Add New Entity</span>
+</button>
+</body></html>

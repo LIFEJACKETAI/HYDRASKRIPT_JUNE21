@@ -46,13 +46,20 @@ export async function POST(request: NextRequest) {
       genre = 'fiction',
       targetAudience = 'adult',
       styleProfileId,
-      characterNames = '[]',
+      characterNames = [],
       outline = '{}'
     } = body;
 
     if (!title) {
       return NextResponse.json({ success: false, error: 'Title is required' }, { status: 400 });
     }
+
+    // Ensure characterNames is always a string[] (Prisma Postgres array field)
+    const parsedCharacterNames: string[] = Array.isArray(characterNames)
+      ? characterNames
+      : typeof characterNames === 'string'
+        ? (() => { try { const p = JSON.parse(characterNames); return Array.isArray(p) ? p : []; } catch { return []; } })()
+        : [];
 
     const profile = await getOrCreateProfile(email);
 
@@ -62,7 +69,7 @@ export async function POST(request: NextRequest) {
         genre,
         targetAudience,
         styleProfileId,
-        characterNames,
+        characterNames: parsedCharacterNames,
         outline,
         ownerId: profile.id,
       },

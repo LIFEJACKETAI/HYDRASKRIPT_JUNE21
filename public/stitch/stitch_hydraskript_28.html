@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account &amp; Billing | HydraSkript</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13c8ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#000000",
+                        "card-dark": "#0a1214",
+                        "management-card": "#2a2a2a",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .gradient-text {
+            background: linear-gradient(90deg, #13c8ec 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cyan-glow {
+            box-shadow: 0 0 20px rgba(19, 200, 236, 0.3);
+        }
+        .glass-card {
+            background: rgba(16, 31, 34, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(19, 200, 236, 0.1);
+        }
+        .circular-progress {
+            background: conic-gradient(#13c8ec calc(240/400 * 360deg), #1a1a1a 0deg);
+        }
+        .usage-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .usage-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .usage-scroll::-webkit-scrollbar-thumb {
+            background: rgba(19, 200, 236, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-dark font-display text-white min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 bg-background-dark/80 backdrop-blur-md px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-white">
+<div class="size-6 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.8261 30.5736C16.7203 29.8826 20.2244 29.4783 24 29.4783C27.7756 29.4783 31.2797 30.5736 34.1739 30.5736C36.9144 31.2278 39.9967 32.7669 41.3563 33.8352L24.8486 7.36089C24.4571 6.73303 23.5429 6.73303 23.1514 7.36089L6.64374 33.8352C8.00331 32.7669 11.0856 31.2278 13.8261 30.5736Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M39.998 35.764C39.9944 35.7463 39.9875 35.7155 39.9748 35.6706C39.9436 35.5601 39.8949 35.4259 39.8346 35.2825C39.8168 35.2403 39.7989 35.1602 39.7813 35.1602C38.5103 34.2887 35.9788 33.0607 33.7095 32.5189C30.9875 31.8691 27.6413 31.4783 24 31.4783C20.3587 31.4783 17.0125 31.8691 14.2905 32.5189C12.0012 33.0654 9.44505 34.3104 8.18538 35.1832C8.17384 35.2075 8.16216 35.233 8.15052 35.2592C8.09919 35.3751 8.05721 35.4886 8.02977 35.589C8.00356 35.6848 8.00039 35.7333 8.00004 35.7388C8.00004 35.739 8 35.7393 8.00004 35.7388C8.00004 35.7641 8.0104 36.0767 8.68485 36.6314C9.34546 37.1746 10.4222 37.7531 11.9291 38.2772C14.9242 39.319 19.1919 40 24 40C28.8081 40 33.0758 39.319 36.0709 38.2772C37.5778 37.7531 38.6545 37.1746 39.3151 36.6314C39.9006 36.1499 39.9857 35.8511 39.998 35.764ZM4.95178 32.7688L21.4543 6.30267C22.6288 4.4191 25.3712 4.41909 26.5457 6.30267L43.0534 32.777C43.0709 32.8052 43.0878 32.8338 43.104 32.8629L41.3563 33.8352C43.104 32.8629 43.1038 32.8626 43.104 32.8629L43.1051 32.865L43.1065 32.8675L43.1101 32.8739L43.1199 32.8918C43.1276 32.906 43.1377 32.9246 43.1497 32.9473C43.1738 32.9925 43.2062 33.0545 43.244 33.1299C43.319 33.2792 43.4196 33.489 43.5217 33.7317C43.6901 34.1321 44 34.9311 44 35.7391C44 37.4427 43.003 38.7775 41.8558 39.7209C40.6947 40.6757 39.1354 41.4464 37.385 42.0552C33.8654 43.2794 29.133 44 24 44C18.867 44 14.1346 43.2794 10.615 42.0552C8.86463 41.4464 7.30529 40.6757 6.14419 39.7209C4.99695 38.7775 3.99999 37.4427 3.99999 35.7391C3.99999 34.8725 4.29264 34.0922 4.49321 33.6393C4.60375 33.3898 4.71348 33.1804 4.79687 33.0311C4.83898 32.9556 4.87547 32.8935 4.9035 32.8471C4.91754 32.8238 4.92954 32.8043 4.93916 32.7889L4.94662 32.777L4.95178 32.7688ZM35.9868 29.004L24 9.77997L12.0131 29.004C12.4661 28.8609 12.9179 28.7342 13.3617 28.6282C16.4281 27.8961 20.0901 27.4783 24 27.4783C27.9099 27.4783 31.5719 27.8961 34.6383 28.6282C35.082 28.7342 35.5339 28.8609 35.9868 29.004Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight tracking-tight">HydraSkript</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8 items-center">
+<nav class="flex items-center gap-9">
+<a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" href="#">Dashboard</a>
+<a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" href="#">My Books</a>
+<a class="text-white/70 hover:text-primary text-sm font-medium transition-colors" href="#">Marketing Kit</a>
+<a class="text-white text-sm font-bold border-b-2 border-primary pb-1" href="#">Account &amp; Billing</a>
+</nav>
+<div class="h-10 w-px bg-white/10 mx-2"></div>
+<div class="flex items-center gap-3">
+<span class="text-xs text-white/50 text-right hidden sm:block">Welcome,<br/><span class="text-white font-medium">Author J. Miller</span></span>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-primary/30" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAC7Ubl1DNFIT9JklC-ZVU0FpJuUUCSK_JPwm3aTfQPqXgq2phE1CK9PMuENcIuflUKiNw5HVUYT2UDi7m--QONn3F8HAxs6h4gLREueCftyfPxY0lSM8wiC3mjS90_75ILNofdKchQOjCZTeH3pzd7K3uhWk-JFpPuuAAIy3jU-BmSHkelH_PUuAvwOHIAPlXjAEPJdDn6anBIFOcc5PpezDAR0kUXGOKgIvt9fTU0BoUePRHpxGg39I1skjtcP0NtyqbzGZsBd09E");'></div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col max-w-[1440px] mx-auto w-full px-4 md:px-10 py-8 gap-8">
+<div class="flex flex-col lg:flex-row gap-8">
+<div class="flex-1 flex flex-col gap-8">
+<section class="glass-card rounded-2xl p-8 flex flex-col md:flex-row items-center gap-10">
+<div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
+<h1 class="gradient-text text-4xl font-bold tracking-tight mb-2">Account Overview</h1>
+<div class="flex items-center gap-3 mb-4">
+<span class="text-white/60">Subscription Tier:</span>
+<span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold border border-primary/30 uppercase tracking-widest">Author Tier</span>
+</div>
+<div class="flex items-center gap-4 text-white/40 text-sm">
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-base">verified</span> Verified Author</div>
+<div class="flex items-center gap-1"><span class="material-symbols-outlined text-base">calendar_today</span> Member since Oct 2023</div>
+</div>
+</div>
+<div class="relative flex items-center justify-center p-4">
+<div class="circular-progress size-52 rounded-full flex items-center justify-center cyan-glow">
+<div class="bg-background-dark size-44 rounded-full flex flex-col items-center justify-center text-center">
+<span class="text-4xl font-bold text-white">240</span>
+<span class="text-white/40 text-xs uppercase tracking-widest mt-1">/ 400 credits</span>
+<span class="text-[10px] text-primary mt-2 font-medium">Remaining</span>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-management-card rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/5">
+<div class="flex flex-col gap-1">
+<h3 class="text-xl font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">credit_card</span>
+                                Plan Management
+                            </h3>
+<p class="text-white/60 text-sm">Your next billing cycle starts on <span class="text-white font-medium">November 12, 2024</span>.</p>
+<div class="mt-4 flex flex-wrap gap-2">
+<span class="text-xs bg-white/5 border border-white/10 px-3 py-1.5 rounded text-white/70">Visa ending in 4242</span>
+<button class="text-xs text-primary hover:underline font-medium ml-2">Edit Method</button>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<button class="px-6 py-3 rounded-lg font-bold text-sm border border-white/20 text-white hover:bg-white/5 transition-colors">
+                                Manage Payment Method
+                            </button>
+<button class="px-8 py-3 rounded-lg font-bold text-sm bg-gradient-to-r from-purple-600 to-primary text-white hover:opacity-90 transition-opacity cyan-glow">
+                                Upgrade Plan
+                            </button>
+</div>
+</section>
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold text-white">Purchase Additional Credits</h3>
+<span class="text-white/40 text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">info</span>
+                                A full book typically costs 250–400 credits
+                            </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="glass-card p-6 rounded-xl border-2 border-white/10 hover:border-primary/40 transition-all flex flex-col gap-4 group cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">token</span>
+<span class="text-xs font-bold text-white/30 uppercase">Starter</span>
+</div>
+<div>
+<h4 class="text-2xl font-bold">100 Credits</h4>
+<p class="text-primary text-lg font-bold">$15</p>
+</div>
+<p class="text-[11px] text-white/40 italic">Perfect for 1-2 chapter revisions or cover art generation.</p>
+<button class="mt-2 w-full py-2.5 rounded-lg border border-primary/20 bg-primary/5 text-primary text-sm font-bold group-hover:bg-primary group-hover:text-background-dark transition-all">
+                                    Buy Package
+                                </button>
+</div>
+<div class="glass-card p-6 rounded-xl border-2 border-primary/50 bg-primary/5 hover:border-primary transition-all flex flex-col gap-4 relative overflow-hidden group cursor-pointer">
+<div class="absolute top-0 right-0 bg-primary text-background-dark text-[10px] font-bold px-3 py-1 rounded-bl">POPULAR</div>
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">database</span>
+<span class="text-xs font-bold text-white/30 uppercase">Growth</span>
+</div>
+<div>
+<h4 class="text-2xl font-bold">500 Credits</h4>
+<p class="text-primary text-lg font-bold">$60</p>
+</div>
+<p class="text-[11px] text-white/40 italic">Covers a full novel and complete marketing kit assets.</p>
+<button class="mt-2 w-full py-2.5 rounded-lg bg-primary text-background-dark text-sm font-bold hover:scale-[1.02] transition-transform">
+                                    Buy Package
+                                </button>
+</div>
+<div class="glass-card p-6 rounded-xl border-2 border-white/10 hover:border-primary/40 transition-all flex flex-col gap-4 group cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">layers</span>
+<span class="text-xs font-bold text-white/30 uppercase">Master</span>
+</div>
+<div>
+<h4 class="text-2xl font-bold">1,000 Credits</h4>
+<p class="text-primary text-lg font-bold">$100</p>
+</div>
+<p class="text-[11px] text-white/40 italic">For professional authors building entire book series.</p>
+<button class="mt-2 w-full py-2.5 rounded-lg border border-primary/20 bg-primary/5 text-primary text-sm font-bold group-hover:bg-primary group-hover:text-background-dark transition-all">
+                                    Buy Package
+                                </button>
+</div>
+</div>
+</section>
+</div>
+<aside class="w-full lg:w-[360px] flex flex-col gap-6">
+<div class="glass-card rounded-2xl p-6 flex flex-col h-full border border-white/10">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">history</span>
+                                Usage History
+                            </h3>
+<button class="text-[10px] text-primary hover:underline uppercase tracking-widest font-bold">Export</button>
+</div>
+<div class="usage-scroll flex-1 overflow-y-auto pr-2 max-h-[600px] flex flex-col gap-4">
+<div class="p-3 bg-white/5 rounded-lg border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors">
+<div class="flex flex-col gap-0.5">
+<span class="text-sm font-medium">Chapter 5 Generation</span>
+<span class="text-[10px] text-white/40">Today, 2:45 PM</span>
+</div>
+<div class="text-primary font-bold text-sm">-12 credits</div>
+</div>
+<div class="p-3 bg-white/5 rounded-lg border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors">
+<div class="flex flex-col gap-0.5">
+<span class="text-sm font-medium">AI Cover Generation</span>
+<span class="text-[10px] text-white/40">Yesterday</span>
+</div>
+<div class="text-primary font-bold text-sm">-25 credits</div>
+</div>
+<div class="p-3 bg-white/5 rounded-lg border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors">
+<div class="flex flex-col gap-0.5">
+<span class="text-sm font-medium">Character Concept Art</span>
+<span class="text-[10px] text-white/40">Oct 24, 2023</span>
+</div>
+<div class="text-primary font-bold text-sm">-8 credits</div>
+</div>
+<div class="p-3 bg-white/5 rounded-lg border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors">
+<div class="flex flex-col gap-0.5">
+<span class="text-sm font-medium">Marketing Video Trailer</span>
+<span class="text-[10px] text-white/40">Oct 22, 2023</span>
+</div>
+<div class="text-primary font-bold text-sm">-40 credits</div>
+</div>
+<div class="p-3 bg-white/5 rounded-lg border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors">
+<div class="flex flex-col gap-0.5">
+<span class="text-sm font-medium">Chapter 4 Generation</span>
+<span class="text-[10px] text-white/40">Oct 21, 2023</span>
+</div>
+<div class="text-primary font-bold text-sm">-12 credits</div>
+</div>
+<div class="p-3 bg-white/5 rounded-lg border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors">
+<div class="flex flex-col gap-0.5">
+<span class="text-sm font-medium">Purchased: Starter Kit</span>
+<span class="text-[10px] text-white/40">Oct 20, 2023</span>
+</div>
+<div class="text-green-400 font-bold text-sm">+100 credits</div>
+</div>
+<div class="p-3 bg-white/5 rounded-lg border border-white/5 flex items-center justify-between hover:bg-white/10 transition-colors">
+<div class="flex flex-col gap-0.5">
+<span class="text-sm font-medium">Initial Grant</span>
+<span class="text-[10px] text-white/40">Oct 12, 2023</span>
+</div>
+<div class="text-green-400 font-bold text-sm">+300 credits</div>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-white/10">
+<div class="bg-primary/5 rounded-lg p-4 border border-primary/20">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary">lightbulb</span>
+<p class="text-[11px] text-white/70 leading-relaxed">
+                                        Authors on the <span class="text-primary font-bold">Pro Tier</span> save 20% on all additional credit top-ups.
+                                    </p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<footer class="mt-auto border-t border-white/5 py-8 text-center text-white/30 text-xs">
+<p>© 2024 HydraSkript AI Tools. All billing transactions are secure and encrypted.</p>
+</footer>
+</div>
+
+</body></html>

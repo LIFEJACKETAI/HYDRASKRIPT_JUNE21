@@ -20,3 +20,14 @@ pnpm-debug.log*
 .DS_Store
 .vscode/
 .z-ai-config
+
+# Committed by mistake — never again
+dev.db
+*.db
+*.log
+server.log
+dev.log
+*.swp
+*.bak
+nextjs_tailwind_shadcn_ts@*
+Tracking
