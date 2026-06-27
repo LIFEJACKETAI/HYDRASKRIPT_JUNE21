@@ -196,7 +196,7 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       where: { bookId, index: { lt: chapterIndex } },
       orderBy: { index: 'desc' },
     });
-    const previousSummary = prevChapter?.summaryForNext || '';
+    const previousSummary = prevChapter?.summaryForNext || 'This is the beginning of the story.';
 
     const stylePrompt = await getStyleSystemPrompt(book.styleProfileId);
     const targetAudience = book.targetAudience as TargetAudience;
@@ -212,11 +212,21 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
 
     if (!chapter) throw new Error(`Chapter ${chapterIndex} not found`);
 
+    // Resolve totalChapters from the outline JSON, fall back to DB count
+    let totalChapters = 0;
+    try {
+      const outlineData = JSON.parse(book.outline || '{}');
+      totalChapters = outlineData?.chapters?.length ?? 0;
+    } catch {}
+    if (totalChapters === 0) {
+      totalChapters = await db.chapter.count({ where: { bookId } });
+    }
+
     let fullSystemPrompt: string;
     let chapterUser: string;
 
     if (isColoringBook && coloringTheme && COLORING_THEMES[coloringTheme]) {
-      fullSystemPrompt = getColoringChapterPrompt(coloringTheme, chapterIndex, 10); // approximate total chapters
+      fullSystemPrompt = getColoringChapterPrompt(coloringTheme, chapterIndex, totalChapters);
       chapterUser = `Write a brief, poetic description for the coloring page titled "${chapter.title}". Visual subject: ${chapter.synopsis}`;
     } else {
       // characterNames is Postgres String[] — Prisma returns a JS array directly, never a JSON string
@@ -224,7 +234,7 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
         ? (book.characterNames as string[])
         : [];
 
-      const chapterPrompt = getChapterWritePrompt(stylePrompt, book.title, genre, chapterIndex, 10, previousSummary, characterNames.length > 0 ? characterNames : undefined);
+      const chapterPrompt = getChapterWritePrompt(stylePrompt, book.title, genre, chapterIndex, totalChapters, previousSummary, characterNames.length > 0 ? characterNames : undefined);
       const childrensPrompt = isChildrenBook ? getChildrensChapterPrompt(targetAudience) : '';
       fullSystemPrompt = childrensPrompt ? `${childrensPrompt}\n\n${chapterPrompt}` : chapterPrompt;
       chapterUser = getChapterUserPrompt(chapter.title, chapter.synopsis, chapter.wordTarget);
@@ -256,7 +266,9 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       } catch (e) { console.error('Illustration failed', e); }
     } else if (isColoringBook) {
       try {
-        const coloringPage = await generateColoringPage(bookId, ownerId, chapterIndex, chapter.synopsis, coloringTheme);
+        // Use AI-generated content as the image subject if available; synopsis is the fallback
+        const coloringSubject = chapterResult.content?.trim() || chapter.synopsis;
+        const coloringPage = await generateColoringPage(bookId, ownerId, chapterIndex, coloringSubject, coloringTheme);
         if (coloringPage.success && coloringPage.publicUrl) {
           await db.chapter.update({ where: { id: chapter.id }, data: { illustrationUrl: coloringPage.publicUrl } });
         }

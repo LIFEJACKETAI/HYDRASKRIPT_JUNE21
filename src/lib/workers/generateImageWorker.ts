@@ -25,12 +25,15 @@ export async function generateImageWorker(jobId: string, assetParams: {
     let result;
 
     if (type === 'cover') {
-      result = await generateBookCover(bookId, ownerId, 'Book Title', genre || 'fiction', targetAudience || 'adult', coloringTheme);
+      // Look up the actual book title rather than passing the hardcoded placeholder
+      const bookRecord = await db.book.findUnique({ where: { id: bookId }, select: { title: true } });
+      const bookTitle = bookRecord?.title || 'Untitled';
+      result = await generateBookCover(bookId, ownerId, bookTitle, genre || 'fiction', targetAudience || 'adult', coloringTheme);
     } else if (type === 'coloring_page') {
       if (chapterIndex === undefined) throw new Error('chapterIndex is required for coloring pages');
-      // Find the chapter by its index to get the synopsis
+      // Prefer the AI-generated content as the subject for a richer image; fall back to synopsis
       const chapter = await db.chapter.findFirst({ where: { bookId, index: chapterIndex } });
-      const subject = chapter?.synopsis || 'A beautiful scene';
+      const subject = chapter?.content?.trim() || chapter?.synopsis || 'A beautiful scene';
       result = await generateColoringPage(bookId, ownerId, chapterIndex, subject, coloringTheme);
     } else {
       // Illustration
