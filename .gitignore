@@ -31,3 +31,5 @@ dev.log
 *.bak
 nextjs_tailwind_shadcn_ts@*
 Tracking
+dev.log
+*.log
