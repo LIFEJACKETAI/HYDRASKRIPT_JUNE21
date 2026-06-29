@@ -38,5 +38,12 @@
   ],
   "exclude": [
     "node_modules"
+    {
+  "compilerOptions": {
+    // ... your existing settings, don't touch these
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "HYDRASKRIPT_220526"]
+}
   ]
 }
