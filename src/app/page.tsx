@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -114,13 +115,20 @@ function LandingPage() {
       <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-black/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="size-8 gradient-multi rounded-lg flex items-center justify-center shrink-0">
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-            <div className="leading-none">
-              <span className="text-white text-xl font-bold tracking-tight">HydraSkript</span>
-              <p className="text-[9px] text-slate-400 font-medium uppercase tracking-widest hidden sm:block">AI Book Engine</p>
-            </div>
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              className="overflow-hidden rounded-xl shadow-[0_0_24px_rgba(122,252,255,0.18),0_0_48px_rgba(184,140,255,0.15)]"
+            >
+              <Image
+                src="/HYDRASKRIPT_LOGO.png"
+                alt="HYDRASKRIPT"
+                width={160}
+                height={44}
+                className="h-10 w-auto object-contain"
+                priority
+              />
+            </motion.div>
           </div>
           <div className="flex items-center gap-3">
             <Input
@@ -192,43 +200,22 @@ function LandingPage() {
             </div>
           </motion.div>
 
-          {/* Mockup terminal */}
+          {/* Brand visual */}
           <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="hidden lg:block">
-            <div className="gradient-multi-border rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/20">
-              <div className="bg-[#09090b] p-6 font-mono text-sm">
-                {/* Window bar */}
-                <div className="flex items-center gap-2 mb-5">
-                  <div className="h-3 w-3 rounded-full bg-red-500/70" />
-                  <div className="h-3 w-3 rounded-full bg-yellow-500/70" />
-                  <div className="h-3 w-3 rounded-full bg-green-500/70" />
-                  <span className="ml-3 text-xs text-gray-500">HydraSkript AI Engine v2.4</span>
-                </div>
-                {/* Fake prompt lines */}
-                {[
-                  { label: '>', text: 'Generate book: "The Last Algorithm"', color: 'text-cyan-400' },
-                  { label: '✓', text: 'Planning 12 chapters...', color: 'text-green-400' },
-                  { label: '✓', text: 'Writing Chapter 1: The Awakening (2,840 words)', color: 'text-green-400' },
-                  { label: '✓', text: 'Generating illustration: cyber-noir style', color: 'text-green-400' },
-                  { label: '⚡', text: 'Training custom style: "noir_tech_v3"', color: 'text-purple-400' },
-                  { label: '✓', text: 'Exporting PDF — 247 pages ready', color: 'text-green-400' },
-                ].map((line, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.6 + i * 0.15 }}
-                    className={`flex gap-3 mb-2 ${line.color}`}
-                  >
-                    <span className="shrink-0">{line.label}</span>
-                    <span className="text-gray-300">{line.text}</span>
-                  </motion.div>
-                ))}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }} className="mt-4 flex gap-2">
-                  <div className="h-5 w-5 rounded bg-purple-500/20 border border-purple-500/30 animate-pulse" />
-                  <span className="text-gray-500">Processing next chapter...</span>
-                </motion.div>
-              </div>
-            </div>
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              className="inline-block max-w-[600px] overflow-hidden rounded-2xl shadow-[0_0_40px_rgba(122,252,255,0.18),0_0_80px_rgba(184,140,255,0.15)]"
+            >
+              <Image
+                src="/HYDRASKRIPT_LOGO.png"
+                alt="HYDRASKRIPT"
+                width={600}
+                height={360}
+                className="block h-auto w-full object-contain"
+                priority
+              />
+            </motion.div>
           </motion.div>
         </div>
       </section>

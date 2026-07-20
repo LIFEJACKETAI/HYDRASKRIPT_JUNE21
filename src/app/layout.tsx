@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   keywords: ["AI", "book generation", "writing", "illustrations", "style training", "HydraSkript"],
   authors: [{ name: "HydraSkript Team" }],
   icons: {
-    icon: "/logo-icon.png",
+    icon: "/HYDRASKRIPT_LOGO.png",
   },
   openGraph: {
     title: "HydraSkript — AI Book Generation",
