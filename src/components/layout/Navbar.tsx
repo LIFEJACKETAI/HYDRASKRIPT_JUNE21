@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Menu, X, LogOut, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/lib/store';
@@ -34,12 +35,15 @@ export default function Navbar() {
             onClick={() => setCurrentView('dashboard')}
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
           >
-            <div className="size-8 gradient-multi rounded-lg flex items-center justify-center shrink-0">
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-            <div className="leading-none">
-              <span className="text-white font-bold text-lg tracking-tight">HydraSkript</span>
-              <p className="text-[10px] text-slate-400 font-medium uppercase tracking-widest hidden sm:block">AI Book Engine</p>
+            <div className="overflow-hidden rounded-xl shadow-[0_0_24px_rgba(122,252,255,0.18),0_0_48px_rgba(184,140,255,0.15)]">
+              <Image
+                src="/HYDRASKRIPT_LOGO.png"
+                alt="HYDRASKRIPT"
+                width={160}
+                height={44}
+                className="h-10 w-auto object-contain"
+                priority
+              />
             </div>
           </button>
         </div>
