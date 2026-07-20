@@ -5,6 +5,15 @@
 // ... existing imports
 import { saveBase64File, generateFilename, createMediaAsset } from '@/lib/utils/storage';
 
+const AUDIOBOOK_VOICES = [
+  { id: 'en-US-Neural2-C', gender: 'female', style: 'warm' },
+  { id: 'en-US-Neural2-E', gender: 'female', style: 'clear' },
+  { id: 'en-GB-Neural2-A', gender: 'female', style: 'british' },
+  { id: 'en-US-Neural2-D', gender: 'male', style: 'warm' },
+  { id: 'en-US-Neural2-A', gender: 'male', style: 'clear' },
+  { id: 'en-GB-Neural2-B', gender: 'male', style: 'british' },
+] as const;
+
 /**
  * Generates a short voice preview for the user to hear before committing.
  */

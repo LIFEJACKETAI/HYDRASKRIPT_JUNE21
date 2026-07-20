@@ -133,6 +133,10 @@ model Job {
   creditsConsumed  Int       @default(0)
   errorMessage     String?
   stepIndex        Int       @default(0) // For idempotency: which step is this
+  retryCount       Int       @default(0)
+  maxRetries       Int       @default(3)
+  leaseExpiresAt   DateTime?
+  lastHeartbeatAt  DateTime?
   result           String    @default("{}") // JSON result data
   startedAt        DateTime?
   completedAt      DateTime?

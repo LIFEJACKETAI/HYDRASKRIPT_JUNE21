@@ -7,7 +7,7 @@ import { askLLMJSON } from '@/lib/llm/openrouter';
 import { getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt } from '@/lib/llm/prompts';
 import { ChapterGenerationSchema, validateOrThrow } from '@/lib/llm/schema';
 import { getStyleSystemPrompt } from '@/lib/services/styleAnalyzer';
-import { TargetAudience } from '@/types';
+import { TargetAudience, type Genre } from '@/types';
 
 export async function writeChapterWorker(jobId: string, chapterId: string) {
   const chapter = await db.chapter.findUnique({
@@ -66,7 +66,7 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
     const chapterPrompt = getChapterWritePrompt(
       stylePrompt,
       book.title,
-      book.genre,
+      book.genre as Genre,
       chapter.index,
       totalChapters,
       previousSummary,

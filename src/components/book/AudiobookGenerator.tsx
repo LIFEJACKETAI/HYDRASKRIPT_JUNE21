@@ -106,8 +106,7 @@ function StepIndicator({ current, total }: { current: StepId; total: number }) {
 
 // ─── Voice Card ───────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function VoiceCard({ voice, selected, onSelect }: { voice: Voice; selected: boolean; onSelect: () => any }) {
+function VoiceCard({ voice, selected, onSelect }: { voice: Voice; selected: boolean; onSelect: () => void }) {
   return (
     <motion.button
       onClick={onSelect}
@@ -228,7 +227,11 @@ function GenerationDisplay({ jobId, selectedVoice, onComplete, onError }: Genera
   const isFailed = job?.status === 'failed';
   const isActive = !isComplete && !isFailed;
 
-  const currentMessage = NARRATION_MESSAGES[messageIndex](selectedVoice.label, chapterRef.current);
+  const currentChapter = job && job.progressPercent > 0
+    ? Math.max(1, Math.round((job.progressPercent / 90) * 10))
+    : 1;
+
+  const currentMessage = NARRATION_MESSAGES[messageIndex](selectedVoice.label, currentChapter);
 
   if (!job) {
     return (

@@ -193,6 +193,10 @@ export interface JobProgress {
   status: JobStatus;
   progressMessage: string;
   progressPercent: number;
+  retryCount?: number;
+  maxRetries?: number;
+  leaseExpiresAt?: string | null;
+  lastHeartbeatAt?: string | null;
   result?: Record<string, unknown>;
 }
 

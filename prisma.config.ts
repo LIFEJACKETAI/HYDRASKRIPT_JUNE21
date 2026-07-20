@@ -6,6 +6,5 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 export default defineConfig({
-  earlyAccess: true,
   schema: path.join(process.cwd(), 'prisma', 'schema.prisma'),
 });

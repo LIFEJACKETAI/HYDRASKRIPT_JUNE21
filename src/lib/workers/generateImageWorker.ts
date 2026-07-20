@@ -7,7 +7,7 @@ import { generateBookCover, generateChapterIllustration, generateColoringPage } 
 import { askLLMJSON } from '@/lib/llm/openrouter';
 import { getImagePromptExtractionPrompt, getImagePromptExtractionUserPrompt } from '@/lib/llm/prompts';
 import { ImagePromptSchema, validateOrThrow } from '@/lib/llm/schema';
-import { AUDIENCE_CONFIG } from '@/types';
+import { AUDIENCE_CONFIG, type ColoringTheme } from '@/types';
 
 export async function generateImageWorker(jobId: string, assetParams: {
   bookId: string,
@@ -34,7 +34,7 @@ export async function generateImageWorker(jobId: string, assetParams: {
       // Prefer the AI-generated content as the subject for a richer image; fall back to synopsis
       const chapter = await db.chapter.findFirst({ where: { bookId, index: chapterIndex } });
       const subject = chapter?.content?.trim() || chapter?.synopsis || 'A beautiful scene';
-      result = await generateColoringPage(bookId, ownerId, chapterIndex, subject, coloringTheme);
+      result = await generateColoringPage(bookId, ownerId, chapterIndex, subject, coloringTheme as ColoringTheme | null | undefined);
     } else {
       // Illustration
       const targetPrompt = prompt || 'A cinematic scene from the story';

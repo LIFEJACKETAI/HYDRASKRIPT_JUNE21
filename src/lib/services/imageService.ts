@@ -11,10 +11,12 @@ async function getZAI() {
   return zaiInstance;
 }
 
+type ImageSize = '1024x1024' | '768x1344' | '864x1152' | '1344x768' | '1152x864' | '1440x720' | '720x1440';
+
 export interface GenerateImageOptions {
   prompt: string;
   style?: string;
-  size?: string;
+  size?: ImageSize;
   ownerId: string;
   bookId?: string;
   assetType: string;

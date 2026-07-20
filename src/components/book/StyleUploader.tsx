@@ -217,7 +217,9 @@ export default function StyleUploader() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchProfiles(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchProfiles();
+  }, []);
 
   const toggleDescriptor = (tag: string) => {
     setSelectedDescriptors(prev =>

@@ -65,7 +65,8 @@ The spec expects Postgres-native constructs such as `vector`, RLS policies, and 
 - Add rate limiting and abuse controls
 
 ### Phase 3 — Production queue and data hardening
-- Harden the current Supabase/Postgres SQL-backed queue with explicit retry counts, lease expiry, and safe multi-instance claiming
+- Run `npm run db:generate` and `npm run db:push` to activate the staged queue schema fields in the Prisma client and database
+- Switch the queue from compatibility-mode retry parsing to native field-backed retry and lease accounting
 - Add pgvector where actually needed
 - Decide whether to enforce RLS via Supabase-native access patterns
 - Move more credit guarantees into DB functions/transactions

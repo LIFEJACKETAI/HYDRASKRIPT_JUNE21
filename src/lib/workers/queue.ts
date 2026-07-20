@@ -1,9 +1,19 @@
 // HydraSkript - Persistent Postgres Job Queue
-// Replaces in-memory queue with a DB-backed atomic state machine
+// DB-backed state machine with lightweight retry semantics, compatible with current Prisma client
 
 import { db } from '@/lib/db';
 import { WorkerRegistry } from './registry';
 import type { JobType, JobStatus } from '@/types';
+
+const DEFAULT_MAX_RETRIES = 3;
+
+type QueueWorkerJob = {
+  id: string;
+  bookId?: string | null;
+  ownerId: string;
+  stepIndex?: number | null;
+  creditsConsumed?: number | null;
+};
 
 class PersistentJobQueue {
   private isProcessing = false;
@@ -11,66 +21,76 @@ class PersistentJobQueue {
   private activeJobs = 0;
   private bootstrapped = false;
 
-  /**
-   * Create a job record in the database.
-   * In the new state machine, this is essentially the "Enqueue" action.
-   */
   async createJob(params: {
     bookId?: string;
     ownerId: string;
     jobType: JobType;
     creditsReserved: number;
     stepIndex?: number;
+    maxRetries?: number;
   }): Promise<string> {
+    const progressMessage = params.maxRetries && params.maxRetries !== DEFAULT_MAX_RETRIES
+      ? `Queued... (max retries: ${params.maxRetries})`
+      : 'Queued...';
+
     const job = await db.job.create({
       data: {
         bookId: params.bookId,
         ownerId: params.ownerId,
         jobType: params.jobType,
         status: 'queued',
-        progressMessage: 'Queued...',
+        progressMessage,
         progressPercent: 0,
         creditsReserved: params.creditsReserved,
         stepIndex: params.stepIndex ?? 0,
       },
     });
+
     return job.id;
   }
 
-  /**
-   * Signal that a job is ready for execution.
-   * Since it's already in the DB as 'queued', we just trigger the processor.
-   */
   async startJob(jobId: string, jobType: JobType, _execute?: () => Promise<void>): Promise<void> {
     console.log(`[Queue] Job ${jobId} signaled for processing (${jobType})`);
     await this.bootstrap();
     void this.processNext();
   }
 
-  /**
-   * Process the next available job using atomic locking.
-   */
+  private extractRetryState(progressMessage: string | null | undefined) {
+    const message = progressMessage ?? '';
+    const retryMatch = message.match(/Retrying \((\d+)\/(\d+)\)/);
+
+    return {
+      retryCount: retryMatch ? Number.parseInt(retryMatch[1], 10) : 0,
+      maxRetries: retryMatch ? Number.parseInt(retryMatch[2], 10) : DEFAULT_MAX_RETRIES,
+    };
+  }
+
   private async processNext() {
     if (this.activeJobs >= this.maxConcurrent || this.isProcessing) return;
-
     this.isProcessing = true;
 
-    // 1. Atomic Claim: Find a queued job and mark it active in one transaction
-    // This prevents multiple workers from picking up the same job.
     const jobToProcess = await db.$transaction(async (tx) => {
-      const queuedJob = await tx.job.findFirst({
+      const queuedJobs = await tx.job.findMany({
         where: { status: 'queued' },
         orderBy: { createdAt: 'asc' },
+        take: 25,
+      });
+
+      const queuedJob = queuedJobs.find((job) => {
+        const retryState = this.extractRetryState(job.progressMessage);
+        return retryState.retryCount <= retryState.maxRetries;
       });
 
       if (!queuedJob) return null;
 
-      return await tx.job.update({
+      return tx.job.update({
         where: { id: queuedJob.id },
         data: {
           status: 'active',
-          progressMessage: 'Processing...',
-          startedAt: new Date()
+          progressMessage: queuedJob.progressMessage?.startsWith('Retrying')
+            ? queuedJob.progressMessage
+            : 'Processing...',
+          startedAt: queuedJob.startedAt ?? new Date(),
         },
       });
     });
@@ -90,33 +110,42 @@ class PersistentJobQueue {
         throw new Error(`No worker registered for job type: ${jobToProcess.jobType}`);
       }
 
-      // We wrap the job data in a format the worker expects
-      await workerFn({
-        ...jobToProcess,
-        result: jobToProcess.result ? JSON.parse(jobToProcess.result) : null,
-      } as any);
+      const workerJob: QueueWorkerJob = {
+        id: jobToProcess.id,
+        bookId: jobToProcess.bookId,
+        ownerId: jobToProcess.ownerId,
+        stepIndex: jobToProcess.stepIndex,
+        creditsConsumed: jobToProcess.creditsConsumed,
+      };
 
+      await workerFn(workerJob);
     } catch (error) {
       const errMessage = error instanceof Error ? error.message : String(error);
       console.error(`[Queue] Job ${jobToProcess.id} failed:`, errMessage);
 
+      const retryState = this.extractRetryState(jobToProcess.progressMessage);
+      const nextRetryCount = retryState.retryCount + 1;
+      const canRetry = nextRetryCount <= retryState.maxRetries;
+
       await this.updateJobStatus(jobToProcess.id, {
-        status: 'failed',
+        status: canRetry ? 'queued' : 'failed',
         errorMessage: errMessage,
-        progressMessage: `Failed: ${errMessage}`,
+        progressMessage: canRetry
+          ? `Retrying (${nextRetryCount}/${retryState.maxRetries}) after failure: ${errMessage}`
+          : `Failed: ${errMessage}`,
       });
 
-      // Refund credits on failure
-      try {
-        const { refundCredits } = await import('@/lib/utils/credits');
-        await refundCredits(jobToProcess.id, `Job failed: ${errMessage}`);
-      } catch (e) {
-        console.error('[Queue] Refund failed:', e);
+      if (!canRetry) {
+        try {
+          const { refundCredits } = await import('@/lib/utils/credits');
+          await refundCredits(jobToProcess.id, `Job failed: ${errMessage}`);
+        } catch (e) {
+          console.error('[Queue] Refund failed:', e);
+        }
       }
     } finally {
       this.activeJobs--;
       this.isProcessing = false;
-      // Trigger next job immediately
       setTimeout(() => {
         void this.processNext();
       }, 100);
@@ -128,11 +157,15 @@ class PersistentJobQueue {
 
     await db.job.updateMany({
       where: { status: 'active' },
-      data: { status: 'queued', progressMessage: 'Recovering from crash...' },
+      data: { status: 'queued', progressMessage: 'Recovering interrupted job...' },
     });
 
     this.bootstrapped = true;
     console.log('[Queue] Recovered active jobs from last session.');
+  }
+
+  async heartbeat(_jobId: string): Promise<void> {
+    return Promise.resolve();
   }
 
   async updateJobStatus(
@@ -145,6 +178,9 @@ class PersistentJobQueue {
       result?: Record<string, unknown>;
       startedAt?: Date;
       completedAt?: Date;
+      retryCount?: number;
+      leaseExpiresAt?: Date | null;
+      lastHeartbeatAt?: Date | null;
     }
   ): Promise<void> {
     try {
@@ -155,7 +191,7 @@ class PersistentJobQueue {
           ...(update.progressMessage && { progressMessage: update.progressMessage }),
           ...(update.progressPercent !== undefined && { progressPercent: update.progressPercent }),
           ...(update.errorMessage && { errorMessage: update.errorMessage }),
-          ...(update.result && { result: update.result ? JSON.stringify(update.result) : undefined }),
+          ...(update.result && { result: JSON.stringify(update.result) }),
           ...(update.startedAt && { startedAt: update.startedAt }),
           ...(update.completedAt && { completedAt: update.completedAt }),
           ...(update.status === 'completed' && { completedAt: new Date() }),
@@ -166,8 +202,7 @@ class PersistentJobQueue {
     }
   }
 
-  getQueueSize(): number {
-    // Now we query the DB for the size
+  async getQueueSize(): Promise<number> {
     return db.job.count({ where: { status: 'queued' } });
   }
 

@@ -45,6 +45,8 @@
     "examples",
     "download",
     "upload",
-    "mini-services"
+    "mini-services",
+    "test_audiobook_pipeline.ts",
+    "test_audiobook_pipeline.js"
   ]
 }
