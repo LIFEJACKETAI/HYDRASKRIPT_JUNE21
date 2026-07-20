@@ -37,7 +37,7 @@ HydraSkript now uses the stable production flow:
 | AI / LLM | OpenRouter |
 | Images | Hugging Face / Replicate / FAL fallback design |
 | Audio | Google AI Studio (Gemini TTS) + FFmpeg |
-| Storage | Local filesystem by default (`public/assets`) |
+| Storage | Supabase Storage when configured, local fallback for development |
 | Payments | Stripe (partially staged / verify before production) |
 
 ---
@@ -94,6 +94,7 @@ DATABASE_URL=postgresql://...
 NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
+SUPABASE_STORAGE_BUCKET=hydraskript-assets
 
 # AI
 OPENROUTER_API_KEY=sk-or-...
@@ -119,15 +120,18 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
 ### Storage note
 
-The app currently stores generated files locally under:
+The app now prefers **Supabase Storage** for generated assets when these are configured:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_STORAGE_BUCKET`
+
+If they are not configured, it falls back to local filesystem storage under:
 
 - `public/assets`
 
-For real production, strongly consider moving to:
-
-- Cloudflare R2
-- S3
-- another durable object store
+For production, create a public Supabase Storage bucket matching `SUPABASE_STORAGE_BUCKET`.
+Local fallback remains useful for development, but should not be your primary production storage strategy.
 
 ---
 
@@ -230,7 +234,7 @@ Before deploying, confirm all of the following:
   - `npm run db:generate`
   - `npm run db:push`
 - FFmpeg is available in the deployment runtime
-- persistent file storage strategy is chosen
+- Supabase Storage bucket exists and matches `SUPABASE_STORAGE_BUCKET` (or an intentional persistent-volume fallback is in place)
 
 ---
 
@@ -361,8 +365,8 @@ HydraSkript currently supports:
 
 These are the main remaining production limitations:
 
-1. **Storage is local filesystem by default**
-   - generated files can be lost on restart/redeploy without persistent volume
+1. **Storage falls back to local filesystem if Supabase Storage is not configured**
+   - generated files can still be lost on restart/redeploy if you rely on fallback storage instead of a real bucket
 
 2. **Queue is single-instance oriented**
    - suitable for one-node deployments today

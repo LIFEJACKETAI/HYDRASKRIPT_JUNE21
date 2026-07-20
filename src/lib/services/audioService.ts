@@ -162,7 +162,9 @@ export async function saveAudioChunk(
 ): Promise<{ success: boolean; publicUrl?: string; error?: string }> {
   try {
     const filename = generateFilename(`audio_chunk_${bookId}_${chunkIndex}`, 'mp3');
-    const publicUrl = saveBase64File('audio-chunks', filename, audioBase64);
+    const publicUrl = await saveBase64File('audio-chunks', filename, audioBase64, {
+      contentType: 'audio/mpeg',
+    });
 
     await createMediaAsset({
       ownerId,

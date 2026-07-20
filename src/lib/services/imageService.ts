@@ -42,7 +42,12 @@ export async function generateImage(options: GenerateImageOptions): Promise<Gene
 
     const imageBase64 = response.data[0].base64;
     const filename = generateFilename(`${assetType}_${style}`, 'png');
-    const publicUrl = saveBase64File(assetType === 'cover' ? 'covers' : 'illustrations', filename, imageBase64);
+    const publicUrl = await saveBase64File(
+      assetType === 'cover' ? 'covers' : 'illustrations',
+      filename,
+      imageBase64,
+      { contentType: 'image/png' }
+    );
 
     const asset = await createMediaAsset({
       ownerId, bookId, assetType, storagePath: publicUrl, publicUrl,

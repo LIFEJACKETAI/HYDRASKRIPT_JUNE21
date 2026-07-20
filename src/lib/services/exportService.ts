@@ -118,7 +118,9 @@ export async function exportBookAsPDF(
 
     // Save to storage
     const filename = generateFilename(`book_${bookId}`, 'pdf');
-    const publicUrl = saveFile('pdfs', filename, pdfBuffer);
+    const publicUrl = await saveFile('pdfs', filename, pdfBuffer, {
+      contentType: 'application/pdf',
+    });
 
     await createMediaAsset({
       ownerId,

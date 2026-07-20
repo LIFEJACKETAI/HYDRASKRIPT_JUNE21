@@ -1,11 +1,12 @@
 // HydraSkript - Persistent Postgres Job Queue
-// DB-backed state machine with lightweight retry semantics, compatible with current Prisma client
+// DB-backed state machine with lease, heartbeat, and retry semantics backed by Prisma fields
 
 import { db } from '@/lib/db';
 import { WorkerRegistry } from './registry';
 import type { JobType, JobStatus } from '@/types';
 
 const DEFAULT_MAX_RETRIES = 3;
+const LEASE_DURATION_MS = 5 * 60 * 1000;
 
 type QueueWorkerJob = {
   id: string;
@@ -29,9 +30,7 @@ class PersistentJobQueue {
     stepIndex?: number;
     maxRetries?: number;
   }): Promise<string> {
-    const progressMessage = params.maxRetries && params.maxRetries !== DEFAULT_MAX_RETRIES
-      ? `Queued... (max retries: ${params.maxRetries})`
-      : 'Queued...';
+    const maxRetries = params.maxRetries ?? DEFAULT_MAX_RETRIES;
 
     const job = await db.job.create({
       data: {
@@ -39,10 +38,14 @@ class PersistentJobQueue {
         ownerId: params.ownerId,
         jobType: params.jobType,
         status: 'queued',
-        progressMessage,
+        progressMessage: 'Queued...',
         progressPercent: 0,
         creditsReserved: params.creditsReserved,
         stepIndex: params.stepIndex ?? 0,
+        retryCount: 0,
+        maxRetries,
+        leaseExpiresAt: null,
+        lastHeartbeatAt: null,
       },
     });
 
@@ -55,42 +58,39 @@ class PersistentJobQueue {
     void this.processNext();
   }
 
-  private extractRetryState(progressMessage: string | null | undefined) {
-    const message = progressMessage ?? '';
-    const retryMatch = message.match(/Retrying \((\d+)\/(\d+)\)/);
-
-    return {
-      retryCount: retryMatch ? Number.parseInt(retryMatch[1], 10) : 0,
-      maxRetries: retryMatch ? Number.parseInt(retryMatch[2], 10) : DEFAULT_MAX_RETRIES,
-    };
+  private getLeaseExpiry(from = new Date()) {
+    return new Date(from.getTime() + LEASE_DURATION_MS);
   }
+
 
   private async processNext() {
     if (this.activeJobs >= this.maxConcurrent || this.isProcessing) return;
     this.isProcessing = true;
 
     const jobToProcess = await db.$transaction(async (tx) => {
-      const queuedJobs = await tx.job.findMany({
-        where: { status: 'queued' },
+      const queuedJob = await tx.job.findFirst({
+        where: {
+          status: 'queued',
+          retryCount: { lte: tx.job.fields.maxRetries },
+        },
         orderBy: { createdAt: 'asc' },
-        take: 25,
-      });
-
-      const queuedJob = queuedJobs.find((job) => {
-        const retryState = this.extractRetryState(job.progressMessage);
-        return retryState.retryCount <= retryState.maxRetries;
       });
 
       if (!queuedJob) return null;
+
+      const now = new Date();
 
       return tx.job.update({
         where: { id: queuedJob.id },
         data: {
           status: 'active',
-          progressMessage: queuedJob.progressMessage?.startsWith('Retrying')
-            ? queuedJob.progressMessage
+          progressMessage: queuedJob.retryCount > 0
+            ? `Retrying (${queuedJob.retryCount}/${queuedJob.maxRetries})...`
             : 'Processing...',
-          startedAt: queuedJob.startedAt ?? new Date(),
+          startedAt: queuedJob.startedAt ?? now,
+          leaseExpiresAt: this.getLeaseExpiry(now),
+          lastHeartbeatAt: now,
+          errorMessage: null,
         },
       });
     });
@@ -123,16 +123,18 @@ class PersistentJobQueue {
       const errMessage = error instanceof Error ? error.message : String(error);
       console.error(`[Queue] Job ${jobToProcess.id} failed:`, errMessage);
 
-      const retryState = this.extractRetryState(jobToProcess.progressMessage);
-      const nextRetryCount = retryState.retryCount + 1;
-      const canRetry = nextRetryCount <= retryState.maxRetries;
+      const nextRetryCount = jobToProcess.retryCount + 1;
+      const canRetry = nextRetryCount <= jobToProcess.maxRetries;
 
       await this.updateJobStatus(jobToProcess.id, {
         status: canRetry ? 'queued' : 'failed',
         errorMessage: errMessage,
         progressMessage: canRetry
-          ? `Retrying (${nextRetryCount}/${retryState.maxRetries}) after failure: ${errMessage}`
+          ? `Retrying (${nextRetryCount}/${jobToProcess.maxRetries}) after failure: ${errMessage}`
           : `Failed: ${errMessage}`,
+        retryCount: nextRetryCount,
+        leaseExpiresAt: null,
+        lastHeartbeatAt: null,
       });
 
       if (!canRetry) {
@@ -155,17 +157,42 @@ class PersistentJobQueue {
   async bootstrap(): Promise<void> {
     if (this.bootstrapped) return;
 
+    const now = new Date();
+
     await db.job.updateMany({
-      where: { status: 'active' },
-      data: { status: 'queued', progressMessage: 'Recovering interrupted job...' },
+      where: {
+        status: 'active',
+        OR: [
+          { leaseExpiresAt: null },
+          { leaseExpiresAt: { lte: now } },
+        ],
+      },
+      data: {
+        status: 'queued',
+        progressMessage: 'Recovering interrupted job...',
+        leaseExpiresAt: null,
+        lastHeartbeatAt: null,
+      },
     });
 
     this.bootstrapped = true;
     console.log('[Queue] Recovered active jobs from last session.');
   }
 
-  async heartbeat(_jobId: string): Promise<void> {
-    return Promise.resolve();
+  async heartbeat(jobId: string): Promise<void> {
+    const now = new Date();
+
+    try {
+      await db.job.update({
+        where: { id: jobId },
+        data: {
+          lastHeartbeatAt: now,
+          leaseExpiresAt: this.getLeaseExpiry(now),
+        },
+      });
+    } catch (error) {
+      console.error(`[Queue] Failed heartbeat for job ${jobId}:`, error);
+    }
   }
 
   async updateJobStatus(
@@ -194,7 +221,17 @@ class PersistentJobQueue {
           ...(update.result && { result: JSON.stringify(update.result) }),
           ...(update.startedAt && { startedAt: update.startedAt }),
           ...(update.completedAt && { completedAt: update.completedAt }),
-          ...(update.status === 'completed' && { completedAt: new Date() }),
+          ...(update.retryCount !== undefined && { retryCount: update.retryCount }),
+          ...(update.leaseExpiresAt !== undefined && { leaseExpiresAt: update.leaseExpiresAt }),
+          ...(update.lastHeartbeatAt !== undefined && { lastHeartbeatAt: update.lastHeartbeatAt }),
+          ...(update.status === 'completed' && {
+            completedAt: new Date(),
+            leaseExpiresAt: null,
+            lastHeartbeatAt: new Date(),
+          }),
+          ...(update.status === 'failed' && {
+            leaseExpiresAt: null,
+          }),
         },
       });
     } catch (error) {

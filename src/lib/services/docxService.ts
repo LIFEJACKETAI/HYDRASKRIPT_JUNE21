@@ -291,7 +291,9 @@ export async function exportBookAsDOCX(
 
     const docxBuffer = buildZip(entries);
     const filename = generateFilename(`book_${bookId}`, 'docx');
-    const publicUrl = saveFile('exports', filename, docxBuffer);
+    const publicUrl = await saveFile('exports', filename, docxBuffer, {
+      contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    });
 
     await createMediaAsset({
       ownerId,

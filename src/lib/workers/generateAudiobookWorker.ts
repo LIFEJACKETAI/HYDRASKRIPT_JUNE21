@@ -38,6 +38,7 @@ export async function generateAudiobookWorker(jobId: string) {
       progressMessage: 'Preparing audiobook pipeline...',
       progressPercent: 5
     });
+    await jobQueue.heartbeat(jobId);
 
     // 2. Process Chapters
     const chapters = book.chapters;
@@ -52,11 +53,13 @@ export async function generateAudiobookWorker(jobId: string) {
         progressMessage: `Generating audio for Chapter ${i + 1}/${totalChapters}...`,
         progressPercent: progress
       });
+      await jobQueue.heartbeat(jobId);
 
       // Chunk the chapter text
       const chunks = chunkText(chapter.content);
 
       for (let j = 0; j < chunks.length; j++) {
+        await jobQueue.heartbeat(jobId);
         const result = await generateAudioChunk(chunks[j], voiceId);
 
         if (!result.success) {
@@ -79,6 +82,7 @@ export async function generateAudiobookWorker(jobId: string) {
       progressMessage: 'Assembling final audiobook file...',
       progressPercent: 90
     });
+    await jobQueue.heartbeat(jobId);
 
     const finalFilename = generateFilename(`audiobook_${book.id}`, 'm4b');
     const finalLocalPath = path.join(tempDir, finalFilename);
@@ -93,7 +97,9 @@ export async function generateAudiobookWorker(jobId: string) {
 
     // 4. Upload Final Asset
     const finalBuffer = await fs.readFile(finalLocalPath);
-    const publicUrl = saveFile('audiobooks', finalFilename, finalBuffer);
+    const publicUrl = await saveFile('audiobooks', finalFilename, finalBuffer, {
+      contentType: 'audio/mp4',
+    });
 
     await createMediaAsset({
       ownerId: book.ownerId,

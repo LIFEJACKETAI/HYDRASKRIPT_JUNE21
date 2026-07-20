@@ -22,6 +22,7 @@ export async function generateImageWorker(jobId: string, assetParams: {
   const { bookId, ownerId, type, chapterIndex, prompt, genre, targetAudience, coloringTheme } = assetParams;
 
   try {
+    await jobQueue.heartbeat(jobId);
     let result;
 
     if (type === 'cover') {
@@ -45,6 +46,8 @@ export async function generateImageWorker(jobId: string, assetParams: {
     if (!result.success) {
       throw new Error(`Image generation failed: ${result.error}`);
     }
+
+    await jobQueue.heartbeat(jobId);
 
     // Update the database to link the image to the asset
     if (type === 'cover') {

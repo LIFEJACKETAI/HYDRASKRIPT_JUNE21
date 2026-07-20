@@ -279,7 +279,9 @@ export async function exportBookAsEPUB(
 
     const epubBuffer = buildZip(entries);
     const filename = generateFilename(`book_${bookId}`, 'epub');
-    const publicUrl = saveFile('exports', filename, epubBuffer);
+    const publicUrl = await saveFile('exports', filename, epubBuffer, {
+      contentType: 'application/epub+zip',
+    });
 
     await createMediaAsset({
       ownerId,
