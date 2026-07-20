@@ -41,7 +41,7 @@ export default function Navbar() {
                 alt="HYDRASKRIPT"
                 width={160}
                 height={44}
-                className="h-10 w-auto object-contain"
+                className="h-9 w-auto object-contain"
                 priority
               />
             </div>

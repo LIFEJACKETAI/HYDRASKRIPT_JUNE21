@@ -45,47 +45,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Add credits (simulated purchase)
-export async function POST(request: NextRequest) {
-  try {
-    const { profile } = await requireProfile(request);
-
-    const { tier } = await request.json();
-    const tierConfig = TIER_CONFIG[tier as Tier];
-
-    if (!tierConfig) {
-      return NextResponse.json({ success: false, error: 'Invalid tier' }, { status: 400 });
-    }
-
-    await addCredits(profile.id, tierConfig.credits, `Credit purchase: ${tierConfig.label}`);
-
-    const tierOrder: Tier[] = ['starter', 'author', 'publisher', 'studio'];
-    const currentTierIndex = tierOrder.indexOf(profile.tier as Tier);
-    const newTierIndex = tierOrder.indexOf(tier as Tier);
-    if (newTierIndex > currentTierIndex) {
-      await db.profile.update({
-        where: { id: profile.id },
-        data: { tier },
-      });
-    }
-
-    const newBalance = await getCreditBalance(profile.id);
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        creditsAdded: tierConfig.credits,
-        newBalance,
-        tier: newTierIndex > currentTierIndex ? tier : profile.tier,
-      },
-    });
-  } catch (error) {
-    if (isUnauthorizedError(error)) {
-      return unauthorizedResponse();
-    }
-
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[API] Add credits failed:', message);
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
-  }
+// POST - Direct credit mutation disabled in favor of Stripe Checkout.
+export async function POST(_request: NextRequest) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'Direct credit purchases are disabled. Use /api/credits/checkout instead.',
+    },
+    { status: 405 }
+  );
 }

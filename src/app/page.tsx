@@ -125,7 +125,7 @@ function LandingPage() {
                 alt="HYDRASKRIPT"
                 width={160}
                 height={44}
-                className="h-10 w-auto object-contain"
+                className="h-9 w-auto object-contain"
                 priority
               />
             </motion.div>
@@ -519,20 +519,18 @@ function CreditsView() {
     { key: 'pack_1000', label: '1 000 Credits', credits: 1000, price: 100, per: '$0.10 / credit', icon: Coins,    color: 'text-cyan-300',   bg: 'bg-cyan-500/10',   border: 'border-cyan-700/40',   badge: 'Best Value' },
   ];
 
-  const handlePurchase = async (tier: string) => {
-    setPurchasing(tier);
+  const handlePurchase = async (pricingKey: string) => {
+    setPurchasing(pricingKey);
     try {
-      const result = await purchaseCredits(tier);
-      if (result.success) {
-        toast({ title: 'Credits purchased!', description: 'Your balance has been updated.' });
-        const [updatedProfile, creditsResult] = await Promise.all([getProfile(), getCredits()]);
-        if (updatedProfile) setProfile(updatedProfile);
-        setCreditsData(creditsResult);
-      } else {
-        toast({ title: 'Purchase failed', description: result.error || 'Unknown error', variant: 'destructive' });
+      const result = await purchaseCredits(pricingKey);
+      if (result.success && result.data?.checkoutUrl) {
+        window.location.href = result.data.checkoutUrl;
+        return;
       }
+
+      toast({ title: 'Purchase failed', description: result.error || 'Unable to start checkout.', variant: 'destructive' });
     } catch {
-      toast({ title: 'Error', description: 'Failed to purchase credits.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Failed to start Stripe checkout.', variant: 'destructive' });
     } finally {
       setPurchasing(null);
     }

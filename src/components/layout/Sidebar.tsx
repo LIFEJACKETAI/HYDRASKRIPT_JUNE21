@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
@@ -72,6 +73,27 @@ export default function Sidebar() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
+        {/* Sidebar brand */}
+        <div className="px-4 pt-4 pb-3">
+          <button
+            onClick={() => setCurrentView('dashboard')}
+            className="w-full flex items-center justify-center rounded-2xl border border-white/8 bg-black/20 px-3 py-3 hover:bg-white/[0.03] transition-colors"
+          >
+            <div className="overflow-hidden rounded-xl shadow-[0_0_24px_rgba(122,252,255,0.18),0_0_48px_rgba(184,140,255,0.15)]">
+              <Image
+                src="/HYDRASKRIPT_LOGO.png"
+                alt="HYDRASKRIPT"
+                width={160}
+                height={44}
+                className="h-9 w-auto object-contain"
+                priority
+              />
+            </div>
+          </button>
+        </div>
+
+        <Separator className="bg-[#312839]" />
+
         {/* Nav items */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {filteredItems.map((item) => {

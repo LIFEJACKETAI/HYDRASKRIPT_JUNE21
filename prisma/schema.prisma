@@ -26,6 +26,7 @@ model Profile {
   mediaAssets   MediaAsset[]
   jobs          Job[]
   creditLedger  CreditLedger[]
+  payments      Payment[]
 
   @@map("profiles")
 }
@@ -163,4 +164,29 @@ model CreditLedger {
   job     Job?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
 
   @@map("credit_ledger")
+}
+
+model Payment {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId             String   @db.Uuid
+  pricingKey            String
+  provider              String   @default("stripe")
+  mode                  String   // subscription or payment
+  status                String   @default("pending")
+  stripeSessionId       String?  @unique
+  stripeInvoiceId       String?  @unique
+  stripeSubscriptionId  String?
+  stripeCustomerId      String?
+  amountCents           Int
+  currency              String   @default("usd")
+  creditsGranted        Int      @default(0)
+  tierApplied           String?
+  fulfilledAt           DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, createdAt])
+  @@map("payments")
 }

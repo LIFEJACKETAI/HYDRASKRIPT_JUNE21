@@ -73,7 +73,7 @@ export type CreateStyleProfileInput = z.infer<typeof CreateStyleProfileSchema>;
 // ─── Credit Purchase Schema ───────────────────────────────────────────────────
 
 export const CreditPurchaseSchema = z.object({
-  tier: z.enum(['author', 'publisher', 'studio']),
+  pricingKey: z.enum(['starter', 'author', 'publisher', 'studio', 'pack_100', 'pack_500', 'pack_1000']),
 });
 
 export type CreditPurchaseInput = z.infer<typeof CreditPurchaseSchema>;

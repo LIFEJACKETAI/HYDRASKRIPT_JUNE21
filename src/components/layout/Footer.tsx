@@ -14,7 +14,7 @@ export default function Footer() {
               alt="HydraSkript Logo"
               width={160}
               height={44}
-              className="h-8 w-auto object-contain"
+              className="h-9 w-auto object-contain"
             />
             <span className="text-gray-500 text-sm ml-2">
               AI-Powered Book Generation

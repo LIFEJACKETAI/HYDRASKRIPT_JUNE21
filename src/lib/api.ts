@@ -192,10 +192,10 @@ export async function getCredits(): Promise<CreditsData | null> {
   return result.data ?? null;
 }
 
-export async function purchaseCredits(tier: string) {
-  return apiFetch('/credits', {
+export async function purchaseCredits(pricingKey: string) {
+  return apiFetch<{ checkoutUrl: string; sessionId: string }>('/credits/checkout', {
     method: 'POST',
-    body: JSON.stringify({ tier }),
+    body: JSON.stringify({ pricingKey }),
   });
 }
 

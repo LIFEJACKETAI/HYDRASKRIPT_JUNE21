@@ -4,6 +4,8 @@
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 export type Tier = 'starter' | 'author' | 'publisher' | 'studio';
+export type CreditPackKey = 'pack_100' | 'pack_500' | 'pack_1000';
+export type PricingKey = Tier | CreditPackKey;
 export type TargetAudience = 'adult' | '0-5' | '6-9' | '10-14';
 export type BookStatus = 'draft' | 'generating' | 'completed' | 'failed';
 export type ChapterStatus = 'pending' | 'writing' | 'reviewing' | 'completed' | 'failed';
@@ -313,8 +315,90 @@ export const AUDIOBOOK_VOICES = [
 // ─── Tier Pricing ─────────────────────────────────────────────────────────────
 
 export const TIER_CONFIG: Record<Tier, { credits: number; price: number; label: string }> = {
-  starter: { credits: 100, price: 0, label: 'Starter (Free Trial)' },
-  author: { credits: 1000, price: 14.99, label: 'Author Studio' },
-  publisher: { credits: 5000, price: 39.99, label: 'Publisher Pro' },
-  studio: { credits: 20000, price: 99.99, label: 'Studio Enterprise' },
+  starter: { credits: 300, price: 29, label: 'Starter' },
+  author: { credits: 1000, price: 79, label: 'Author' },
+  publisher: { credits: 3000, price: 149, label: 'Publisher' },
+  studio: { credits: 10000, price: 299, label: 'Studio' },
+};
+
+export const CREDIT_PACK_CONFIG: Record<CreditPackKey, { credits: number; price: number; label: string }> = {
+  pack_100: { credits: 100, price: 15, label: 'A - LA CARTE (PACK 100)' },
+  pack_500: { credits: 500, price: 60, label: 'A - LA CARTE (PACK 500)' },
+  pack_1000: { credits: 1000, price: 100, label: 'A - LA CARTE (PACK 1000)' },
+};
+
+export const STRIPE_PRICE_ENV_KEYS: Record<PricingKey, string> = {
+  starter: 'STRIPE_PRICE_STARTER',
+  author: 'STRIPE_PRICE_AUTHOR',
+  publisher: 'STRIPE_PRICE_PUBLISHER',
+  studio: 'STRIPE_PRICE_STUDIO',
+  pack_100: 'STRIPE_PRICE_PACK_100',
+  pack_500: 'STRIPE_PRICE_PACK_500',
+  pack_1000: 'STRIPE_PRICE_PACK_1000',
+};
+
+export const PRICING_CONFIG: Record<PricingKey, {
+  key: PricingKey;
+  label: string;
+  credits: number;
+  price: number;
+  mode: 'subscription' | 'payment';
+  category: 'tier' | 'pack';
+}> = {
+  starter: {
+    key: 'starter',
+    label: 'Starter',
+    credits: 300,
+    price: 29,
+    mode: 'subscription',
+    category: 'tier',
+  },
+  author: {
+    key: 'author',
+    label: 'Author',
+    credits: 1000,
+    price: 79,
+    mode: 'subscription',
+    category: 'tier',
+  },
+  publisher: {
+    key: 'publisher',
+    label: 'Publisher',
+    credits: 3000,
+    price: 149,
+    mode: 'subscription',
+    category: 'tier',
+  },
+  studio: {
+    key: 'studio',
+    label: 'Studio',
+    credits: 10000,
+    price: 299,
+    mode: 'subscription',
+    category: 'tier',
+  },
+  pack_100: {
+    key: 'pack_100',
+    label: '100 Credits',
+    credits: 100,
+    price: 15,
+    mode: 'payment',
+    category: 'pack',
+  },
+  pack_500: {
+    key: 'pack_500',
+    label: '500 Credits',
+    credits: 500,
+    price: 60,
+    mode: 'payment',
+    category: 'pack',
+  },
+  pack_1000: {
+    key: 'pack_1000',
+    label: '1 000 Credits',
+    credits: 1000,
+    price: 100,
+    mode: 'payment',
+    category: 'pack',
+  },
 };
