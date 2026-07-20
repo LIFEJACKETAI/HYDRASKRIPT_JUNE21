@@ -446,23 +446,35 @@ export default function AudiobookGenerator() {
 
     setIsSubmitting(true);
     try {
-      const payload: Record<string, unknown> = {
-        voiceId: selectedVoice.id,
-        source,
-      };
+      const requestInit: RequestInit = { method: 'POST' };
 
       if (source === 'book') {
-        payload.bookId = selectedBookId;
-      }
-      // For upload source we pass the source flag; actual file parsing is server-side in production
-
-      const res = await fetch('/api/audiobook', {
-        method: 'POST',
-        headers: {
+        requestInit.headers = {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+        };
+        requestInit.body = JSON.stringify({
+          voiceId: selectedVoice.id,
+          source,
+          bookId: selectedBookId,
+        });
+      } else {
+        if (!uploadedFile) {
+          toast({
+            title: 'No manuscript selected',
+            description: 'Please choose a manuscript file before generating.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('voiceId', selectedVoice.id);
+        formData.append('source', source);
+        formData.append('file', uploadedFile);
+        requestInit.body = formData;
+      }
+
+      const res = await fetch('/api/audiobook', requestInit);
 
       const json = await res.json();
 
@@ -482,7 +494,7 @@ export default function AudiobookGenerator() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedVoice, source, selectedBookId]);
+  }, [selectedVoice, source, selectedBookId, uploadedFile]);
 
   const handleJobComplete = useCallback((job: JobData) => {
     setCompletedJob(job);

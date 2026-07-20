@@ -7,6 +7,139 @@ import { jobQueue } from '@/lib/workers/queue';
 import { CREDIT_COSTS } from '@/types';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
+const SUPPORTED_UPLOAD_EXTENSIONS = new Set(['txt', 'pdf', 'docx']);
+
+function splitManuscriptIntoChapters(text: string) {
+  const normalized = text.replace(/\r\n/g, '\n').trim();
+  if (!normalized) return [] as { id: string; index: number; title: string; content: string }[];
+
+  const chapterRegex = /(^|\n)(chapter|part|section)\s+(\d+|[ivxlcdm]+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b[^\n]*/gim;
+  const matches = [...normalized.matchAll(chapterRegex)];
+
+  if (matches.length >= 2) {
+    return matches.map((match, index) => {
+      const start = match.index ?? 0;
+      const end = index + 1 < matches.length ? (matches[index + 1].index ?? normalized.length) : normalized.length;
+      const chunk = normalized.slice(start, end).trim();
+      const firstLine = chunk.split('\n')[0]?.trim() || `Chapter ${index + 1}`;
+
+      return {
+        id: `upload-${index}`,
+        index,
+        title: firstLine.slice(0, 120),
+        content: chunk,
+      };
+    }).filter((chapter) => chapter.content.length > 0);
+  }
+
+  const paragraphs = normalized
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  const targetCharsPerChapter = 12000;
+  const chapters: { id: string; index: number; title: string; content: string }[] = [];
+  let current = '';
+
+  for (const paragraph of paragraphs) {
+    const next = current ? `${current}\n\n${paragraph}` : paragraph;
+    if (current && next.length > targetCharsPerChapter) {
+      const chapterIndex = chapters.length;
+      chapters.push({
+        id: `upload-${chapterIndex}`,
+        index: chapterIndex,
+        title: `Part ${chapterIndex + 1}`,
+        content: current,
+      });
+      current = paragraph;
+    } else {
+      current = next;
+    }
+  }
+
+  if (current) {
+    const chapterIndex = chapters.length;
+    chapters.push({
+      id: `upload-${chapterIndex}`,
+      index: chapterIndex,
+      title: chapters.length === 0 ? 'Manuscript' : `Part ${chapterIndex + 1}`,
+      content: current,
+    });
+  }
+
+  return chapters;
+}
+
+async function extractTextFromUpload(file: File, extension: string) {
+  if (extension === 'txt') {
+    return file.text();
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  if (extension === 'docx') {
+    const mammoth = await import('mammoth');
+    const result = await mammoth.extractRawText({ buffer });
+    return result.value;
+  }
+
+  if (extension === 'pdf') {
+    const { PDFParse } = await import('pdf-parse');
+    const parser = new PDFParse({ data: new Uint8Array(buffer) });
+
+    try {
+      const result = await parser.getText();
+      return result.text;
+    } finally {
+      await parser.destroy();
+    }
+  }
+
+  throw new Error(`Unsupported manuscript type: .${extension}`);
+}
+
+async function parseUploadSource(request: NextRequest) {
+  const formData = await request.formData();
+  const voiceId = formData.get('voiceId');
+  const source = formData.get('source');
+  const file = formData.get('file');
+
+  if (typeof voiceId !== 'string' || typeof source !== 'string') {
+    throw new Error('Missing upload form fields.');
+  }
+
+  if (!(file instanceof File)) {
+    throw new Error('A manuscript file is required for upload mode.');
+  }
+
+  const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+  if (!SUPPORTED_UPLOAD_EXTENSIONS.has(extension)) {
+    throw new Error('Unsupported manuscript type. Please upload a .txt, .pdf, or .docx file.');
+  }
+
+  const manuscriptText = await extractTextFromUpload(file, extension);
+  const sanitizedText = manuscriptText.replace(/\u0000/g, '').trim();
+
+  if (!sanitizedText) {
+    throw new Error(`Uploaded ${extension.toUpperCase()} manuscript did not contain readable text.`);
+  }
+
+  const chapterList = splitManuscriptIntoChapters(sanitizedText);
+  if (chapterList.length === 0) {
+    throw new Error('Could not extract readable chapters from the uploaded manuscript.');
+  }
+
+  return {
+    bookId: undefined,
+    voiceId,
+    source: source as 'book' | 'upload',
+    uploadedFileName: file.name,
+    chapterList,
+    bookTitle: file.name.replace(/\.[^.]+$/, '') || 'Uploaded Manuscript',
+  };
+}
+
 // ─── Chunk text into pieces within Google TTS limit ───────────────────────────
 
 function chunkText(text: string, maxChars = 4800): string[] {
@@ -44,16 +177,35 @@ export async function POST(request: NextRequest) {
   try {
     const { profile } = await requireProfile(request);
 
-    const body = await request.json();
-    const {
-      bookId,
-      voiceId,
-      source,
-    }: {
-      bookId?: string;
-      voiceId: string;
-      source: 'book' | 'upload';
-    } = body;
+    const contentType = request.headers.get('content-type') || '';
+
+    let bookId: string | undefined;
+    let voiceId: string;
+    let source: 'book' | 'upload';
+    let uploadedFileName: string | undefined;
+    let uploadedChapterList: { id: string; index: number; title: string; content: string }[] | undefined;
+    let uploadedBookTitle: string | undefined;
+
+    if (contentType.includes('multipart/form-data')) {
+      const uploadPayload = await parseUploadSource(request);
+      bookId = uploadPayload.bookId;
+      voiceId = uploadPayload.voiceId;
+      source = uploadPayload.source;
+      uploadedFileName = uploadPayload.uploadedFileName;
+      uploadedChapterList = uploadPayload.chapterList;
+      uploadedBookTitle = uploadPayload.bookTitle;
+    } else {
+      const body = await request.json();
+      ({
+        bookId,
+        voiceId,
+        source,
+      } = body as {
+        bookId?: string;
+        voiceId: string;
+        source: 'book' | 'upload';
+      });
+    }
 
     // ── Validate inputs ────────────────────────────────────────────────────────
 
@@ -112,19 +264,15 @@ export async function POST(request: NextRequest) {
       bookTitle = book.title;
       chapterList = book.chapters;
     } else {
-      // Upload source: manuscript is described by filename; we create placeholder chapters
-      // In a full implementation the manuscript text would be uploaded and parsed server-side.
-      // For now we create a single-chapter placeholder so the job runs correctly.
-      bookTitle = 'Uploaded Manuscript';
-      chapterList = [
-        {
-          id: 'upload-0',
-          index: 0,
-          title: 'Manuscript',
-          content:
-            'This is an uploaded manuscript. In production, the text would be extracted from the uploaded file and processed here.',
-        },
-      ];
+      if (!uploadedChapterList || !uploadedBookTitle) {
+        return NextResponse.json(
+          { success: false, error: 'Uploaded manuscript payload was not available.' },
+          { status: 400 }
+        );
+      }
+
+      bookTitle = uploadedBookTitle;
+      chapterList = uploadedChapterList;
     }
 
     // ── Credit estimation ──────────────────────────────────────────────────────
@@ -144,7 +292,7 @@ export async function POST(request: NextRequest) {
       creditsReserved: creditCost,
     });
 
-    console.log(`[API/audiobook] Created job ${jobId} for book "${bookTitle}" (${chapterList.length} chapters, voice: ${voiceId})`);
+    console.log(`[API/audiobook] Created job ${jobId} for book "${bookTitle}" (${chapterList.length} chapters, voice: ${voiceId}${uploadedFileName ? `, upload: ${uploadedFileName}` : ''})`);
 
     // ── Enqueue async worker ───────────────────────────────────────────────────
 
