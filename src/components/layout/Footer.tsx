@@ -10,11 +10,11 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Image
-              src="/logo-navbar.png"
+              src="/HYDRASKRIPT_LOGO.png"
               alt="HydraSkript Logo"
-              width={71}
-              height={40}
-              className="h-6 w-auto"
+              width={160}
+              height={44}
+              className="h-8 w-auto object-contain"
             />
             <span className="text-gray-500 text-sm ml-2">
               AI-Powered Book Generation
