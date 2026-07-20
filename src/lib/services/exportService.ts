@@ -54,7 +54,7 @@ export async function exportBookAsPDF(
       }
     } else {
       doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT).fill('#000');
-      doc.fillColor('#fff').fontSize(30).text(book.title, { align: 'center' }, PAGE_HEIGHT / 2);
+      doc.fillColor('#fff').fontSize(30).text(book.title, 0, PAGE_HEIGHT / 2, { align: 'center' });
     }
 
     // 2. Chapters

@@ -18,8 +18,6 @@ RUN npx prisma generate
 # Build Next.js app
 RUN npm run build
 
-# EXPOSE the correct port for Coolify
-EXPOSE 3020
+EXPOSE 3000
 
-# Start the app on the correct port
-CMD ["sh", "-c", "PORT=3020 npm start"]
+CMD ["sh", "-c", "PORT=3000 npm start"]

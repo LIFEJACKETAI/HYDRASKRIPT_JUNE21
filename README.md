@@ -23,7 +23,7 @@ HydraSkript is a professional-grade, full-stack AI platform that transforms a si
 | Language | TypeScript 5 |
 | Database | Supabase (PostgreSQL via Prisma) |
 | Auth | Supabase Auth + `@supabase/ssr` (session cookies, edge middleware) |
-| Queue | Custom Postgres-backed Persistent Queue (atomic DB transactions, crash recovery) |
+| Queue | Custom Supabase/Postgres-backed Persistent Queue (atomic DB transactions, crash recovery) |
 | AI / LLM | OpenRouter (GLM 5.2 / configurable) |
 | Images | Hugging Face → Replicate → FAL.ai (tiered fallback) |
 | Audio | Google AI Studio (Gemini TTS) + FFmpeg |
@@ -34,8 +34,8 @@ HydraSkript is a professional-grade, full-stack AI platform that transforms a si
 
 ## Security
 
-- **Edge Middleware** (`src/middleware.ts`) validates the Supabase session on every request
-- All `/api/*` routes return `401 JSON` immediately if no valid session cookie exists
+- **Edge Middleware** (`middleware.ts`) validates the Supabase session on protected requests
+- Protected `/api/*` routes return `401 JSON` immediately if no valid session cookie exists
 - Protected pages redirect to `/login?next=...`
 - Session cookies are refreshed automatically on every request (required by `@supabase/ssr`)
 - No demo email fallbacks — every route requires a verified Supabase user
@@ -120,7 +120,7 @@ docker run -p 3000:3000 --env-file .env.local hydraskript
 
 Vercel works with some caveats:
 
-- The **Persistent Queue** runs in-process. On Vercel's serverless functions, long-running jobs may hit the 60s timeout. Use Railway or a VPS for production workloads with heavy generation.
+- The **Persistent Queue** is a custom Supabase/Postgres-backed queue that currently runs in-process. On Vercel's serverless functions, long-running jobs may hit the 60s timeout. Use Railway or a VPS for production workloads with heavy generation.
 - Set all environment variables in the Vercel dashboard.
 - The `Dockerfile` is ignored — Vercel uses its own Next.js build.
 
@@ -199,7 +199,7 @@ UPDATE "Profile" SET "isAdmin" = true WHERE email = 'your@email.com';
 ## Known Limitations
 
 - Storage is local filesystem by default — files are lost on container restarts unless a persistent volume is mounted at `/public/assets`
-- The Persistent Queue is in-process — not suitable for multi-instance horizontal scaling without switching to a proper queue (Redis/BullMQ)
+- The custom Supabase/Postgres-backed queue is in-process today — suitable for a single-instance deployment, but not yet suitable for multi-instance horizontal scaling without additional leasing/coordination hardening
 - Audiobook generation requires FFmpeg available in the deployment environment (included in the provided `Dockerfile`)
 
 ---

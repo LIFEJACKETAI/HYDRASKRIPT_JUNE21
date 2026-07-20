@@ -9,6 +9,7 @@ class PersistentJobQueue {
   private isProcessing = false;
   private maxConcurrent = 2;
   private activeJobs = 0;
+  private bootstrapped = false;
 
   /**
    * Create a job record in the database.
@@ -42,14 +43,17 @@ class PersistentJobQueue {
    */
   async startJob(jobId: string, jobType: JobType, _execute?: () => Promise<void>): Promise<void> {
     console.log(`[Queue] Job ${jobId} signaled for processing (${jobType})`);
-    this.processNext();
+    await this.bootstrap();
+    void this.processNext();
   }
 
   /**
    * Process the next available job using atomic locking.
    */
   private async processNext() {
-    if (this.activeJobs >= this.maxConcurrent) return;
+    if (this.activeJobs >= this.maxConcurrent || this.isProcessing) return;
+
+    this.isProcessing = true;
 
     // 1. Atomic Claim: Find a queued job and mark it active in one transaction
     // This prevents multiple workers from picking up the same job.
@@ -77,7 +81,6 @@ class PersistentJobQueue {
     }
 
     this.activeJobs++;
-    this.isProcessing = true;
 
     try {
       console.log(`[Queue] Executing ${jobToProcess.jobType} job ${jobToProcess.id}`);
@@ -112,9 +115,24 @@ class PersistentJobQueue {
       }
     } finally {
       this.activeJobs--;
+      this.isProcessing = false;
       // Trigger next job immediately
-      setTimeout(() => this.processNext(), 100);
+      setTimeout(() => {
+        void this.processNext();
+      }, 100);
     }
+  }
+
+  async bootstrap(): Promise<void> {
+    if (this.bootstrapped) return;
+
+    await db.job.updateMany({
+      where: { status: 'active' },
+      data: { status: 'queued', progressMessage: 'Recovering from crash...' },
+    });
+
+    this.bootstrapped = true;
+    console.log('[Queue] Recovered active jobs from last session.');
   }
 
   async updateJobStatus(
@@ -159,17 +177,3 @@ class PersistentJobQueue {
 }
 
 export const jobQueue = new PersistentJobQueue();
-
-// Bootstrapping: Check for hung jobs on server start
-if (typeof process !== 'undefined') {
-  // Resume any jobs that were 'active' during a crash
-  async function recoverJobs() {
-    await db.job.updateMany({
-      where: { status: 'active' },
-      data: { status: 'queued', progressMessage: 'Recovering from crash...' },
-    });
-    console.log('[Queue] Recovered active jobs from last session.');
-  }
-
-  recoverJobs().then(() => jobQueue.processNext());
-}

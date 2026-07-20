@@ -377,7 +377,6 @@ export default function IdeasLab() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-email': (await getUserEmail()) || 'demo@hydraskript.com',
         },
         body: JSON.stringify({ ideaText: ideaText.trim(), genre, targetAudience, requestType }),
       });

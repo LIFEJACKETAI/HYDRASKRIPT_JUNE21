@@ -50,7 +50,7 @@ export async function getUserEmail(): Promise<string | null> {
   return profile?.email ?? null;
 }
 
-export async function setUserEmail(email: string) {
+export async function setUserEmail(_email: string) {
   return Promise.resolve();
 }
 

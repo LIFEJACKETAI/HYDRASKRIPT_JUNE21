@@ -3,11 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
-
-function getAuthEmail(request: NextRequest): string {
-  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
-}
+import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // GET - Get job progress
 export async function GET(
@@ -16,8 +12,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     const job = await db.job.findUnique({
       where: { id, ownerId: profile.id },
@@ -45,6 +40,10 @@ export async function GET(
       },
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] Get job failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });

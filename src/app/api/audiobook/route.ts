@@ -3,13 +3,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { jobQueue } from '@/lib/workers/queue';
 import { CREDIT_COSTS } from '@/types';
-
-function getAuthEmail(request: NextRequest): string {
-  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
-}
+import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // ─── Chunk text into pieces within Google TTS limit ───────────────────────────
 
@@ -46,8 +42,7 @@ function chunkText(text: string, maxChars = 4800): string[] {
 
 export async function POST(request: NextRequest) {
   try {
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     const body = await request.json();
     const {
@@ -197,7 +192,6 @@ export async function POST(request: NextRequest) {
                 const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-preview-tts' });
                 const result = await model.generateContent({
                   contents: [{ role: 'user', parts: [{ text: chunk }] }],
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   generationConfig: {
                     responseModalities: ['AUDIO'],
                     speechConfig: {
@@ -328,6 +322,10 @@ export async function POST(request: NextRequest) {
       data: { jobId, estimatedCredits: creditCost, chapters: chapterList.length },
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API/audiobook] POST failed:', message, error instanceof Error ? error.stack : '');
     return NextResponse.json({ success: false, error: message }, { status: 500 });

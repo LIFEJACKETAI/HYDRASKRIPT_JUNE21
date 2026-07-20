@@ -2,13 +2,8 @@
 // POST /api/ideas - Generate structured creative outputs from a raw book idea
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
 import { askLLMJSON } from '@/lib/llm/openrouter';
-import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
-
-function getAuthEmail(request: NextRequest): string {
-  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
-}
+import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // ─── Response Shape Types ──────────────────────────────────────────────────────
 
@@ -40,8 +35,7 @@ type RequestType = 'titles' | 'outline' | 'cover' | 'blurb';
 
 export async function POST(request: NextRequest) {
   try {
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { email } = await requireProfile(request);
 
     const body = await request.json();
     const { ideaText, genre, targetAudience, requestType } = body as {
@@ -155,6 +149,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API/ideas] Request failed:', message, error instanceof Error ? error.stack : '');
     return NextResponse.json({ success: false, error: message }, { status: 500 });

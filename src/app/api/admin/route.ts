@@ -3,20 +3,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
-
-function getAuthEmail(request: NextRequest): string {
-  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
-}
+import { forbiddenResponse, isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // GET - Admin dashboard data
 export async function GET(request: NextRequest) {
   try {
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     if (!profile.isAdmin) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+      return forbiddenResponse('Admin access required');
     }
 
     // Get all jobs
@@ -74,6 +69,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] Admin data failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });

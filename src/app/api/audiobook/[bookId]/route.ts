@@ -4,14 +4,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { jobQueue } from '@/lib/workers/queue';
-import { reserveCredits, estimateBookCredits } from '@/lib/utils/credits';
+import { reserveCredits } from '@/lib/utils/credits';
 import { generateAudiobookWorker } from '@/lib/workers/generateAudiobookWorker';
-
-function getAuthEmail(request: NextRequest): string {
-  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
-}
+import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 export async function GET(
   request: NextRequest,
@@ -19,10 +15,8 @@ export async function GET(
 ) {
   try {
     const { bookId } = await params;
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
-    // Verify the book belongs to this user
     const book = await db.book.findUnique({
       where: { id: bookId, ownerId: profile.id },
       select: { id: true, title: true },
@@ -35,7 +29,6 @@ export async function GET(
       );
     }
 
-    // Fetch all audiobook-type media assets for this book
     const assets = await db.mediaAsset.findMany({
       where: {
         bookId,
@@ -45,7 +38,6 @@ export async function GET(
       orderBy: { createdAt: 'desc' },
     });
 
-    // Fetch the most recent generate_audiobook job for this book
     const job = await db.job.findFirst({
       where: {
         bookId,
@@ -94,6 +86,10 @@ export async function GET(
       },
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API/audiobook/:bookId] GET failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
@@ -106,11 +102,15 @@ export async function POST(
 ) {
   try {
     const { bookId } = await params;
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     const book = await db.book.findUnique({
       where: { id: bookId, ownerId: profile.id },
+      include: {
+        chapters: {
+          select: { wordCount: true },
+        },
+      },
     });
 
     if (!book) {
@@ -121,13 +121,10 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Book must be completed before generating audiobook' }, { status: 400 });
     }
 
-    // 1. Estimate credits (Spec: 50 base + 1 per minute)
-    // Rough estimate: 150 words per minute
     const totalWords = book.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
     const estimatedMinutes = Math.ceil(totalWords / 150);
     const estimatedCredits = 50 + estimatedMinutes;
 
-    // 2. Create Job Record
     const jobId = await jobQueue.createJob({
       bookId,
       ownerId: profile.id,
@@ -135,23 +132,24 @@ export async function POST(
       creditsReserved: estimatedCredits,
     });
 
-    // 3. Reserve Credits
     const reserved = await reserveCredits(profile.id, estimatedCredits, jobId, 'Audiobook generation');
     if (!reserved) {
       return NextResponse.json({ success: false, error: 'Insufficient credits' }, { status: 402 });
     }
 
-    // 4. Start the Worker
     await jobQueue.startJob(jobId, 'generate_audiobook', async () => {
       await generateAudiobookWorker(jobId);
     });
 
     return NextResponse.json({
       success: true,
-      data: { jobId, estimatedCredits }
+      data: { jobId, estimatedCredits },
     });
-
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API/audiobook/:bookId] POST failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });

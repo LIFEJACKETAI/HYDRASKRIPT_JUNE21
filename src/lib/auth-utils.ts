@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
  * Retrieves the authenticated user's email from the Supabase session.
  * Throws an error or returns null if the user is not authenticated.
  */
-export async function getAuthenticatedUserEmail(request: NextRequest): Promise<string | null> {
+export async function getAuthenticatedUserEmail(_request: NextRequest): Promise<string | null> {
   try {
     const supabase = await createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -14,7 +14,7 @@ export async function getAuthenticatedUserEmail(request: NextRequest): Promise<s
       return null;
     }
     
-    return user.email;
+    return user.email ?? null;
   } catch (e) {
     console.error('[Auth Utils] Error getting authenticated user email:', e);
     return null;

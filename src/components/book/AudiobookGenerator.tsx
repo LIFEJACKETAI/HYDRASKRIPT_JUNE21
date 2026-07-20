@@ -457,7 +457,6 @@ export default function AudiobookGenerator() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-email': getUserEmail(),
         },
         body: JSON.stringify(payload),
       });

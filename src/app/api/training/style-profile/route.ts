@@ -3,19 +3,14 @@
 // GET /api/training/style-profile - List style profiles
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { createStyleProfile, listStyleProfiles, deleteStyleProfile } from '@/lib/services/styleAnalyzer';
 import { CreateStyleProfileSchema, validateOrThrow } from '@/lib/llm/schema';
-
-function getAuthEmail(request: NextRequest): string {
-  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
-}
+import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // POST - Create a style profile from exemplar texts
 export async function POST(request: NextRequest) {
   try {
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     const body = await request.json();
     const input = validateOrThrow(CreateStyleProfileSchema, body);
@@ -29,6 +24,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: result }, { status: 201 });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] Create style profile failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 400 });
@@ -38,13 +37,11 @@ export async function POST(request: NextRequest) {
 // GET - List style profiles
 export async function GET(request: NextRequest) {
   try {
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     const profiles = await listStyleProfiles(profile.id);
 
-    // Parse exemplarTexts from JSON
-    const formatted = profiles.map(p => ({
+    const formatted = profiles.map((p) => ({
       ...p,
       exemplarTexts: JSON.parse(p.exemplarTexts || '[]'),
       preview: p.systemPrompt.slice(0, 150) + '...',
@@ -52,6 +49,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: formatted });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] List style profiles failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
@@ -61,8 +62,7 @@ export async function GET(request: NextRequest) {
 // DELETE - Delete a style profile
 export async function DELETE(request: NextRequest) {
   try {
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     const { profileId } = await request.json();
     const deleted = await deleteStyleProfile(profileId, profile.id);
@@ -73,6 +73,10 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] Delete style profile failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });

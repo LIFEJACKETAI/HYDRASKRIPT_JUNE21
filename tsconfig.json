@@ -36,5 +36,15 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "HYDRASKRIPT_220526"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "HYDRASKRIPT_220526",
+    "hydraskript_stitch_50_50_1",
+    "hydraskript_stitch_50_50_2",
+    "examples",
+    "download",
+    "upload",
+    "mini-services"
+  ]
 }

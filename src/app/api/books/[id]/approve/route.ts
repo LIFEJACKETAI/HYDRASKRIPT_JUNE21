@@ -3,13 +3,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { generateChapter, finalizeBook } from '@/lib/services/bookGenerator';
 import { jobQueue } from '@/lib/workers/queue';
-
-function getAuthEmail(request: NextRequest): string {
-  const email = request.headers.get('x-user-email'); if (!email) throw new Error('Unauthorized'); return email;
-}
+import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 export async function POST(
   request: NextRequest,
@@ -17,8 +13,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const email = await getAuthEmail(request);
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     const body = await request.json();
     const { type, chapterIndex, updatedOutline } = body;
@@ -119,6 +114,10 @@ export async function POST(
 
     return NextResponse.json({ success: false, error: 'Invalid approval type' }, { status: 400 });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] Approval failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
