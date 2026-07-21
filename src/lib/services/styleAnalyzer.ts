@@ -3,7 +3,7 @@
 // Stores the generated system prompt for use in chapter generation
 
 import { db } from '@/lib/db';
-import { askLLMJSON } from '@/lib/llm/openrouter';
+import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
 import { getStyleAnalysisPrompt, getStyleAnalysisUserPrompt } from '@/lib/llm/prompts';
 import { StyleAnalysisSchema, validateOrThrow } from '@/lib/llm/schema';
 
@@ -23,7 +23,7 @@ export async function analyzeStyle(exemplarTexts: string[]): Promise<string> {
   const systemPrompt = getStyleAnalysisPrompt();
   const userPrompt = getStyleAnalysisUserPrompt(exemplarTexts);
 
-  const result = await askLLMJSON<unknown>(systemPrompt, userPrompt, 0.3);
+  const result = await askLLMJSONWithFallback<unknown>(systemPrompt, userPrompt, 0.3);
 
   // Validate the response
   const validated = validateOrThrow(StyleAnalysisSchema, result);

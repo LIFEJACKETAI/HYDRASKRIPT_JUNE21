@@ -3,7 +3,7 @@
 
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
-import { askLLMJSON } from '@/lib/llm/openrouter';
+import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
 import { getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt } from '@/lib/llm/prompts';
 import { ChapterGenerationSchema, validateOrThrow } from '@/lib/llm/schema';
 import { getStyleSystemPrompt } from '@/lib/services/styleAnalyzer';
@@ -81,7 +81,7 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
     const chapterUser = getChapterUserPrompt(chapter.title, chapter.synopsis, chapter.wordTarget);
 
     // 4. Generation
-    const rawResult = await askLLMJSON<unknown>(fullSystemPrompt, chapterUser, 0.7);
+    const rawResult = await askLLMJSONWithFallback<unknown>(fullSystemPrompt, chapterUser, 0.7);
     const chapterResult = validateOrThrow(ChapterGenerationSchema, rawResult);
 
     // 5. Persistence

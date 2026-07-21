@@ -2,7 +2,7 @@
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits, consumeCredits, refundCredits, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
-import { askLLMJSON } from '@/lib/llm/openrouter';
+import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
 import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getImagePromptExtractionPrompt, getImagePromptExtractionUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt } from '@/lib/llm/prompts';
 import { BookOutlineSchema, ChapterGenerationSchema, ImagePromptSchema, validateOrThrow } from '@/lib/llm/schema';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
@@ -134,8 +134,8 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
       outlineUser = getOutlineUserPrompt(book.title, genre, targetAudience);
     }
 
-    console.log(`[DEBUG] 5. Calling askLLMJSON (waiting for AI response...)`);
-    const outlineResult = await askLLMJSON<unknown>(outlinePrompt, outlineUser, 0.7);
+    console.log(`[DEBUG] 5. Calling askLLMJSONWithFallback (waiting for AI response...)`);
+    const outlineResult = await askLLMJSONWithFallback<unknown>(outlinePrompt, outlineUser, 0.7);
     
     console.log(`[DEBUG] 6. AI responded! Validating schema...`);
     const outline = validateOrThrow(BookOutlineSchema, outlineResult);
@@ -240,7 +240,7 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       chapterUser = getChapterUserPrompt(chapter.title, chapter.synopsis, chapter.wordTarget);
     }
 
-    const rawResult = await askLLMJSON<unknown>(fullSystemPrompt, chapterUser, 0.7);
+    const rawResult = await askLLMJSONWithFallback<unknown>(fullSystemPrompt, chapterUser, 0.7);
     const chapterResult = validateOrThrow(ChapterGenerationSchema, rawResult);
 
     await db.chapter.update({
@@ -257,7 +257,7 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
     // Handle Illustrations
     if (isChildrenBook && !isColoringBook) {
       try {
-        const imgPromptResult = await askLLMJSON<unknown>(getImagePromptExtractionPrompt(), getImagePromptExtractionUserPrompt(chapterResult.content), 0.3);
+        const imgPromptResult = await askLLMJSONWithFallback<unknown>(getImagePromptExtractionPrompt(), getImagePromptExtractionUserPrompt(chapterResult.content), 0.3);
         const validatedPrompt = validateOrThrow(ImagePromptSchema, imgPromptResult);
         const illustration = await generateChapterIllustration(bookId, ownerId, chapterIndex, validatedPrompt.prompt, config.illustrationStyle);
         if (illustration.success && illustration.publicUrl) {

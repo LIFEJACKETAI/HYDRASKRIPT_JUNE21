@@ -2,7 +2,7 @@
 // POST /api/ideas - Generate structured creative outputs from a raw book idea
 
 import { NextRequest, NextResponse } from 'next/server';
-import { askLLMJSON } from '@/lib/llm/openrouter';
+import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // ─── Response Shape Types ──────────────────────────────────────────────────────
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
           `${contextLine}\n\nIdea:\n${ideaText.trim()}\n\n` +
           'Generate 5 distinct title options that span different tones (literary, commercial, mysterious, etc.).';
 
-        data = await askLLMJSON<TitlesResponse>(systemPrompt, userPrompt, 0.85);
+        data = await askLLMJSONWithFallback<TitlesResponse>(systemPrompt, userPrompt, 0.85);
         break;
       }
 
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
           `${contextLine}\n\nIdea:\n${ideaText.trim()}\n\n` +
           'Create a 10-chapter outline with clear narrative arc, compelling chapter titles, and concise synopses.';
 
-        data = await askLLMJSON<OutlineResponse>(systemPrompt, userPrompt, 0.7);
+        data = await askLLMJSONWithFallback<OutlineResponse>(systemPrompt, userPrompt, 0.7);
         break;
       }
 
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
           `${contextLine}\n\nIdea:\n${ideaText.trim()}\n\n` +
           'Design a cover concept that immediately communicates genre, tone, and intrigue.';
 
-        data = await askLLMJSON<CoverResponse>(systemPrompt, userPrompt, 0.75);
+        data = await askLLMJSONWithFallback<CoverResponse>(systemPrompt, userPrompt, 0.75);
         break;
       }
 
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
           `${contextLine}\n\nIdea:\n${ideaText.trim()}\n\n` +
           'Write a compelling back-cover blurb that will make readers unable to put the book down.';
 
-        data = await askLLMJSON<BlurbResponse>(systemPrompt, userPrompt, 0.8);
+        data = await askLLMJSONWithFallback<BlurbResponse>(systemPrompt, userPrompt, 0.8);
         break;
       }
     }
