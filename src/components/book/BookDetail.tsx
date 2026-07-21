@@ -218,7 +218,17 @@ export default function BookDetail() {
     'from-green-600/40 to-teal-600/40',
     'from-violet-600/40 to-indigo-600/40',
   ];
+  
+  console.log("book.outline =", book.outline);
 
+  try {
+    const parsed = JSON.parse(book.outline || "[]");
+    console.log("Parsed outline =", parsed);
+    console.log("Is array?", Array.isArray(parsed));
+  } catch (e) {
+    console.error("Outline JSON parse failed:", e);
+  }
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -343,7 +353,14 @@ export default function BookDetail() {
       {/* Blueprint Editor - Visible only when awaiting approval */}
       {book.status === 'awaiting_outline_approval' && (
         <OutlineEditor
-          outline={JSON.parse(book.outline || '[]')}
+          const parsedOutline = JSON.parse(book.outline || '{"chapters":[]}');
+
+          <OutlineEditor
+            outline={parsedOutline.chapters ?? []}
+            onApprove={handleApproveOutline}
+            isLoading={!!generationJobId}
+          />
+          
           onApprove={handleApproveOutline}
           isLoading={!!generationJobId}
         />
