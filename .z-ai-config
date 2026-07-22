@@ -1,1 +1,4 @@
-{"baseUrl": "https://openrouter.ai/api/v1", "apiKey": "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"}
+{
+  "baseUrl": "https://api.z.ai/api/paas/v4",
+  "apiKey": "8030da70e9b24bed819d514c426202d8.JTEG8HKB5O5TPHR9"
+}
