@@ -83,81 +83,6 @@ export default function BookDetail() {
     fetchBook();
   }, [fetchBook]);
 
-  // ↓↓↓ KEEP EVERYTHING BELOW THIS LINE (your handlers, JSX, etc.) ↓↓↓
-  
-import { motion } from 'framer-motion';
-import {
-  ArrowLeft,
-  Play,
-  Download,
-  Trash2,
-  BookOpen,
-  Users,
-  Tag,
-  Zap,
-  FileText,
-  RefreshCw,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { useAppStore } from '@/lib/store';
-import { getBook, deleteBook, startGeneration, exportBook } from '@/lib/api';
-import type { BookData } from '@/lib/api';
-import ChapterEditor from '@/components/book/ChapterEditor';
-import GenerationProgress from '@/components/book/GenerationProgress';
-import OutlineEditor from '@/components/book/OutlineEditor';
-import { toast } from '@/hooks/use-toast';
-
-const statusConfig: Record<string, { label: string; className: string }> = {
-  draft: { label: 'Draft', className: 'bg-gray-500/20 text-gray-300 border-gray-500/30' },
-  outlining: { label: 'Outlining', className: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
-  awaiting_outline_approval: { label: 'Awaiting Approval', className: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
-  writing: { label: 'Writing', className: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
-  awaiting_chapter_approval: { label: 'Reviewing Chapter', className: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
-  finalizing: { label: 'Finalizing', className: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' },
-  completed: { label: 'Completed', className: 'bg-green-500/20 text-green-300 border-green-500/30' },
-  failed: { label: 'Failed', className: 'bg-red-500/20 text-red-300 border-red-500/30' },
-};
-
-const audienceLabels: Record<string, string> = {
-  adult: 'Adult',
-  '0-5': 'Ages 0-5',
-  '6-9': 'Ages 6-9',
-  '10-14': 'Ages 10-14',
-};
-
-export default function BookDetail() {
-  const parsedOutline = JSON.parse(book.outline || '{"title": "", "chapters": []}');
-  const { selectedBookId, setSelectedBookId, setCurrentView, setIsGenerating, activeJobId, setActiveJobId } = useAppStore();
-  const [book, setBook] = useState<BookData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [generationJobId, setGenerationJobId] = useState<string | null>(activeJobId);
-
-  const fetchBook = useCallback(async () => {
-    if (!selectedBookId) return;
-    setLoading(true);
-    const data = await getBook(selectedBookId);
-    setBook(data);
-    setLoading(false);
-  }, [selectedBookId]);
-
-  useEffect(() => {
-    fetchBook();
-  }, [fetchBook]);
-
   // Refresh book data when generation completes
   const handleGenerationComplete = useCallback(() => {
     setIsGenerating(false);
@@ -441,7 +366,7 @@ export default function BookDetail() {
           outline={(() => {
             try { return JSON.parse(book.outline || '{}').chapters ?? []; }
             catch { return []; }
-          })()}
+       })()}
           onApprove={handleApproveOutline}
           isLoading={!!generationJobId}
         />

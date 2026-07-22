@@ -36,7 +36,7 @@ export async function generateImage(options: GenerateImageOptions): Promise<Gene
 
   try {
     const zai = await getZAI();
-    const response = await zai.images.generations.create({ prompt: enhancedPrompt, size });
+    const response = await zai.images.generations.create({ model: process.env.ZAI_IMAGE_MODEL || 'cogview-4', prompt: enhancedPrompt, size });
 
     if (!response.data?.[0]?.base64) throw new Error('Invalid response from image API');
 
