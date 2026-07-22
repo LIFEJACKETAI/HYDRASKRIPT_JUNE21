@@ -438,7 +438,10 @@ export default function BookDetail() {
       {/* Blueprint Editor - Visible only when awaiting approval */}
       {book.status === 'awaiting_outline_approval' && (
         <OutlineEditor
-          outline={parsedOutline}
+          outline={(() => {
+            try { return JSON.parse(book.outline || '{}').chapters ?? []; }
+            catch { return []; }
+          })()}
           onApprove={handleApproveOutline}
           isLoading={!!generationJobId}
         />

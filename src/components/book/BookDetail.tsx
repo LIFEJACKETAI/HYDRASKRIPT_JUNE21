@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -13,7 +13,6 @@ import {
   Zap,
   FileText,
   RefreshCw,
-  CheckCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -69,6 +68,15 @@ export default function BookDetail() {
     setBook(data);
     setLoading(false);
   }, [selectedBookId]);
+
+  const parsedOutline = useMemo(() => {
+    if (!book?.outline) return { title: '', chapters: [] };
+    try {
+      return JSON.parse(book.outline);
+    } catch {
+      return { title: '', chapters: [] };
+    }
+  }, [book]);
 
   useEffect(() => {
     fetchBook();
@@ -219,16 +227,6 @@ export default function BookDetail() {
     'from-violet-600/40 to-indigo-600/40',
   ];
   
-  console.log("book.outline =", book.outline);
-
-  try {
-    const parsed = JSON.parse(book.outline || "[]");
-    console.log("Parsed outline =", parsed);
-    console.log("Is array?", Array.isArray(parsed));
-  } catch (e) {
-    console.error("Outline JSON parse failed:", e);
-  }
-  
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -352,18 +350,11 @@ export default function BookDetail() {
 
       {/* Blueprint Editor - Visible only when awaiting approval */}
       {book.status === 'awaiting_outline_approval' && (
-        <OutlineEditor
-          const parsedOutline = JSON.parse(book.outline || '{"chapters":[]}');
-
           <OutlineEditor
             outline={parsedOutline.chapters ?? []}
             onApprove={handleApproveOutline}
             isLoading={!!generationJobId}
           />
-          
-          onApprove={handleApproveOutline}
-          isLoading={!!generationJobId}
-        />
       )}
 
       {/* Generation Progress */}
