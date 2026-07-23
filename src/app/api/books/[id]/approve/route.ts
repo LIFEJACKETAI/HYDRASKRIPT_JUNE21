@@ -68,7 +68,7 @@ export async function POST(
       // 1. Mark chapter as approved
       await db.chapter.update({
         where: { bookId_index: { bookId: id, index: chapterIndex } },
-        data: { approvalStatus: 'approved' },
+        data: { approvalStatus: 'approved', status: 'completed' },
       });
 
       // 2. Find the next chapter
