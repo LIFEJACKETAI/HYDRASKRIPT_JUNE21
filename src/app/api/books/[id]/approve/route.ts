@@ -3,7 +3,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { generateChapter, finalizeBook } from '@/lib/services/bookGenerator';
 import { jobQueue } from '@/lib/workers/queue';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
@@ -51,11 +50,10 @@ export async function POST(
         ownerId: profile.id,
         jobType: 'write_chapter',
         creditsReserved: 0, // Already reserved during startBookGeneration
+        stepIndex: 0, // The worker generates job.stepIndex (defaults to 0)
       });
 
-      await jobQueue.startJob(jobId, 'write_chapter', async () => {
-        await generateChapter(id, profile.id, jobId, 0);
-      });
+      await jobQueue.startJob(jobId, 'write_chapter');
 
       return NextResponse.json({ success: true, data: { jobId } });
     }
@@ -84,29 +82,30 @@ export async function POST(
           ownerId: profile.id,
           jobType: 'write_chapter',
           creditsReserved: 0,
+          stepIndex: nextChapter.index, // CRITICAL: worker generates job.stepIndex; without this it always regenerates chapter 0
         });
 
-        await jobQueue.startJob(jobId, 'write_chapter', async () => {
-          await generateChapter(id, profile.id, jobId, nextChapter.index);
-        });
+        await jobQueue.startJob(jobId, 'write_chapter');
 
         return NextResponse.json({ success: true, data: { jobId, nextChapterIndex: nextChapter.index } });
       } else {
         // Last chapter approved -> Finalize the book
+        // We need totalCredits for final consumption
+        const bookWithCredits = await db.book.findUnique({ where: { id } });
+        const totalCredits = bookWithCredits?.totalCreditsEstimated || 0;
+
         const jobId = await jobQueue.createJob({
           bookId: id,
           ownerId: profile.id,
           jobType: "finalize_book",
           creditsReserved: 0,
+          creditsConsumed: totalCredits, // Passed through to finalizeBook via the worker
         });
 
-        // We need totalCredits for final consumption
-        const bookWithCredits = await db.book.findUnique({ where: { id } });
-        const totalCredits = bookWithCredits?.totalCreditsEstimated || 0;
+        await jobQueue.startJob(jobId, "finalize_book");
 
-        await jobQueue.startJob(jobId, "finalize_book", async () => {
-          await finalizeBook(id, profile.id, jobId, totalCredits);
-        });
+        // Reflect finalization in the book status so the UI updates
+        await db.book.update({ where: { id }, data: { status: 'finalizing' } });
 
         return NextResponse.json({ success: true, data: { jobId, status: 'finalizing' } });
       }

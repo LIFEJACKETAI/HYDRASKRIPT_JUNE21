@@ -28,6 +28,7 @@ class PersistentJobQueue {
     jobType: JobType;
     creditsReserved: number;
     stepIndex?: number;
+    creditsConsumed?: number;
     maxRetries?: number;
   }): Promise<string> {
     const maxRetries = params.maxRetries ?? DEFAULT_MAX_RETRIES;
@@ -41,6 +42,7 @@ class PersistentJobQueue {
         progressMessage: 'Queued...',
         progressPercent: 0,
         creditsReserved: params.creditsReserved,
+        creditsConsumed: params.creditsConsumed ?? 0,
         stepIndex: params.stepIndex ?? 0,
         retryCount: 0,
         maxRetries,
