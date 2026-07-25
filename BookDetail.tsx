@@ -73,6 +73,7 @@ export default function BookDetail() {
   const parsedOutline = useMemo(() => {
     if (!book?.outline) return { title: '', chapters: [] };
     try {
+      
       return JSON.parse(book.outline);
     } catch {
       return { title: '', chapters: [] };
