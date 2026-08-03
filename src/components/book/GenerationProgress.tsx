@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { getJob } from '@/lib/api';
 import type { JobData } from '@/lib/api';
@@ -10,13 +10,19 @@ import { GENERATION_FLAVOR } from '@/types';
 interface GenerationProgressProps {
   jobId: string;
   genre?: string;
+  estimatedDuration?: number | null;
   onComplete?: () => void;
   onError?: (error: string) => void;
 }
 
-export default function GenerationProgress({ jobId, genre, onComplete, onError }: GenerationProgressProps) {
+export default function GenerationProgress({ jobId, genre, estimatedDuration, onComplete, onError }: GenerationProgressProps) {
   const [job, setJob] = useState<JobData | null>(null);
   const [flavorIndex, setFlavorIndex] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  useEffect(() => {
+    setElapsedSeconds(0);
+  }, [jobId]);
   const onCompleteRef = useRef(onComplete);
   const onErrorRef = useRef(onError);
 
@@ -30,7 +36,8 @@ export default function GenerationProgress({ jobId, genre, onComplete, onError }
 
   const flavors = GENERATION_FLAVOR[genre || 'default'] || GENERATION_FLAVOR.default;
 
-  // Poll the job status every 2 seconds
+  const isChildrenBook = estimatedDuration != null && estimatedDuration > 20;
+
   useEffect(() => {
     let cancelled = false;
 
@@ -46,7 +53,6 @@ export default function GenerationProgress({ jobId, genre, onComplete, onError }
       }
     }
 
-    // Initial poll
     poll();
     const interval = setInterval(poll, 2000);
     return () => {
@@ -55,7 +61,14 @@ export default function GenerationProgress({ jobId, genre, onComplete, onError }
     };
   }, [jobId]);
 
-  // Flavor text rotation
+  useEffect(() => {
+    if (!job || job.status === 'completed' || job.status === 'failed') return;
+    const timer = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [job?.status]);
+
   useEffect(() => {
     if (job && job.status !== 'completed' && job.status !== 'failed') {
       const timer = setInterval(() => {
@@ -64,6 +77,16 @@ export default function GenerationProgress({ jobId, genre, onComplete, onError }
       return () => clearInterval(timer);
     }
   }, [job, flavors.length]);
+
+  const formatTime = (seconds: number) => {
+    if (seconds < 60) return `${seconds}s`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+  };
+
+  const estimatedTotal = estimatedDuration ? formatTime(estimatedDuration) : null;
+  const elapsed = formatTime(elapsedSeconds);
 
   if (!job) {
     return (
@@ -91,7 +114,7 @@ export default function GenerationProgress({ jobId, genre, onComplete, onError }
         {isComplete && <CheckCircle className="h-5 w-5 text-green-400" />}
         {isFailed && <AlertCircle className="h-5 w-5 text-red-400" />}
         {isGenerating && <Loader2 className="h-5 w-5 text-purple-400 animate-spin" />}
-        <div>
+        <div className="flex-1">
           <p className="text-sm font-medium text-white">
             {isComplete && 'Generation Complete!'}
             {isFailed && 'Generation Failed'}
@@ -101,6 +124,15 @@ export default function GenerationProgress({ jobId, genre, onComplete, onError }
             <p className="text-xs text-gray-500 mt-0.5">{job.progressMessage}</p>
           )}
         </div>
+        {isGenerating && estimatedTotal && (
+          <div className="text-right">
+            <div className="flex items-center gap-1 text-xs text-gray-400">
+              <Clock className="h-3 w-3" />
+              <span>Est. {estimatedTotal}</span>
+            </div>
+            <p className="text-xs text-purple-400 mt-0.5">Elapsed: {elapsed}</p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

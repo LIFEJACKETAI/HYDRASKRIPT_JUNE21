@@ -54,6 +54,13 @@ const audienceLabels: Record<string, string> = {
   '10-14': 'Ages 10-14',
 };
 
+function estimateGenerationTime(chapterCount: number, targetAudience: string, hasIllustrations: boolean): number {
+  if (chapterCount === 0) return 30;
+  const basePerChapter = hasIllustrations ? 35 : 15;
+  const audienceMultiplier = ['0-5', '6-9', '10-14'].includes(targetAudience) ? 1.4 : 1;
+  return Math.round(chapterCount * basePerChapter * audienceMultiplier);
+}
+
 export default function BookDetail() {
   const { selectedBookId, setSelectedBookId, setCurrentView, setIsGenerating, activeJobId, setActiveJobId } = useAppStore();
   const [book, setBook] = useState<BookData | null>(null);
@@ -62,6 +69,7 @@ export default function BookDetail() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [generationJobId, setGenerationJobId] = useState<string | null>(activeJobId);
+  const [estimatedDuration, setEstimatedDuration] = useState<number | null>(null);
 
   const fetchBook = useCallback(async () => {
     if (!selectedBookId) return;
@@ -85,14 +93,15 @@ export default function BookDetail() {
   }, [fetchBook]);
 
   // Refresh book data when generation completes
-  const handleGenerationComplete = useCallback(() => {
-    setIsGenerating(false);
-    setActiveJobId(null);
-    setGenerationJobId(null);
-    setAutoApprovePending(false);
-    fetchBook();
-    toast({ title: 'Generation complete!', description: 'Your book has been generated.' });
-  }, [fetchBook, setIsGenerating, setActiveJobId]);
+const handleGenerationComplete = useCallback(() => {
+     setIsGenerating(false);
+     setActiveJobId(null);
+     setGenerationJobId(null);
+     setEstimatedDuration(null);
+     setAutoApprovePending(false);
+     fetchBook();
+     toast({ title: 'Generation complete!', description: 'Your book has been generated.' });
+   }, [fetchBook, setIsGenerating, setActiveJobId]);
 
   const handleGenerationError = useCallback((error: string) => {
     setIsGenerating(false);
@@ -122,27 +131,36 @@ export default function BookDetail() {
     }
   };
 
-  const handleAutoApproveAll = async () => {
-    if (!selectedBookId) return;
-    setAutoApprovePending(true);
-    try {
-      const response = await fetch(`/api/books/${selectedBookId}/approve-all`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await response.json();
-      if (result.success) {
-        toast({ title: 'All chapters approved!', description: 'Auto-approval complete.' });
-        fetchBook();
-      } else {
-        toast({ title: 'Auto-approval failed', description: result.error, variant: 'destructive' });
-      }
-    } catch (error) {
-      toast({ title: 'Error', description: 'Failed to auto-approve chapters.', variant: 'destructive' });
-    } finally {
-      setAutoApprovePending(false);
-    }
-  };
+const handleAutoApproveAll = async () => {
+     if (!selectedBookId || !book) return;
+     setAutoApprovePending(true);
+     try {
+       const response = await fetch(`/api/books/${selectedBookId}/approve-all`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+       });
+       const result = await response.json();
+       if (result.success) {
+         const data = result.data as { jobId: string; nextChapterIndex?: number };
+         if (data.jobId) {
+           setGenerationJobId(data.jobId);
+           setActiveJobId(data.jobId);
+         }
+         const pendingChapters = book.chapters?.filter(c => c.status === 'pending').length ?? 0;
+         const isChildrenBook = ['0-5', '6-9', '10-14'].includes(book.targetAudience);
+         const hasIllustrations = isChildrenBook && book.genre !== 'coloring';
+         setEstimatedDuration(estimateGenerationTime(pendingChapters, book.targetAudience, hasIllustrations));
+         toast({ title: 'Auto-approval started!', description: 'All chapters are being approved and generation is underway.' });
+         fetchBook();
+       } else {
+         toast({ title: 'Auto-approval failed', description: result.error, variant: 'destructive' });
+       }
+     } catch (error) {
+       toast({ title: 'Error', description: 'Failed to auto-approve chapters.', variant: 'destructive' });
+     } finally {
+       setAutoApprovePending(false);
+     }
+   };
 
   const handleStartGeneration = async () => {
     if (!selectedBookId) return;
@@ -385,14 +403,15 @@ export default function BookDetail() {
       )}
 
       {/* Generation Progress */}
-      {generationJobId && (
-        <GenerationProgress
-          jobId={generationJobId}
-          genre={book.genre}
-          onComplete={handleGenerationComplete}
-          onError={handleGenerationError}
-        />
-      )}
+{generationJobId && (
+         <GenerationProgress
+           jobId={generationJobId}
+           genre={book.genre}
+           estimatedDuration={estimatedDuration}
+           onComplete={handleGenerationComplete}
+           onError={handleGenerationError}
+         />
+       )}
 
       {/* Auto-Approve All Chapters button - show when chapters are awaiting approval */}
       {(book.status === 'awaiting_chapter_approval' || book.status === 'writing') && book.chapters?.some(c => c.status === 'awaiting_approval') && (
