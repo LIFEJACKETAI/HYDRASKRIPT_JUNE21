@@ -25,7 +25,7 @@ export async function POST(
 
     // Check if there are any pending chapters to approve
     const pendingChapters = book.chapters.filter(
-      (ch) => ch.status === 'awaiting_approval' || ch.status === 'writing'
+      (ch) => ch.status === 'awaiting_approval' || ch.status === 'writing' || ch.status === 'completed'
     );
 
     if (pendingChapters.length === 0) {
@@ -39,16 +39,18 @@ export async function POST(
 
     // Approve all pending chapters in order
     for (const chapter of pendingChapters.sort((a, b) => a.index - b.index)) {
-      await db.chapter.update({
-        where: { bookId_index: { bookId: id, index: chapter.index } },
-        data: { approvalStatus: 'approved', status: 'completed' },
-      });
+      if (chapter.status !== 'completed') {
+        await db.chapter.update({
+          where: { bookId_index: { bookId: id, index: chapter.index } },
+          data: { approvalStatus: 'approved', status: 'completed' },
+        });
+      }
       approvedIndices.push(chapter.index);
     }
 
-    // Find the next unapproved chapter or finalize
+    // Find the next unapproved chapter (still pending/not completed)
     const nextUnapproved = book.chapters.find(
-      (ch) => !approvedIndices.includes(ch.index) && (ch.status === 'pending' || ch.status === 'awaiting_approval')
+      (ch) => !approvedIndices.includes(ch.index) && ch.status === 'pending'
     );
 
     if (nextUnapproved) {
@@ -69,7 +71,7 @@ export async function POST(
         data: { jobId, nextChapterIndex: nextUnapproved.index },
       });
     } else {
-      // All chapters approved - finalize the book
+      // All chapters now approved - finalize the book
       const bookWithCredits = await db.book.findUnique({ where: { id } });
       const totalCredits = bookWithCredits?.totalCreditsEstimated || 0;
 

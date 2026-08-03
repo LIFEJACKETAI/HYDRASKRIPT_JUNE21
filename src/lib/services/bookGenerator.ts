@@ -3,8 +3,8 @@ import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits, consumeCredits, refundCredits, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
 import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
-import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getImagePromptExtractionPrompt, getImagePromptExtractionUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt } from '@/lib/llm/prompts';
-import { BookOutlineSchema, ChapterGenerationSchema, ImagePromptSchema, validateOrThrow } from '@/lib/llm/schema';
+import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt } from '@/lib/llm/prompts';
+import { BookOutlineSchema, ChapterGenerationSchema, validateOrThrow } from '@/lib/llm/schema';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
 import { getStyleSystemPrompt } from '@/lib/services/styleAnalyzer';
 import type { TargetAudience, Genre, ColoringTheme } from '@/types';
@@ -272,11 +272,10 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
     // Handle Illustrations
     if (isChildrenBook && !isColoringBook) {
       try {
-        const imgPromptResult = await askLLMJSONWithFallback<unknown>(getImagePromptExtractionPrompt(), getImagePromptExtractionUserPrompt(chapterResult.content), 0.3);
-        const validatedPrompt = validateOrThrow(ImagePromptSchema, imgPromptResult);
-        const illustration = await generateChapterIllustration(bookId, ownerId, chapterIndex, validatedPrompt.prompt, config.illustrationStyle);
+        const illustrationPrompt = chapter.synopsis || chapter.title;
+        const illustration = await generateChapterIllustration(bookId, ownerId, chapterIndex, illustrationPrompt, config.illustrationStyle);
         if (illustration.success && illustration.publicUrl) {
-          await db.chapter.update({ where: { id: chapter.id }, data: { illustrationUrl: illustration.publicUrl, illustrationPrompt: validatedPrompt.prompt } });
+          await db.chapter.update({ where: { id: chapter.id }, data: { illustrationUrl: illustration.publicUrl, illustrationPrompt } });
         }
       } catch (e) { console.error('Illustration failed', e); }
     } else if (isColoringBook) {

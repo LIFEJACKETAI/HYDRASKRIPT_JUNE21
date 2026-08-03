@@ -4,9 +4,6 @@
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
-import { askLLMJSON } from '@/lib/llm/openrouter';
-import { getImagePromptExtractionPrompt, getImagePromptExtractionUserPrompt } from '@/lib/llm/prompts';
-import { ImagePromptSchema, validateOrThrow } from '@/lib/llm/schema';
 import { AUDIENCE_CONFIG, type ColoringTheme } from '@/types';
 
 export async function generateImageWorker(jobId: string, assetParams: {

@@ -70,7 +70,6 @@ async function generateWithGemini(prompt: string, options: GenerateImageOptions)
     const modelName = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
     const model = genAI.getGenerativeModel({ model: modelName });
 
-    // Retry logic for 429 Too Many Requests errors
     const maxRetries = 3;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -98,14 +97,13 @@ async function generateWithGemini(prompt: string, options: GenerateImageOptions)
             throw error;
           }
           console.warn(`[imageService] Gemini quota limit hit, retrying (attempt ${attempt}/${maxRetries})...`);
-          await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, attempt), 10000))); // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, attempt), 10000)));
         } else {
           throw error;
         }
       }
     }
-
-    throw new Error('Maximum retry attempts exceeded for Gemini image generation');
+    return { success: false, error: 'Image generation failed after all retries' };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
