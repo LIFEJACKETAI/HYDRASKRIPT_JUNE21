@@ -25,8 +25,11 @@ export function getOutlinePrompt(
   }
 
   let adventureNote = '';
+  let adventureToken = '';
   if (adventureType) {
-    adventureNote = `\nAdventure setting: The story takes place ${adventureType.replace(/-/g, ' ')}. All chapters should be set in this location.`;
+    const safeAdventure = adventureType.replace(/[^\w\s]/g, '').toUpperCase();
+    adventureToken = `AdventureSettingToken: ${safeAdventure}`;
+    adventureNote = `\nAdventure setting: The story takes place ${adventureType.replace(/-/g, ' ')}. All chapters should be set in this location.\nKEY TOKEN TO INCLUDE IN EVERY CHAPTER: ${adventureToken}`;
   }
 
   return `You are a master book outliner with expertise in ${genre} fiction. ${stylePrompt ? `Your writing style should match: ${stylePrompt}` : ''}

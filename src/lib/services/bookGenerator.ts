@@ -140,6 +140,21 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
     console.log(`[DEBUG] 6. AI responded! Validating schema...`);
     const outline = validateOrThrow(BookOutlineSchema, outlineResult);
 
+    // Validate adventure token if adventureType is set
+    if (book.adventureType) {
+        const adventureToken = `AdventureSettingToken: ${book.adventureType.replace(/[^\w\s]/g, '').toUpperCase()}`;
+        const chaptersWithoutToken = outline.chapters
+            .map((chapter, index) => ({ chapter, index }))
+            .filter(({ chapter }) => !chapter.synopsis.toUpperCase().includes(adventureToken));
+
+        if (chaptersWithoutToken.length > 0) {
+            const errMessage = `Adventure setting validation failed: ${chaptersWithoutToken.length} chapters missing adventure token "${adventureToken}". Chapters: ${chaptersWithoutToken.map(c => c.index + 1).join(', ')}`;
+            console.error("[Outline Validation] " + errMessage);
+            throw new Error(errMessage);
+        }
+        console.log(`[DEBUG] Adventure token validation passed for ${outline.chapters.length} chapters.`);
+    }
+
     console.log(`[DEBUG] 7. Saving outline to database...`);
     await db.book.update({
       where: { id: bookId },

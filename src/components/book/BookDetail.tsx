@@ -13,6 +13,8 @@ import {
   Zap,
   FileText,
   RefreshCw,
+  CheckCircle,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -87,6 +89,7 @@ export default function BookDetail() {
     setIsGenerating(false);
     setActiveJobId(null);
     setGenerationJobId(null);
+    setAutoApprovePending(false);
     fetchBook();
     toast({ title: 'Generation complete!', description: 'Your book has been generated.' });
   }, [fetchBook, setIsGenerating, setActiveJobId]);
@@ -97,6 +100,8 @@ export default function BookDetail() {
     setGenerationJobId(null);
     toast({ title: 'Generation failed', description: error, variant: 'destructive' });
   }, [setIsGenerating, setActiveJobId]);
+
+  const [autoApprovePending, setAutoApprovePending] = useState(false);
 
   const handleApproveOutline = async (updatedOutline: any) => {
     try {
@@ -114,6 +119,28 @@ export default function BookDetail() {
       }
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to approve outline.', variant: 'destructive' });
+    }
+  };
+
+  const handleAutoApproveAll = async () => {
+    if (!selectedBookId) return;
+    setAutoApprovePending(true);
+    try {
+      const response = await fetch(`/api/books/${selectedBookId}/approve-all`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const result = await response.json();
+      if (result.success) {
+        toast({ title: 'All chapters approved!', description: 'Auto-approval complete.' });
+        fetchBook();
+      } else {
+        toast({ title: 'Auto-approval failed', description: result.error, variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to auto-approve chapters.', variant: 'destructive' });
+    } finally {
+      setAutoApprovePending(false);
     }
   };
 
@@ -365,6 +392,34 @@ export default function BookDetail() {
           onComplete={handleGenerationComplete}
           onError={handleGenerationError}
         />
+      )}
+
+      {/* Auto-Approve All Chapters button - show when chapters are awaiting approval */}
+      {(book.status === 'awaiting_chapter_approval' || book.status === 'writing') && book.chapters?.some(c => c.status === 'awaiting_approval') && (
+        <Card className="bg-[#2a2a2a] border-cyan-500/30">
+          <CardContent className="p-4">
+            <Button
+              onClick={handleAutoApproveAll}
+              disabled={autoApprovePending}
+              className="w-full btn-gradient h-10"
+            >
+              {autoApprovePending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Auto-approving all chapters...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Auto-approve All Chapters
+                </>
+              )}
+            </Button>
+            <p className="text-xs text-gray-500 text-center mt-2">
+              Approves all pending chapters at once without individual review
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Chapters */}
