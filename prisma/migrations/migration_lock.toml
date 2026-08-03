@@ -1,0 +1,6 @@
+# Prisma Migrate Lock File
+# This file is used to prevent multiple people from running migrations at the same time.
+# It is automatically created and managed by Prisma Migrate.
+
+# The version of the lock file format
+version = 1

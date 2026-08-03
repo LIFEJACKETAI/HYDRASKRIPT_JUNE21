@@ -33,7 +33,7 @@ export async function GET(
         creditsReserved: job.creditsReserved,
         creditsConsumed: job.creditsConsumed,
         errorMessage: job.errorMessage,
-        result: job.result ? JSON.parse(job.result) : null,
+        result: (() => { try { return job.result ? JSON.parse(job.result) : null; } catch { return job.result; } })(),
         startedAt: job.startedAt,
         completedAt: job.completedAt,
         createdAt: job.createdAt,

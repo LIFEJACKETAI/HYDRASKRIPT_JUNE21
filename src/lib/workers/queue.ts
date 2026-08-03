@@ -54,7 +54,7 @@ class PersistentJobQueue {
     return job.id;
   }
 
-  async startJob(jobId: string, jobType: JobType, _execute?: () => Promise<void>): Promise<void> {
+  async startJob(jobId: string, jobType: JobType): Promise<void> {
     console.log(`[Queue] Job ${jobId} signaled for processing (${jobType})`);
     await this.bootstrap();
     void this.processNext();

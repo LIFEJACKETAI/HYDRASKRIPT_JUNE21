@@ -1,8 +1,11 @@
 // HydraSkript - Worker Registry
 // Maps job types to their corresponding implementation functions
 
+import { db } from '@/lib/db';
 import { generateOutline, generateChapter, finalizeBook } from '@/lib/services/bookGenerator';
 import { exportBookAsPDF } from '@/lib/services/exportService';
+import { generateImageWorker } from '@/lib/workers/generateImageWorker';
+import { generateAudiobookWorker } from '@/lib/workers/generateAudiobookWorker';
 
 type QueueJob = {
   id: string;
@@ -10,6 +13,7 @@ type QueueJob = {
   ownerId: string;
   stepIndex?: number | null;
   creditsConsumed?: number | null;
+  result?: string | null;
 };
 
 export type WorkerFunction = (job: QueueJob) => Promise<void>;
@@ -33,5 +37,17 @@ export const WorkerRegistry: Record<string, WorkerFunction> = {
   export_pdf: async (job) => {
     if (!job.bookId) throw new Error('Missing bookId for export_pdf');
     await exportBookAsPDF(job.bookId, job.ownerId);
+  },
+
+  generate_image: async (job) => {
+    if (!job.bookId) throw new Error('Missing bookId for generate_image');
+    if (!job.result) throw new Error('Missing result data for generate_image');
+    const assetParams = JSON.parse(job.result);
+    await generateImageWorker(job.id, assetParams);
+  },
+
+  generate_audiobook: async (job) => {
+    if (!job.bookId) throw new Error('Missing bookId for generate_audiobook');
+    await generateAudiobookWorker(job.id);
   },
 };

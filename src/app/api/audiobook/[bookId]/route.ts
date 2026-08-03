@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits } from '@/lib/utils/credits';
-import { generateAudiobookWorker } from '@/lib/workers/generateAudiobookWorker';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 export async function GET(
@@ -137,9 +136,7 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Insufficient credits' }, { status: 402 });
     }
 
-    await jobQueue.startJob(jobId, 'generate_audiobook', async () => {
-      await generateAudiobookWorker(jobId);
-    });
+    await jobQueue.startJob(jobId, 'generate_audiobook');
 
     return NextResponse.json({
       success: true,

@@ -4,7 +4,7 @@
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
-import { AUDIENCE_CONFIG, type ColoringTheme } from '@/types';
+import { AUDIENCE_CONFIG, type ColoringTheme, type TargetAudience } from '@/types';
 
 export async function generateImageWorker(jobId: string, assetParams: {
   bookId: string,
@@ -36,7 +36,7 @@ export async function generateImageWorker(jobId: string, assetParams: {
     } else {
       // Illustration
       const targetPrompt = prompt || 'A cinematic scene from the story';
-      const style = targetAudience ? AUDIENCE_CONFIG[targetAudience as any]?.illustrationStyle || 'pixar' : 'pixar';
+      const style = targetAudience ? AUDIENCE_CONFIG[targetAudience as TargetAudience]?.illustrationStyle || 'pixar' : 'pixar';
       result = await generateChapterIllustration(bookId, ownerId, chapterIndex || 0, targetPrompt, style);
     }
 

@@ -1,5 +1,5 @@
 // HydraSkript - AI Book Generation Platform
-// Prisma Schema (SQLite)
+// Prisma Schema (PostgreSQL)
 
 generator client {
   provider = "prisma-client-js"

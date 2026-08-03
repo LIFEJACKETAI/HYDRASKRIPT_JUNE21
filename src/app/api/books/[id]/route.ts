@@ -65,8 +65,12 @@ export async function DELETE(
     const { id: bookId } = await params;
 
     const result = await db.book.delete({
-      where: { id: bookId },
+      where: { id: bookId, ownerId: profile.id },
     });
+
+    if (!result) {
+      return NextResponse.json({ success: false, error: 'Book not found' }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {

@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast';
 const chapterStatusConfig: Record<string, { label: string; icon: React.ElementType; className: string }> = {
   pending: { label: 'Pending', icon: Clock, className: 'bg-gray-500/20 text-gray-300 border-gray-500/30' },
   writing: { label: 'Writing', icon: Loader2, className: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
+  reviewing: { label: 'Reviewing', icon: Loader2, className: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
   awaiting_approval: { label: 'Review Needed', icon: Sparkles, className: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
   completed: { label: 'Completed', icon: CheckCircle, className: 'bg-green-500/20 text-green-300 border-green-500/30' },
   failed: { label: 'Failed', icon: AlertCircle, className: 'bg-red-500/20 text-red-300 border-red-500/30' },

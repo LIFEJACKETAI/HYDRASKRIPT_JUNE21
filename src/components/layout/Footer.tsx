@@ -21,27 +21,25 @@ export default function Footer() {
             </span>
           </div>
           <div className="flex items-center gap-6">
-            <a
-              href="#"
-              className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
-            >
+            <span className="text-gray-500 text-sm transition-colors cursor-default">
               Documentation
-            </a>
-            <a
-              href="#"
-              className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
-            >
+            </span>
+            <span className="text-gray-500 text-sm transition-colors cursor-default">
               Support
-            </a>
+            </span>
             <a
-              href="#"
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-500 hover:text-gray-300 transition-colors"
               aria-label="GitHub"
             >
               <Github className="h-4 w-4" />
             </a>
             <a
-              href="#"
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-500 hover:text-gray-300 transition-colors"
               aria-label="Twitter"
             >

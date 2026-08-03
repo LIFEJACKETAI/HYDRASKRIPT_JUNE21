@@ -1,22 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
-import { getAuthenticatedUserEmail } from '@/lib/auth-utils';
-
-async function getAuthEmail(request: NextRequest): Promise<string | null> {
-  const email = await getAuthenticatedUserEmail(request);
-  if (!email) return null;
-  return email;
-}
+import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // GET - Get profile
 export async function GET(request: NextRequest) {
   try {
-    const email = await getAuthEmail(request);
-    if (!email) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     return NextResponse.json({
       success: true,
@@ -32,6 +22,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
@@ -40,11 +34,7 @@ export async function GET(request: NextRequest) {
 // PUT - Update profile
 export async function PUT(request: NextRequest) {
   try {
-    const email = await getAuthEmail(request);
-    if (!email) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-    const profile = await getOrCreateProfile(email);
+    const { profile } = await requireProfile(request);
 
     const body = await request.json();
     const updated = await db.profile.update({
@@ -65,6 +55,10 @@ export async function PUT(request: NextRequest) {
       },
     });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
