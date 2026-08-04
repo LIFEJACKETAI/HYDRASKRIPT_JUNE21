@@ -55,12 +55,14 @@ export async function POST(
 
     if (nextUnapproved) {
       // There are still chapters to write - create a job for the first unapproved chapter
+      // with autoApprove enabled so the worker chains through every remaining chapter
       const jobId = await jobQueue.createJob({
         bookId: id,
         ownerId: profile.id,
         jobType: 'write_chapter',
         creditsReserved: 0,
         stepIndex: nextUnapproved.index,
+        result: JSON.stringify({ autoApprove: true }),
       });
 
       await jobQueue.startJob(jobId, 'write_chapter');

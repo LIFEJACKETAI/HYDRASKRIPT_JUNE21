@@ -203,6 +203,16 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
 
   if (!book) throw new Error('Book not found');
 
+  // Detect "auto-approve all chapters" mode. When set, each chapter is approved
+  // immediately and the worker chains straight into the next pending chapter so a
+  // single action completes the entire book without stopping for review.
+  let autoApprove = false;
+  try {
+    const job = await db.job.findUnique({ where: { id: jobId } });
+    const result = job?.result ? JSON.parse(job.result) : {};
+    autoApprove = result.autoApprove === true;
+  } catch {}
+
   try {
     await jobQueue.updateJobStatus(jobId, { progressMessage: `Writing chapter ${chapterIndex + 1}...`, progressPercent: 20 });
 
@@ -289,9 +299,52 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       } catch (e) { console.error('Coloring page failed', e); }
     }
 
+    // Auto-approve mode: accept this chapter and chain straight into the next one
+    if (autoApprove) {
+      await db.chapter.update({
+        where: { id: chapter.id },
+        data: { approvalStatus: 'approved', status: 'completed' },
+      });
+
+      const nextPendingChapter = await db.chapter.findFirst({
+        where: { bookId, status: 'pending' },
+        orderBy: { index: 'asc' },
+      });
+
+      if (nextPendingChapter) {
+        const nextJobId = await jobQueue.createJob({
+          bookId,
+          ownerId,
+          jobType: 'write_chapter',
+          creditsReserved: 0,
+          stepIndex: nextPendingChapter.index,
+          result: JSON.stringify({ autoApprove: true }),
+        });
+        await jobQueue.startJob(nextJobId, 'write_chapter');
+        console.log(`[GenerateChapter] Auto-approved chapter ${chapter.index + 1}. Chaining to chapter ${nextPendingChapter.index + 1}.`);
+      } else {
+        const bookWithCredits = await db.book.findUnique({ where: { id: bookId } });
+        const totalCredits = bookWithCredits?.totalCreditsEstimated || 0;
+
+        const finalizeJobId = await jobQueue.createJob({
+          bookId,
+          ownerId,
+          jobType: 'finalize_book',
+          creditsReserved: 0,
+          creditsConsumed: totalCredits,
+        });
+        await jobQueue.startJob(finalizeJobId, 'finalize_book');
+
+        await db.book.update({ where: { id: bookId }, data: { status: 'finalizing' } });
+        console.log(`[GenerateChapter] All chapters auto-approved. Starting finalization.`);
+      }
+    }
+
     await jobQueue.updateJobStatus(jobId, {
       status: 'completed',
-      progressMessage: `Chapter ${chapterIndex + 1} drafted! Please review and approve.`,
+      progressMessage: autoApprove
+        ? `Chapter ${chapterIndex + 1} completed.`
+        : `Chapter ${chapterIndex + 1} drafted! Please review and approve.`,
       progressPercent: 100
     });
 

@@ -30,6 +30,7 @@ class PersistentJobQueue {
     stepIndex?: number;
     creditsConsumed?: number;
     maxRetries?: number;
+    result?: string;
   }): Promise<string> {
     const maxRetries = params.maxRetries ?? DEFAULT_MAX_RETRIES;
 
@@ -48,6 +49,7 @@ class PersistentJobQueue {
         maxRetries,
         leaseExpiresAt: null,
         lastHeartbeatAt: null,
+        result: params.result ?? '{}',
       },
     });
 

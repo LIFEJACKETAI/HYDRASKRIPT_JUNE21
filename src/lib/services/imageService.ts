@@ -193,14 +193,111 @@ async function generateWithPollinations(prompt: string, size: ImageSize, options
 }
 
 /**
- * Generate an image using available backends (Gemini primary, Pollinations fallback)
+ * Backend 3: Stability AI (stable-image / core).
+ * Uses a stable per-book seed for character consistency and honors the
+ * requested aspect ratio. Returns JSON with a base64 `image` payload.
+ */
+function stabilityAspectRatio(size: ImageSize): string {
+  const [w, h] = size.split('x').map((n) => parseInt(n, 10));
+  if (!Number.isFinite(w) || !Number.isFinite(h) || h <= 0) return '1:1';
+  if (w === h) return '1:1';
+  const ratio = w / h;
+  if (ratio >= 1.7) return '16:9';
+  if (ratio >= 1.3) return '3:2';
+  if (ratio >= 1.05) return '4:5';
+  if (ratio <= 0.58) return '9:16';
+  if (ratio <= 0.75) return '2:3';
+  return '4:5';
+}
+
+async function generateWithStability(prompt: string, size: ImageSize, options: GenerateImageOptions): Promise<GeneratedImageResult> {
+  const apiKey = process.env.STABILITY_AI_API_KEY;
+  if (!apiKey) return { success: false, error: 'No Stability API key configured' };
+
+  const aspectRatio = stabilityAspectRatio(size);
+  // A stable per-book seed keeps characters/art consistent across chapters.
+  const seed = hashString(`${options.bookId ?? options.ownerId}:${options.assetType}`) % 2147483647;
+
+  const form = new FormData();
+  form.append('prompt', prompt);
+  form.append('aspect_ratio', aspectRatio);
+  form.append('output_format', 'png');
+  form.append('seed', String(seed));
+  if (options.style === 'lineart' || options.style === 'lineart-adult') {
+    form.append('negative_prompt', 'color, gradient, grayscale, shading, 3d, photo, photorealistic, full color');
+  }
+
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 60_000);
+      let response: Response;
+      try {
+        response = await fetch('https://api.stability.ai/v2beta/stable-image/generate/core', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Accept': 'application/json',
+          },
+          body: form,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
+
+      if (!response.ok) {
+        let detail = '';
+        try {
+          const err: any = await response.json();
+          detail = err?.message || (Array.isArray(err?.errors) ? err.errors.join(', ') : '') || '';
+        } catch {}
+        throw new Error(`Stability API error: ${response.status} ${detail}`.trim());
+      }
+
+      const data = (await response.json()) as { image?: string };
+      if (!data?.image) {
+        throw new Error('Stability returned no image data');
+      }
+
+      return persistAsset({
+        base64: data.image,
+        mimeType: 'image/png',
+        assetType: options.assetType,
+        style: options.style || 'pixar',
+        ownerId: options.ownerId,
+        bookId: options.bookId,
+        prompt,
+      });
+    } catch (error) {
+      if (attempt === maxRetries) {
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+      console.warn(`[imageService] Stability failed (attempt ${attempt}/${maxRetries}):`, error instanceof Error ? error.message : String(error));
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+
+  return { success: false, error: `Stability generation failed after ${maxRetries} attempts` };
+}
+
+/**
+ * Generate an image using available backends (Stability primary, Gemini & Pollinations fallback)
  */
 export async function generateImage(options: GenerateImageOptions): Promise<GeneratedImageResult> {
   const { prompt, style = 'pixar', size = '1024x1024', ownerId, bookId, assetType } = options;
   const styleConfig = STYLE_CONFIG[style] || STYLE_CONFIG.pixar;
   const enhancedPrompt = `${prompt}, ${styleConfig.prompt}`;
 
-  // Primary: Gemini
+  // Primary: Stability AI
+  if (process.env.STABILITY_AI_API_KEY) {
+    const stabilityResult = await generateWithStability(enhancedPrompt, size, { ...options, prompt: enhancedPrompt });
+    if (stabilityResult.success) return stabilityResult;
+    console.error('[imageService] Stability image generation failed:', stabilityResult.error);
+  }
+
+  // Secondary: Gemini
   if (process.env.GOOGLE_AI_API_KEY) {
     const geminiResult = await generateWithGemini(enhancedPrompt, { ...options, prompt: enhancedPrompt });
     if (geminiResult.success) return geminiResult;

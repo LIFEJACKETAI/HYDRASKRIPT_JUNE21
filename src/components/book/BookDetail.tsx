@@ -70,6 +70,8 @@ export default function BookDetail() {
   const [isExporting, setIsExporting] = useState(false);
   const [generationJobId, setGenerationJobId] = useState<string | null>(activeJobId);
   const [estimatedDuration, setEstimatedDuration] = useState<number | null>(null);
+  const [autoApprovePending, setAutoApprovePending] = useState(false);
+  const [isAutoCompleting, setIsAutoCompleting] = useState(false);
 
   const fetchBook = useCallback(async () => {
     if (!selectedBookId) return;
@@ -92,25 +94,65 @@ export default function BookDetail() {
     fetchBook();
   }, [fetchBook]);
 
+  // While auto-completing, keep polling the book until the whole chain finishes.
+  // The backend chains every remaining chapter automatically; this keeps the UI
+  // in sync through the last chapter and finalization.
+  useEffect(() => {
+    if (!isAutoCompleting || !selectedBookId) return;
+    let stopped = false;
+    const interval = setInterval(async () => {
+      const data = await getBook(selectedBookId);
+      if (stopped || !data) return;
+      setBook(data);
+      if (data.status === 'completed') {
+        stopped = true;
+        clearInterval(interval);
+        setIsAutoCompleting(false);
+        setActiveJobId(null);
+        setGenerationJobId(null);
+        setEstimatedDuration(null);
+        toast({ title: 'Generation complete!', description: 'Your book has been generated.' });
+      } else if (data.status === 'failed' || data.chapters?.some(c => c.status === 'failed')) {
+        stopped = true;
+        clearInterval(interval);
+        setIsAutoCompleting(false);
+        setActiveJobId(null);
+        setGenerationJobId(null);
+        setEstimatedDuration(null);
+        toast({ title: 'Generation failed', description: 'One or more chapters failed to generate.', variant: 'destructive' });
+      }
+    }, 3000);
+    return () => {
+      stopped = true;
+      clearInterval(interval);
+    };
+  }, [isAutoCompleting, selectedBookId]);
+
   // Refresh book data when generation completes
-const handleGenerationComplete = useCallback(() => {
-     setIsGenerating(false);
-     setActiveJobId(null);
-     setGenerationJobId(null);
-     setEstimatedDuration(null);
-     setAutoApprovePending(false);
-     fetchBook();
-     toast({ title: 'Generation complete!', description: 'Your book has been generated.' });
-   }, [fetchBook, setIsGenerating, setActiveJobId]);
+  const handleGenerationComplete = useCallback(() => {
+    setAutoApprovePending(false);
+    if (isAutoCompleting) {
+      // Auto-complete is still chaining through chapters - keep the book poller running
+      setGenerationJobId(null);
+      setActiveJobId(null);
+      fetchBook();
+      return;
+    }
+    setIsGenerating(false);
+    setActiveJobId(null);
+    setGenerationJobId(null);
+    setEstimatedDuration(null);
+    fetchBook();
+    toast({ title: 'Generation complete!', description: 'Your book has been generated.' });
+  }, [fetchBook, setIsGenerating, setActiveJobId, isAutoCompleting]);
 
   const handleGenerationError = useCallback((error: string) => {
     setIsGenerating(false);
     setActiveJobId(null);
     setGenerationJobId(null);
+    setIsAutoCompleting(false);
     toast({ title: 'Generation failed', description: error, variant: 'destructive' });
   }, [setIsGenerating, setActiveJobId]);
-
-  const [autoApprovePending, setAutoApprovePending] = useState(false);
 
   const handleApproveOutline = async (updatedOutline: any) => {
     try {
@@ -151,6 +193,7 @@ const handleAutoApproveAll = async () => {
          const hasIllustrations = isChildrenBook && book.genre !== 'coloring';
          setEstimatedDuration(estimateGenerationTime(pendingChapters, book.targetAudience, hasIllustrations));
          toast({ title: 'Auto-approval started!', description: 'All chapters are being approved and generation is underway.' });
+         setIsAutoCompleting(true);
          fetchBook();
        } else {
          toast({ title: 'Auto-approval failed', description: result.error, variant: 'destructive' });
@@ -414,7 +457,7 @@ const handleAutoApproveAll = async () => {
        )}
 
       {/* Auto-Approve All Chapters button - show when chapters are awaiting approval */}
-      {(book.status === 'awaiting_chapter_approval' || book.status === 'writing') && book.chapters?.some(c => c.status === 'awaiting_approval') && (
+      {(book.status === 'awaiting_chapter_approval' || book.status === 'writing') && book.chapters?.some(c => c.status === 'awaiting_approval') && !isAutoCompleting && (
         <Card className="bg-[#2a2a2a] border-cyan-500/30">
           <CardContent className="p-4">
             <Button
@@ -437,6 +480,21 @@ const handleAutoApproveAll = async () => {
             <p className="text-xs text-gray-500 text-center mt-2">
               Approves all pending chapters at once without individual review
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Auto-complete in progress banner */}
+      {isAutoCompleting && (
+        <Card className="bg-[#2a2a2a] border-purple-500/30">
+          <CardContent className="p-4 flex items-center gap-3">
+            <Loader2 className="h-5 w-5 text-purple-400 animate-spin shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm text-white">Completing all chapters...</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                The remaining chapters are being generated automatically. {book.chapters?.filter(c => c.status === 'completed').length ?? 0}/{book.chapters?.length ?? 0} chapters done.
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}
