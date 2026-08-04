@@ -237,13 +237,20 @@ const handleAutoApproveAll = async () => {
     if (!selectedBookId) return;
     setIsExporting(true);
     try {
+      // Generate the export via the POST route, then download via the
+      // GET download route. The download route streams the file back
+      // with `Content-Disposition: attachment`, which guarantees a
+      // real download (no popup blocker, no opening in a new tab).
       const result = await exportBook(selectedBookId);
-      if (result.success && result.data) {
-        const data = result.data as { downloadUrl: string };
-        if (data.downloadUrl) {
-          window.open(data.downloadUrl, '_blank');
-        }
-        toast({ title: 'Export complete!', description: 'Your PDF is ready.' });
+      if (result.success) {
+        const downloadUrl = `/api/books/${selectedBookId}/export/download?format=pdf`;
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = ''; // hint to the browser to use Content-Disposition
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast({ title: 'Export complete!', description: 'Your PDF is downloading.' });
       } else {
         toast({
           title: 'Export failed',
