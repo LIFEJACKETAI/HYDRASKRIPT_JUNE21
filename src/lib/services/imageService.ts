@@ -111,35 +111,85 @@ async function generateWithGemini(prompt: string, options: GenerateImageOptions)
 
 /**
  * Backend 2: Pollinations AI.
- * Fetches image from URL and converts to base64.
+ * Fetches image from URL and converts to base64. Honors the requested size,
+ * model, and uses a deterministic per-book seed for character consistency.
  */
-async function generateWithPollinations(prompt: string, size: ImageSize, options: GenerateImageOptions): Promise<GeneratedImageResult> {
-  try {
-    // Pollinations uses URL-encoded prompts, convert to base64
-    const encodedPrompt = encodeURIComponent(prompt);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true`;
-
-    const response = await fetch(pollinationsUrl);
-    if (!response.ok) {
-      throw new Error(`Pollinations API error: ${response.status}`);
-    }
-
-    const buffer = await response.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-    const contentType = response.headers.get('content-type') || 'image/png';
-
-    return persistAsset({
-      base64,
-      mimeType: contentType,
-      assetType: options.assetType,
-      style: options.style || 'pixar',
-      ownerId: options.ownerId,
-      bookId: options.bookId,
-      prompt,
-    });
-  } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+function pollinationsSize(size: ImageSize): { width: number; height: number } {
+  const [w, h] = size.split('x').map((n) => parseInt(n, 10));
+  if (Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0) {
+    return { width: w, height: h };
   }
+  return { width: 1024, height: 1024 };
+}
+
+function hashString(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = ((hash << 5) - hash + input.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) % 2147483647;
+}
+
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Pollinations request timed out');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function generateWithPollinations(prompt: string, size: ImageSize, options: GenerateImageOptions): Promise<GeneratedImageResult> {
+  // Pollinations uses URL-encoded prompts
+  const encodedPrompt = encodeURIComponent(prompt);
+  const { width, height } = pollinationsSize(size);
+  // A stable per-book seed keeps characters/art consistent across chapters.
+  const seed = hashString(`${options.bookId ?? options.ownerId}:${options.assetType}`);
+  const model = process.env.POLLINATIONS_MODEL || 'flux';
+  const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&model=${model}&seed=${seed}&nologo=true`;
+
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetchWithTimeout(pollinationsUrl, 60_000);
+      if (!response.ok) {
+        throw new Error(`Pollinations API error: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type') || 'image/png';
+      // Guard against Pollinations returning a non-image (e.g. an error page).
+      if (!contentType.includes('image')) {
+        throw new Error(`Pollinations returned non-image content-type: ${contentType}`);
+      }
+
+      const buffer = await response.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+
+      return persistAsset({
+        base64,
+        mimeType: contentType,
+        assetType: options.assetType,
+        style: options.style || 'pixar',
+        ownerId: options.ownerId,
+        bookId: options.bookId,
+        prompt,
+      });
+    } catch (error) {
+      if (attempt === maxRetries) {
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+      }
+      console.warn(`[imageService] Pollinations failed (attempt ${attempt}/${maxRetries}):`, error instanceof Error ? error.message : String(error));
+      await new Promise(resolve => setTimeout(resolve, 1500 * attempt));
+    }
+  }
+
+  return { success: false, error: `Pollinations generation failed after ${maxRetries} attempts` };
 }
 
 /**
