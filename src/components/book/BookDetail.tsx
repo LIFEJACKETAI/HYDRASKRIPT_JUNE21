@@ -243,7 +243,7 @@ const handleAutoApproveAll = async () => {
         if (data.downloadUrl) {
           window.open(data.downloadUrl, '_blank');
         }
-        toast({ title: 'Export started!', description: 'Your PDF is being prepared.' });
+        toast({ title: 'Export complete!', description: 'Your PDF is ready.' });
       } else {
         toast({
           title: 'Export failed',
