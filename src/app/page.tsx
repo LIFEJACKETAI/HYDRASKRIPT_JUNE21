@@ -63,6 +63,7 @@ import BookDetail from '@/components/book/BookDetail';
 import StyleUploader from '@/components/book/StyleUploader';
 import IdeasLab from '@/components/book/IdeasLab';
 import AudiobookGenerator from '@/components/book/AudiobookGenerator';
+import StoryBible from '@/components/book/StoryBible';
 
 // ─── Landing Page ────────────────────────────────────────────────────────────
 
@@ -1175,6 +1176,7 @@ export default function HomePage() {
       case 'pricing':       return <CreditsView />;
       case 'export-hub':    return <ExportHubView />;
       case 'ui-gallery':    return <UIGalleryView />;
+      case 'story-bible':   return <StoryBible />;
       case 'admin':         return <AdminView />;
       default:              return <DashboardView />;
     }

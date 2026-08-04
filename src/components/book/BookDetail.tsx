@@ -15,6 +15,7 @@ import {
   RefreshCw,
   CheckCircle,
   Loader2,
+  Library,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -369,6 +370,14 @@ const handleAutoApproveAll = async () => {
               {isExporting ? 'Exporting...' : 'Export PDF'}
             </Button>
           )}
+          <Button
+            variant="outline"
+            onClick={() => setCurrentView('story-bible')}
+            className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10"
+          >
+            <Library className="h-4 w-4 mr-2" />
+            Story Bible
+          </Button>
           <Button
             variant="ghost"
             size="icon"

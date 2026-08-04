@@ -35,6 +35,8 @@ interface AppState {
   // Selected book
   selectedBookId: string | null;
   setSelectedBookId: (id: string | null) => void;
+  // Select a book for Story Bible context WITHOUT navigating to book-detail
+  setStoryBibleBookId: (id: string | null) => void;
 
   // Active generation job
   activeJobId: string | null;
@@ -61,6 +63,7 @@ export const useAppStore = create<AppState>((set) => ({
   // Selected book
   selectedBookId: null,
   setSelectedBookId: (id) => set({ selectedBookId: id, currentView: id ? 'book-detail' : 'dashboard' }),
+  setStoryBibleBookId: (id) => set({ selectedBookId: id }),
 
   // Active job
   activeJobId: null,
