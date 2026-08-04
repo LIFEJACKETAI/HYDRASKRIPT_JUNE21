@@ -27,6 +27,7 @@ model Profile {
   jobs          Job[]
   creditLedger  CreditLedger[]
   payments      Payment[]
+  storyBible    StoryBibleEntity[]
 
   @@map("profiles")
 }
@@ -75,6 +76,7 @@ model Book {
   chapters     Chapter[]
   mediaAssets  MediaAsset[]
   jobs         Job[]
+  storyBible   StoryBibleEntity[]
 
   @@map("books")
 }
@@ -103,6 +105,37 @@ model Chapter {
 
   @@unique([bookId, index])
   @@map("chapters")
+}
+
+// ─── Story Bible ──────────────────────────────────────────────────────────────
+// Canonical lore store that the AI can read while writing. Each entity
+// belongs to a single book. The `kind` enum determines which list/detail
+// page the entity surfaces under (Characters / Locations / Objects /
+// Themes / History). physicalTraits and secrets are stored as JSON
+// strings so we can evolve the shape without further migrations.
+model StoryBibleEntity {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId         String   @db.Uuid
+  bookId          String   @db.Uuid
+  kind            String   // CHARACTER, LOCATION, OBJECT, THEME, HISTORY
+  name            String
+  role            String   @default("")         // e.g. "Main Character", "Capital City"
+  summary         String   @default("")         // Short blurb shown under name
+  motivation      String   @default("")         // For CHARACTER: core drive
+  description     String   @default("")         // Long-form description (used by Themes/History primarily)
+  physicalTraits  String   @default("{}")       // JSON: { tags: string[], notes: string }
+  secrets         String   @default("{}")       // JSON: { confidential: string, isPrivate: boolean }
+  portraitUrl     String?                       // Optional portrait/cover image URL
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  book  Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([bookId, kind])
+  @@index([ownerId])
+  @@map("story_bible_entities")
 }
 
 model MediaAsset {

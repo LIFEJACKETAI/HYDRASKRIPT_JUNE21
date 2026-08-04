@@ -18,7 +18,8 @@ export type AppView =
   | 'export-hub'
   | 'ui-gallery'
   | 'pricing'
-  | 'admin';
+  | 'admin'
+  | 'story-bible';
 
 // ─── Store Interface ──────────────────────────────────────────────────────────
 

@@ -14,6 +14,7 @@ import {
   Zap,
   ChevronLeft,
   LayoutGrid,
+  Library,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/lib/store';
@@ -31,6 +32,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard',      view: 'dashboard' },
   { icon: BookPlus,        label: 'Create Book',    view: 'create-book' },
+  { icon: Library,         label: 'Story Bible',    view: 'story-bible',     color: 'text-cyan-400' },
   { icon: Lightbulb,       label: 'Ideas Lab',      view: 'ideas-lab',       color: 'text-yellow-400' },
   { icon: Headphones,      label: 'Audiobook',      view: 'audiobook',       color: 'text-cyan-400' },
   { icon: Palette,         label: 'Style Training', view: 'style-training',  color: 'text-pink-400' },

@@ -265,3 +265,59 @@ export async function getAdminData(): Promise<AdminData | null> {
   const result = await apiFetch<AdminData>('/admin');
   return result.data ?? null;
 }
+// ─── Story Bible API ──────────────────────────────────────────────────────────
+
+export type StoryBibleKind = 'CHARACTER' | 'LOCATION' | 'OBJECT' | 'THEME' | 'HISTORY';
+
+export interface StoryBibleEntity {
+  id: string;
+  bookId: string;
+  kind: StoryBibleKind;
+  name: string;
+  role: string;
+  summary: string;
+  motivation: string;
+  description: string;
+  physicalTraits: { tags: string[]; notes: string };
+  secrets: { confidential: string; isPrivate: boolean };
+  portraitUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type StoryBiblePayload = Partial<
+  Pick<
+    StoryBibleEntity,
+    'kind' | 'name' | 'role' | 'summary' | 'motivation' | 'description' | 'portraitUrl'
+  >
+> & {
+  physicalTraits?: { tags: string[]; notes: string };
+  secrets?: { confidential: string; isPrivate: boolean };
+};
+
+export async function listStoryBibleEntities(bookId: string, kind?: StoryBibleKind) {
+  const query = kind ? `?bookId=${encodeURIComponent(bookId)}&kind=${kind}` : `?bookId=${encodeURIComponent(bookId)}`;
+  return apiFetch<StoryBibleEntity[]>(`/story-bible${query}`);
+}
+
+export async function getStoryBibleEntity(id: string) {
+  return apiFetch<StoryBibleEntity>(`/story-bible/${id}`);
+}
+
+export async function createStoryBibleEntity(bookId: string, payload: StoryBiblePayload) {
+  return apiFetch<StoryBibleEntity>('/story-bible', {
+    method: 'POST',
+    body: JSON.stringify({ bookId, ...payload }),
+  });
+}
+
+export async function updateStoryBibleEntity(id: string, payload: StoryBiblePayload) {
+  return apiFetch<StoryBibleEntity>(`/story-bible/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteStoryBibleEntity(id: string) {
+  return apiFetch<{ ok: true }>(`/story-bible/${id}`, { method: 'DELETE' });
+}
