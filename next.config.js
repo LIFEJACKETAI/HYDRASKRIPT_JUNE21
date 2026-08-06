@@ -8,12 +8,14 @@ const nextConfig = {
   // Next.js bundles pdfkit but does NOT copy the .afm files into the
   // .next output, so PDFDocument fails at runtime with
   // `ENOENT: ... Helvetica.afm` and the export appears to silently fail.
-  serverExternalPackages: ['pdfkit'],
+  serverExternalPackages: ['pdfkit', 'pdf-parse'],
   webpack: (config, { isServer }) => {
     if (isServer && Array.isArray(config.externals)) {
       // Belt-and-braces: also push via the legacy externals array.
-      if (!config.externals.includes('pdfkit')) {
-        config.externals.push('pdfkit');
+      for (const pkg of ['pdfkit', 'pdf-parse']) {
+        if (!config.externals.includes(pkg)) {
+          config.externals.push(pkg);
+        }
       }
     }
     return config;
