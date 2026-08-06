@@ -16,8 +16,10 @@ import {
   ChevronUp,
   Send,
   Library,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import {
@@ -40,7 +42,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAppStore } from '@/lib/store';
-import { getUserEmail, listBooks, transferIdeaToStoryBible } from '@/lib/api';
+import { getUserEmail, listBooks, createBook, transferIdeaToStoryBible } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -356,7 +358,7 @@ function TabSkeleton({ type }: { type: RequestType }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function IdeasLab() {
-  const { setCurrentView } = useAppStore();
+  const { setCurrentView, setStoryBibleBookId } = useAppStore();
 
   // Form state
   const [ideaText, setIdeaText] = useState('');
@@ -375,6 +377,8 @@ export default function IdeasLab() {
   const [booksLoading, setBooksLoading] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferBookId, setTransferBookId] = useState('');
+  const [transferMode, setTransferMode] = useState<'existing' | 'new'>('existing');
+  const [newProjectTitle, setNewProjectTitle] = useState('');
   const [transferring, setTransferring] = useState(false);
 
   const ideaTooShort = ideaText.trim().length < 20;
@@ -386,6 +390,9 @@ export default function IdeasLab() {
 
   const openTransfer = async () => {
     setTransferOpen(true);
+    setTransferBookId('');
+    setTransferMode('existing');
+    setNewProjectTitle(results.titles?.[0]?.title ?? '');
     if (books.length > 0) return;
     setBooksLoading(true);
     try {
@@ -399,15 +406,44 @@ export default function IdeasLab() {
   };
 
   const handleTransfer = async () => {
-    if (!transferBookId) {
+    if (transferMode === 'existing' && !transferBookId) {
       toast({ title: 'Select a book', description: 'Choose which project to carry these ideas into.', variant: 'destructive' });
+      return;
+    }
+    if (transferMode === 'new' && !newProjectTitle.trim()) {
+      toast({ title: 'Name your project', description: 'Give the new project a working title.', variant: 'destructive' });
       return;
     }
     setTransferring(true);
     try {
       const chapters = results.outline?.map((c) => ({ number: c.number, title: c.title, synopsis: c.synopsis }));
+
+      let bookId = transferBookId;
+      let projectName = books.find((b) => b.id === transferBookId)?.title ?? '';
+
+      // Create a new project (book) first if requested.
+      if (transferMode === 'new') {
+        const safeGenre = ['fiction', 'non-fiction', 'fantasy', 'sci-fi', 'mystery', 'romance', 'horror', 'children', 'poetry', 'self-help', 'biography'].includes(genre)
+          ? genre
+          : 'fiction';
+        const safeAudience = ['adult', '0-5', '6-9', '10-14'].includes(targetAudience)
+          ? targetAudience
+          : 'adult';
+        const created = await createBook({
+          title: newProjectTitle.trim(),
+          genre: safeGenre,
+          targetAudience: safeAudience,
+        });
+        if (!created.success || !created.data?.id) {
+          toast({ title: 'Could not create project', description: created.error || 'An error occurred.', variant: 'destructive' });
+          return;
+        }
+        bookId = created.data.id;
+        projectName = created.data.title;
+      }
+
       const result = await transferIdeaToStoryBible({
-        bookId: transferBookId,
+        bookId,
         ideaText: ideaText.trim(),
         title: results.titles?.[0]?.title ?? undefined,
         blurb: results.blurb?.blurb ?? undefined,
@@ -417,9 +453,13 @@ export default function IdeasLab() {
       if (result.success) {
         toast({
           title: 'Transferred to Story Bible!',
-          description: `${result.data?.total ?? 0} entities carried into the selected project.`,
+          description: `${result.data?.total ?? 0} entities carried into "${projectName}".`,
         });
         setTransferOpen(false);
+        if (transferMode === 'new') {
+          setStoryBibleBookId(bookId);
+          setCurrentView('story-bible');
+        }
       } else {
         toast({ title: 'Transfer failed', description: result.error || 'An error occurred.', variant: 'destructive' });
       }
@@ -743,40 +783,82 @@ export default function IdeasLab() {
               Send Ideas to Story Bible
             </DialogTitle>
             <DialogDescription className="text-gray-400">
-              Carry your generated ideas into an existing project's Story Bible as theme and timeline entries.
-              If you skip this, everything will be erased when you leave this page.
+              Carry your generated ideas into a Story Bible as theme and timeline entries. Pick an existing
+              project or start a new one. If you skip this, everything will be erased when you leave this page.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <Label className="text-gray-300 text-sm">Target project *</Label>
-              {booksLoading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-10 w-full rounded-lg" />
-                  <Skeleton className="h-10 w-full rounded-lg" />
-                </div>
-              ) : books.length === 0 ? (
-                <div className="p-4 rounded-lg bg-[#1e1e1e] border border-gray-800">
-                  <p className="text-sm text-gray-300">
-                    No projects yet. Create a book first, then come back to send your ideas.
-                  </p>
-                </div>
-              ) : (
-                <Select value={transferBookId} onValueChange={setTransferBookId}>
-                  <SelectTrigger className="bg-[#1e1e1e] border-gray-700 text-white w-full">
-                    <SelectValue placeholder="Select a project..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a1a] border-gray-700">
-                    {books.map((b) => (
-                      <SelectItem key={b.id} value={b.id} className="text-gray-300 focus:bg-[#252525] focus:text-white">
-                        {b.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+            {/* Mode toggle */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setTransferMode('existing')}
+                className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-all ${
+                  transferMode === 'existing'
+                    ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
+                    : 'bg-[#1e1e1e] border-gray-800 text-gray-400 hover:text-white'
+                }`}
+              >
+                Existing project
+              </button>
+              <button
+                type="button"
+                onClick={() => setTransferMode('new')}
+                className={`px-3 py-2 rounded-lg border text-sm font-semibold transition-all ${
+                  transferMode === 'new'
+                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                    : 'bg-[#1e1e1e] border-gray-800 text-gray-400 hover:text-white'
+                }`}
+              >
+                <Plus className="h-3.5 w-3.5 inline -mt-0.5 mr-1" />
+                New project
+              </button>
             </div>
+
+            {transferMode === 'existing' ? (
+              <div className="space-y-2">
+                <Label className="text-gray-300 text-sm">Target project *</Label>
+                {booksLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-10 w-full rounded-lg" />
+                    <Skeleton className="h-10 w-full rounded-lg" />
+                  </div>
+                ) : books.length === 0 ? (
+                  <div className="p-4 rounded-lg bg-[#1e1e1e] border border-gray-800">
+                    <p className="text-sm text-gray-300">
+                      No projects yet — switch to "New project" to create one.
+                    </p>
+                  </div>
+                ) : (
+                  <Select value={transferBookId} onValueChange={setTransferBookId}>
+                    <SelectTrigger className="bg-[#1e1e1e] border-gray-700 text-white w-full">
+                      <SelectValue placeholder="Select a project..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-gray-700">
+                      {books.map((b) => (
+                        <SelectItem key={b.id} value={b.id} className="text-gray-300 focus:bg-[#252525] focus:text-white">
+                          {b.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-gray-300 text-sm">New project title *</Label>
+                <Input
+                  value={newProjectTitle}
+                  onChange={(e) => setNewProjectTitle(e.target.value)}
+                  placeholder="e.g. The Clockmaker's Debt"
+                  className="bg-[#1e1e1e] border-gray-700 text-white placeholder:text-gray-600 focus:border-emerald-500"
+                />
+                <p className="text-xs text-gray-500">
+                  A new book project will be created (genre: {GENRES.find((g) => g.value === genre)?.label ?? 'Fiction'}) and your ideas will be carried straight into its Story Bible.
+                </p>
+              </div>
+            )}
 
             <div className="rounded-lg bg-[#1e1e1e] border border-gray-800 p-4 space-y-1.5">
               <p className="text-xs font-semibold text-cyan-300 uppercase tracking-wider">Will be carried over</p>
@@ -801,7 +883,7 @@ export default function IdeasLab() {
             </Button>
             <Button
               onClick={handleTransfer}
-              disabled={transferring || books.length === 0 || !transferBookId}
+              disabled={transferring || (transferMode === 'existing' && (!books.length || !transferBookId)) || (transferMode === 'new' && !newProjectTitle.trim())}
               className="btn-gradient"
             >
               {transferring && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
