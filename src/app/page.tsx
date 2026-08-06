@@ -25,6 +25,7 @@ import {
   Headphones,
   Plus,
   BarChart3,
+  Menu,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,6 +65,7 @@ import StyleUploader from '@/components/book/StyleUploader';
 import IdeasLab from '@/components/book/IdeasLab';
 import AudiobookGenerator from '@/components/book/AudiobookGenerator';
 import StoryBible from '@/components/book/StoryBible';
+import UniverseArchitect from '@/components/book/UniverseArchitect';
 
 // ─── Landing Page ────────────────────────────────────────────────────────────
 
@@ -400,6 +402,7 @@ function DashboardView() {
           { label: 'Style Training',    icon: Sparkles,   view: 'style-training' as const, color: 'text-pink-400',   bg: 'hover:bg-pink-500/5   hover:border-pink-500/20' },
           { label: 'Export Hub',        icon: Download,   view: 'export-hub'     as const, color: 'text-blue-400',   bg: 'hover:bg-blue-500/5   hover:border-blue-500/20' },
           { label: 'Ideas Lab',         icon: Zap,        view: 'ideas-lab'      as const, color: 'text-yellow-400', bg: 'hover:bg-yellow-500/5 hover:border-yellow-500/20' },
+          { label: 'Universe',          icon: Menu,       view: 'universe'       as const, color: 'text-teal-400',   bg: 'hover:bg-teal-500/5   hover:border-teal-500/20' },
         ].map((a) => (
           <button
             key={a.label}
@@ -1177,6 +1180,7 @@ export default function HomePage() {
       case 'export-hub':    return <ExportHubView />;
       case 'ui-gallery':    return <UIGalleryView />;
       case 'story-bible':   return <StoryBible />;
+      case 'universe':      return <UniverseArchitect />;
       case 'admin':         return <AdminView />;
       default:              return <DashboardView />;
     }

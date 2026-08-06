@@ -19,7 +19,8 @@ export type AppView =
   | 'ui-gallery'
   | 'pricing'
   | 'admin'
-  | 'story-bible';
+  | 'story-bible'
+  | 'universe';
 
 // ─── Store Interface ──────────────────────────────────────────────────────────
 
