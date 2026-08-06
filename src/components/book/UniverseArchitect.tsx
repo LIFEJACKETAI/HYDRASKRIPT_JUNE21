@@ -46,6 +46,7 @@ interface UniverseEntry {
   kind: StoryBibleKind;
   occurrences: UniverseOccurrence[];
   volumes: number;
+  universal: boolean;
 }
 
 interface Conflict {
@@ -113,17 +114,18 @@ function buildUniverse(books: BookData[], entitiesByBook: Record<string, StoryBi
   }
   const entries: UniverseEntry[] = [];
   for (const [key, occurrences] of grouped) {
-    if (occurrences.length < 2) continue;
     const first = occurrences[0].entity;
+    const volumes = new Set(occurrences.map((o) => o.book.id)).size;
     entries.push({
       key,
       name: first.name,
       kind: first.kind,
       occurrences,
-      volumes: new Set(occurrences.map((o) => o.book.id)).size,
+      volumes,
+      universal: volumes > 1,
     });
   }
-  return entries.sort((a, b) => b.volumes - a.volumes || a.name.localeCompare(b.name));
+  return entries.sort((a, b) => Number(b.universal) - Number(a.universal) || b.volumes - a.volumes || a.name.localeCompare(b.name));
 }
 
 function computeConflicts(entries: UniverseEntry[]): Conflict[] {
@@ -190,7 +192,7 @@ function computeConflicts(entries: UniverseEntry[]): Conflict[] {
       }
     }
 
-    if (entryConflicts === 0) {
+    if (entryConflicts === 0 && entry.universal) {
       conflicts.push({
         id: `sync-${seq++}`,
         severity: 'info',
@@ -247,7 +249,7 @@ export default function UniverseArchitect() {
   const universe = useMemo(() => buildUniverse(books, entitiesByBook), [books, entitiesByBook]);
   const conflicts = useMemo(() => computeConflicts(universe), [universe]);
   const activeConflicts = conflicts.filter((c) => c.severity !== 'info');
-  const sharedCount = universe.length;
+  const universalCount = universe.filter((e) => e.universal).length;
   const totalEntities = Object.values(entitiesByBook).reduce((sum, list) => sum + list.length, 0);
 
   const filtered = useMemo(() => {
@@ -323,7 +325,7 @@ export default function UniverseArchitect() {
           <p className="text-sm text-slate-400 mt-1">
             {books.length === 0
               ? 'Create books to start building a shared universe.'
-              : `${books.length} volume${books.length === 1 ? '' : 's'} connected · ${sharedCount} shared entit${sharedCount === 1 ? 'y' : 'ies'} · ${totalEntities} total lore records`}
+              : `${books.length} volume${books.length === 1 ? '' : 's'} connected · ${totalEntities} lore record${totalEntities === 1 ? '' : 's'} · ${universalCount} universal`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -354,9 +356,9 @@ export default function UniverseArchitect() {
         {/* ── Left: Shared Entities ─────────────────────────────────────── */}
         <div className="rounded-2xl bg-[#0d0d10] border border-[#312839] flex flex-col overflow-hidden">
           <div className="p-4 border-b border-[#312839]">
-            <h2 className="text-sm font-semibold text-white uppercase tracking-wider">Shared Entities</h2>
+            <h2 className="text-sm font-semibold text-white uppercase tracking-wider">Universe Entities</h2>
             <p className="text-[11px] text-slate-500 mt-0.5">
-              Synchronized across {Math.max(1, books.length)} volume{books.length === 1 ? '' : 's'}
+              Every character, place & lore entry across your volumes
             </p>
           </div>
           <div className="flex-1 overflow-y-auto p-3 space-y-5 min-h-[320px]">
@@ -373,7 +375,7 @@ export default function UniverseArchitect() {
                 <Sparkles className="h-8 w-8 text-slate-700 mb-3" />
                 <p className="text-sm text-slate-500">
                   {universe.length === 0
-                    ? 'No shared entities yet. Reuse a character, location, or theme name in 2+ books to make it universal.'
+                    ? 'No story bible entities yet. Upload a manuscript in the Story Bible to auto-populate the universe, or add profiles manually.'
                     : 'No entities match your search.'}
                 </p>
               </div>
@@ -402,12 +404,23 @@ export default function UniverseArchitect() {
                           >
                             <Icon className={`h-4 w-4 ${kindAccent(entry.kind)} shrink-0`} />
                             <span className="flex-1 min-w-0">
-                              <span className="block text-sm font-medium text-white truncate">{entry.name}</span>
+                              <span className="flex items-center gap-1.5">
+                                <span className="block text-sm font-medium text-white truncate">{entry.name}</span>
+                                {entry.universal && (
+                                  <span className="shrink-0 text-[8px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-teal-500/15 border border-teal-500/40 text-teal-300">
+                                    Universal
+                                  </span>
+                                )}
+                              </span>
                               <span className="block text-[10px] text-slate-500 truncate">
                                 {entry.occurrences[0].entity.role || KIND_CONFIG[entry.kind]?.singular || 'Entity'} · {entry.volumes} Volume{entry.volumes === 1 ? '' : 's'}
                               </span>
                             </span>
-                            <CheckCircle className="h-3.5 w-3.5 text-green-400 opacity-60 shrink-0" />
+                            {entry.universal ? (
+                              <CheckCircle className="h-3.5 w-3.5 text-green-400 opacity-60 shrink-0" />
+                            ) : (
+                              <span className="w-3.5 shrink-0" />
+                            )}
                           </button>
                         );
                       })}
@@ -629,11 +642,11 @@ export default function UniverseArchitect() {
               <FileText className="h-5 w-5 text-cyan-400" /> Universe Consistency Report
             </DialogTitle>
             <DialogDescription className="text-slate-400">
-              {sharedCount} shared entit{sharedCount === 1 ? 'y' : 'ies'} across {books.length} volume{books.length === 1 ? '' : 's'} · {consistency}% consistent
+              {totalEntities} lore entit{totalEntities === 1 ? 'y' : 'ies'} · {universalCount} universal across {books.length} volume{books.length === 1 ? '' : 's'} · {consistency}% consistent
             </DialogDescription>
           </DialogHeader>
           {universe.length === 0 ? (
-            <p className="text-sm text-slate-500 py-8 text-center">No shared entities to report on yet.</p>
+            <p className="text-sm text-slate-500 py-8 text-center">No entities to report on yet.</p>
           ) : (
             <div className="space-y-4">
               {universe.map((entry) => {
