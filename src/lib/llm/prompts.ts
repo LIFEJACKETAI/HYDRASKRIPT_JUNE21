@@ -253,6 +253,45 @@ IMPORTANT: Respond with valid JSON only in this exact format:
 }`;
 }
 
+// ─── Manuscript Import (Story Bible) ─────────────────────────────────────────
+
+export function getManuscriptImportPrompt(): string {
+  return `You are a master story bible architect. Read the provided manuscript and extract all recurring, plot-relevant story bible entities so an AI can keep them consistent while writing.
+
+Extract entities into exactly these kinds:
+- CHARACTER: named characters who appear or are referenced meaningfully
+- LOCATION: settings where scenes happen (cities, rooms, worlds, planets)
+- OBJECT: important items/artifacts that matter to the plot
+- THEME: central ideas or motifs the story explores
+- HISTORY: backstory, world events, or timeline facts that shape the present
+
+For every entity provide:
+- name: the exact name as used in the story (capitalize properly)
+- role: one-line role (e.g. "Protagonist", "Capital City", "MacGuffin")
+- summary: 1-2 sentence summary of who/what this entity is
+- motivation: for CHARACTER, their core drive; for LOCATION/OBJECT/THEME/HISTORY, its significance
+- description: 2-4 sentences of canonical details (appearance, personality, history, traits)
+- tags: 2-5 short keyword tags (physical traits for CHARACTER, features for LOCATION, etc.)
+- kind: exactly one of CHARACTER, LOCATION, OBJECT, THEME, HISTORY
+
+Only include entities that genuinely appear in the text. Do not invent characters or places that are not in the manuscript. Aim for the most important entities first — quality over quantity.
+
+IMPORTANT: Respond with valid JSON only in this exact format:
+{
+  "entities": [
+    {
+      "kind": "CHARACTER",
+      "name": "...",
+      "role": "...",
+      "summary": "...",
+      "motivation": "...",
+      "description": "...",
+      "tags": ["...", "..."]
+    }
+  ]
+}`;
+}
+
 // ─── Summary Generation ───────────────────────────────────────────────────────
 
 export function getSummaryPrompt(bookTitle: string, genre: Genre): string {

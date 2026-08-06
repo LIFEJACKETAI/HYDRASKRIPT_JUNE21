@@ -70,6 +70,41 @@ export const CreateStyleProfileSchema = z.object({
 
 export type CreateStyleProfileInput = z.infer<typeof CreateStyleProfileSchema>;
 
+// ─── Manuscript Import Schema ─────────────────────────────────────────────────
+
+export const ManuscriptEntitySchema = z.object({
+  kind: z.enum(['CHARACTER', 'LOCATION', 'OBJECT', 'THEME', 'HISTORY']),
+  name: z.string().min(1, 'Name is required'),
+  role: z.string().default(''),
+  summary: z.string().default(''),
+  motivation: z.string().default(''),
+  description: z.string().default(''),
+  tags: z.array(z.string()).default([]),
+});
+
+export const ManuscriptImportSchema = z.object({
+  entities: z.array(ManuscriptEntitySchema).min(1, 'At least one entity required'),
+});
+
+export type ValidatedManuscriptImport = z.infer<typeof ManuscriptImportSchema>;
+
+// ─── Idea Transfer Schema ─────────────────────────────────────────────────────
+
+export const IdeaTransferSchema = z.object({
+  bookId: z.string().min(1, 'bookId is required'),
+  ideaText: z.string().min(1, 'ideaText is required'),
+  title: z.string().optional(),
+  blurb: z.string().optional(),
+  chapters: z.array(z.object({
+    number: z.number(),
+    title: z.string(),
+    synopsis: z.string(),
+  })).optional(),
+  coverConcept: z.string().optional(),
+});
+
+export type ValidatedIdeaTransfer = z.infer<typeof IdeaTransferSchema>;
+
 // ─── Credit Purchase Schema ───────────────────────────────────────────────────
 
 export const CreditPurchaseSchema = z.object({

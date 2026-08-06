@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Plus, RefreshCw, Trash2, Pencil, Library, BookOpen } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Plus, RefreshCw, Trash2, Pencil, Library, BookOpen, Upload, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -17,6 +17,7 @@ import {
   listBooks,
   listStoryBibleEntities,
   deleteStoryBibleEntity,
+  importManuscriptToStoryBible,
   type BookData,
   type StoryBibleEntity,
   type StoryBibleKind,
@@ -65,6 +66,11 @@ export default function StoryBible() {
   const [editingEntity, setEditingEntity] = useState<StoryBibleEntity | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<StoryBibleEntity | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Manuscript upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadResult, setUploadResult] = useState<{ fileName: string; counts: Record<string, number>; total: number } | null>(null);
 
   const currentBook = books.find((b) => b.id === selectedBookId) ?? null;
 
@@ -121,6 +127,44 @@ export default function StoryBible() {
       reload();
     } else {
       toast({ title: 'Delete failed', description: result.error || 'Unknown error', variant: 'destructive' });
+    }
+  };
+
+  const handleManuscriptChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!selectedBookId) return;
+
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!['txt', 'pdf', 'docx'].includes(extension)) {
+      toast({
+        title: 'Unsupported file type',
+        description: 'Please upload a .txt, .pdf, or .docx manuscript.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploading(true);
+    setUploadResult(null);
+    try {
+      const result = await importManuscriptToStoryBible(selectedBookId, file);
+      if (result.success && result.data) {
+        setUploadResult({ fileName: result.data.fileName, counts: result.data.counts, total: result.data.total });
+        toast({
+          title: 'Manuscript imported!',
+          description: `${result.data.total} story bible entities extracted from "${result.data.fileName}".`,
+        });
+        reload();
+      } else {
+        toast({ title: 'Import failed', description: result.error || 'An error occurred.', variant: 'destructive' });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Network error';
+      toast({ title: 'Import failed', description: msg, variant: 'destructive' });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -271,11 +315,57 @@ export default function StoryBible() {
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.pdf,.docx"
+            onChange={handleManuscriptChange}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="border-[#312839] text-slate-300 hover:bg-white/5"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Importing...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4 mr-2" /> Upload Manuscript
+              </>
+            )}
+          </Button>
           <Button onClick={() => { setEditingEntity(null); setEditorOpen(true); }} className="btn-gradient">
             <Plus className="h-4 w-4 mr-2" /> Add {cfg.singular}
           </Button>
         </div>
       </div>
+
+      {/* Manuscript upload result */}
+      {uploadResult && (
+        <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 px-5 py-4 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-emerald-300 flex items-center gap-2">
+              <FileText className="h-4 w-4" /> Imported "{uploadResult.fileName}"
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {uploadResult.total} entities added ·{' '}
+              {Object.entries(uploadResult.counts)
+                .map(([kind, count]) => `${KIND_CONFIG[kind as StoryBibleKind]?.label ?? kind}: ${count}`)
+                .join(' · ')}
+            </p>
+          </div>
+          <button
+            onClick={() => setUploadResult(null)}
+            className="text-slate-500 hover:text-white transition-colors text-sm"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Consistency bar */}
       <div className="rounded-2xl bg-[#0d0d10] border border-[#312839] px-5 py-4">

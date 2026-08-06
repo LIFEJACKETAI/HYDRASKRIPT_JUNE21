@@ -14,6 +14,8 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
+  Send,
+  Library,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,8 +31,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useAppStore } from '@/lib/store';
-import { getUserEmail } from '@/lib/api';
+import { getUserEmail, listBooks, transferIdeaToStoryBible } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -360,7 +370,66 @@ export default function IdeasLab() {
   // Expanded sections
   const [expanded, setExpanded] = useState<Record<RequestType, boolean>>({ titles: true, outline: true, cover: true, blurb: true });
 
+  // Transfer to Story Bible
+  const [books, setBooks] = useState<{ id: string; title: string }[]>([]);
+  const [booksLoading, setBooksLoading] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferBookId, setTransferBookId] = useState('');
+  const [transferring, setTransferring] = useState(false);
+
   const ideaTooShort = ideaText.trim().length < 20;
+
+  const hasAnyResult = Object.values(results).some((r) => {
+    if (Array.isArray(r)) return (r as unknown[]).length > 0;
+    return r !== null;
+  });
+
+  const openTransfer = async () => {
+    setTransferOpen(true);
+    if (books.length > 0) return;
+    setBooksLoading(true);
+    try {
+      const data = await listBooks();
+      setBooks(data.map((b) => ({ id: b.id, title: b.title })));
+    } catch {
+      setBooks([]);
+    } finally {
+      setBooksLoading(false);
+    }
+  };
+
+  const handleTransfer = async () => {
+    if (!transferBookId) {
+      toast({ title: 'Select a book', description: 'Choose which project to carry these ideas into.', variant: 'destructive' });
+      return;
+    }
+    setTransferring(true);
+    try {
+      const chapters = results.outline?.map((c) => ({ number: c.number, title: c.title, synopsis: c.synopsis }));
+      const result = await transferIdeaToStoryBible({
+        bookId: transferBookId,
+        ideaText: ideaText.trim(),
+        title: results.titles?.[0]?.title ?? undefined,
+        blurb: results.blurb?.blurb ?? undefined,
+        chapters,
+        coverConcept: results.cover?.concept ?? undefined,
+      });
+      if (result.success) {
+        toast({
+          title: 'Transferred to Story Bible!',
+          description: `${result.data?.total ?? 0} entities carried into the selected project.`,
+        });
+        setTransferOpen(false);
+      } else {
+        toast({ title: 'Transfer failed', description: result.error || 'An error occurred.', variant: 'destructive' });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Network error';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    } finally {
+      setTransferring(false);
+    }
+  };
 
   const handleGenerate = useCallback(async (requestType: RequestType) => {
     if (ideaTooShort) {
@@ -641,6 +710,106 @@ export default function IdeasLab() {
           </CardContent>
         </Card>
       )}
+
+      {/* Transfer to Story Bible CTA */}
+      {hasAnyResult && (
+        <Card className="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border-cyan-500/20">
+          <CardContent className="p-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shrink-0">
+                <Library className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Start a new project from these ideas</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Carry what you generated into a Story Bible. If you skip this, it will be erased when you leave.
+                </p>
+              </div>
+            </div>
+            <Button onClick={openTransfer} className="btn-gradient shrink-0">
+              <Send className="h-4 w-4 mr-2" />
+              Send to Story Bible
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Transfer to Story Bible Dialog */}
+      <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
+        <DialogContent className="bg-[#2a2a2a] border-gray-800 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Library className="h-5 w-5 text-cyan-400" />
+              Send Ideas to Story Bible
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Carry your generated ideas into an existing project's Story Bible as theme and timeline entries.
+              If you skip this, everything will be erased when you leave this page.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label className="text-gray-300 text-sm">Target project *</Label>
+              {booksLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              ) : books.length === 0 ? (
+                <div className="p-4 rounded-lg bg-[#1e1e1e] border border-gray-800">
+                  <p className="text-sm text-gray-300">
+                    No projects yet. Create a book first, then come back to send your ideas.
+                  </p>
+                </div>
+              ) : (
+                <Select value={transferBookId} onValueChange={setTransferBookId}>
+                  <SelectTrigger className="bg-[#1e1e1e] border-gray-700 text-white w-full">
+                    <SelectValue placeholder="Select a project..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a1a1a] border-gray-700">
+                    {books.map((b) => (
+                      <SelectItem key={b.id} value={b.id} className="text-gray-300 focus:bg-[#252525] focus:text-white">
+                        {b.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            <div className="rounded-lg bg-[#1e1e1e] border border-gray-800 p-4 space-y-1.5">
+              <p className="text-xs font-semibold text-cyan-300 uppercase tracking-wider">Will be carried over</p>
+              {results.titles?.[0]?.title && (
+                <p className="text-sm text-gray-300">• Title: {results.titles[0].title}</p>
+              )}
+              {results.blurb?.blurb && (
+                <p className="text-sm text-gray-300">• Blurb / concept</p>
+              )}
+              {results.outline && results.outline.length > 0 && (
+                <p className="text-sm text-gray-300">• {results.outline.length} chapter timeline entries</p>
+              )}
+              {results.cover?.concept && (
+                <p className="text-sm text-gray-300">• Cover concept notes</p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="ghost" onClick={() => setTransferOpen(false)} className="text-gray-400">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleTransfer}
+              disabled={transferring || books.length === 0 || !transferBookId}
+              className="btn-gradient"
+            >
+              {transferring && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {transferring ? 'Transferring...' : 'Send to Story Bible'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -321,3 +321,41 @@ export async function updateStoryBibleEntity(id: string, payload: StoryBiblePayl
 export async function deleteStoryBibleEntity(id: string) {
   return apiFetch<{ ok: true }>(`/story-bible/${id}`, { method: 'DELETE' });
 }
+
+export interface ManuscriptImportResult {
+  fileName: string;
+  entities: StoryBibleEntity[];
+  counts: Record<string, number>;
+  total: number;
+}
+
+export async function importManuscriptToStoryBible(bookId: string, file: File) {
+  const formData = new FormData();
+  formData.append('bookId', bookId);
+  formData.append('file', file);
+  const response = await fetch('/api/story-bible/import-manuscript', {
+    method: 'POST',
+    body: formData,
+  });
+  return (await response.json()) as {
+    success: boolean;
+    data?: ManuscriptImportResult;
+    error?: string;
+  };
+}
+
+export interface IdeaTransferInput {
+  bookId: string;
+  ideaText: string;
+  title?: string;
+  blurb?: string;
+  chapters?: { number: number; title: string; synopsis: string }[];
+  coverConcept?: string;
+}
+
+export async function transferIdeaToStoryBible(input: IdeaTransferInput) {
+  return apiFetch<{ entities: StoryBibleEntity[]; total: number }>('/story-bible/transfer', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}

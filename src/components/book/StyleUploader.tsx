@@ -29,10 +29,42 @@ const DESCRIPTOR_OPTIONS = [
 ];
 
 const TONE_PRESETS = [
-  { label: 'Action',    icon: Zap,       scene: 'She kicked the door. Splinters. She kept moving. No time for mercy.' },
-  { label: 'Romantic',  icon: Sparkles,  scene: 'The world narrowed to the space between their hands. Warm. Electric. Inevitable.' },
-  { label: 'Reveal',    icon: FileText,  scene: 'The letter had been written thirty years ago. The handwriting was his.' },
-  { label: 'Emotional', icon: RefreshCw, scene: 'He didn\'t cry. He laughed — that broken kind that sounds like goodbye.' },
+  {
+    label: 'Action',
+    icon: Zap,
+    scene: `She kicked the door. Splinters exploded into the dark. She didn't stop to check if she'd cleared the room — the mission was already two steps ahead of her. Steel hit concrete, boots eating distance, breath controlled into sharp, cold rhythm.
+
+The detonator was taped under the third stair. She'd counted them on the way in, the way she always did. Forty-one steps. Forty-one chances to die. Forty-one reasons not to look back at the man still bleeding in the stairwell. When the timer clicked, she was already gone, the night swallowing her silhouette like it had never been there at all.
+
+Three blocks out, she finally let herself breathe. The explosion lit the skyline behind her — a second sunrise, brief and wrong. She didn't turn around. Turnarounds get you killed. She just pulled up her collar and walked into the crowd, one more ghost in a city full of them.`,
+  },
+  {
+    label: 'Romantic',
+    icon: Sparkles,
+    scene: `The world narrowed to the space between their hands. Her fingers hovered a breath away from his, close enough to feel the heat of the distance between them. The restaurant had gone quiet, or maybe it was just the two of them going quiet, the way the world does when you finally stop pretending.
+
+He said her name like it was a question he'd been carrying all year. She laughed — small, honest, a little broken at the edges — and let her hand close over his. The candlelight bent around them, and somewhere the music kept playing, but neither of them heard it anymore.
+
+Later, they would argue about who moved first. She would insist it was him, steady and brave. He would swear it was her, the way she smiled right before she closed the distance. But that night, standing in the warm spill of the streetlight, it didn't matter. The world had already made its decision, and it was leaning toward them.`,
+  },
+  {
+    label: 'Reveal',
+    icon: FileText,
+    scene: `The letter had been written thirty years ago. The handwriting was his — she'd know it anywhere, the way the "g" curled and the pressure of the pen had bitten through the paper. She'd found it in the false bottom of the attic trunk, the one he'd told her never to open.
+
+It started simply enough. "If you're reading this, it means I didn't tell you the truth, and I ran out of time to fix that." She read the rest standing in the cold attic light, the words stacking like stones. The name at the bottom wasn't the name on his grave. It wasn't even the name she'd called him.
+
+When she finished, she sat down on the dusty floor and read it again. Some truths are too heavy to hold standing up. Some secrets, once told, rewrite every memory you thought you had — and she'd just discovered her entire past had been written in ink she never knew existed.`,
+  },
+  {
+    label: 'Emotional',
+    icon: RefreshCw,
+    scene: `He didn't cry. He laughed — that broken kind that sounds like goodbye. The kitchen was still warm from the dinner she'd never get to eat, the chair pushed out just slightly, the way she always left it when she was late. Everything exactly where it should be. That was the cruelest part.
+
+He picked up the cup she'd used that morning, still stained at the rim with the dark coffee she'd left halfway. He turned it over in his hands like it might explain something. Like the ceramic could tell him why she'd said "see you tonight" and then never walked through the door.
+
+The mail on the counter was addressed to her. The light on the answering machine blinked, patient and red. He sat at the table, in her chair, and let the quiet fill the room until it was too heavy to breathe. That's when the laughing finally stopped, and the kitchen went very, very still.`,
+  },
 ];
 
 // ─── Directive Card ───────────────────────────────────────────────────────────
@@ -209,11 +241,32 @@ export default function StyleUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
+  const loadProfileIntoConfig = (p: StyleProfileData) => {
+    setActiveProfile(p);
+    setName(p.name || '');
+    setDescription(p.description || '');
+    if (p.exemplarTexts && p.exemplarTexts.length > 0) {
+      setExemplarTexts(p.exemplarTexts);
+    }
+    const tagsMatch = (p.description || '').match(/Tags:\s*(.+)/);
+    if (tagsMatch) {
+      setSelectedDescriptors(tagsMatch[1].split(',').map(t => t.trim()).filter(t => DESCRIPTOR_OPTIONS.includes(t)));
+    }
+  };
+
   const fetchProfiles = async () => {
     setLoading(true);
     const data = await listStyleProfiles();
     setProfiles(data);
-    if (data.length > 0 && !activeProfile) setActiveProfile(data[0]);
+    if (data.length > 0) {
+      if (activeProfile) {
+        const stillThere = data.find(p => p.id === activeProfile.id);
+        if (stillThere) loadProfileIntoConfig(stillThere);
+        else loadProfileIntoConfig(data[0]);
+      } else {
+        loadProfileIntoConfig(data[0]);
+      }
+    }
     setLoading(false);
   };
 
@@ -399,7 +452,7 @@ export default function StyleUploader() {
                   profiles.map((p) => (
                     <div
                       key={p.id}
-                      onClick={() => setActiveProfile(p)}
+                      onClick={() => loadProfileIntoConfig(p)}
                       className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all ${
                         activeProfile?.id === p.id
                           ? 'bg-purple-500/10 border border-purple-500/30 text-white'
@@ -605,11 +658,11 @@ export default function StyleUploader() {
               </button>
             ))}
           </div>
-          <div className="flex-1 min-h-[70px] bg-black/40 rounded-xl p-4 border border-[#312839] relative group">
-            <p className="text-sm text-slate-400 italic line-clamp-3 pr-10">{previewText}</p>
+          <div className="flex-1 min-h-[200px] max-h-[260px] bg-black/40 rounded-xl p-4 border border-[#312839] relative group overflow-y-auto">
+            <p className="text-sm text-slate-400 italic whitespace-pre-line pr-10">{previewText}</p>
             <button
               onClick={() => previewToneScene(TONE_PRESETS[Math.floor(Math.random() * TONE_PRESETS.length)].scene)}
-              className="absolute bottom-2 right-3 text-[10px] font-bold text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
+              className="sticky bottom-0 right-3 ml-auto block text-[10px] font-bold text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
             >
               <RefreshCw className="h-3 w-3" /> Regenerate
             </button>
