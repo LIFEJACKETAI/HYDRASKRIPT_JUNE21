@@ -4,6 +4,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
+// Prisma 7+ - URL is passed directly to the PrismaClient constructor
 export const db =
   globalForPrisma.prisma ??
   new PrismaClient({

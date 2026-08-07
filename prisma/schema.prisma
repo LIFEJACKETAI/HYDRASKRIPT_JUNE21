@@ -1,5 +1,6 @@
 // HydraSkript - AI Book Generation Platform
 // Prisma Schema (PostgreSQL)
+// Prisma 7+ - URL will be provided via prisma.config.ts
 
 generator client {
   provider = "prisma-client-js"
@@ -7,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // URL moved to prisma.config.ts
 }
 
 model Profile {
