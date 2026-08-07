@@ -6,29 +6,11 @@ function hasGeminiApiKey(): boolean {
   return Boolean(process.env.GOOGLE_AI_API_KEY);
 }
 
-function isOpenRouterRecoverableError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false;
-  }
-
-  const message = error.message.toLowerCase();
-
-  return (
-    message.includes('openrouter_api_key is not set') ||
-    message.includes('openrouter api error: 401') ||
-    message.includes('openrouter api error: 402') ||
-    message.includes('openrouter api error: 403') ||
-    message.includes('user not found') ||
-    message.includes('invalid api key') ||
-    message.includes('unauthorized') ||
-    message.includes('no auth credentials found')
-  );
-}
-
 async function askGeminiJSON<T>(
   systemPrompt: string,
   userPrompt: string,
-  temperature: number = 0.2
+  temperature: number = 0.2,
+  _model?: string
 ): Promise<T> {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
 
@@ -90,15 +72,15 @@ async function askGeminiJSON<T>(
 export async function askLLMJSONWithFallback<T>(
   systemPrompt: string,
   userPrompt: string,
-  temperature: number = 0.2
+  temperature: number = 0.2,
+  model?: string
 ): Promise<T> {
   try {
-    return await askLLMJSON<T>(systemPrompt, userPrompt, temperature);
+    return await askLLMJSON<T>(systemPrompt, userPrompt, temperature, model);
   } catch (error) {
-    if (!isOpenRouterRecoverableError(error)) {
-      throw error;
-    }
-
+    // Fall back to Gemini on ANY OpenRouter failure (bad JSON, empty response,
+    // rate limit, or auth issue) — the primary provider may return unusable
+    // output (e.g. safety text instead of JSON) and we still want the result.
     if (!hasGeminiApiKey()) {
       const originalMessage = error instanceof Error ? error.message : 'Unknown OpenRouter error';
       throw new Error(
@@ -107,12 +89,12 @@ export async function askLLMJSONWithFallback<T>(
     }
 
     console.warn(
-      '[LLM] OpenRouter failed with a recoverable auth/provider error. Falling back to Gemini:',
+      '[LLM] OpenRouter failed, falling back to Gemini:',
       error instanceof Error ? error.message : String(error)
     );
 
     try {
-      return await askGeminiJSON<T>(systemPrompt, userPrompt, temperature);
+      return await askGeminiJSON<T>(systemPrompt, userPrompt, temperature, model);
     } catch (fallbackError) {
       const originalMessage = error instanceof Error ? error.message : 'Unknown OpenRouter error';
       const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);

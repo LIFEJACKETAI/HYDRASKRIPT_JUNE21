@@ -62,17 +62,20 @@ export interface CompletionOptions {
   maxTokens?: number;
   model?: string;
   retries?: number;
+  timeoutMs?: number;
 }
 
 /**
  * Generate a chat completion using OpenRouter REST API.
  */
 export async function generateCompletion(options: CompletionOptions): Promise<string> {
-  const { messages, temperature = 0.7, maxTokens, model, retries = 3 } = options;
+  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 120000 } = options;
   const apiKey = getApiKey();
   const openrouterModel = model || getModel();
 
   return withRetry(async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const response = await fetch(OPENROUTER_API_URL, {
         method: 'POST',
@@ -88,6 +91,7 @@ export async function generateCompletion(options: CompletionOptions): Promise<st
           temperature,
           max_tokens: maxTokens,
         }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -107,8 +111,13 @@ export async function generateCompletion(options: CompletionOptions): Promise<st
 
       return content;
     } catch (apiError) {
+      if (apiError instanceof Error && apiError.name === 'AbortError') {
+        throw new Error(`OpenRouter request timed out after ${timeoutMs}ms`);
+      }
       console.error('[LLM] API call failed:', apiError instanceof Error ? apiError.message : String(apiError));
       throw new Error(`LLM API call failed: ${apiError instanceof Error ? apiError.message : String(apiError)}`);
+    } finally {
+      clearTimeout(timeout);
     }
   }, { maxAttempts: retries });
 }
@@ -125,6 +134,8 @@ export async function generateJSON<T>(options: CompletionOptions): Promise<T> {
     ...options,
     messages,
     temperature: options.temperature ?? 0.2,
+    maxTokens: options.maxTokens,
+    model: options.model,
   });
 
   let jsonStr = response.trim();
@@ -166,7 +177,8 @@ export async function askLLM(
 export async function askLLMJSON<T>(
   systemPrompt: string,
   userPrompt: string,
-  temperature: number = 0.2
+  temperature: number = 0.2,
+  model?: string
 ): Promise<T> {
   return generateJSON<T>({
     messages: [
@@ -174,5 +186,6 @@ export async function askLLMJSON<T>(
       { role: 'user', content: userPrompt },
     ],
     temperature,
+    model,
   });
 }

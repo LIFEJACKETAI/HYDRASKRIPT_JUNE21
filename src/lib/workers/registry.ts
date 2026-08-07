@@ -6,6 +6,7 @@ import { generateOutline, generateChapter, finalizeBook } from '@/lib/services/b
 import { exportBookAsPDF } from '@/lib/services/exportService';
 import { generateImageWorker } from '@/lib/workers/generateImageWorker';
 import { generateAudiobookWorker } from '@/lib/workers/generateAudiobookWorker';
+import { editorialReviewWorker } from '@/lib/workers/editorialReviewWorker';
 
 type QueueJob = {
   id: string;
@@ -49,5 +50,9 @@ export const WorkerRegistry: Record<string, WorkerFunction> = {
   generate_audiobook: async (job) => {
     if (!job.bookId) throw new Error('Missing bookId for generate_audiobook');
     await generateAudiobookWorker(job.id);
+  },
+
+  editorial_review: async (job) => {
+    await editorialReviewWorker(job);
   },
 };

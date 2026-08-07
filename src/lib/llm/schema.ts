@@ -88,6 +88,54 @@ export const ManuscriptImportSchema = z.object({
 
 export type ValidatedManuscriptImport = z.infer<typeof ManuscriptImportSchema>;
 
+// ─── Editorial Review Schemas ────────────────────────────────────────────────
+
+export const EDITORIAL_CATEGORIES = [
+  'TIMELINE',
+  'CHARACTER',
+  'CONTINUITY',
+  'CROSS_REFERENCE',
+  'PLOT_HOLE',
+  'LOCATION',
+  'POV',
+  'FACTUAL',
+  'DIALOGUE',
+  'OTHER',
+] as const;
+
+export const EDITORIAL_SEVERITIES = ['critical', 'warning', 'info'] as const;
+
+export const EditorialFindingSchema = z.object({
+  severity: z.enum(EDITORIAL_SEVERITIES).catch('warning'),
+  category: z.enum(EDITORIAL_CATEGORIES).catch('OTHER'),
+  title: z.string().min(1, 'Finding title is required').catch('Editorial note'),
+  description: z.string().min(1, 'Finding description is required').catch('No description provided.'),
+  quote: z.string().default(''),
+  location: z.string().default(''),
+  suggestion: z.string().default(''),
+});
+
+export const EditorialContinuityNoteSchema = z.object({
+  entity: z.string().min(1, 'Entity name is required').catch('Unnamed'),
+  category: z.enum(['PHYSICAL', 'RELATIONSHIP', 'TIMELINE', 'LOCATION', 'STATUS', 'OBJECT']).catch('STATUS'),
+  fact: z.string().min(1, 'Fact is required').catch('No fact provided.'),
+  location: z.string().default(''),
+});
+
+export const EditorialChunkResultSchema = z.object({
+  findings: z.array(EditorialFindingSchema).default([]),
+  continuity: z.array(EditorialContinuityNoteSchema).default([]),
+});
+
+export const EditorialCoherenceResultSchema = z.object({
+  findings: z.array(EditorialFindingSchema).default([]),
+});
+
+export type ValidatedEditorialChunk = z.infer<typeof EditorialChunkResultSchema>;
+export type ValidatedEditorialCoherence = z.infer<typeof EditorialCoherenceResultSchema>;
+export type EditorialFinding = z.infer<typeof EditorialFindingSchema>;
+export type EditorialContinuityNote = z.infer<typeof EditorialContinuityNoteSchema>;
+
 // ─── Idea Transfer Schema ─────────────────────────────────────────────────────
 
 export const IdeaTransferSchema = z.object({

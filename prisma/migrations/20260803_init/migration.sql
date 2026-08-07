@@ -1,8 +1,3 @@
-npm notice run nextjs_tailwind_shadcn_ts@0.2.0 npx
-npm notice run 'prisma' migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script
-◇ injected env (31) from .env.local // tip: ◈ encrypted .env [www.dotenvx.com]
-Loaded Prisma config from prisma.config.ts.
-
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
@@ -203,14 +198,4 @@ ALTER TABLE "credit_ledger" ADD CONSTRAINT "credit_ledger_jobId_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "payments" ADD CONSTRAINT "payments_profileId_fkey" FOREIGN KEY ("profileId") REFERENCES "profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-┌─────────────────────────────────────────────────────────┐
-│  Update available 6.19.3 -> 7.9.1                       │
-│                                                         │
-│  This is a major update - please follow the guide at    │
-│  https://pris.ly/d/major-version-upgrade                │
-│                                                         │
-│  Run the following to update                            │
-│    npm i --save-dev prisma@latest                       │
-│    npm i @prisma/client@latest                          │
-└─────────────────────────────────────────────────────────┘
 

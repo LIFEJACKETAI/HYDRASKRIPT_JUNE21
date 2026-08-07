@@ -10,7 +10,7 @@ export type TargetAudience = 'adult' | '0-5' | '6-9' | '10-14';
 export type BookStatus = 'draft' | 'generating' | 'completed' | 'failed';
 export type ChapterStatus = 'pending' | 'writing' | 'reviewing' | 'completed' | 'failed';
 export type JobStatus = 'queued' | 'active' | 'completed' | 'failed';
-export type JobType = 'generate_outline' | 'write_chapter' | 'generate_image' | 'generate_audiobook' | 'export_pdf' | 'finalize_book';
+export type JobType = 'generate_outline' | 'write_chapter' | 'generate_image' | 'generate_audiobook' | 'export_pdf' | 'finalize_book' | 'editorial_review';
 export type AssetType = 'cover' | 'illustration' | 'coloring_page' | 'audiobook_chapter' | 'audiobook_complete' | 'pdf_export';
 export type Genre = 'fiction' | 'non-fiction' | 'fantasy' | 'sci-fi' | 'mystery' | 'romance' | 'horror' | 'children' | 'coloring' | 'poetry' | 'self-help' | 'biography';
 

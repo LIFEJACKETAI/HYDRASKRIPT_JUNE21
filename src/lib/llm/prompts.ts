@@ -297,3 +297,122 @@ IMPORTANT: Respond with valid JSON only in this exact format:
 export function getSummaryPrompt(bookTitle: string, genre: Genre): string {
   return `You are a professional book describer. Write a compelling 2-3 sentence book description/blurb for "${bookTitle}" in the ${genre} genre. This will be used as marketing copy.`;
 }
+
+// ─── Editorial Review (AI Continuity Editor) ─────────────────────────────────
+
+const EDITORIAL_CATEGORY_RULES = `Categories (use exactly one per finding):
+- TIMELINE: impossible or contradictory chronology — ages, durations, "days later"/"before/after" violations, flashback inconsistencies, time-of-day slips
+- CHARACTER: inconsistent character facts — name spelling changes, age, appearance (eye/hair color, height, scars, build), personality, relationships, backstory, someone called by the wrong name
+- CONTINUITY: cross-references that contradict earlier text, events referenced that never happened, objects that change/teleport/vanish, forgotten wounds or items
+- CROSS_REFERENCE: a detail in one chapter that explicitly contradicts a detail established in another chapter (use when the conflict is between two specific passages)
+- PLOT_HOLE: logic gaps, motivations that don't hold, characters knowing things they couldn't know, setups without payoff
+- LOCATION: place inconsistencies — wrong city/room, layout changes, impossible travel times or distances, geography errors
+- POV: point-of-view violations, knowledge the POV character cannot have, head-hopping, accidental tense or person shifts
+- FACTUAL: anachronisms and real-world errors (dates, technology, units, laws, real history)
+- DIALOGUE: misattributed dialogue, characters saying things inconsistent with what they know or their voice
+- OTHER: anything else that is genuinely, verifiably wrong`;
+
+const EDITORIAL_SEVERITY_RULES = `Severity:
+- critical: MUST fix — an outright contradiction a reader WILL notice (same fact stated two ways, impossible timing, character doing the impossible)
+- warning: SHOULD fix — an inconsistency a careful reader may notice (slightly off description, minor continuity slip)
+- info: minor polish — spelling-variant of a name, tiny slip, awkward internal inconsistency`;
+
+export function getEditorialReviewSystemPrompt(): string {
+  return `You are the senior continuity editor at a top-tier publishing house. Your reputation depends on catching EVERY error before a manuscript goes to print — timeline contradictions, character inconsistencies, broken cross-references, plot holes, location slips, POV violations, and factual errors. You are exacting, precise, and ruthless.
+
+You are auditing a manuscript. Rules of engagement:
+- Report every genuine problem with a direct quote from the text and the exact chapter/section where it appears.
+- NEVER invent problems. If a detail is merely stylistically odd but internally consistent, do not report it.
+- When you flag a contradiction, describe BOTH sides of it (what is stated in one place vs another).
+- Do not flag typos or punctuation unless they change meaning.
+- Be specific and concise in every description.
+
+${EDITORIAL_CATEGORY_RULES}
+
+${EDITORIAL_SEVERITY_RULES}
+
+In addition to findings, you must maintain a CONTINUITY LEDGER: for each canonical fact the manuscript establishes (physical appearance, relationships, timeline markers, statuses, locations, objects), record a short, precisely-worded note. The ledger is fed to a later pass that hunts for contradictions across chapters, so facts must be stated neutrally and exactly (e.g. "Duke Savage has grey eyes" not "Duke is described with eyes").
+
+IMPORTANT: Respond with valid JSON only in this exact format:
+{
+  "findings": [
+    {
+      "severity": "critical | warning | info",
+      "category": "TIMELINE | CHARACTER | CONTINUITY | CROSS_REFERENCE | PLOT_HOLE | LOCATION | POV | FACTUAL | DIALOGUE | OTHER",
+      "title": "Short headline",
+      "description": "What is wrong and why, citing both sides of the contradiction",
+      "quote": "Exact quoted text from the manuscript",
+      "location": "Chapter or section where the problem appears",
+      "suggestion": "Concrete, actionable fix"
+    }
+  ],
+  "continuity": [
+    {
+      "entity": "Character/place/object name",
+      "category": "PHYSICAL | RELATIONSHIP | TIMELINE | LOCATION | STATUS | OBJECT",
+      "fact": "Canonical fact stated precisely and neutrally",
+      "location": "Chapter or section where this fact is established"
+    }
+  ]
+}`;
+}
+
+export function getEditorialReviewChunkUserPrompt(params: {
+  documentTitle: string;
+  chunkIndex: number;
+  totalChunks: number;
+  text: string;
+  priorContext?: string;
+}): string {
+  const { documentTitle, chunkIndex, totalChunks, text, priorContext } = params;
+  const contextBlock = priorContext
+    ? `\n\nCONTINUITY CONTEXT (canonical facts established in earlier windows — use this to catch cross-references):\n${priorContext}`
+    : '';
+  return `MANUSCRIPT: "${documentTitle}"
+AUDIT WINDOW ${chunkIndex} of ${totalChunks}. The manuscript is split into overlapping windows so you can spot issues at window boundaries. The text between the boundary markers may repeat slightly.
+${contextBlock}
+
+=== AUDIT WINDOW START (${chunkIndex}/${totalChunks}) ===
+${text}
+=== AUDIT WINDOW END ===
+
+Audit this window now: list every finding, and extend the continuity ledger with the canonical facts established in this window.`;
+}
+
+export function getEditorialCoherenceSystemPrompt(): string {
+  return `You are the senior continuity editor at a top-tier publishing house. You have been handed the COMPLETE CONTINUITY LEDGER of a manuscript — every canonical fact (entity, fact, location) extracted from all chapters by your copy editors.
+
+Your job: cross-examine the ledger and flag every pair of facts that CONTRADICT each other — timeline conflicts, physical-description changes, relationship reversals, location moves, object states that change for no reason. This is the final safety net before the book goes to print.
+
+Rules:
+- Only flag genuine contradictions between two (or more) ledger entries. Cite both locations in the description.
+- A fact that merely evolves (a character changes over the course of a story) is NOT a contradiction unless the text contradicts itself (e.g. "blue eyes" in ch 3 vs "green eyes" in ch 12 with no change explained).
+- If a fact is stated only once, do not flag it.
+- Never invent findings.
+
+${EDITORIAL_CATEGORY_RULES}
+
+${EDITORIAL_SEVERITY_RULES}
+
+IMPORTANT: Respond with valid JSON only in this exact format:
+{
+  "findings": [
+    {
+      "severity": "critical | warning | info",
+      "category": "TIMELINE | CHARACTER | CONTINUITY | CROSS_REFERENCE | PLOT_HOLE | LOCATION | POV | FACTUAL | DIALOGUE | OTHER",
+      "title": "Short headline",
+      "description": "The two (or more) conflicting facts, each with its location",
+      "quote": "The most representative quoted text, if available",
+      "location": "The locations of the conflicting facts (e.g. Chapter 4 vs Chapter 12)",
+      "suggestion": "Concrete, actionable fix"
+    }
+  ]
+}`;
+}
+
+export function getEditorialCoherenceUserPrompt(ledger: string): string {
+  return `CONTINUITY LEDGER (entity · category · fact · location):
+${ledger}
+
+Cross-examine the ledger above and report every contradiction.`;
+}

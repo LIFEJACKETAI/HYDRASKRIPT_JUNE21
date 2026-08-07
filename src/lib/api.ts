@@ -359,3 +359,103 @@ export async function transferIdeaToStoryBible(input: IdeaTransferInput) {
     body: JSON.stringify(input),
   });
 }
+
+// ─── Editorial Review API ─────────────────────────────────────────────────────
+
+export type EditorialSeverity = 'critical' | 'warning' | 'info';
+export type EditorialCategory =
+  | 'TIMELINE'
+  | 'CHARACTER'
+  | 'CONTINUITY'
+  | 'CROSS_REFERENCE'
+  | 'PLOT_HOLE'
+  | 'LOCATION'
+  | 'POV'
+  | 'FACTUAL'
+  | 'DIALOGUE'
+  | 'OTHER';
+export type EditorialFindingStatus = 'open' | 'fixed' | 'ignored';
+
+export interface EditorialReviewSummary {
+  id: string;
+  bookId: string | null;
+  scope: 'book' | 'manuscript';
+  sourceLabel: string;
+  status: 'queued' | 'active' | 'completed' | 'failed';
+  textLength: number;
+  errorMessage: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  findingCount: number;
+}
+
+export interface EditorialFindingData {
+  id: string;
+  reviewId: string;
+  severity: EditorialSeverity;
+  category: EditorialCategory;
+  title: string;
+  description: string;
+  quote: string;
+  location: string;
+  bookTitle: string;
+  suggestion: string;
+  status: EditorialFindingStatus;
+  createdAt: string;
+}
+
+export interface EditorialReviewDetail extends EditorialReviewSummary {
+  findings: EditorialFindingData[];
+}
+
+export async function runEditorialReview(input: {
+  bookIds?: string[];
+  file?: File;
+  title?: string;
+}) {
+  const formData = new FormData();
+  if (input.bookIds && input.bookIds.length > 0) {
+    formData.append('bookIds', JSON.stringify(input.bookIds));
+  }
+  if (input.file) {
+    formData.append('file', input.file);
+  }
+  if (input.title) {
+    formData.append('title', input.title);
+  }
+  const response = await fetch('/api/universe/review', {
+    method: 'POST',
+    body: formData,
+  });
+  return (await response.json()) as {
+    success: boolean;
+    data?: { reviewId: string; jobId: string };
+    error?: string;
+  };
+}
+
+export async function listEditorialReviews(): Promise<EditorialReviewSummary[]> {
+  const result = await apiFetch<EditorialReviewSummary[]>('/universe/review');
+  return result.data ?? [];
+}
+
+export async function getEditorialReview(id: string) {
+  return apiFetch<EditorialReviewDetail>(`/universe/review/${id}`);
+}
+
+export async function updateEditorialFindingStatus(
+  reviewId: string,
+  findingId: string,
+  status: EditorialFindingStatus
+) {
+  return apiFetch<{ id: string; status: string }>(
+    `/universe/review/${reviewId}/finding/${findingId}`,
+    { method: 'PATCH', body: JSON.stringify({ status }) }
+  );
+}
+
+export async function deleteEditorialReview(id: string) {
+  return apiFetch<{ deleted: boolean }>(`/universe/review/${id}`, {
+    method: 'DELETE',
+  });
+}

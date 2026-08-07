@@ -32,6 +32,7 @@ import { useAppStore } from '@/lib/store';
 import { listBooks, listStoryBibleEntities } from '@/lib/api';
 import type { BookData, StoryBibleEntity, StoryBibleKind } from '@/lib/api';
 import { KIND_CONFIG } from '@/components/book/story-bible-config';
+import EditorialReviewPanel from '@/components/book/EditorialReviewPanel';
 
 type Severity = 'critical' | 'warning' | 'info';
 
@@ -633,6 +634,9 @@ export default function UniverseArchitect() {
           </div>
         </div>
       </div>
+
+      {/* AI Editorial Review — LLM publishing-house editor pass */}
+      <EditorialReviewPanel books={books} />
 
       {/* Full report dialog */}
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>

@@ -21,13 +21,14 @@ model Profile {
   updatedAt DateTime @updatedAt
 
   // Relations
-  books         Book[]
-  styleProfiles StyleProfile[]
-  mediaAssets   MediaAsset[]
-  jobs          Job[]
-  creditLedger  CreditLedger[]
-  payments      Payment[]
-  storyBible    StoryBibleEntity[]
+  books            Book[]
+  styleProfiles    StyleProfile[]
+  mediaAssets      MediaAsset[]
+  jobs             Job[]
+  creditLedger     CreditLedger[]
+  payments         Payment[]
+  storyBible       StoryBibleEntity[]
+  editorialReviews EditorialReview[]
 
   @@map("profiles")
 }
@@ -39,7 +40,7 @@ model StyleProfile {
   description   String   @default("")
   exemplarTexts String   @default("[]") // JSON array of text samples
   embedding     String   @default("[]") // JSON array of 768 floats (average embedding)
-  systemPrompt  String   @default("")   // Generated "Write like this" instruction
+  systemPrompt  String   @default("") // Generated "Write like this" instruction
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -51,54 +52,55 @@ model StyleProfile {
 }
 
 model Book {
-  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ownerId              String   @db.Uuid
-  title                String
-  genre                String   @default("fiction")
-  targetAudience       String   @default("adult") // adult, 0-5, 6-9, 10-14
-  maxPages             Int      @default(600)      // Computed from targetAudience in app logic
-  styleProfileId       String?  @db.Uuid
-  status               String   @default("draft")  // draft, outlining, awaiting_outline_approval, writing, awaiting_chapter_approval, finalizing, completed, failed
-  totalCreditsEstimated Int     @default(0)
-  totalCreditsCharged  Int      @default(0)
-  visualIdentityUrl    String?  // URL to the approved character reference sheet
-  coloringTheme        String?  // For coloring books: mandalas, undersea-creatures, birds, etc.
-  adventureType        String?  // For kids books: farm, school, fair, boat, forest, beach, space, zoo, castle, city
-  characterNames       String[]   @default([]) // Postgres native array: [mainCharacter, ...friendNames] up to 5 names
-  outline              String   @default("{}")     // JSON: { title, chapters: [{title, synopsis, wordTarget}] }
-  coverImageUrl        String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId               String   @db.Uuid
+  title                 String
+  genre                 String   @default("fiction")
+  targetAudience        String   @default("adult") // adult, 0-5, 6-9, 10-14
+  maxPages              Int      @default(600) // Computed from targetAudience in app logic
+  styleProfileId        String?  @db.Uuid
+  status                String   @default("draft") // draft, outlining, awaiting_outline_approval, writing, awaiting_chapter_approval, finalizing, completed, failed
+  totalCreditsEstimated Int      @default(0)
+  totalCreditsCharged   Int      @default(0)
+  visualIdentityUrl     String? // URL to the approved character reference sheet
+  coloringTheme         String? // For coloring books: mandalas, undersea-creatures, birds, etc.
+  adventureType         String? // For kids books: farm, school, fair, boat, forest, beach, space, zoo, castle, city
+  characterNames        String[] @default([]) // Postgres native array: [mainCharacter, ...friendNames] up to 5 names
+  outline               String   @default("{}") // JSON: { title, chapters: [{title, synopsis, wordTarget}] }
+  coverImageUrl         String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   // Relations
-  owner        Profile       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  styleProfile StyleProfile? @relation(fields: [styleProfileId], references: [id], onDelete: SetNull)
-  chapters     Chapter[]
-  mediaAssets  MediaAsset[]
-  jobs         Job[]
-  storyBible   StoryBibleEntity[]
+  owner            Profile            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  styleProfile     StyleProfile?      @relation(fields: [styleProfileId], references: [id], onDelete: SetNull)
+  chapters         Chapter[]
+  mediaAssets      MediaAsset[]
+  jobs             Job[]
+  storyBible       StoryBibleEntity[]
+  editorialReviews EditorialReview[]
 
   @@map("books")
 }
 
 model Chapter {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  bookId           String   @db.Uuid
-  index            Int      // 0-based
-  title            String   @default("")
-  synopsis         String   @default("")  // From outline
-  wordTarget       Int      @default(1500)
-  content          String   @default("")
-  wordCount        Int      @default(0)   // Computed in app logic
-  status           String   @default("pending") // pending, writing, reviewing, completed, failed
-  approvalStatus     String   @default("pending") // pending, approved, rejected
-  generationJobId  String?
-  charactersIntroduced String @default("[]") // JSON array
-  summaryForNext   String   @default("")  // Summary for continuity
-  illustrationUrl  String?  // Generated image URL
-  illustrationPrompt String @default("") // The prompt used to generate the illustration
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bookId               String   @db.Uuid
+  index                Int // 0-based
+  title                String   @default("")
+  synopsis             String   @default("") // From outline
+  wordTarget           Int      @default(1500)
+  content              String   @default("")
+  wordCount            Int      @default(0) // Computed in app logic
+  status               String   @default("pending") // pending, writing, reviewing, completed, failed
+  approvalStatus       String   @default("pending") // pending, approved, rejected
+  generationJobId      String?
+  charactersIntroduced String   @default("[]") // JSON array
+  summaryForNext       String   @default("") // Summary for continuity
+  illustrationUrl      String? // Generated image URL
+  illustrationPrompt   String   @default("") // The prompt used to generate the illustration
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   // Relations
   book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
@@ -114,20 +116,20 @@ model Chapter {
 // Themes / History). physicalTraits and secrets are stored as JSON
 // strings so we can evolve the shape without further migrations.
 model StoryBibleEntity {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ownerId         String   @db.Uuid
-  bookId          String   @db.Uuid
-  kind            String   // CHARACTER, LOCATION, OBJECT, THEME, HISTORY
-  name            String
-  role            String   @default("")         // e.g. "Main Character", "Capital City"
-  summary         String   @default("")         // Short blurb shown under name
-  motivation      String   @default("")         // For CHARACTER: core drive
-  description     String   @default("")         // Long-form description (used by Themes/History primarily)
-  physicalTraits  String   @default("{}")       // JSON: { tags: string[], notes: string }
-  secrets         String   @default("{}")       // JSON: { confidential: string, isPrivate: boolean }
-  portraitUrl     String?                       // Optional portrait/cover image URL
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId        String   @db.Uuid
+  bookId         String   @db.Uuid
+  kind           String // CHARACTER, LOCATION, OBJECT, THEME, HISTORY
+  name           String
+  role           String   @default("") // e.g. "Main Character", "Capital City"
+  summary        String   @default("") // Short blurb shown under name
+  motivation     String   @default("") // For CHARACTER: core drive
+  description    String   @default("") // Long-form description (used by Themes/History primarily)
+  physicalTraits String   @default("{}") // JSON: { tags: string[], notes: string }
+  secrets        String   @default("{}") // JSON: { confidential: string, isPrivate: boolean }
+  portraitUrl    String? // Optional portrait/cover image URL
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relations
   owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -142,9 +144,9 @@ model MediaAsset {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   ownerId     String   @db.Uuid
   bookId      String?  @db.Uuid
-  assetType   String   // cover, illustration, coloring_page, audiobook_chapter, audiobook_complete, pdf_export
-  storagePath String   // Local file path or URL
-  publicUrl   String   // Accessible URL
+  assetType   String // cover, illustration, coloring_page, audiobook_chapter, audiobook_complete, pdf_export
+  storagePath String // Local file path or URL
+  publicUrl   String // Accessible URL
   metadata    String   @default("{}") // JSON: {duration, dimensions, chapterIndex, etc}
   createdAt   DateTime @default(now())
 
@@ -156,38 +158,88 @@ model MediaAsset {
 }
 
 model Job {
-  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  bookId           String?   @db.Uuid
-  ownerId          String    @db.Uuid
-  jobType          String    // write_chapter, generate_image, generate_audiobook, export_pdf, generate_outline
-  status           String    @default("queued") // queued, active, completed, failed
-  progressMessage  String    @default("Queued...")
-  progressPercent  Int       @default(0)
-  creditsReserved  Int       @default(0) // Held in escrow
-  creditsConsumed  Int       @default(0)
-  errorMessage     String?
-  stepIndex        Int       @default(0) // For idempotency: which step is this
-  retryCount       Int       @default(0)
-  maxRetries       Int       @default(3)
-  leaseExpiresAt   DateTime?
-  lastHeartbeatAt  DateTime?
-  result           String    @default("{}") // JSON result data
-  startedAt        DateTime?
-  completedAt      DateTime?
-  createdAt        DateTime  @default(now())
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bookId          String?   @db.Uuid
+  ownerId         String    @db.Uuid
+  jobType         String // write_chapter, generate_image, generate_audiobook, export_pdf, generate_outline
+  status          String    @default("queued") // queued, active, completed, failed
+  progressMessage String    @default("Queued...")
+  progressPercent Int       @default(0)
+  creditsReserved Int       @default(0) // Held in escrow
+  creditsConsumed Int       @default(0)
+  errorMessage    String?
+  stepIndex       Int       @default(0) // For idempotency: which step is this
+  retryCount      Int       @default(0)
+  maxRetries      Int       @default(3)
+  leaseExpiresAt  DateTime?
+  lastHeartbeatAt DateTime?
+  result          String    @default("{}") // JSON result data
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
 
   // Relations
-  owner         Profile        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  book          Book?          @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  creditLedger  CreditLedger[]
+  owner            Profile           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  book             Book?             @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  creditLedger     CreditLedger[]
+  editorialReviews EditorialReview[]
 
   @@map("jobs")
+}
+
+// ─── Editorial Review ─────────────────────────────────────────────────────────
+// AI editorial audit reports produced by the LLM "publishing house editor".
+// A single review run scans one book (chapters) or an uploaded manuscript and
+// records every timeline / character / continuity / plot issue it finds.
+model EditorialReview {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId      String    @db.Uuid
+  bookId       String?   @db.Uuid // null for standalone manuscript uploads
+  scope        String // 'book' | 'manuscript'
+  sourceLabel  String // book title or uploaded file name
+  status       String    @default("queued") // queued, active, completed, failed
+  textLength   Int       @default(0) // characters of prose that were audited
+  errorMessage String?
+  jobId        String?   @db.Uuid // backing job id (jobType editorial_review)
+  sourceText   String? // temp store for manuscript uploads; cleared on completion
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  // Relations
+  owner    Profile            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  book     Book?              @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  job      Job?               @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  findings EditorialFinding[]
+
+  @@index([ownerId, createdAt])
+  @@map("editorial_reviews")
+}
+
+model EditorialFinding {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reviewId    String   @db.Uuid
+  severity    String // critical | warning | info
+  category    String // TIMELINE | CHARACTER | CONTINUITY | PLOT_HOLE | LOCATION | POV | FACTUAL | DIALOGUE | OTHER
+  title       String
+  description String
+  quote       String   @default("")
+  location    String   @default("") // chapter / section reference
+  bookTitle   String   @default("") // for multi-book reviews
+  suggestion  String   @default("")
+  status      String   @default("open") // open | fixed | ignored
+  createdAt   DateTime @default(now())
+
+  // Relations
+  review EditorialReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@map("editorial_findings")
 }
 
 model CreditLedger {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   profileId String   @db.Uuid
-  amount    Int      // negative for spend, positive for purchase/refund
+  amount    Int // negative for spend, positive for purchase/refund
   reason    String
   jobId     String?  @db.Uuid
   createdAt DateTime @default(now())
@@ -200,23 +252,23 @@ model CreditLedger {
 }
 
 model Payment {
-  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  profileId             String   @db.Uuid
-  pricingKey            String
-  provider              String   @default("stripe")
-  mode                  String   // subscription or payment
-  status                String   @default("pending")
-  stripeSessionId       String?  @unique
-  stripeInvoiceId       String?  @unique
-  stripeSubscriptionId  String?
-  stripeCustomerId      String?
-  amountCents           Int
-  currency              String   @default("usd")
-  creditsGranted        Int      @default(0)
-  tierApplied           String?
-  fulfilledAt           DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId            String    @db.Uuid
+  pricingKey           String
+  provider             String    @default("stripe")
+  mode                 String // subscription or payment
+  status               String    @default("pending")
+  stripeSessionId      String?   @unique
+  stripeInvoiceId      String?   @unique
+  stripeSubscriptionId String?
+  stripeCustomerId     String?
+  amountCents          Int
+  currency             String    @default("usd")
+  creditsGranted       Int       @default(0)
+  tierApplied          String?
+  fulfilledAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
