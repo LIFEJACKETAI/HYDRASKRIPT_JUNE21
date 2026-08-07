@@ -18,6 +18,18 @@ async function apiFetch<T>(
       },
     });
 
+    // Check if response is JSON before parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      // If it's HTML (login page), treat as auth failure
+      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+        console.warn(`[API Client] ${path} returned HTML (likely login redirect)`);
+        return { success: false, error: 'Authentication required' };
+      }
+      return { success: false, error: `Unexpected response: ${text.slice(0, 100)}` };
+    }
+
     const result = await response.json();
     console.log(`[API DEBUG] ${path} →`, response.status, result);
     return result;
