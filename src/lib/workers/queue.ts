@@ -107,6 +107,13 @@ class PersistentJobQueue {
 
     this.activeJobs++;
 
+    // Keep the lease fresh while a long-running worker (editorial review,
+    // audiobook, etc.) is in flight so recoverExpiredLeases never re-queues a
+    // job that is still legitimately processing.
+    const heartbeatTimer = setInterval(() => {
+      void this.heartbeat(jobToProcess.id);
+    }, 60_000);
+
     try {
       console.log(`[Queue] Executing ${jobToProcess.jobType} job ${jobToProcess.id}`);
 
@@ -151,6 +158,7 @@ class PersistentJobQueue {
         }
       }
     } finally {
+      clearInterval(heartbeatTimer);
       this.activeJobs--;
       this.isProcessing = false;
       setTimeout(() => {
@@ -195,23 +203,30 @@ class PersistentJobQueue {
    * Start a background poll loop so queued jobs are picked up even without a
    * fresh `startJob` signal (e.g. after a server restart). Idempotent.
    */
-  startLoop(intervalMs = 5000): void {
+  startLoop(pollIntervalMs = 5000, recoveryIntervalMs = 60_000): void {
     if (this.loopStarted) return;
     this.loopStarted = true;
 
     const tick = () => {
+      void this.processNext();
+    };
+
+    // Recover crashed/orphaned jobs periodically. Active jobs renew their
+    // lease via heartbeat (60s), so a 60s recovery cadence is safe: a job is
+    // only re-queued once its lease has actually gone stale (>5 min old).
+    const recover = () => {
       void (async () => {
         try {
-          await this.bootstrap();
+          await this.recoverExpiredLeases();
         } catch (error) {
-          console.error('[Queue] Loop bootstrap failed:', error);
+          console.error('[Queue] Loop lease recovery failed:', error);
         }
-        void this.processNext();
       })();
     };
 
-    setInterval(tick, intervalMs);
-    console.log(`[Queue] Background poll loop started (every ${intervalMs}ms).`);
+    setInterval(tick, pollIntervalMs);
+    setInterval(recover, recoveryIntervalMs);
+    console.log(`[Queue] Background poll loop started (poll ${pollIntervalMs}ms, recovery ${recoveryIntervalMs}ms).`);
   }
 
   async heartbeat(jobId: string): Promise<void> {
