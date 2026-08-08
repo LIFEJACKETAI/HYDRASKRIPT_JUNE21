@@ -213,6 +213,7 @@ export default function EditorialReviewPanel({ books, onReviewsChanged }: Editor
   };
 
   const handleDelete = async (reviewId: string) => {
+    if (!window.confirm('Delete this editorial report? This cannot be undone.')) return;
     const result = await deleteEditorialReview(reviewId);
     if (result.success) {
       toast({ title: 'Report deleted' });
@@ -318,10 +319,8 @@ export default function EditorialReviewPanel({ books, onReviewsChanged }: Editor
         <div className="px-4 py-3 border-b border-[#312839] flex flex-wrap items-center gap-2">
           <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mr-1">Reports</span>
           {reviews.slice(0, 8).map((r) => (
-            <button
+            <div
               key={r.id}
-              onClick={() => r.status === 'completed' && loadDetail(r.id)}
-              disabled={r.status !== 'completed'}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all border ${
                 activeReview?.id === r.id
                   ? 'bg-cyan-500/10 border-cyan-500/40 text-cyan-300'
@@ -334,27 +333,34 @@ export default function EditorialReviewPanel({ books, onReviewsChanged }: Editor
               title={r.status === 'completed' ? formatTime(r.createdAt) : r.status}
             >
               {r.status === 'completed' ? (
-                <CheckCircle className="h-3 w-3" />
-              ) : r.status === 'failed' ? (
-                <XCircle className="h-3 w-3" />
-              ) : (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              )}
-              <span className="max-w-[140px] truncate">{r.sourceLabel}</span>
-              <span className="text-[9px] text-slate-500">{r.findingCount}</span>
-              {activeReview?.id === r.id && (
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(r.id);
-                  }}
-                  className="text-slate-600 hover:text-red-400 transition-colors"
-                  aria-label="Delete report"
+                  onClick={() => loadDetail(r.id)}
+                  className="flex items-center gap-1.5 text-[11px] font-medium"
+                  title={formatTime(r.createdAt)}
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <CheckCircle className="h-3 w-3" />
+                  <span className="max-w-[140px] truncate">{r.sourceLabel}</span>
+                  <span className="text-[9px] text-slate-500">{r.findingCount}</span>
                 </button>
+              ) : (
+                <>
+                  {r.status === 'failed' ? (
+                    <XCircle className="h-3 w-3" />
+                  ) : (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  )}
+                  <span className="max-w-[140px] truncate">{r.sourceLabel}</span>
+                  <span className="text-[9px] text-slate-500">{r.findingCount}</span>
+                </>
               )}
-            </button>
+              <button
+                onClick={() => handleDelete(r.id)}
+                className="text-slate-600 hover:text-red-400 transition-colors ml-0.5"
+                aria-label={`Delete report ${r.sourceLabel}`}
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
           ))}
         </div>
       )}

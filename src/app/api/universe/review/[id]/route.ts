@@ -80,6 +80,29 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'Review not found' }, { status: 404 });
     }
 
+    // Cancel the backing job so the queue loop never resurrects it as an
+    // orphaned phantom (recoverExpiredLeases only re-queues `active` jobs with
+    // a stale lease; a `failed` job with a cleared lease is left alone).
+    if (existing.jobId) {
+      await db.job.update({
+        where: { id: existing.jobId },
+        data: {
+          status: 'failed',
+          progressMessage: 'Cancelled: report deleted',
+          errorMessage: 'Cancelled: report deleted',
+          leaseExpiresAt: null,
+          lastHeartbeatAt: null,
+        },
+      });
+
+      try {
+        const { refundCredits } = await import('@/lib/utils/credits');
+        await refundCredits(existing.jobId, 'Cancelled: report deleted');
+      } catch (e) {
+        console.error('[API/universe/review] Refund failed after delete:', e);
+      }
+    }
+
     await db.editorialReview.delete({ where: { id } });
 
     return NextResponse.json({ success: true, data: { deleted: true } });
