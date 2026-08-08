@@ -21,6 +21,7 @@ class PersistentJobQueue {
   private maxConcurrent = 2;
   private activeJobs = 0;
   private bootstrapped = false;
+  private loopStarted = false;
 
   async createJob(params: {
     bookId?: string;
@@ -159,8 +160,18 @@ class PersistentJobQueue {
   }
 
   async bootstrap(): Promise<void> {
-    if (this.bootstrapped) return;
+    await this.recoverExpiredLeases();
 
+    if (this.bootstrapped) return;
+    this.bootstrapped = true;
+    console.log('[Queue] Recovered active jobs from last session.');
+  }
+
+  /**
+   * Reset any job whose worker died (stale/expired lease) back to `queued` so
+   * the next poll can pick it up. Safe to call repeatedly.
+   */
+  private async recoverExpiredLeases(): Promise<void> {
     const now = new Date();
 
     await db.job.updateMany({
@@ -178,9 +189,29 @@ class PersistentJobQueue {
         lastHeartbeatAt: null,
       },
     });
+  }
 
-    this.bootstrapped = true;
-    console.log('[Queue] Recovered active jobs from last session.');
+  /**
+   * Start a background poll loop so queued jobs are picked up even without a
+   * fresh `startJob` signal (e.g. after a server restart). Idempotent.
+   */
+  startLoop(intervalMs = 5000): void {
+    if (this.loopStarted) return;
+    this.loopStarted = true;
+
+    const tick = () => {
+      void (async () => {
+        try {
+          await this.bootstrap();
+        } catch (error) {
+          console.error('[Queue] Loop bootstrap failed:', error);
+        }
+        void this.processNext();
+      })();
+    };
+
+    setInterval(tick, intervalMs);
+    console.log(`[Queue] Background poll loop started (every ${intervalMs}ms).`);
   }
 
   async heartbeat(jobId: string): Promise<void> {

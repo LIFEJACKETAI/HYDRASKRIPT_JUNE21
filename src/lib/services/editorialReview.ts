@@ -38,7 +38,7 @@ const MAX_LEDGER_CHARS = 50000;
 const MAX_FINDINGS = 300;
 
 const REVIEW_MODEL =
-  process.env.EDITORIAL_REVIEW_MODEL || 'nvidia/nemotron-3-ultra-550b-a55b:free';
+  process.env.EDITORIAL_REVIEW_MODEL || process.env.OPENROUTER_MODEL || 'openrouter/free';
 
 // ─── Manuscript assembly ──────────────────────────────────────────────────────
 
@@ -272,6 +272,25 @@ function sanitizeCoherenceResult(raw: unknown): { findings: unknown } {
 
 // ─── Orchestration ────────────────────────────────────────────────────────────
 
+async function persistFindings(reviewId: string, findings: ReviewFinding[]): Promise<void> {
+  await db.$transaction([
+    db.editorialFinding.deleteMany({ where: { reviewId } }),
+    db.editorialFinding.createMany({
+      data: findings.map((f) => ({
+        reviewId,
+        severity: f.severity,
+        category: f.category,
+        title: f.title,
+        description: f.description,
+        quote: f.quote,
+        location: f.location,
+        bookTitle: f.bookTitle || '',
+        suggestion: f.suggestion,
+      })),
+    }),
+  ]);
+}
+
 async function auditWindow(
   window: ReviewWindow,
   documentTitle: string,
@@ -350,6 +369,7 @@ export async function runEditorialReview(reviewId: string): Promise<void> {
 
   const allFindings: ReviewFinding[][] = [];
   const allNotes: EditorialContinuityNote[] = [];
+  const failedWindows: { index: number; location: string }[] = [];
 
   // Pass 1 - per-window audit.
   for (const window of windows) {
@@ -358,9 +378,21 @@ export async function runEditorialReview(reviewId: string): Promise<void> {
       progressPercent: Math.round(2 + (window.index / windows.length) * 78),
     });
 
-    const result = await auditWindow(window, review.sourceLabel, windows.length, allNotes);
-    allFindings.push(result.findings);
-    allNotes.push(...result.continuity);
+    try {
+      const result = await auditWindow(window, review.sourceLabel, windows.length, allNotes);
+      allFindings.push(result.findings);
+      allNotes.push(...result.continuity);
+
+      // Persist incrementally so a crash mid-review never loses prior windows.
+      const mergedSoFar = mergeFindings(allFindings).slice(0, MAX_FINDINGS);
+      await persistFindings(review.id, mergedSoFar);
+    } catch (error) {
+      failedWindows.push({ index: window.index, location: window.location || `window ${window.index + 1}` });
+      console.warn(
+        `[EditorialReview] Skipping failed window ${window.index + 1}/${windows.length} (${window.location || 'unlabelled'}):`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
   }
 
   // Pass 2 - global coherence audit across the full ledger.
@@ -379,25 +411,14 @@ export async function runEditorialReview(reviewId: string): Promise<void> {
 
   const merged = mergeFindings(allFindings).slice(0, MAX_FINDINGS);
 
-  // Persist findings.
-  await db.$transaction([
-    db.editorialFinding.deleteMany({ where: { reviewId } }),
-    db.editorialFinding.createMany({
-      data: merged.map((f) => ({
-        reviewId,
-        severity: f.severity,
-        category: f.category,
-        title: f.title,
-        description: f.description,
-        quote: f.quote,
-        location: f.location,
-        bookTitle: f.bookTitle || '',
-        suggestion: f.suggestion,
-      })),
-    }),
-  ]);
+  // Persist findings (final, includes coherence pass).
+  await persistFindings(review.id, merged);
 
   const completedAt = new Date();
+  const completedMessage =
+    failedWindows.length > 0
+      ? `Editorial review complete with ${merged.length} findings. ${failedWindows.length} window(s) skipped due to LLM errors (${failedWindows.map((w) => w.location).join(', ')}).`
+      : 'Editorial review complete.';
   await db.$transaction([
     db.editorialReview.update({
       where: { id: reviewId },
@@ -406,6 +427,9 @@ export async function runEditorialReview(reviewId: string): Promise<void> {
         textLength: text.length,
         completedAt,
         sourceText: null, // release the stored manuscript once audited
+        errorMessage: failedWindows.length > 0
+          ? `Completed with ${failedWindows.length} skipped window(s): ${failedWindows.map((w) => w.location).join(', ')}`
+          : null,
       },
     }),
     db.job.update({
@@ -413,10 +437,10 @@ export async function runEditorialReview(reviewId: string): Promise<void> {
       data: {
         status: 'completed',
         progressPercent: 100,
-        progressMessage: 'Editorial review complete.',
+        progressMessage: completedMessage,
         completedAt,
       },
     }),  ]);
 
-  console.log(`[EditorialReview] Completed review ${reviewId}: ${merged.length} findings across ${windows.length} windows.`);
+  console.log(`[EditorialReview] Completed review ${reviewId}: ${merged.length} findings across ${windows.length} windows${failedWindows.length ? ` (${failedWindows.length} skipped)` : ''}.`);
 }

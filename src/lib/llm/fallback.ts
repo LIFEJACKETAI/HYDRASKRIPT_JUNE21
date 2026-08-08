@@ -1,73 +1,11 @@
+// HydraSkript - LLM fallback
+// Routes every structured-generation call through OpenRouter. If the primary
+// model fails (bad JSON, empty response, rate limit, or auth issue), retry the
+// same call with the default OpenRouter model instead of a second provider.
+
 import { askLLMJSON } from '@/lib/llm/openrouter';
 
-const DEFAULT_GEMINI_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-1.5-flash';
-
-function hasGeminiApiKey(): boolean {
-  return Boolean(process.env.GOOGLE_AI_API_KEY);
-}
-
-async function askGeminiJSON<T>(
-  systemPrompt: string,
-  userPrompt: string,
-  temperature: number = 0.2,
-  _model?: string
-): Promise<T> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('GOOGLE_AI_API_KEY is not configured');
-  }
-
-  const { GoogleGenerativeAI } = await import('@google/generative-ai');
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: DEFAULT_GEMINI_MODEL });
-
-  const result = await model.generateContent({
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          {
-            text:
-              `${systemPrompt}\n\n` +
-              'IMPORTANT: Respond with valid JSON only. No markdown, no code fences, no extra text. Just the JSON object.\n\n' +
-              `${userPrompt}`,
-          },
-        ],
-      },
-    ],
-    generationConfig: {
-      temperature,
-      responseMimeType: 'application/json',
-    },
-  });
-
-  const text = result.response.text().trim();
-
-  if (!text) {
-    throw new Error('Empty response from Gemini');
-  }
-
-  let jsonStr = text;
-  const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (jsonMatch) jsonStr = jsonMatch[1].trim();
-
-  try {
-    return JSON.parse(jsonStr) as T;
-  } catch {
-    const firstBrace = jsonStr.indexOf('{');
-    const lastBrace = jsonStr.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1) {
-      try {
-        return JSON.parse(jsonStr.slice(firstBrace, lastBrace + 1)) as T;
-      } catch {
-        throw new Error(`Failed to parse Gemini JSON response: ${jsonStr.slice(0, 200)}...`);
-      }
-    }
-
-    throw new Error(`Failed to parse Gemini JSON response: ${jsonStr.slice(0, 200)}...`);
-  }
-}
+const DEFAULT_FALLBACK_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free';
 
 export async function askLLMJSONWithFallback<T>(
   systemPrompt: string,
@@ -75,31 +13,28 @@ export async function askLLMJSONWithFallback<T>(
   temperature: number = 0.2,
   model?: string
 ): Promise<T> {
+  const primary = model || DEFAULT_FALLBACK_MODEL;
+
   try {
-    return await askLLMJSON<T>(systemPrompt, userPrompt, temperature, model);
+    return await askLLMJSON<T>(systemPrompt, userPrompt, temperature, primary);
   } catch (error) {
-    // Fall back to Gemini on ANY OpenRouter failure (bad JSON, empty response,
-    // rate limit, or auth issue) — the primary provider may return unusable
-    // output (e.g. safety text instead of JSON) and we still want the result.
-    if (!hasGeminiApiKey()) {
-      const originalMessage = error instanceof Error ? error.message : 'Unknown OpenRouter error';
-      throw new Error(
-        `Text generation is unavailable: OpenRouter failed (${originalMessage}) and GOOGLE_AI_API_KEY is not configured for Gemini fallback.`
-      );
+    const originalMessage = error instanceof Error ? error.message : String(error);
+
+    if (primary === DEFAULT_FALLBACK_MODEL) {
+      throw new Error(`Text generation is unavailable: ${originalMessage}`);
     }
 
     console.warn(
-      '[LLM] OpenRouter failed, falling back to Gemini:',
-      error instanceof Error ? error.message : String(error)
+      `[LLM] ${primary} failed, falling back to ${DEFAULT_FALLBACK_MODEL}:`,
+      originalMessage
     );
 
     try {
-      return await askGeminiJSON<T>(systemPrompt, userPrompt, temperature, model);
+      return await askLLMJSON<T>(systemPrompt, userPrompt, temperature, DEFAULT_FALLBACK_MODEL);
     } catch (fallbackError) {
-      const originalMessage = error instanceof Error ? error.message : 'Unknown OpenRouter error';
       const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
       throw new Error(
-        `Text generation failed in both providers. OpenRouter: ${originalMessage}. Gemini fallback: ${fallbackMessage}.`
+        `Text generation failed in both attempts. ${primary}: ${originalMessage}. ${DEFAULT_FALLBACK_MODEL}: ${fallbackMessage}.`
       );
     }
   }
