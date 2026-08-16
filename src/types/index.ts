@@ -314,6 +314,13 @@ export interface JobData {
   createdAt: string;
 }
 
+// ─── Extended JobData for admin list (includes extra DB relations) ──────
+
+export type JobListItem = JobData & {
+  book: { id: string; title: string } | null;
+  owner: { id: string; email: string; name: string } | null;
+};
+
 // ─── Audiobook Voices ─────────────────────────────────────────────────────────
 
 export const AUDIOBOOK_VOICES = [
