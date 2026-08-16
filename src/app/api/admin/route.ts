@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { forbiddenResponse, isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
-import type { JobData } from '@/types/index';
+import type { JobData, JobStatus, JobType } from '@/types';
 
 // GET - Admin dashboard data
 export async function GET(request: NextRequest) {
@@ -53,20 +53,36 @@ export async function GET(request: NextRequest) {
           totalCreditsConsumed: Math.abs(totalCreditsConsumed._sum.amount || 0),
           jobStats,
         },
-        jobs: jobs.map((j): JobData => ({
-          id: j.id,
-          jobType: j.jobType,
-          status: j.status,
-          progressMessage: j.progressMessage,
-          progressPercent: j.progressPercent,
-          creditsReserved: j.creditsReserved,
-          creditsConsumed: j.creditsConsumed,
-          errorMessage: j.errorMessage,
-          book: j.book,
-          owner: j.owner,
-          createdAt: j.createdAt,
-          completedAt: j.completedAt,
-        })),
+        jobs: jobs.map((j) => {
+          const parsedResult: Record<string, unknown> = {};
+          if (j.result) {
+            try {
+              const parsed = JSON.parse(j.result);
+              if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+                Object.assign(parsedResult, parsed);
+              }
+            } catch {
+              // ignore parse errors, return empty object
+            }
+          }
+          return {
+            id: j.id,
+            jobType: j.jobType,
+            status: j.status,
+            progressMessage: j.progressMessage ?? '',
+            progressPercent: j.progressPercent ?? 0,
+            creditsReserved: j.creditsReserved ?? 0,
+            creditsConsumed: j.creditsConsumed ?? 0,
+            errorMessage: j.errorMessage ?? '',
+            result: parsedResult,
+            startedAt: j.startedAt ? j.startedAt.toISOString() : null,
+            completedAt: j.completedAt ? j.completedAt.toISOString() : null,
+            createdAt: j.createdAt.toISOString(),
+            // Extra fields mapped for the admin dashboard UI
+            book: j.book ? { id: j.book.id, title: j.book.title } : null,
+            owner: j.owner ? { id: j.owner.id, email: j.owner.email, name: j.owner.name } : null,
+          } as unknown as JobData;
+        }),
       },
     });
   } catch (error) {
