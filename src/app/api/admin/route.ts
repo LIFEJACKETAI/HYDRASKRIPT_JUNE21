@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { forbiddenResponse, isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
+import type { JobData } from '@/types/index';
 
 // GET - Admin dashboard data
 export async function GET(request: NextRequest) {
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
           totalCreditsConsumed: Math.abs(totalCreditsConsumed._sum.amount || 0),
           jobStats,
         },
-        jobs: jobs.map(j => ({
+        jobs: jobs.map((j): JobData => ({
           id: j.id,
           jobType: j.jobType,
           status: j.status,

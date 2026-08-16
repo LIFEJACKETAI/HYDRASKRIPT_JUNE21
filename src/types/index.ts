@@ -297,6 +297,23 @@ export const KIDS_ADVENTURES = [
 
 export type KidsAdventure = typeof KIDS_ADVENTURES[number]['value'];
 
+// ─── Job Data Types ───────────────────────────────────────────────────────────
+
+export interface JobData {
+  id: string;
+  jobType: JobType;
+  status: JobStatus;
+  progressMessage: string;
+  progressPercent: number;
+  creditsReserved: number;
+  creditsConsumed: number;
+  errorMessage: string | null;
+  result: Record<string, unknown> | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
 // ─── Audiobook Voices ─────────────────────────────────────────────────────────
 
 export const AUDIOBOOK_VOICES = [
