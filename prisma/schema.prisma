@@ -22,8 +22,8 @@ model Profile {
   updatedAt DateTime @updatedAt
 
   // Stripe fields
-  stripeCustomerId      String?   @db.DbText
-  stripeSubscriptionId  String?   @db.DbText
+  stripeCustomerId      String?
+  stripeSubscriptionId  String?
   subscriptionStatus    String    @default("inactive")
   currentPeriodEnd      DateTime?
   freeCreditsGranted    Boolean   @default(false)
@@ -213,7 +213,7 @@ model Job {
   bookId          String?   @db.Uuid
   ownerId         String    @db.Uuid
   jobType         JobType
-  status          JobStatus    @default("queued") // queued, active, completed, failed
+  status          JobStatus    @default(queued)
   progressMessage String    @default("Queued...")
   progressPercent Int       @default(0)
   creditsReserved Int       @default(0) // Held in escrow
@@ -276,4 +276,23 @@ model Payment {
 
   @@index([profileId, createdAt])
   @@map("payments")
+}
+
+model EditorialReview {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bookId      String   @db.Uuid
+  ownerId     String   @db.Uuid
+  jobId       String?  @db.Uuid
+  status      String   @default("queued") // queued, active, completed, failed
+  feedback    String   @default("") // JSON string of review feedback
+  score       Int?     // Overall quality score
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  book  Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  job   Job?  @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@map("editorial_reviews")
 }
