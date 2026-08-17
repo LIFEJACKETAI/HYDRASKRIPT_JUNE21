@@ -21,16 +21,21 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      toast({ title: 'Welcome back!' });
-      router.push('/');
-      router.refresh();
+      // Verify session is established before redirecting
+      if (data.session) {
+        toast({ title: 'Welcome back!' });
+        // Use window.location for full page reload to ensure cookies are sent
+        window.location.href = '/';
+      } else {
+        throw new Error('Session not established');
+      }
     } catch (error: any) {
       console.error('[Auth] Sign-in error:', error);
       toast({
