@@ -68,7 +68,7 @@ export default function UpdatePasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
-      <div className="w-full max-w-md p-8 rounded-2xl bg-[#0d0d10] border border-white/10 shadow-2xl">
+      <div className="w-full max-w-md p-8 rounded-2xl bg-[#0d0d10] border border-white/10 shadow-2xl" suppressHydrationWarning>
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">Set New Password</h2>
           <p className="text-sm text-slate-400">

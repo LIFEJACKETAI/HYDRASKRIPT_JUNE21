@@ -10,7 +10,7 @@ export default function AuthCodeErrorPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
-      <div className="w-full max-w-md p-8 rounded-2xl bg-[#0d0d10] border border-white/10 shadow-2xl text-center">
+      <div className="w-full max-w-md p-8 rounded-2xl bg-[#0d0d10] border border-white/10 shadow-2xl text-center" suppressHydrationWarning>
         <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
           <AlertCircle className="h-8 w-8 text-red-400" />
         </div>

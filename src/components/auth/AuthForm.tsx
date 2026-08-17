@@ -90,7 +90,7 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 rounded-2xl bg-[#0d0d10] border border-white/10 shadow-2xl">
+    <div className="w-full max-w-md p-8 rounded-2xl bg-[#0d0d10] border border-white/10 shadow-2xl" suppressHydrationWarning>
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-white mb-2">
           {isSignUp ? 'Create an Account' : 'Welcome Back'}
