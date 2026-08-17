@@ -3,9 +3,9 @@
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-export type Tier = 'starter' | 'author' | 'publisher' | 'studio';
+export type Tier = 'free' | 'starter' | 'author' | 'publisher' | 'studio';
 export type CreditPackKey = 'pack_100' | 'pack_500' | 'pack_1000';
-export type PricingKey = Tier | CreditPackKey;
+export type PricingKey = Exclude<Tier, 'free'> | CreditPackKey;
 export type TargetAudience = 'adult' | '0-5' | '6-9' | '10-14';
 export type BookStatus = 'draft' | 'generating' | 'completed' | 'failed';
 export type ChapterStatus = 'pending' | 'writing' | 'reviewing' | 'completed' | 'failed';
@@ -339,6 +339,7 @@ export const AUDIOBOOK_VOICES = [
 // ─── Tier Pricing ─────────────────────────────────────────────────────────────
 
 export const TIER_CONFIG: Record<Tier, { credits: number; price: number; label: string }> = {
+  free: { credits: 25, price: 0, label: 'Free' },
   starter: { credits: 300, price: 29, label: 'Starter' },
   author: { credits: 1000, price: 79, label: 'Author' },
   publisher: { credits: 3000, price: 149, label: 'Publisher' },
