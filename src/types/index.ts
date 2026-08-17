@@ -340,10 +340,10 @@ export const AUDIOBOOK_VOICES = [
 
 export const TIER_CONFIG: Record<Tier, { credits: number; price: number; label: string }> = {
   free: { credits: 25, price: 0, label: 'Free' },
-  starter: { credits: 300, price: 29, label: 'Starter' },
-  author: { credits: 1000, price: 79, label: 'Author' },
-  publisher: { credits: 3000, price: 149, label: 'Publisher' },
-  studio: { credits: 10000, price: 299, label: 'Studio' },
+  starter: { credits: 200, price: 29, label: 'Starter' },
+  author: { credits: 700, price: 79, label: 'Author' },
+  publisher: { credits: 1500, price: 149, label: 'Publisher' },
+  studio: { credits: 3500, price: 299, label: 'Studio' },
 };
 
 export const CREDIT_PACK_CONFIG: Record<CreditPackKey, { credits: number; price: number; label: string }> = {

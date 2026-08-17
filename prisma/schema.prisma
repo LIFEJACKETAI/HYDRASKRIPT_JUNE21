@@ -15,11 +15,18 @@ model Profile {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email     String   @unique
   name      String   @default("Anonymous Author")
-  credits   Int      @default(100) // Start with 100 free credits
-  tier      String   @default("starter") // starter, author, publisher, studio
+  credits   Int      @default(0) // Start with 0 free credits (granted on signup)
+  tier      String   @default("free") // free, starter, author, publisher, studio
   isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Stripe fields
+  stripeCustomerId      String?   @db.DbText
+  stripeSubscriptionId  String?   @db.DbText
+  subscriptionStatus    String    @default("inactive")
+  currentPeriodEnd      DateTime?
+  freeCreditsGranted    Boolean   @default(false)
 
   // Relations
   books            Book[]
