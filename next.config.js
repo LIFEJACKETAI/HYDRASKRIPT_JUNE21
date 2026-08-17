@@ -18,6 +18,21 @@ const nextConfig = {
         }
       }
     }
+    // Ignore example folders and other non-app directories during build
+    config.module = config.module || {};
+    config.module.rules = config.module.rules || [];
+    config.module.rules.push({
+      test: /\.(ts|tsx|js|jsx)$/,
+      exclude: [
+        /HYDRASKRIPT_220526/,
+        /hydraskript_stitch_50_50_1/,
+        /hydraskript_stitch_50_50_2/,
+        /examples/,
+        /download/,
+        /upload/,
+        /mini-services/,
+      ],
+    });
     return config;
   },
 };

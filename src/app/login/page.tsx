@@ -93,6 +93,17 @@ export default function LoginPage() {
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign In'}
           </Button>
         </form>
+
+        <div className="mt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push('/auth/forgot-password')}
+            className="text-slate-400 hover:text-white text-sm w-full"
+          >
+            Forgot your password?
+          </Button>
+        </div>
       </div>
     </div>
   );
