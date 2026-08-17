@@ -5,10 +5,11 @@ node_modules/
 .next/
 out/
 
-# env files
+# env files — never commit environment files containing secrets
 .env
 .env.local
 .env.*.local
+.env.example
 
 # logs
 npm-debug.log*
