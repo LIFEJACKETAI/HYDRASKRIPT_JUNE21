@@ -33,6 +33,19 @@ export async function askLLMJSONWithFallback<T>(
       return await askLLMJSON<T>(systemPrompt, userPrompt, temperature, fallbackModel);
     } catch (openrouterError) {
       const openrouterMessage = openrouterError instanceof Error ? openrouterError.message : String(openrouterError);
+
+      // Check if it's a safety-related error from OpenRouter
+      const safetyCategories = openrouterMessage.match(/Safety Categories:([^\n]+)/i);
+      if (safetyCategories && safetyCategories[1]) {
+        console.error(
+          `[LLM] OpenRouter safety filter triggered:`,
+          safetyCategories[1]
+        );
+        throw new Error(
+          `Content flagged by safety filter: ${safetyCategories[1]}. Try adjusting book themes or descriptions to avoid restricted categories.`
+        );
+      }
+
       throw new Error(
         `Text generation failed in both attempts. NVIDIA NIM (${primaryModel}): ${nimMessage}. OpenRouter (${fallbackModel}): ${openrouterMessage}.`
       );
