@@ -51,6 +51,7 @@ export default function CreateBookForm() {
   const { setCurrentView, setSelectedBookId, setIsGenerating, setActiveJobId, profile } = useAppStore();
 
   const [title, setTitle]                     = useState('');
+  const [description, setDescription]         = useState('');
   const [genre, setGenre]                     = useState<string>('');
   const [targetAudience, setTargetAudience]   = useState<string>('');
   const [styleProfileId, setStyleProfileId]   = useState<string>('');
