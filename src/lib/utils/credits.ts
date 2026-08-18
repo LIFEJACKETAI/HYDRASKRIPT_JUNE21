@@ -1,6 +1,6 @@
 // HydraSkript - Credit Management System
-// Atomic credit operations using Prisma transactions
-// Credits are deducted ONLY inside a transaction that commits ONLY after final success
+// Multi-wallet credit system: monthlyCredits, purchasedCredits, lifetimeCredits
+// Credits consumed in order: monthlyCredits -> lifetimeCredits -> purchasedCredits
 
 import { db } from '@/lib/db';
 import { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, type TargetAudience, type ColoringTheme } from '@/types';
@@ -69,6 +69,21 @@ export function estimateBookCredits(
 }
 
 /**
+ * Calculate audiobook cost based on word count (dynamic pricing).
+ * Base fee + per-minute cost.
+ */
+export function calculateAudiobookCost(wordCount: number): number {
+  // Average reading speed: ~150 words per minute
+  const estimatedMinutes = Math.ceil(wordCount / 150);
+  
+  // Base cost + Variable cost per minute
+  // Example: 10 credits base + 5 credits per minute
+  const cost = 10 + (estimatedMinutes * 5);
+  
+  return cost;
+}
+
+/**
  * Calculate credits for a specific chapter generation.
  */
 export function calculateChapterCredits(wordTarget: number): number {
@@ -96,7 +111,176 @@ export function getBookDefaults(targetAudience: TargetAudience) {
   };
 }
 
-// ─── Atomic Credit Operations ─────────────────────────────────────────────────
+// ─── Multi-Wallet Credit Balance ──────────────────────────────────────────────
+
+/**
+ * Get all credit wallets for a profile.
+ */
+export async function getCreditBalances(profileId: string): Promise<{
+  monthlyCredits: number;
+  purchasedCredits: number;
+  lifetimeCredits: number;
+  total: number;
+}> {
+  const profile = await db.profile.findUnique({
+    where: { id: profileId },
+    select: {
+      monthlyCredits: true,
+      purchasedCredits: true,
+      lifetimeCredits: true,
+      credits: true, // legacy
+    },
+  });
+
+  if (!profile) {
+    return { monthlyCredits: 0, purchasedCredits: 0, lifetimeCredits: 0, total: 0 };
+  }
+
+  // For backward compatibility, include legacy credits in total
+  const legacyCredits = profile.credits ?? 0;
+  
+  return {
+    monthlyCredits: profile.monthlyCredits ?? 0,
+    purchasedCredits: profile.purchasedCredits ?? 0,
+    lifetimeCredits: profile.lifetimeCredits ?? 0,
+    total: (profile.monthlyCredits ?? 0) + (profile.purchasedCredits ?? 0) + (profile.lifetimeCredits ?? 0) + legacyCredits,
+  };
+}
+
+/**
+ * Get total available credits (for simple display).
+ */
+export async function getTotalCredits(profileId: string): Promise<number> {
+  const balances = await getCreditBalances(profileId);
+  return balances.total;
+}
+
+/**
+ * Check if user has enough total credits.
+ */
+export async function hasEnoughCredits(profileId: string, amount: number): Promise<boolean> {
+  const total = await getTotalCredits(profileId);
+  return total >= amount;
+}
+
+// ─── Atomic Credit Operations (Multi-Wallet) ──────────────────────────────────
+
+/**
+ * Consume credits from wallets in priority order:
+ * 1. monthlyCredits (expire monthly)
+ * 2. lifetimeCredits (promotional)
+ * 3. purchasedCredits (never expire)
+ * 4. legacy credits (fallback)
+ */
+async function consumeFromWallets(
+  tx: any,
+  profileId: string,
+  amount: number,
+  reason: string,
+  jobId: string
+): Promise<{ success: boolean; consumed: { monthly: number; lifetime: number; purchased: number; legacy: number } }> {
+  const profile = await tx.profile.findUnique({
+    where: { id: profileId },
+    select: {
+      monthlyCredits: true,
+      purchasedCredits: true,
+      lifetimeCredits: true,
+      credits: true,
+      email: true,
+    },
+  });
+
+  if (!profile) return { success: false, consumed: { monthly: 0, lifetime: 0, purchased: 0, legacy: 0 } };
+
+  // ADMIN BYPASS: Unlimited credits for admin@hydraskript.com
+  if (profile.email === 'admin@hydraskript.com') {
+    await tx.creditLedger.create({
+      data: {
+        profileId,
+        amount: 0,
+        reason: `ADMIN-FREE: ${reason}`,
+        jobId,
+      },
+    });
+    return { success: true, consumed: { monthly: 0, lifetime: 0, purchased: 0, legacy: 0 } };
+  }
+
+  let remaining = amount;
+  const consumed = { monthly: 0, lifetime: 0, purchased: 0, legacy: 0 };
+
+  // 1. Consume from monthlyCredits first
+  if (remaining > 0 && (profile.monthlyCredits ?? 0) > 0) {
+    const take = Math.min(remaining, profile.monthlyCredits ?? 0);
+    await tx.profile.update({
+      where: { id: profileId },
+      data: { monthlyCredits: { decrement: take } },
+    });
+    consumed.monthly = take;
+    remaining -= take;
+  }
+
+  // 2. Consume from lifetimeCredits
+  if (remaining > 0 && (profile.lifetimeCredits ?? 0) > 0) {
+    const take = Math.min(remaining, profile.lifetimeCredits ?? 0);
+    await tx.profile.update({
+      where: { id: profileId },
+      data: { lifetimeCredits: { decrement: take } },
+    });
+    consumed.lifetime = take;
+    remaining -= take;
+  }
+
+  // 3. Consume from purchasedCredits
+  if (remaining > 0 && (profile.purchasedCredits ?? 0) > 0) {
+    const take = Math.min(remaining, profile.purchasedCredits ?? 0);
+    await tx.profile.update({
+      where: { id: profileId },
+      data: { purchasedCredits: { decrement: take } },
+    });
+    consumed.purchased = take;
+    remaining -= take;
+  }
+
+  // 4. Fallback to legacy credits
+  if (remaining > 0 && (profile.credits ?? 0) > 0) {
+    const take = Math.min(remaining, profile.credits ?? 0);
+    await tx.profile.update({
+      where: { id: profileId },
+      data: { credits: { decrement: take } },
+    });
+    consumed.legacy = take;
+    remaining -= take;
+  }
+
+  if (remaining > 0) {
+    // Not enough credits - rollback what we consumed
+    if (consumed.monthly > 0) {
+      await tx.profile.update({ where: { id: profileId }, data: { monthlyCredits: { increment: consumed.monthly } } });
+    }
+    if (consumed.lifetime > 0) {
+      await tx.profile.update({ where: { id: profileId }, data: { lifetimeCredits: { increment: consumed.lifetime } } });
+    }
+    if (consumed.purchased > 0) {
+      await tx.profile.update({ where: { id: profileId }, data: { purchasedCredits: { increment: consumed.purchased } } });
+    }
+    if (consumed.legacy > 0) {
+      await tx.profile.update({ where: { id: profileId }, data: { credits: { increment: consumed.legacy } } });
+    }
+    return { success: false, consumed: { monthly: 0, lifetime: 0, purchased: 0, legacy: 0 } };
+  }
+
+  // Record in ledger
+  await tx.creditLedger.create({
+    data: {
+      profileId,
+      amount: -amount,
+      reason: `CONSUMED: ${reason}`,
+      jobId,
+    },
+  });
+
+  return { success: true, consumed };
+}
 
 /**
  * Reserve credits for a job (escrow).
@@ -111,39 +295,13 @@ export async function reserveCredits(
 ): Promise<boolean> {
   try {
     return await db.$transaction(async (tx) => {
-      // Read current credits with lock (serializable isolation in SQLite)
-      const profile = await tx.profile.findUnique({
-        where: { id: profileId },
-        select: { credits: true, email: true },
-      });
-
-      if (!profile) return false;
-
-      // ADMIN BYPASS: Unlimited credits for admin@hydraskript.com
-      if (profile.email === 'admin@hydraskript.com') {
-        // We don't deduct anything, but we still record the ledger for tracking
-        await tx.creditLedger.create({
-          data: {
-            profileId,
-            amount: 0,
-            reason: `ADMIN-FREE: ${reason}`,
-            jobId,
-          },
-        });
-        return true;
-      }
-
-      if (profile.credits < amount) {
+      // Check total available credits
+      const balances = await getCreditBalances(profileId);
+      if (balances.total < amount) {
         return false; // Insufficient funds
       }
 
-      // Deduct credits
-      await tx.profile.update({
-        where: { id: profileId },
-        data: { credits: profile.credits - amount },
-      });
-
-      // Record in ledger
+      // Record reservation in ledger
       await tx.creditLedger.create({
         data: {
           profileId,
@@ -151,6 +309,12 @@ export async function reserveCredits(
           reason: `RESERVED: ${reason}`,
           jobId,
         },
+      });
+
+      // Update job with reserved amount
+      await tx.job.update({
+        where: { id: jobId },
+        data: { creditsReserved: amount },
       });
 
       return true;
@@ -173,15 +337,11 @@ export async function consumeCredits(
 ): Promise<boolean> {
   try {
     return await db.$transaction(async (tx) => {
-      // Record consumption in ledger (positive entry offsetting the reservation)
-      await tx.creditLedger.create({
-        data: {
-          profileId,
-          amount: amount, // Positive to offset the negative reservation
-          reason: `CONSUMED: ${reason}`,
-          jobId,
-        },
-      });
+      const result = await consumeFromWallets(tx, profileId, amount, reason, jobId);
+      
+      if (!result.success) {
+        return false;
+      }
 
       // Update job's consumed amount
       await tx.job.update({
@@ -230,28 +390,28 @@ export async function refundCredits(
         return true; // Nothing to refund
       }
 
-      // Return credits to profile
-      const profile = await tx.profile.findUnique({
+      // Return credits to profile - add to monthlyCredits (expire monthly) or purchasedCredits
+      // For refunds, we add back to the most flexible wallet
+      await tx.profile.update({
         where: { id: job.ownerId },
-        select: { credits: true },
+        data: { monthlyCredits: { increment: job.creditsReserved } },
       });
 
-      if (profile) {
-        await tx.profile.update({
-          where: { id: job.ownerId },
-          data: { credits: profile.credits + job.creditsReserved },
-        });
+      // Record refund
+      await tx.creditLedger.create({
+        data: {
+          profileId: job.ownerId,
+          amount: job.creditsReserved,
+          reason: `REFUND: ${reason}`,
+          jobId,
+        },
+      });
 
-        // Record refund
-        await tx.creditLedger.create({
-          data: {
-            profileId: job.ownerId,
-            amount: job.creditsReserved,
-            reason: `REFUND: ${reason}`,
-            jobId,
-          },
-        });
-      }
+      // Reset job reserved amount
+      await tx.job.update({
+        where: { id: jobId },
+        data: { creditsReserved: 0 },
+      });
 
       return true;
     });
@@ -263,31 +423,37 @@ export async function refundCredits(
 
 /**
  * Add credits to a profile (from purchase or admin action).
+ * Specify wallet type: 'monthly', 'purchased', 'lifetime', or 'legacy'
  */
 export async function addCredits(
   profileId: string,
   amount: number,
-  reason: string
+  reason: string,
+  wallet: 'monthly' | 'purchased' | 'lifetime' | 'legacy' = 'purchased'
 ): Promise<boolean> {
   try {
     await db.$transaction(async (tx) => {
       const profile = await tx.profile.findUnique({
         where: { id: profileId },
-        select: { credits: true },
+        select: { credits: true, monthlyCredits: true, purchasedCredits: true, lifetimeCredits: true },
       });
 
       if (!profile) throw new Error('Profile not found');
 
+      const walletField = wallet === 'monthly' ? 'monthlyCredits' : 
+                         wallet === 'purchased' ? 'purchasedCredits' : 
+                         wallet === 'lifetime' ? 'lifetimeCredits' : 'credits';
+
       await tx.profile.update({
         where: { id: profileId },
-        data: { credits: profile.credits + amount },
+        data: { [walletField]: { increment: amount } },
       });
 
       await tx.creditLedger.create({
         data: {
           profileId,
           amount,
-          reason,
+          reason: `${wallet.toUpperCase()}: ${reason}`,
         },
       });
     });
@@ -300,12 +466,128 @@ export async function addCredits(
 }
 
 /**
- * Get current credit balance for a profile.
+ * Grant Founder monthly credits (500 credits).
+ * Idempotent: checks if already granted this month.
+ */
+export async function grantFounderMonthlyCredits(profileId: string): Promise<boolean> {
+  try {
+    return await db.$transaction(async (tx) => {
+      const profile = await tx.profile.findUnique({
+        where: { id: profileId },
+        select: { 
+          isLifetime: true, 
+          monthlyCreditAllowance: true,
+          monthlyCreditsLastGrantedAt: true,
+          monthlyCredits: true,
+        },
+      });
+
+      if (!profile || !profile.isLifetime || (profile.monthlyCreditAllowance ?? 0) <= 0) {
+        return false; // Not a Founder or no allowance
+      }
+
+      // Check if already granted this month
+      const now = new Date();
+      if (profile.monthlyCreditsLastGrantedAt) {
+        const lastGrant = new Date(profile.monthlyCreditsLastGrantedAt);
+        if (lastGrant.getFullYear() === now.getFullYear() && lastGrant.getMonth() === now.getMonth()) {
+          console.log(`[Credits] Founder monthly credits already granted this month`);
+          return true; // Already granted, idempotent
+        }
+      }
+
+      const allowance = profile.monthlyCreditAllowance ?? 500;
+
+      // Reset monthly credits to allowance (non-rollover)
+      await tx.profile.update({
+        where: { id: profileId },
+        data: {
+          monthlyCredits: allowance,
+          monthlyCreditsLastGrantedAt: now,
+        },
+      });
+
+      // Record in ledger
+      await tx.creditLedger.create({
+        data: {
+          profileId,
+          amount: allowance,
+          reason: 'Founder monthly credit refresh',
+        },
+      });
+
+      console.log(`[Credits] Granted ${allowance} Founder monthly credits to ${profileId}`);
+      return true;
+    });
+  } catch (error) {
+    console.error('[Credits] Founder monthly grant failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Grant free tier signup credits (25 credits one-time).
+ */
+export async function grantFreeTierCredits(profileId: string): Promise<boolean> {
+  try {
+    return await db.$transaction(async (tx) => {
+      const profile = await tx.profile.findUnique({
+        where: { id: profileId },
+        select: { freeCreditsGranted: true, tier: true },
+      });
+
+      if (!profile || profile.freeCreditsGranted || profile.tier !== 'free') {
+        return false; // Already granted or not free tier
+      }
+
+      // Grant 25 credits to monthlyCredits (expire monthly for free tier)
+      await tx.profile.update({
+        where: { id: profileId },
+        data: { 
+          monthlyCredits: 25,
+          freeCreditsGranted: true,
+        },
+      });
+
+      // Record in ledger
+      await tx.creditLedger.create({
+        data: {
+          profileId,
+          amount: 25,
+          reason: 'Free tier signup bonus',
+        },
+      });
+
+      return true;
+    });
+  } catch (error) {
+    console.error('[Credits] Free tier grant failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Get current credit balance for a profile (legacy - returns total).
  */
 export async function getCreditBalance(profileId: string): Promise<number> {
-  const profile = await db.profile.findUnique({
-    where: { id: profileId },
-    select: { credits: true },
-  });
-  return profile?.credits ?? 0;
+  return getTotalCredits(profileId);
+}
+
+// ─── Credit Estimation Helpers ────────────────────────────────────────────────
+
+/**
+ * Check if user can afford audiobook generation.
+ * Returns cost and whether they have enough credits.
+ */
+export async function checkAudiobookAffordability(
+  profileId: string,
+  wordCount: number
+): Promise<{ cost: number; canAfford: boolean; balance: number }> {
+  const cost = calculateAudiobookCost(wordCount);
+  const balance = await getTotalCredits(profileId);
+  return {
+    cost,
+    canAfford: balance >= cost,
+    balance,
+  };
 }

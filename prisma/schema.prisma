@@ -12,14 +12,23 @@ datasource db {
 }
 
 model Profile {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email     String   @unique
-  name      String   @default("Anonymous Author")
-  credits   Int      @default(0) // Start with 0 free credits (granted on signup)
-  tier      String   @default("free") // free, starter, author, publisher, studio
-  isAdmin   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                 String    @unique
+  name                  String    @default("Anonymous Author")
+  credits               Int       @default(0) // Legacy single wallet (kept for backward compatibility)
+  monthlyCredits        Int       @default(0) // Monthly credits (Founder/paid plans) - do not roll over
+  purchasedCredits      Int       @default(0) // A-la-carte purchased credits - never expire
+  lifetimeCredits       Int       @default(0) // Promotional/founder lifetime credits
+  tier                  String    @default("free") // free, starter, author, publisher, studio, founder
+  isLifetime            Boolean   @default(false)
+  founderNumber         Int?      @unique
+  founderBadge          Boolean   @default(false)
+  monthlyCreditAllowance Int      @default(0)
+  monthlyCreditsLastGrantedAt DateTime?
+  audiobookEnabled      Boolean   @default(false)
+  isAdmin               Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   // Stripe fields
   stripeCustomerId      String?
@@ -29,14 +38,15 @@ model Profile {
   freeCreditsGranted    Boolean   @default(false)
 
   // Relations
-  books            Book[]
-  styleProfiles    StyleProfile[]
-  mediaAssets      MediaAsset[]
-  jobs             Job[]
-  creditLedger     CreditLedger[]
-  payments         Payment[]
-  storyBible       StoryBibleEntity[]
-  editorialReviews EditorialReview[]
+  books                 Book[]
+  styleProfiles         StyleProfile[]
+  mediaAssets           MediaAsset[]
+  jobs                  Job[]
+  creditLedger          CreditLedger[]
+  payments              Payment[]
+  storyBible            StoryBibleEntity[]
+  editorialReviews      EditorialReview[]
+  founderSale           FounderSale?
 
   @@map("profiles")
 }
@@ -158,6 +168,7 @@ model MediaAsset {
   storagePath String // Local file path or URL
   publicUrl   String // Accessible URL
   metadata    String   @default("{}") // JSON: {duration, dimensions, chapterIndex, etc}
+  paymentSource String?  @default("subscription_allowance") // subscription_allowance, ala_carte_topup
   createdAt   DateTime @default(now())
 
   // Relations
@@ -278,6 +289,20 @@ model Payment {
 
   @@index([profileId, createdAt])
   @@map("payments")
+}
+
+model FounderSale {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profileId               String    @db.Uuid @unique
+  founderNumber           Int       @unique
+  pricePaidCents          Int
+  stripeCheckoutSessionId String    @unique
+  stripePaymentIntentId   String?   @unique
+  createdAt               DateTime  @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("founder_sales")
 }
 
 model EditorialReview {
