@@ -42,6 +42,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { FounderPackCTA } from '@/components/pricing/FounderPackCTA';
+import { useAppStore } from '@/lib/store';
 import {
   getProfile,
   listBooks,
