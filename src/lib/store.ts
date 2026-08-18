@@ -20,7 +20,8 @@ export type AppView =
   | 'pricing'
   | 'admin'
   | 'story-bible'
-  | 'universe';
+  | 'universe'
+  | 'ai-cover-designer';
 
 // ─── Store Interface ──────────────────────────────────────────────────────────
 

@@ -42,6 +42,7 @@ const navItems: NavItem[] = [
   { icon: LayoutGrid,      label: 'UI Gallery',     view: 'ui-gallery',      color: 'text-emerald-400' },
   { icon: Coins,           label: 'Credits',        view: 'credits',         color: 'text-amber-400' },
   { icon: Shield,          label: 'Admin',          view: 'admin', adminOnly: true, color: 'text-red-400' },
+  { icon: Palette,         label: 'AI Cover',       view: 'ai-cover-designer', color: 'text-purple-400' },
 ];
 
 export default function Sidebar() {

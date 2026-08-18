@@ -386,12 +386,18 @@ export default function StyleUploader() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Description</label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Gritty, cynical, atmospheric..."
-                  className="bg-[#111] border-[#312839] text-white placeholder:text-slate-700 focus:border-purple-500 text-sm resize-none h-20"
-                />
+                <div className="relative">
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Gritty, cynical, atmospheric..."
+                    className="bg-[#111] border-[#312839] text-white placeholder:text-slate-700 focus:border-purple-500 text-sm resize-none h-20"
+                    maxLength={1500}
+                  />
+                  <div className="absolute bottom-1 right-2 text-[10px] text-slate-600">
+                    {description.length}/1500
+                  </div>
+                </div>
               </div>
             </div>
 

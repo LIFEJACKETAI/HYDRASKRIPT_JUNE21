@@ -41,7 +41,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useAppStore } from '@/lib/store';
+import { FounderPackCTA } from '@/components/pricing/FounderPackCTA';
 import {
   getProfile,
   listBooks,
@@ -66,6 +66,7 @@ import IdeasLab from '@/components/book/IdeasLab';
 import AudiobookGenerator from '@/components/book/AudiobookGenerator';
 import StoryBible from '@/components/book/StoryBible';
 import UniverseArchitect from '@/components/book/UniverseArchitect';
+import AICoverDesigner from '@/components/book/AICoverDesigner';
 
 // ─── Landing Page ────────────────────────────────────────────────────────────
 
@@ -564,6 +565,9 @@ function CreditsView() {
           </div>
         )}
       </div>
+
+        {/* Founder Lifetime CTA */}
+        <FounderPackCTA soldCount={creditsData?.founderCount ?? 0} />
 
       {/* ── Plans grid ── */}
       <div>
@@ -1182,6 +1186,7 @@ export default function HomePage() {
       case 'story-bible':   return <StoryBible />;
       case 'universe':      return <UniverseArchitect />;
       case 'admin':         return <AdminView />;
+      case 'ai-cover-designer': return <AICoverDesigner />;
       default:              return <DashboardView />;
     }
   };
