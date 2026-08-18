@@ -152,6 +152,7 @@ export default function CreateBookForm() {
     try {
       const result = await createBook({
         title: title.trim(),
+        description: description.trim() || undefined,
         genre,
         targetAudience,
         coloringTheme: genre === 'coloring' && coloringTheme ? coloringTheme : undefined,
@@ -247,6 +248,21 @@ export default function CreateBookForm() {
                 placeholder="Enter your book title..."
                 className="bg-[#1e1e1e] border-gray-700 text-white placeholder:text-gray-600 focus:border-purple-500"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-gray-300">
+                What should the book be about? <span className="text-gray-600 text-xs">(optional)</span>
+              </Label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your book idea... (e.g., 'A noir detective story set in 1940s New York with a supernatural twist' or 'A children's book about a brave mouse who explores space')"
+                rows={3}
+                className="bg-[#1e1e1e] border-gray-700 text-white placeholder:text-gray-600 focus:border-purple-500 w-full px-3 py-2 rounded-md resize-none"
+              />
+              <p className="text-xs text-gray-500">Help the AI understand your vision. The more detail, the better the result.</p>
             </div>
 
             <div className="space-y-2">

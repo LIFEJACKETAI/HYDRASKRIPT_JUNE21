@@ -33,7 +33,7 @@ export async function startBookGeneration(
   const isColoringBook = book.genre === 'coloring';
   const coloringTheme = book.coloringTheme as ColoringTheme | null;
 
-  let chapterCount = defaults.chapterCount;
+  let chapterCount = book.chapterCount || defaults.chapterCount;
   try {
     const existingOutline = JSON.parse(book.outline || '{}');
     if (existingOutline.requestedChapters) chapterCount = existingOutline.requestedChapters;
@@ -130,7 +130,7 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
         ? (book.characterNames as string[])
         : [];
 
-      outlinePrompt = getOutlinePrompt(genre, targetAudience, chapterCount, stylePrompt, characterNames.length > 0 ? characterNames : undefined, book.adventureType ?? undefined);
+      outlinePrompt = getOutlinePrompt(genre, targetAudience, chapterCount, stylePrompt, characterNames.length > 0 ? characterNames : undefined, book.adventureType ?? undefined, book.description ?? undefined);
       outlineUser = getOutlineUserPrompt(book.title, genre, targetAudience);
     }
 

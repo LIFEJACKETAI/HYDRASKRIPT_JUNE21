@@ -121,6 +121,7 @@ export interface MediaAssetData {
 
 export interface CreateBookInput {
   title: string;
+  description?: string;
   genre: string;
   targetAudience: string;
   coloringTheme?: string;

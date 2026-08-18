@@ -12,7 +12,8 @@ export function getOutlinePrompt(
   chapterCount: number,
   stylePrompt: string,
   characterNames?: string[],
-  adventureType?: string
+  adventureType?: string,
+  description?: string
 ): string {
   const audienceNote = targetAudience === 'adult'
     ? 'This is for an adult audience. Use sophisticated language and mature themes.'
@@ -32,9 +33,14 @@ export function getOutlinePrompt(
     adventureNote = `\nAdventure setting: The story takes place ${adventureType.replace(/-/g, ' ')}. All chapters should be set in this location.\nKEY TOKEN TO INCLUDE IN EVERY CHAPTER: ${adventureToken}`;
   }
 
+  let descriptionNote = '';
+  if (description && description.trim()) {
+    descriptionNote = `\nUser's book concept: ${description.trim()}. Use this as the core inspiration for the story — the plot, characters, themes, and tone should all reflect this vision.`;
+  }
+
   return `You are a master book outliner with expertise in ${genre} fiction. ${stylePrompt ? `Your writing style should match: ${stylePrompt}` : ''}
 
-${audienceNote}${characterNote}${adventureNote}
+${audienceNote}${characterNote}${adventureNote}${descriptionNote}
 
 Create a detailed book outline with exactly ${chapterCount} chapters. Each chapter should have a compelling title, a 2-3 sentence synopsis, and a word count target appropriate for the audience.
 
