@@ -64,7 +64,7 @@ export type CreateBookInput = z.infer<typeof CreateBookSchema>;
 
 export const CreateStyleProfileSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be under 100 characters'),
-  description: z.string().max(500, 'Description must be under 500 characters').optional(),
+  description: z.string().max(1500, 'Description must be under 1500 characters').optional(),
   exemplarTexts: z.array(z.string().min(50, 'Each sample must be at least 50 characters')).min(1, 'At least 1 sample required').max(10, 'Maximum 10 samples'),
 });
 
