@@ -63,6 +63,7 @@ model Book {
   id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   ownerId               String   @db.Uuid
   title                 String
+  description           String?  // User's description of what the book should be about
   genre                 String   @default("fiction")
   targetAudience        String   @default("adult") // adult, 0-5, 6-9, 10-14
   maxPages              Int      @default(600) // Computed from targetAudience in app logic
@@ -73,6 +74,7 @@ model Book {
   visualIdentityUrl     String? // URL to the approved character reference sheet
   coloringTheme         String? // For coloring books: mandalas, undersea-creatures, birds, etc.
   adventureType         String? // For kids books: farm, school, fair, boat, forest, beach, space, zoo, castle, city
+  chapterCount          Int?     // Number of chapters for this book
   characterNames        String[] @default([]) // Postgres native array: [mainCharacter, ...friendNames] up to 5 names
   outline               String   @default("{}") // JSON: { title, chapters: [{title, synopsis, wordTarget}] }
   coverImageUrl         String?

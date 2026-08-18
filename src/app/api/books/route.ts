@@ -43,11 +43,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       title,
+      description,
       genre = 'fiction',
       targetAudience = 'adult',
       styleProfileId,
       characterNames = [],
-      outline = '{}'
+      outline = '{}',
+      coloringTheme,
+      adventureType,
+      chapterCount
     } = body;
 
     if (!title) {
@@ -66,12 +70,16 @@ export async function POST(request: NextRequest) {
     const book = await db.book.create({
       data: {
         title,
+        description,
         genre,
         targetAudience,
         styleProfileId,
         characterNames: parsedCharacterNames,
         outline,
         ownerId: profile.id,
+        coloringTheme,
+        adventureType,
+        chapterCount,
       },
     });
 
