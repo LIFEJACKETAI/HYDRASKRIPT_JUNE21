@@ -1,10 +1,12 @@
 // HydraSkript - LLM fallback
-// Routes every structured-generation call through OpenRouter. If the primary
-// model fails (bad JSON, empty response, rate limit, or auth issue), retry the
-// same call with the default OpenRouter model instead of a second provider.
+// Primary provider: NVIDIA NIM with Minimax 3.0 model.
+// If NVIDIA NIM fails (bad JSON, empty response, rate limit, or auth issue),
+// falls back to OpenRouter as secondary provider.
 
 import { askLLMJSON } from '@/lib/llm/openrouter';
+import { askLLMJSON as askLLMNimJSON } from '@/lib/llm/nvidia-nim';
 
+const DEFAULT_NIM_MODEL = process.env.NVIDIA_NIM_MODEL || 'minimax-3.0';
 const DEFAULT_FALLBACK_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free';
 
 export async function askLLMJSONWithFallback<T>(
@@ -13,28 +15,26 @@ export async function askLLMJSONWithFallback<T>(
   temperature: number = 0.2,
   model?: string
 ): Promise<T> {
-  const primary = model || DEFAULT_FALLBACK_MODEL;
+  // Try NVIDIA NIM first
+  const primaryModel = model || DEFAULT_NIM_MODEL;
+  const fallbackModel = DEFAULT_FALLBACK_MODEL;
 
   try {
-    return await askLLMJSON<T>(systemPrompt, userPrompt, temperature, primary);
-  } catch (error) {
-    const originalMessage = error instanceof Error ? error.message : String(error);
-
-    if (primary === DEFAULT_FALLBACK_MODEL) {
-      throw new Error(`Text generation is unavailable: ${originalMessage}`);
-    }
+    return await askLLMNimJSON<T>(systemPrompt, userPrompt, temperature, primaryModel);
+  } catch (nimError) {
+    const nimMessage = nimError instanceof Error ? nimError.message : String(nimError);
 
     console.warn(
-      `[LLM] ${primary} failed, falling back to ${DEFAULT_FALLBACK_MODEL}:`,
-      originalMessage
+      `[LLM] NVIDIA NIM (${primaryModel}) failed, falling back to OpenRouter:`,
+      nimMessage
     );
 
     try {
-      return await askLLMJSON<T>(systemPrompt, userPrompt, temperature, DEFAULT_FALLBACK_MODEL);
-    } catch (fallbackError) {
-      const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+      return await askLLMJSON<T>(systemPrompt, userPrompt, temperature, fallbackModel);
+    } catch (openrouterError) {
+      const openrouterMessage = openrouterError instanceof Error ? openrouterError.message : String(openrouterError);
       throw new Error(
-        `Text generation failed in both attempts. ${primary}: ${originalMessage}. ${DEFAULT_FALLBACK_MODEL}: ${fallbackMessage}.`
+        `Text generation failed in both attempts. NVIDIA NIM (${primaryModel}): ${nimMessage}. OpenRouter (${fallbackModel}): ${openrouterMessage}.`
       );
     }
   }
