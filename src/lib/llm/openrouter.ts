@@ -15,7 +15,10 @@ function getApiKey(): string {
 }
 
 function getModel(): string {
-  return process.env.OPENROUTER_MODEL || 'anthropic/claude-3-haiku';
+  // Use a valid OpenRouter model - "openrouter/free" is not a valid model
+  // Common free models: meta-llama/llama-3.1-8b-instruct:free, 
+  // google/gemma-2-9b-it:free, microsoft/phi-3-mini-128k-instruct:free
+  return process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────
@@ -37,7 +40,12 @@ async function withRetry<T>(
       return await fn();
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
-      console.error(`[LLM] Attempt ${attempt}/${maxAttempts} failed:`, lastError.message);
+      console.error(`[LLM] OpenRouter Attempt ${attempt}/${maxAttempts} failed:`, lastError.message);
+
+      // Don't retry on 404 (model not found) or 401 (auth error)
+      if (lastError.message.includes('404') || lastError.message.includes('401')) {
+        throw lastError;
+      }
 
       if (attempt < maxAttempts) {
         const delay = baseDelayMs * Math.pow(2, attempt - 1);
@@ -69,7 +77,7 @@ export interface CompletionOptions {
  * Generate a chat completion using OpenRouter REST API.
  */
 export async function generateCompletion(options: CompletionOptions): Promise<string> {
-  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 120000 } = options;
+  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 60000 } = options;
   const apiKey = getApiKey();
   const openrouterModel = model || getModel();
 
@@ -125,35 +133,57 @@ export async function generateCompletion(options: CompletionOptions): Promise<st
 // ─── Structured JSON Completion ───────────────────────────────────────────────
 
 export async function generateJSON<T>(options: CompletionOptions): Promise<T> {
+  const jsonInstruction = 'IMPORTANT: Respond with valid JSON only. No markdown, no code fences, no extra text, no commentary. Just the JSON object matching the expected schema.';
+  
   const messages: ChatMessage[] = [
     ...options.messages,
-    { role: 'system', content: 'IMPORTANT: Respond with valid JSON only. No markdown, no code fences, no extra text. Just the JSON object.' },
+    { role: 'system', content: jsonInstruction },
   ];
 
   const response = await generateCompletion({
     ...options,
     messages,
-    temperature: options.temperature ?? 0.2,
+    temperature: options.temperature ?? 0.1, // Lower temperature for more reliable JSON
     maxTokens: options.maxTokens,
     model: options.model,
   });
 
+  // Robust JSON extraction
   let jsonStr = response.trim();
-    const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (jsonMatch) jsonStr = jsonMatch[1].trim();
-
+  
+  // Try to extract from markdown code fences
+  const codeFenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeFenceMatch) {
+    jsonStr = codeFenceMatch[1].trim();
+  }
+  
+  // Try direct parse
   try {
     return JSON.parse(jsonStr) as T;
   } catch {
+    // Try to find JSON object in the response
     const firstBrace = jsonStr.indexOf('{');
     const lastBrace = jsonStr.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1) {
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
       try {
         return JSON.parse(jsonStr.slice(firstBrace, lastBrace + 1)) as T;
       } catch {
-        throw new Error(`Failed to parse LLM JSON response: ${jsonStr.slice(0, 200)}...`);
+        // Continue to fallback
       }
     }
+    
+    // Try to find JSON array
+    const firstBracket = jsonStr.indexOf('[');
+    const lastBracket = jsonStr.lastIndexOf(']');
+    if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+      try {
+        return JSON.parse(jsonStr.slice(firstBracket, lastBracket + 1)) as T;
+      } catch {
+        // Continue to error
+      }
+    }
+    
+    console.error('[LLM] Failed to parse JSON from OpenRouter response:', jsonStr.slice(0, 500));
     throw new Error(`Failed to parse LLM JSON response: ${jsonStr.slice(0, 200)}...`);
   }
 }
