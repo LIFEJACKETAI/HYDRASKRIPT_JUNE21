@@ -26,6 +26,10 @@ import {
   Plus,
   BarChart3,
   Menu,
+  Upload,
+  Search,
+  Star,
+  Store,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -995,6 +999,133 @@ export default function HomePage() {
 
   if (currentView === 'landing') return <LandingPage />;
 
+  // ─── Bookstore View ────────────────────────────────────────────────────────
+
+  function BookstoreView() {
+    const [activeTab, setActiveTab] = useState<'browse' | 'sell'>('browse');
+    const [selectedCategory, setSelectedCategory] = useState('all');
+
+    const categories = ['all', 'fiction', 'non-fiction', 'romance', 'mystery', 'fantasy', 'sci-fi', 'children', 'audiobook'];
+
+    const featuredBooks = [
+      { id: 1, title: 'The Last Algorithm', author: 'Sarah Chen', price: 4.99, format: 'ebook', cover: '📘', rating: 4.5, sales: 2847 },
+      { id: 2, title: 'Midnight in Prague', author: 'David Morgen', price: 3.49, format: 'audiobook', cover: '🎧', rating: 4.8, sales: 5231 },
+      { id: 3, title: 'Build to Last', author: 'James Clearwater', price: 12.99, format: 'ebook', cover: '📗', rating: 4.3, sales: 1893 },
+      { id: 4, title: 'Echoes of Tomorrow', author: 'Maya Patel', price: 5.99, format: 'ebook', cover: '📕', rating: 4.7, sales: 3421 },
+      { id: 5, title: 'The Silent Observer', author: 'Robert K. Hayes', price: 7.99, format: 'audiobook', cover: '🎵', rating: 4.6, sales: 4102 },
+      { id: 6, title: 'Digital Nomad Handbook', author: 'Alex Rivera', price: 2.99, format: 'ebook', cover: '📙', rating: 4.4, sales: 8765 },
+    ];
+
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <Store className="h-8 w-8 text-emerald-400" />
+              Bookstore
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">Discover, upload, and sell your ebooks and audiobooks to a global audience.</p>
+          </div>
+          <Button onClick={() => setActiveTab('sell')} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+            <Plus className="h-4 w-4 mr-2" /> Sell Your Book
+          </Button>
+        </div>
+
+        {activeTab === 'sell' ? (
+          <Card className="bg-[#2a2a2a] border-emerald-500/30">
+            <CardHeader>
+              <CardTitle className="text-white text-lg">List Your Book for Sale</CardTitle>
+              <p className="text-xs text-slate-500 mt-1">Upload your ebook (PDF, EPUB) or audiobook (MP3, M4B) and set your price.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-400">Book Title</label>
+                  <input type="text" placeholder="Enter your book title" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-400">Author Name</label>
+                  <input type="text" placeholder="Your name or pen name" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-400">Format</label>
+                  <select className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    <option value="ebook">Ebook (PDF, EPUB)</option>
+                    <option value="audiobook">Audiobook (MP3, M4B)</option>
+                    <option value="both">Both</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-400">Price (USD)</label>
+                  <input type="number" min="0.99" step="0.01" placeholder="9.99" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs font-medium text-slate-400">Description</label>
+                  <textarea rows={3} placeholder="Describe your book..." className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 resize-none" />
+                </div>
+              </div>
+
+              <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center">
+                <Upload className="h-8 w-8 mx-auto text-slate-600 mb-2" />
+                <p className="text-sm text-slate-400">Drag and drop your files here, or click to browse</p>
+                <p className="text-[10px] text-slate-600 mt-1">PDF, EPUB, MP3, M4B — Max 500MB</p>
+                <Button variant="ghost" size="sm" className="mt-3 text-emerald-400 hover:text-emerald-300">Choose files</Button>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-[10px] text-slate-600">You keep 85% of every sale. We handle hosting and payments.</p>
+                <Button className="bg-emerald-600 hover:bg-emerald-500 text-white">List for Sale</Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input type="text" placeholder="Search titles, authors..." className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500" />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.map(cat => (
+                  <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${selectedCategory === cat ? 'bg-emerald-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'}`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Book Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {featuredBooks.map(book => (
+                <div key={book.id} className="group rounded-xl border border-white/10 overflow-hidden bg-[#0d0d10] hover:border-emerald-500/50 transition-all">
+                  <div className="aspect-[3/4] bg-gradient-to-br from-emerald-900/30 to-cyan-900/30 flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
+                    {book.cover}
+                  </div>
+                  <div className="p-3 space-y-1">
+                    <h3 className="text-sm font-bold text-white truncate">{book.title}</h3>
+                    <p className="text-[10px] text-slate-500">{book.author}</p>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-sm font-bold text-emerald-400">${book.price}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 uppercase">{book.format}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                      <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                      <span>{book.rating}</span>
+                      <span className="text-slate-600">·</span>
+                      <span>{book.sales.toLocaleString()} sold</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':     return <DashboardView />;
@@ -1010,6 +1141,7 @@ export default function HomePage() {
       case 'universe':      return <UniverseArchitect />;
       case 'admin':         return <AdminView />;
       case 'ai-cover-designer': return <AICoverDesigner />;
+      case 'bookstore':     return <BookstoreView />;
       default:              return <DashboardView />;
     }
   };

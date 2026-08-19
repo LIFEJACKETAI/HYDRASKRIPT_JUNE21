@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Sparkles, BookOpen, Loader2, Users, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +56,7 @@ export default function CreateBookForm() {
   const [targetAudience, setTargetAudience]   = useState<string>('');
   const [styleProfileId, setStyleProfileId]   = useState<string>('');
   const [chapterCount, setChapterCount]       = useState<number>(0);
+  const hasManuallySetChapters = useRef(false);
   const [coloringTheme, setColoringTheme]     = useState<string>('');
   const [adventureType, setAdventureType]     = useState<string>('');
   // Kids book character names: index 0 = hero/main character, 1-4 = friends
@@ -82,7 +83,7 @@ export default function CreateBookForm() {
 
   // Auto-fill chapter count from audience config
   useEffect(() => {
-    if (targetAudience) {
+    if (targetAudience && !hasManuallySetChapters.current) {
       const config = AUDIENCE_CONFIG[targetAudience as TargetAudience];
       if (config) setChapterCount(config.defaultChapters);
     }
@@ -454,7 +455,7 @@ export default function CreateBookForm() {
                   min={1}
                   max={50}
                   value={chapterCount || ''}
-                  onChange={(e) => setChapterCount(parseInt(e.target.value) || 0)}
+                  onChange={(e) => { hasManuallySetChapters.current = true; setChapterCount(parseInt(e.target.value) || 0); }}
                   placeholder="Auto-filled from audience"
                   className="bg-[#1e1e1e] border-gray-700 text-white placeholder:text-gray-600 focus:border-purple-500"
                 />
