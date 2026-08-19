@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, FileText, ImageIcon, Clock, CheckCircle, AlertCircle, Loader2, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -21,11 +21,17 @@ const chapterStatusConfig: Record<string, { label: string; icon: React.ElementTy
 interface ChapterEditorProps {
   chapters: ChapterData[];
   bookId: string;
+  onChapterApproved?: () => void;
 }
 
-export default function ChapterEditor({ chapters, bookId }: ChapterEditorProps) {
+export default function ChapterEditor({ chapters, bookId, onChapterApproved }: ChapterEditorProps) {
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
   const [approvingChapter, setApprovingChapter] = useState<string | null>(null);
+  const [localChapters, setLocalChapters] = useState<ChapterData[]>(chapters);
+
+  useEffect(() => {
+    setLocalChapters(chapters);
+  }, [chapters]);
 
   const handleApprove = async (chapterId: string, index: number) => {
     setApprovingChapter(chapterId);
@@ -38,7 +44,13 @@ export default function ChapterEditor({ chapters, bookId }: ChapterEditorProps) 
       const result = await response.json();
       if (result.success) {
         toast({ title: 'Chapter approved!', description: 'Moving to the next chapter...' });
-        window.location.reload();
+        setLocalChapters(prev =>
+          prev.map(ch =>
+            ch.index === index ? { ...ch, status: 'completed' as const, approvalStatus: 'approved' } : ch
+          )
+        );
+        setExpandedChapter(null);
+        onChapterApproved?.();
       } else {
         toast({ title: 'Approval failed', description: result.error, variant: 'destructive' });
       }
@@ -49,7 +61,7 @@ export default function ChapterEditor({ chapters, bookId }: ChapterEditorProps) 
     }
   };
 
-  if (!chapters || chapters.length === 0) {
+  if (!localChapters || localChapters.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
         <FileText className="h-10 w-10 mx-auto mb-2 opacity-30" />
@@ -61,7 +73,7 @@ export default function ChapterEditor({ chapters, bookId }: ChapterEditorProps) 
   return (
     <ScrollArea className="max-h-[600px] custom-scrollbar">
       <div className="space-y-2 pr-2">
-        {chapters
+        {localChapters
           .sort((a, b) => a.index - b.index)
           .map((chapter) => {
             const statusInfo = chapterStatusConfig[chapter.status] || chapterStatusConfig.pending;
