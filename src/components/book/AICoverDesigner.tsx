@@ -66,6 +66,9 @@ export default function AICoverDesigner() {
   const [selectedPreset, setSelectedPreset] = useState<string>('cyberpunk');
   const [prompt, setPrompt] = useState('');
   const [aspectRatio, setAspectRatio] = useState('6x9');
+  const [bookTitle, setBookTitle] = useState('');
+  const [genre, setGenre] = useState('fiction');
+  const [targetAudience, setTargetAudience] = useState<'adult' | '0-5' | '6-9' | '10-14'>('adult');
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -92,43 +95,56 @@ export default function AICoverDesigner() {
       toast({ title: 'Prompt required', description: 'Please enter a description for your cover.', variant: 'destructive' });
       return;
     }
+    if (!bookTitle.trim()) {
+      toast({ title: 'Book title required', description: 'Please enter a book title.', variant: 'destructive' });
+      return;
+    }
 
     setIsGenerating(true);
     setProgress(0);
 
-    // Simulate generation progress
+    // Real progress simulation with smoother increments
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 90) {
           clearInterval(progressInterval);
           return 90;
         }
-        return prev + Math.random() * 10;
+        return prev + Math.random() * 8;
       });
-    }, 300);
+    }, 400);
 
     try {
-      // In production, this would call your actual image generation API
-      // For now, we'll use a placeholder from the original HTML
-      const placeholderImages = {
-        cyberpunk: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDeVH1zrXSNjVzGXxWwTL_AjG1YWR29ixVc9_0K2AbGlviltreKJTZYwZZP8i1TWSx27Sm2CkzYDVJ4ffdnF7pd4AfCD8p1pg_o1qDvb5FJkSm26zecYvN3v5u81Q_KIwS80dusQU5XEN3k40JQfpDX0vv_J3RPbuMsci7Vy34bQx9yrjrUYXJVfmr3hCO0qJmF865epIZXgW5nlQc-S0bKz52AO5jabMTrA-QLzl22e34hcatyT739mIFGOVQUAwvhZ05IbYQfddBi',
-        noir: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCnnOmlMmVEm7-WRLkDWrPjEWgREBTnOEGNw1AEUVGE0KqEfnWfsWj6DzRbzYkPQmPYuPAx8vWEuYrr9vyeuRWh4K4J4VMbuojtc1Q0MooSSn308F2mONCa5K1ON5xwojya4DAXdJFwKqHlbYwSyax5AwMaegJml40UknHwE2RJcKlN_IipfzMrHqIpF8ImbrpdBN_k9gWYQ8SgYWUUP8scTlsAjLmvJvTTAioe31CXAAQtJG9YsITBaPvN5S7VPCcm9Ce_HQ9pOqwH',
-        watercolor: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7zQx7sOXARo2Fxl6kMw-e27un57rswid8QPrvoDcxiEtaAc5sh1PzARvbo-q5MNBrrFMMv_UER3kVV-AkTRKN87VnYWQRcMd7nby1M6ZG-9Pi04-fjNhXHLvDFxxOvfGvtdnci2tp7xi-Z1ju5XQuNjlKiFrvZCeusSH7cXExY39Q2qZrUOXmGquGLY7Gn45iVdIJXRtmJAgVDd_EnKb_Db6__U6XhR2LXoy0khfcmdrjCxB8W9FPLuGkiN6xByZv-3QRyMLqFnEu',
-        minimalist: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDHgH4fJSIULwz3PlJFqekCZI_YAtII75qyznMcAeY213zYABWZgmQ8v9WQCHMTT4rGBsXh3-7Up8UJH8TDLCLhsVw6PWd8yvg2c7OeuuxuaHjs6En2hWiCE3NEHHSWQC9IZJEJTIzZeH6mNVUeVQ6Tl1EwivNzgmtxuw6JlslPgd9fsv9dku1qb0leFVijcrbOHWsIUDDc63NnJB0Yx0OVwCO2-4pUFlJnhNloo4Om8Jpxule0kwCD41B0DrvbrzU3UdUN9-huWX19',
-      };
+      const response = await fetch('/api/cover/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookTitle,
+          genre,
+          targetAudience,
+          style: selectedPreset,
+          prompt: prompt.trim(),
+          aspectRatio,
+          coloringTheme: genre === 'coloring' ? selectedPreset : undefined,
+        }),
+      });
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const data = await response.json();
+
       clearInterval(progressInterval);
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to generate cover');
+      }
+
       setProgress(100);
-      
-      setGeneratedImage(placeholderImages[selectedPreset as keyof typeof placeholderImages] || placeholderImages.cyberpunk);
+      setGeneratedImage(data.data.imageUrl);
       
       toast({ title: 'Cover generated!', description: 'Your AI book cover is ready.' });
     } catch (error) {
       clearInterval(progressInterval);
-      toast({ title: 'Generation failed', description: 'Please try again.', variant: 'destructive' });
+      const message = error instanceof Error ? error.message : 'Generation failed';
+      toast({ title: 'Generation failed', description: message, variant: 'destructive' });
     } finally {
       setIsGenerating(false);
       setTimeout(() => setProgress(0), 1000);
@@ -276,6 +292,51 @@ export default function AICoverDesigner() {
                     )}
                   </motion.button>
                 ))}
+              </div>
+            </div>
+
+            {/* Book Details */}
+            <div className="mb-8">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-[#13c8ec] mb-4">Book Details</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Book Title</label>
+                  <input
+                    type="text"
+                    value={bookTitle}
+                    onChange={(e) => setBookTitle(e.target.value)}
+                    placeholder="Enter your book title"
+                    className="w-full bg-[#161b1d] border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-[#13c8ec] focus:ring-1 focus:ring-[#13c8ec] transition-all placeholder:text-slate-600"
+                    maxLength={100}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Genre</label>
+                  <Select value={genre} onValueChange={(v) => setGenre(v)}>
+                    <SelectTrigger className="bg-[#161b1d] border-white/10 text-sm focus:border-[#13c8ec] focus:ring-1 focus:ring-[#13c8ec]">
+                      <SelectValue placeholder="Select genre" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#0a0a0a] border-white/10">
+                      {['fiction', 'non-fiction', 'fantasy', 'sci-fi', 'mystery', 'romance', 'horror', 'children', 'coloring', 'poetry', 'self-help', 'biography'].map((g) => (
+                        <SelectItem key={g} value={g} className="text-slate-400 focus:bg-[#161b1d] focus:text-white">{g}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Target Audience</label>
+                <Select value={targetAudience} onValueChange={(v) => setTargetAudience(v as 'adult' | '0-5' | '6-9' | '10-14')}>
+                  <SelectTrigger className="bg-[#161b1d] border-white/10 text-sm focus:border-[#13c8ec] focus:ring-1 focus:ring-[#13c8ec]">
+                    <SelectValue placeholder="Select audience" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0a0a0a] border-white/10">
+                    <SelectItem value="adult" className="text-slate-400 focus:bg-[#161b1d] focus:text-white">Adult</SelectItem>
+                    <SelectItem value="10-14" className="text-slate-400 focus:bg-[#161b1d] focus:text-white">Ages 10-14</SelectItem>
+                    <SelectItem value="6-9" className="text-slate-400 focus:bg-[#161b1d] focus:text-white">Ages 6-9</SelectItem>
+                    <SelectItem value="0-5" className="text-slate-400 focus:bg-[#161b1d] focus:text-white">Ages 0-5</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
