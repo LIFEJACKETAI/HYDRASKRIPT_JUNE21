@@ -212,7 +212,7 @@ export default function AICoverDesigner() {
 
       <main className="flex-1 flex overflow-hidden min-w-0">
         {/* Sidebar */}
-        <aside className="w-64 border-r border-white/10 p-6 flex flex-col justify-between hidden lg:flex bg-black">
+        <aside className="w-64 border-r border-white/10 p-6 flex flex-col justify-between hidden lg:flex bg-black overflow-hidden">
           <div className="flex flex-col gap-8">
             <div className="flex items-center gap-3 p-2">
               <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAyndQVV_CjBbPSDd8wcmk4aQA-eL1brBqhf0l82Zk6Oq1blUjsqUWAu33nLJud-WZF4CyBiVfJE6fYQ73OCAQLo-OfltKrHPX4eQVgv49l71f2mmVoZYPda6kok7IbNSz-PZ2fhiBF5zhoPg-J-ysceoynNmv7Wi698QpHBXrdI8wc1tWTrjQKMfK-Kdiq22RWHYHqt_OmoLB1c7JIj5JcFVM4haVpvTis9dp7eIcJlD_ta-G0jX112wqliA3Z180mnwjm3j3CDoXX")' }} />
@@ -222,22 +222,22 @@ export default function AICoverDesigner() {
               </div>
             </div>
             <div className="flex flex-col gap-1">
-              <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white transition-colors" onClick={() => setCurrentView('dashboard')}>
-                <span className="material-symbols-outlined text-[22px]">auto_stories</span>
-                <p className="text-sm font-medium">Book Info</p>
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white transition-colors" onClick={() => setCurrentView('create-book')}>
-                <span className="material-symbols-outlined text-[22px]">format_list_bulleted</span>
-                <p className="text-sm font-medium">Chapters</p>
-              </Button>
-              <Button variant="default" className="w-full justify-start gap-3 px-3 py-2.5 rounded-lg bg-[#13c8ec]/10 text-[#13c8ec] border border-[#13c8ec]/20">
-                <Palette className="h-5 w-5 fill-current" />
-                <p className="text-sm font-medium">AI Cover</p>
-              </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white transition-colors" onClick={() => setCurrentView('export-hub')}>
-                <span className="material-symbols-outlined text-[22px]">format_shapes</span>
-                <p className="text-sm font-medium">Formatting</p>
-              </Button>
+<Button variant="ghost" size="sm" className="w-full justify-start gap-3 text-slate-400 hover:text-white transition-colors" onClick={() => setCurrentView('dashboard')}>
+  <span className="material-symbols-outlined text-[20px]">auto_stories</span>
+  <span className="text-sm font-medium">Book Info</span>
+</Button>
+<Button variant="ghost" size="sm" className="w-full justify-start gap-3 text-slate-400 hover:text-white transition-colors" onClick={() => setCurrentView('create-book')}>
+  <span className="material-symbols-outlined text-[20px]">format_list_bulleted</span>
+  <span className="text-sm font-medium">Chapters</span>
+</Button>
+<Button variant="default" size="sm" className="w-full justify-start gap-3 bg-[#13c8ec]/10 text-[#13c8ec] border border-[#13c8ec]/20">
+  <Palette className="h-4 w-4 fill-current" />
+  <span className="text-sm font-medium">AI Cover</span>
+</Button>
+<Button variant="ghost" size="sm" className="w-full justify-start gap-3 text-slate-400 hover:text-white transition-colors" onClick={() => setCurrentView('export-hub')}>
+  <span className="material-symbols-outlined text-[20px]">format_shapes</span>
+  <span className="text-sm font-medium">Formatting</span>
+</Button>
             </div>
           </div>
           <div className="bg-[#161b1d] rounded-xl p-4 border border-white/5">
