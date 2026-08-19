@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { getAuthEmail } from '@/lib/auth-helpers';
-import { generateBookCover } from '@/lib/services/imageService';
+import { STYLE_CONFIG } from '@/types';
+import { generateImage } from '@/lib/services/imageService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,20 +34,29 @@ export async function POST(request: NextRequest) {
     };
     const size = aspectRatioMap[aspectRatio] || '1344x768';
 
-    // Build enhanced prompt combining user prompt with style
+    // Determine style config
     const isChildrenBook = ['0-5', '6-9', '10-14'].includes(targetAudience);
     const isColoringBook = genre === 'coloring';
+    const effectiveStyle = style || (isColoringBook ? (isChildrenBook ? 'lineart' : 'lineart-adult') : 'pixar');
+    const styleConfig = STYLE_CONFIG[effectiveStyle] || STYLE_CONFIG.pixar;
+
+    // Build enhanced prompt: USER PROMPT FIRST, then style reinforcement
+    let finalPrompt = prompt.trim();
     
-    let finalPrompt = prompt;
+    // For coloring books, enforce line art
     if (isColoringBook && coloringTheme) {
-      finalPrompt = `${prompt}. Pure black and white line art, no shading, no color.`;
+      finalPrompt = `${finalPrompt}. Pure black and white line art, no shading, no color, clean white background.`;
+    }
+    // For regular covers, append style keywords as reinforcement (not replacement)
+    else if (!isColoringBook) {
+      // Extract key visual descriptors from style config
+      const styleKeywords = styleConfig.prompt.split(',').slice(0, 6).join(', ');
+      finalPrompt = `${finalPrompt}, ${styleKeywords}, professional book cover, no title text, no author name`;
     }
 
-    // Use the image service with custom options
-    const { generateImage } = await import('@/lib/services/imageService');
     const result = await generateImage({
       prompt: finalPrompt,
-      style: style || (isColoringBook ? (isChildrenBook ? 'lineart' : 'lineart-adult') : 'pixar'),
+      style: effectiveStyle,
       size: size as any,
       ownerId: profile.id,
       bookId: body.bookId,
@@ -66,7 +76,7 @@ export async function POST(request: NextRequest) {
         imageUrl: result.publicUrl,
         assetId: result.assetId,
         prompt: finalPrompt,
-        style: style || (isColoringBook ? (isChildrenBook ? 'lineart' : 'lineart-adult') : 'pixar'),
+        style: effectiveStyle,
         size,
       },
     });

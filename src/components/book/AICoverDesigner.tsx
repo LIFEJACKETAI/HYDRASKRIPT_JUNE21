@@ -212,7 +212,7 @@ export default function AICoverDesigner() {
 
       <main className="flex-1 flex overflow-hidden min-w-0">
         {/* Sidebar */}
-        <aside className="w-64 border-r border-white/10 p-6 flex flex-col justify-between hidden lg:flex bg-black overflow-hidden">
+        <aside className="w-64 border-r border-white/10 p-6 flex flex-col justify-between hidden lg:flex bg-black overflow-hidden z-10 relative">
           <div className="flex flex-col gap-8">
             <div className="flex items-center gap-3 p-2">
               <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-12" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAyndQVV_CjBbPSDd8wcmk4aQA-eL1brBqhf0l82Zk6Oq1blUjsqUWAu33nLJud-WZF4CyBiVfJE6fYQ73OCAQLo-OfltKrHPX4eQVgv49l71f2mmVoZYPda6kok7IbNSz-PZ2fhiBF5zhoPg-J-ysceoynNmv7Wi698QpHBXrdI8wc1tWTrjQKMfK-Kdiq22RWHYHqt_OmoLB1c7JIj5JcFVM4haVpvTis9dp7eIcJlD_ta-G0jX112wqliA3Z180mnwjm3j3CDoXX")' }} />
@@ -252,7 +252,7 @@ export default function AICoverDesigner() {
         </aside>
 
         {/* Main Workspace - Column on mobile, Row on desktop */}
-        <section className="flex-1 flex flex-col lg:flex-row overflow-hidden min-w-0">
+        <section className="flex-1 flex flex-col lg:flex-row overflow-hidden min-w-0 relative z-0">
           {/* Left Panel: Input & Styles - Full width on mobile, 40% on desktop (with sidebar) */}
           <div className="w-full lg:w-[40%] flex flex-col p-8 overflow-y-auto border-r lg:border-white/10 lg:border-b-0 min-w-0">
             <div className="mb-8">

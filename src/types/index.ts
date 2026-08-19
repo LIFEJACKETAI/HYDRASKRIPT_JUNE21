@@ -186,6 +186,19 @@ export const STYLE_CONFIG: Record<string, { prompt: string; size: string }> = {
     prompt: 'Photorealistic style, dramatic lighting, high detail, professional composition',
     size: '1344x768',
   },
+  // AI Cover Designer presets
+  cyberpunk: {
+    prompt: 'Cyberpunk aesthetic, neon-drenched cityscape, high-tech low-life, holographic advertisements, rain-slicked streets, glowing signs, chrome and circuitry, volumetric lighting, Blade Runner atmosphere, cinematic composition, highly detailed',
+    size: '1344x768',
+  },
+  noir: {
+    prompt: 'Film noir style, high contrast black and white, dramatic shadows, Venetian blind lighting, smoke and fog, gritty urban atmosphere, chiaroscuro, 1940s detective aesthetic, moody, cinematic, heavy grain',
+    size: '1344x768',
+  },
+  minimalist: {
+    prompt: 'Minimalist book cover design, clean negative space, bold typography, simple geometric shapes, limited color palette, modern design, iconic imagery, professional publishing quality',
+    size: '1344x768',
+  },
 };
 
 // ─── Job Progress Types ───────────────────────────────────────────────────────
