@@ -392,9 +392,9 @@ export default function AICoverDesigner() {
           </div>
 
           {/* Right Panel: Live Preview */}
-          <div className="flex-1 bg-[#161b1d]/30 flex flex-col items-center justify-center p-8 relative">
-            {/* Top Tools Overlay */}
-            <div className="absolute top-8 left-8 right-8 flex justify-between items-center">
+          <div className="flex-1 bg-[#161b1d]/30 flex flex-col relative min-w-0">
+            {/* Top Tools Overlay - Fixed at top */}
+            <div className="flex justify-between items-center p-4 border-b border-white/5 bg-black/20 backdrop-blur-sm z-10">
               <div className="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs font-medium flex items-center gap-2">
                 <span className="size-2 rounded-full bg-[#13c8ec] animate-pulse" />
                 LIVE PREVIEW
@@ -409,69 +409,74 @@ export default function AICoverDesigner() {
               </div>
             </div>
 
-            {/* Book Preview Canvas */}
-            <div className={`relative w-full max-w-[400px] ${getAspectRatioClass(aspectRatio)} group`}>
-              {/* Progress Bar Overlay */}
-              <AnimatePresence mode="wait">
-                {(isGenerating || progress > 0) && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute -top-10 left-0 right-0"
-                  >
-                    <div className="flex justify-between text-[10px] text-[#13c8ec] font-bold mb-1 tracking-widest">
-                      <span>GENERATING TEXTURES...</span>
-                      <span>{Math.round(progress)}%</span>
-                    </div>
-                    <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
-                      <motion.div
-                        className="bg-[#13c8ec] h-full shadow-[0_0_10px_#13c8ec]"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* Book Preview Canvas - Flexible center area */}
+            <div className="flex-1 flex items-center justify-center p-6 min-h-0 relative">
+              {/* Book Preview Canvas */}
+              <div className={`relative w-full max-w-[400px] ${getAspectRatioClass(aspectRatio)} group`}>
+                {/* Progress Bar Overlay - Inside the canvas area */}
+                <AnimatePresence mode="wait">
+                  {(isGenerating || progress > 0) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute top-4 left-4 right-4 z-10"
+                    >
+                      <div className="flex justify-between text-[10px] text-[#13c8ec] font-bold mb-1 tracking-widest">
+                        <span>GENERATING TEXTURES...</span>
+                        <span>{Math.round(progress)}%</span>
+                      </div>
+                      <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                        <motion.div
+                          className="bg-[#13c8ec] h-full shadow-[0_0_10px_#13c8ec]"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-              {/* The Cover Image */}
-              <div className="w-full h-full rounded-lg shadow-2xl shadow-cyan-900/20 bg-cover bg-center border border-white/10 relative overflow-hidden" style={{
-                backgroundImage: generatedImage
-                  ? `url("${generatedImage}")`
-                  : 'none'
-              }}>
-                {/* Overlay for "Empty" or "Processing" State */}
-                {!generatedImage && !isGenerating && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-12"
-                  >
-                    <Palette className="text-4xl text-[#13c8ec] mb-4" />
-                    <h4 className="text-xl font-bold">Regenerate Frame</h4>
-                    <p className="text-sm text-slate-300">Click the generate button to update this view with your current settings.</p>
-                  </motion.div>
-                )}
-                {isGenerating && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-12"
-                  >
-                    <Loader2 className="h-8 w-8 text-[#13c8ec] animate-spin mb-4" />
-                    <h4 className="text-xl font-bold">Generating Cover...</h4>
-                    <p className="text-sm text-slate-300">AI is crafting your cover...</p>
-                  </motion.div>
-                )}
+                {/* The Cover Image */}
+                <div className="w-full h-full rounded-lg shadow-2xl shadow-cyan-900/20 bg-cover bg-center border border-white/10 relative overflow-hidden" style={{
+                  backgroundImage: generatedImage
+                    ? `url("${generatedImage}")`
+                    : 'none'
+                }}>
+                  {/* Overlay for "Empty" or "Processing" State */}
+                  {!generatedImage && !isGenerating && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-8"
+                    >
+                      <Palette className="text-4xl text-[#13c8ec] mb-4" />
+                      <h4 className="text-xl font-bold">Regenerate Frame</h4>
+                      <p className="text-sm text-slate-300">Click the generate button to update this view with your current settings.</p>
+                    </motion.div>
+                  )}
+                  {isGenerating && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-8"
+                    >
+                      <Loader2 className="h-8 w-8 text-[#13c8ec] animate-spin mb-4" />
+                      <h4 className="text-xl font-bold">Generating Cover...</h4>
+                      <p className="text-sm text-slate-300">AI is crafting your cover...</p>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Spine & Back Shadow Visualizer */}
+                <div className="absolute top-0 -right-4 bottom-0 w-4 bg-gradient-to-l from-transparent to-black/30 rounded-r-lg" />
               </div>
+            </div>
 
-              {/* Spine & Back Shadow Visualizer */}
-              <div className="absolute top-0 -right-4 bottom-0 w-4 bg-gradient-to-l from-transparent to-black/30 rounded-r-lg" />
-
-              {/* Footer Action Bar */}
-              <div className="absolute bottom-8 left-8 right-8 flex items-center gap-4">
+            {/* Footer Action Bar - Fixed at bottom */}
+            <div className="p-4 border-t border-white/5 bg-black/20 backdrop-blur-sm z-10">
+              <div className="flex items-center gap-4 max-w-[400px] mx-auto">
                 <Button
                   onClick={handleGenerate}
                   disabled={isGenerating || !prompt.trim()}
@@ -493,7 +498,7 @@ export default function AICoverDesigner() {
                 <Button
                   onClick={handleApply}
                   disabled={!generatedImage}
-                  className="px-8 py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest"
+                  className="px-8 py-4 bg-white/5 border border-white/10 rounded-xl font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest whitespace-nowrap"
                 >
                   Apply to Project
                 </Button>
