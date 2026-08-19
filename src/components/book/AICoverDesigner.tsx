@@ -210,7 +210,7 @@ export default function AICoverDesigner() {
         </div>
       </header>
 
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex-1 flex overflow-hidden min-w-0">
         {/* Sidebar */}
         <aside className="w-64 border-r border-white/10 p-6 flex flex-col justify-between hidden lg:flex bg-black">
           <div className="flex flex-col gap-8">
@@ -251,10 +251,10 @@ export default function AICoverDesigner() {
           </div>
         </aside>
 
-        {/* Main Workspace */}
-        <section className="flex-1 flex overflow-hidden">
-          {/* Left Panel: Input & Styles */}
-          <div className="w-full lg:w-[45%] flex flex-col p-8 overflow-y-auto border-r border-white/10">
+        {/* Main Workspace - Column on mobile, Row on desktop */}
+        <section className="flex-1 flex flex-col lg:flex-row overflow-hidden min-w-0">
+          {/* Left Panel: Input & Styles - Full width on mobile, 40% on desktop (with sidebar) */}
+          <div className="w-full lg:w-[40%] flex flex-col p-8 overflow-y-auto border-r lg:border-white/10 lg:border-b-0 min-w-0">
             <div className="mb-8">
               <h2 className="text-3xl font-black tracking-tight mb-2">AI Cover Designer</h2>
               <p className="text-slate-400 text-sm">Craft high-fidelity book covers using generative art presets.</p>
