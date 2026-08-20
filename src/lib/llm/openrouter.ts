@@ -77,7 +77,7 @@ export interface CompletionOptions {
  * Generate a chat completion using OpenRouter REST API.
  */
 export async function generateCompletion(options: CompletionOptions): Promise<string> {
-  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 60000 } = options;
+  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 120000 } = options;
   const apiKey = getApiKey();
   const openrouterModel = model || getModel();
 

@@ -204,6 +204,11 @@ enum BookStatus {
   generating
   completed
   failed
+  outlining
+  awaiting_outline_approval
+  writing
+  awaiting_chapter_approval
+  finalizing
 }
 
 enum ChapterStatus {

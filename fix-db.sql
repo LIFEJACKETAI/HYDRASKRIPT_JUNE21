@@ -35,3 +35,6 @@ FOREIGN KEY ("jobId") REFERENCES jobs(id) ON DELETE SET NULL;
 -- Create index
 CREATE INDEX IF NOT EXISTS idx_editorial_reviews_book ON editorial_reviews("bookId");
 CREATE INDEX IF NOT EXISTS idx_editorial_reviews_owner ON editorial_reviews("ownerId");
+
+-- Add missing value to ChapterStatus enum (used by interactive chapter steering)
+ALTER TYPE "ChapterStatus" ADD VALUE IF NOT EXISTS 'awaiting_approval' BEFORE 'completed';
