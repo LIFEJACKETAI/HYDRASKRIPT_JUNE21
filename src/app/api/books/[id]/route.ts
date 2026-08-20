@@ -6,6 +6,7 @@ import { getAuthEmail } from '@/lib/auth-helpers';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
+import { refundOutstandingReservation } from '@/lib/utils/credits';
 
 // GET /api/books/[id] - Get a single book
 export async function GET(
@@ -63,6 +64,9 @@ export async function DELETE(
     
     const profile = await getOrCreateProfile(email);
     const { id: bookId } = await params;
+
+    // Refund any outstanding escrow reservation before the book (and its jobs) are deleted
+    await refundOutstandingReservation(bookId, 'Book deleted');
 
     const result = await db.book.delete({
       where: { id: bookId, ownerId: profile.id },

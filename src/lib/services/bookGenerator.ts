@@ -1,7 +1,7 @@
 // HydraSkript - Book Generator Service (Interactive Studio Version)
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
-import { reserveCredits, consumeCredits, refundCredits, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
+import { reserveCredits, consumeCredits, refundCredits, refundOutstandingReservation, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
 import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
 import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt } from '@/lib/llm/prompts';
 import { BookOutlineSchema, ChapterGenerationSchema, validateOrThrow } from '@/lib/llm/schema';
@@ -45,7 +45,7 @@ export async function startBookGeneration(
   } else {
     estimatedCredits = estimateBookCredits(
       book.targetAudience as TargetAudience,
-      defaults.chapterCount,
+      chapterCount,
       defaults.wordsPerChapter,
       isChildrenBook,
       false
@@ -111,7 +111,8 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
     const config = AUDIENCE_CONFIG[targetAudience];
     const coloringTheme = book.coloringTheme as ColoringTheme | null;
 
-    let chapterCount = config.defaultChapters;
+    // Use the user-selected chapter count; fall back to the audience default.
+    let chapterCount = book.chapterCount || config.defaultChapters;
     try {
       const existingOutline = JSON.parse(book.outline || '{}');
       if (existingOutline.requestedChapters) chapterCount = existingOutline.requestedChapters;
@@ -356,6 +357,7 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       data: { status: 'failed' }
     });
     await jobQueue.updateJobStatus(jobId, { status: 'failed', errorMessage: errMessage, progressMessage: `Failed: ${errMessage}` });
+    await refundOutstandingReservation(bookId, `Chapter generation failed: ${errMessage}`);
     throw error;
   }
 }
@@ -397,7 +399,17 @@ export async function finalizeBook(bookId: string, ownerId: string, jobId: strin
       }
     });
 
-    await consumeCredits(ownerId, totalCredits, jobId, 'Book generation completed');
+    // Settle the escrow reservation against the actual cost.
+    // The estimate was deducted at generation start; reconcile any difference.
+    const outlineJob = await db.job.findFirst({
+      where: { bookId, jobType: 'generate_outline', creditsReserved: { gt: 0 } },
+      select: { id: true },
+    });
+    if (outlineJob) {
+      await consumeCredits(ownerId, totalCredits, outlineJob.id, 'Book generation completed');
+    } else {
+      await consumeCredits(ownerId, totalCredits, jobId, 'Book generation completed');
+    }
     await jobQueue.updateJobStatus(jobId, {
       status: 'completed',
       progressMessage: 'Book completed! Your masterpiece is ready.',
@@ -410,6 +422,7 @@ export async function finalizeBook(bookId: string, ownerId: string, jobId: strin
     console.error("[Queue] BOOK FINALIZATION FAILED:", errMessage); // <-- ADDED LOGGING HERE
     await db.book.update({ where: { id: bookId }, data: { status: 'failed' } });
     await refundCredits(jobId, `Finalization failed: ${errMessage}`);
+    await refundOutstandingReservation(bookId, `Finalization failed: ${errMessage}`);
     await jobQueue.updateJobStatus(jobId, { status: 'failed', errorMessage: errMessage, progressMessage: `Failed: ${errMessage}` });
     throw error;
   }

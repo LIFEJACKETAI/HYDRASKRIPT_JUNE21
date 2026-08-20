@@ -5,6 +5,9 @@
 import { db } from '@/lib/db';
 import { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, type TargetAudience, type ColoringTheme } from '@/types';
 
+// Admin account that gets unlimited free generation (see consumeFromWallets).
+const ADMIN_FREE_EMAIL = 'admin@hydraskript.com';
+
 // ─── Credit Calculation ───────────────────────────────────────────────────────
 
 /**
@@ -193,7 +196,7 @@ async function consumeFromWallets(
   if (!profile) return { success: false, consumed: { monthly: 0, lifetime: 0, purchased: 0, legacy: 0 } };
 
   // ADMIN BYPASS: Unlimited credits for admin@hydraskript.com
-  if (profile.email === 'admin@hydraskript.com') {
+  if (profile.email === ADMIN_FREE_EMAIL) {
     await tx.creditLedger.create({
       data: {
         profileId,
@@ -301,11 +304,18 @@ export async function reserveCredits(
         return false; // Insufficient funds
       }
 
-      // Record reservation in ledger
+      // Hold the credits now (escrow): deduct from wallets so the
+      // balance visibly decreases as soon as generation starts.
+      const result = await consumeFromWallets(tx, profileId, amount, reason, jobId);
+      if (!result.success) {
+        return false;
+      }
+
+      // Record reservation marker so consumeCredits/refundCredits can settle
       await tx.creditLedger.create({
         data: {
           profileId,
-          amount: -amount,
+          amount: 0,
           reason: `RESERVED: ${reason}`,
           jobId,
         },
@@ -337,16 +347,63 @@ export async function consumeCredits(
 ): Promise<boolean> {
   try {
     return await db.$transaction(async (tx) => {
+      const job = await tx.job.findUnique({
+        where: { id: jobId },
+        select: { creditsReserved: true },
+      });
+
+      const reserved = job?.creditsReserved ?? 0;
+
+      if (reserved > 0) {
+        // Credits were already deducted at reservation time (escrow).
+        // Reconcile the difference between the actual cost and the reserved amount.
+        const diff = amount - reserved;
+
+        if (diff > 0) {
+          const result = await consumeFromWallets(tx, profileId, diff, `${reason} (adjustment)`, jobId);
+          if (!result.success) {
+            return false;
+          }
+        } else if (diff < 0) {
+          // Return the over-reserved portion (skipped for the free admin account)
+          const profile = await tx.profile.findUnique({
+            where: { id: profileId },
+            select: { email: true },
+          });
+          if (profile?.email !== ADMIN_FREE_EMAIL) {
+            await tx.profile.update({
+              where: { id: profileId },
+              data: { monthlyCredits: { increment: -diff } },
+            });
+            await tx.creditLedger.create({
+              data: {
+                profileId,
+                amount: -diff,
+                reason: `REFUND: ${reason} (adjustment)`,
+                jobId,
+              },
+            });
+          }
+        }
+
+        // Mark the reservation as consumed (prevents a later double-refund)
+        await tx.job.update({
+          where: { id: jobId },
+          data: { creditsConsumed: amount, creditsReserved: 0 },
+        });
+
+        return true;
+      }
+
+      // No prior reservation: consume directly from wallets
       const result = await consumeFromWallets(tx, profileId, amount, reason, jobId);
-      
       if (!result.success) {
         return false;
       }
 
-      // Update job's consumed amount
       await tx.job.update({
         where: { id: jobId },
-        data: { creditsConsumed: amount },
+        data: { creditsConsumed: amount, creditsReserved: 0 },
       });
 
       return true;
@@ -391,21 +448,29 @@ export async function refundCredits(
       }
 
       // Return credits to profile - add to monthlyCredits (expire monthly) or purchasedCredits
-      // For refunds, we add back to the most flexible wallet
-      await tx.profile.update({
+      // For refunds, we add back to the most flexible wallet.
+      // The free admin account never had credits deducted, so skip the refund.
+      const owner = await tx.profile.findUnique({
         where: { id: job.ownerId },
-        data: { monthlyCredits: { increment: job.creditsReserved } },
+        select: { email: true },
       });
 
-      // Record refund
-      await tx.creditLedger.create({
-        data: {
-          profileId: job.ownerId,
-          amount: job.creditsReserved,
-          reason: `REFUND: ${reason}`,
-          jobId,
-        },
-      });
+      if (owner?.email !== ADMIN_FREE_EMAIL) {
+        await tx.profile.update({
+          where: { id: job.ownerId },
+          data: { monthlyCredits: { increment: job.creditsReserved } },
+        });
+
+        // Record refund
+        await tx.creditLedger.create({
+          data: {
+            profileId: job.ownerId,
+            amount: job.creditsReserved,
+            reason: `REFUND: ${reason}`,
+            jobId,
+          },
+        });
+      }
 
       // Reset job reserved amount
       await tx.job.update({
@@ -417,6 +482,27 @@ export async function refundCredits(
     });
   } catch (error) {
     console.error('[Credits] Refund failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Refund any outstanding escrow reservation for a book's outline job.
+ * Prevents credits from being stranded if a book fails mid-flow
+ * (after outline approval but before finalization).
+ */
+export async function refundOutstandingReservation(bookId: string, reason: string): Promise<boolean> {
+  try {
+    const outlineJob = await db.job.findFirst({
+      where: { bookId, creditsReserved: { gt: 0 } },
+      select: { id: true },
+    });
+    if (!outlineJob) {
+      return true;
+    }
+    return refundCredits(outlineJob.id, reason);
+  } catch (error) {
+    console.error('[Credits] Refund outstanding reservation failed:', error);
     return false;
   }
 }
