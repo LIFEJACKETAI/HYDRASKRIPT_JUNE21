@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useState } from 'react';
 import { FOUNDER_PACK, getFounderOfferStatus } from '@/config/founderPack';
 
 type FounderPackCTAProps = {
@@ -9,6 +9,29 @@ type FounderPackCTAProps = {
 
 export function FounderPackCTA({ soldCount }: FounderPackCTAProps) {
   const offer = getFounderOfferStatus(soldCount);
+  const [startingCheckout, setStartingCheckout] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const handleBecomeFounder = async () => {
+    setStartingCheckout(true);
+    setCheckoutError(null);
+    try {
+      const response = await fetch('/api/checkout/founder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const result = await response.json();
+      if (result.success && result.data?.checkoutUrl) {
+        window.location.href = result.data.checkoutUrl;
+        return;
+      }
+      setCheckoutError(result.error || 'Unable to start Founder checkout.');
+    } catch {
+      setCheckoutError('Failed to start Founder checkout. Please try again.');
+    } finally {
+      setStartingCheckout(false);
+    }
+  };
   const progressPercent = Math.min(
     100,
     Math.round((soldCount / FOUNDER_PACK.totalSlots) * 100)
@@ -191,12 +214,21 @@ export function FounderPackCTA({ soldCount }: FounderPackCTAProps) {
             </div>
 
             {offer.available ? (
-              <Link
-                href="/api/checkout/founder"
-                className="inline-flex rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 px-8 py-4 text-lg font-bold text-white transition hover:opacity-90"
+              <button
+                type="button"
+                onClick={handleBecomeFounder}
+                disabled={startingCheckout}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 px-8 py-4 text-lg font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Become a Founder
-              </Link>
+                {startingCheckout ? (
+                  <>
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    Starting checkout…
+                  </>
+                ) : (
+                  'Become a Founder'
+                )}
+              </button>
             ) : (
               <button
                 disabled
@@ -204,6 +236,9 @@ export function FounderPackCTA({ soldCount }: FounderPackCTAProps) {
               >
                 Founder Offer Closed
               </button>
+            )}
+            {checkoutError && (
+              <p className="mt-3 text-sm font-medium text-red-400">{checkoutError}</p>
             )}
           </div>
 

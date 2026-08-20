@@ -123,6 +123,82 @@ export async function fulfillPaymentBySession(session: Stripe.Checkout.Session) 
   });
 }
 
+export async function fulfillFounderSale(session: Stripe.Checkout.Session) {
+  const profileId = session.metadata?.profileId;
+  const founderPriceCents = session.metadata?.founderPrice;
+  const founderPhase = session.metadata?.founderPhase;
+
+  if (!profileId || !founderPriceCents) {
+    throw new Error('Founder session metadata is incomplete');
+  }
+
+  const priceCents = parseInt(founderPriceCents, 10);
+  if (![39900, 49900].includes(priceCents)) {
+    throw new Error(`Unexpected founder price: ${founderPriceCents}`);
+  }
+
+  // Idempotent: a profile can only claim one Founder slot.
+  const existing = await db.founderSale.findUnique({ where: { profileId } });
+  if (existing) return existing;
+
+  return db.$transaction(async (tx) => {
+    const soldCount = await tx.founderSale.count();
+    const founderNumber = soldCount + 1;
+
+    await tx.profile.update({
+      where: { id: profileId },
+      data: {
+        tier: 'founder',
+        isLifetime: true,
+        founderBadge: true,
+        founderNumber,
+        monthlyCreditAllowance: 500,
+        monthlyCredits: 500,
+        monthlyCreditsLastGrantedAt: new Date(),
+        audiobookEnabled: false,
+      },
+    });
+
+    await tx.founderSale.create({
+      data: {
+        profileId,
+        founderNumber,
+        pricePaidCents: priceCents,
+        stripeCheckoutSessionId: session.id,
+        stripePaymentIntentId:
+          typeof session.payment_intent === 'string' ? session.payment_intent : null,
+      },
+    });
+
+    await tx.payment.create({
+      data: {
+        profileId,
+        pricingKey: 'founder',
+        provider: 'stripe',
+        mode: 'payment',
+        status: 'paid',
+        stripeSessionId: session.id,
+        stripeCustomerId: typeof session.customer === 'string' ? session.customer : null,
+        amountCents: priceCents,
+        creditsGranted: 500,
+        tierApplied: 'founder',
+        fulfilledAt: new Date(),
+      },
+    });
+
+    await tx.creditLedger.create({
+      data: {
+        profileId,
+        amount: 500,
+        reason:
+          founderPhase === 'early_bird'
+            ? 'Founder Early Bird activation — 500 monthly credits'
+            : 'Founder Lifetime activation — 500 monthly credits',
+      },
+    });
+  });
+}
+
 export async function syncPaymentInvoice(params: {
   sessionId?: string | null;
   invoiceId?: string | null;

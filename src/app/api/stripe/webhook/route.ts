@@ -4,6 +4,7 @@ import {
   getStripeClient,
   getStripeWebhookSecret,
   fulfillPaymentBySession,
+  fulfillFounderSale,
   syncPaymentInvoice,
 } from '@/lib/stripe';
 
@@ -23,7 +24,12 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        await fulfillPaymentBySession(session);
+        const metadata = session.metadata ?? {};
+        if (metadata.founderPhase || metadata.founderPrice) {
+          await fulfillFounderSale(session);
+        } else {
+          await fulfillPaymentBySession(session);
+        }
         break;
       }
       case 'invoice.payment_succeeded': {

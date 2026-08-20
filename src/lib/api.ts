@@ -192,6 +192,7 @@ export async function getJob(jobId: string): Promise<JobData | null> {
 export interface CreditsData {
   credits: number;
   tier: string;
+  founderCount?: number;
   recentTransactions: {
     id: string;
     amount: number;

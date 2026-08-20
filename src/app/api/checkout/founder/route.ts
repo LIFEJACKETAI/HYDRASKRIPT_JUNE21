@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
         price: process.env[offer.stripePriceEnvKey]!,
         quantity: 1,
       }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/founder/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/pricing?canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/?checkout=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3002'}/?checkout=cancelled`,
       metadata: {
         profileId: profile.id,
         founderPrice: offer.priceCents.toString(),

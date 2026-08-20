@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
 
     const balance = await getCreditBalance(profile.id);
 
+    const founderCount = await db.founderSale.count();
+
     const recentLedger = await db.creditLedger.findMany({
       where: { profileId: profile.id },
       orderBy: { createdAt: 'desc' },
@@ -26,6 +28,7 @@ export async function GET(request: NextRequest) {
       data: {
         credits: balance,
         tier: profile.tier,
+        founderCount,
         recentTransactions: recentLedger.map((entry) => ({
           id: entry.id,
           amount: entry.amount,
