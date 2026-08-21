@@ -42,8 +42,9 @@ async function withRetry<T>(
       lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`[LLM] OpenRouter Attempt ${attempt}/${maxAttempts} failed:`, lastError.message);
 
-      // Don't retry on 404 (model not found) or 401 (auth error)
-      if (lastError.message.includes('404') || lastError.message.includes('401')) {
+      // Don't retry on 404 (model not found), 401 (auth error), or timeout
+      // (let fallback.ts switch providers instead of burning the full timeout again)
+      if (lastError.message.includes('404') || lastError.message.includes('401') || lastError.message.includes('timed out')) {
         throw lastError;
       }
 
@@ -77,7 +78,7 @@ export interface CompletionOptions {
  * Generate a chat completion using OpenRouter REST API.
  */
 export async function generateCompletion(options: CompletionOptions): Promise<string> {
-  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 120000 } = options;
+  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 300000 } = options;
   const apiKey = getApiKey();
   const openrouterModel = model || getModel();
 
@@ -133,7 +134,7 @@ export async function generateCompletion(options: CompletionOptions): Promise<st
 // ─── Structured JSON Completion ───────────────────────────────────────────────
 
 export async function generateJSON<T>(options: CompletionOptions): Promise<T> {
-  const jsonInstruction = 'IMPORTANT: Respond with valid JSON only. No markdown, no code fences, no extra text, no commentary. Just the JSON object matching the expected schema.';
+  const jsonInstruction = 'IMPORTANT: Respond with valid JSON only. Do NOT reason, think out loud, or explain your process. Do not use markdown, code fences, or any commentary before or after the JSON. Output the JSON object immediately, matching the expected schema.';
   
   const messages: ChatMessage[] = [
     ...options.messages,
@@ -144,48 +145,59 @@ export async function generateJSON<T>(options: CompletionOptions): Promise<T> {
     ...options,
     messages,
     temperature: options.temperature ?? 0.1, // Lower temperature for more reliable JSON
-    maxTokens: options.maxTokens,
+    maxTokens: options.maxTokens ?? 8192, // Enough for full chapters without truncating the JSON
     model: options.model,
   });
 
   // Robust JSON extraction
   let jsonStr = response.trim();
-  
-  // Try to extract from markdown code fences
-  const codeFenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (codeFenceMatch) {
-    jsonStr = codeFenceMatch[1].trim();
-  }
-  
+
   // Try direct parse
   try {
     return JSON.parse(jsonStr) as T;
-  } catch {
-    // Try to find JSON object in the response
-    const firstBrace = jsonStr.indexOf('{');
-    const lastBrace = jsonStr.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      try {
-        return JSON.parse(jsonStr.slice(firstBrace, lastBrace + 1)) as T;
-      } catch {
-        // Continue to fallback
-      }
-    }
-    
-    // Try to find JSON array
-    const firstBracket = jsonStr.indexOf('[');
-    const lastBracket = jsonStr.lastIndexOf(']');
-    if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
-      try {
-        return JSON.parse(jsonStr.slice(firstBracket, lastBracket + 1)) as T;
-      } catch {
-        // Continue to error
-      }
-    }
-    
-    console.error('[LLM] Failed to parse JSON from OpenRouter response:', jsonStr.slice(0, 500));
-    throw new Error(`Failed to parse LLM JSON response: ${jsonStr.slice(0, 200)}...`);
+  } catch {}
+
+  // Try to extract from markdown code fences
+  const codeFenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeFenceMatch) {
+    const fenced = codeFenceMatch[1].trim();
+    try { return JSON.parse(fenced) as T; } catch {}
   }
+
+  // The model may emit a "thinking process" preamble or trailing prose around the
+  // JSON. Scan for the first balanced JSON object/array that actually parses —
+  // this safely skips any commentary and handles nested objects (outline) too.
+  const extractBalanced = (s: string): unknown | null => {
+    for (let i = 0; i < s.length; i++) {
+      if (s[i] !== '{' && s[i] !== '[') continue;
+      let depth = 0;
+      let inStr = false;
+      let esc = false;
+      let end = -1;
+      for (let j = i; j < s.length; j++) {
+        const c = s[j];
+        if (inStr) {
+          if (esc) esc = false;
+          else if (c === '\\') esc = true;
+          else if (c === '"') inStr = false;
+        } else {
+          if (c === '"') inStr = true;
+          else if (c === '{' || c === '[') depth++;
+          else if (c === '}' || c === ']') { depth--; if (depth === 0) { end = j; break; } }
+        }
+      }
+      if (end !== -1) {
+        try { return JSON.parse(s.slice(i, end + 1)); } catch {}
+      }
+    }
+    return null;
+  };
+
+  const balanced = extractBalanced(jsonStr);
+  if (balanced !== null) return balanced as T;
+
+  console.error('[LLM] Failed to parse JSON from OpenRouter response:', jsonStr.slice(0, 500));
+  throw new Error(`Failed to parse LLM JSON response: ${jsonStr.slice(0, 200)}...`);
 }
 
 // ─── Convenience Functions ──────────────────────────────────────────────────

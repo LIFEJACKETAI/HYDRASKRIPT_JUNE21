@@ -22,8 +22,8 @@ export type ValidatedOutline = z.infer<typeof BookOutlineSchema>;
 
 export const ChapterGenerationSchema = z.object({
   content: z.string().min(50, 'Chapter content must be at least 50 characters'),
-  charactersIntroduced: z.array(z.string()),
-  summaryForNextChapter: z.string().min(10, 'Summary must be at least 10 characters'),
+  charactersIntroduced: z.array(z.string()).catch([]),
+  summaryForNextChapter: z.string().catch(''),
 });
 
 export type ValidatedChapter = z.infer<typeof ChapterGenerationSchema>;

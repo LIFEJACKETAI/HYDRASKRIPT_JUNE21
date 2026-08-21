@@ -269,13 +269,20 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
     const rawResult = await askLLMJSONWithFallback<unknown>(fullSystemPrompt, chapterUser, 0.7);
     const chapterResult = validateOrThrow(ChapterGenerationSchema, rawResult);
 
+    // If the model omitted the continuity summary, derive one from the chapter ending
+    let summaryForNext = chapterResult.summaryForNextChapter;
+    if (!summaryForNext || summaryForNext.length < 10) {
+      const sentences = chapterResult.content.match(/[^.!?]+[.!?]+/g) ?? [];
+      summaryForNext = (sentences.slice(-2).join(' ').trim() || chapterResult.content.slice(-200)).slice(0, 400);
+    }
+
     await db.chapter.update({
       where: { id: chapter.id },
       data: {
         content: chapterResult.content,
         wordCount: chapterResult.content.split(/\s+/).length,
         charactersIntroduced: JSON.stringify(chapterResult.charactersIntroduced),
-        summaryForNext: chapterResult.summaryForNextChapter,
+        summaryForNext,
         status: 'awaiting_approval', // New state for interactive steering
       },
     });
