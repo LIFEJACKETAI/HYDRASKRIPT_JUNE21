@@ -452,28 +452,32 @@ class PersistentJobQueue {
   }
 }
 
-// Singleton enforcement - prevent multiple queue instances
-let queueInstance: PersistentJobQueue | null = null;
-let initializationPromise: Promise<PersistentJobQueue> | null = null;
+// Singleton enforcement - prevent multiple queue instances.
+// Stored on globalThis so Next.js dev (which loads this module in separate
+// instances for instrumentation vs route handlers) shares ONE queue.
+const globalForQueue = globalThis as unknown as {
+  __hydraQueue?: PersistentJobQueue;
+  __hydraQueueInit?: Promise<PersistentJobQueue>;
+};
 
 export function getJobQueue(): PersistentJobQueue {
-  if (!queueInstance) {
-    queueInstance = new PersistentJobQueue();
+  if (!globalForQueue.__hydraQueue) {
+    globalForQueue.__hydraQueue = new PersistentJobQueue();
   }
-  return queueInstance;
+  return globalForQueue.__hydraQueue;
 }
 
 export async function initializeJobQueue(): Promise<PersistentJobQueue> {
-  if (initializationPromise) return initializationPromise;
-  
-  initializationPromise = (async () => {
+  if (globalForQueue.__hydraQueueInit) return globalForQueue.__hydraQueueInit;
+
+  globalForQueue.__hydraQueueInit = (async () => {
     const queue = getJobQueue();
     await queue.bootstrap();
     queue.startLoop();
     return queue;
   })();
 
-  return initializationPromise;
+  return globalForQueue.__hydraQueueInit;
 }
 
 // Backward compatibility
