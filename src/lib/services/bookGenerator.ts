@@ -2,13 +2,64 @@
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits, consumeCredits, refundCredits, refundOutstandingReservation, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
-import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
+import { askLLMJSONWithFallback, askLLMWithFallback } from '@/lib/llm/fallback';
 import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt } from '@/lib/llm/prompts';
-import { BookOutlineSchema, ChapterGenerationSchema, validateOrThrow } from '@/lib/llm/schema';
+import { BookOutlineSchema, validateOrThrow } from '@/lib/llm/schema';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
 import { getStyleSystemPrompt } from '@/lib/services/styleAnalyzer';
 import type { TargetAudience, Genre, ColoringTheme } from '@/types';
 import { AUDIENCE_CONFIG, COLORING_THEMES } from '@/types';
+
+/**
+ * Normalize raw chapter prose from the LLM into clean content.
+ * Handles the common cases where a small model still wraps output in JSON or
+ * markdown fences, or prepends a redundant title line.
+ */
+function cleanChapterText(raw: string, chapterTitle: string): string {
+  let text = raw.trim();
+
+  // Strip markdown code fences if the model added them anyway
+  const fence = text.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
+  if (fence) text = fence[1].trim();
+
+  // If it came back as JSON, try to recover the chapter text from it
+  if (text.startsWith('{')) {
+    // 1) Valid JSON with a usable content field — ideal case
+    try {
+      const parsed = JSON.parse(text) as { content?: unknown };
+      if (typeof parsed.content === 'string' && parsed.content.trim().length >= 50) {
+        return parsed.content.trim();
+      }
+    } catch {
+      // malformed JSON — fall through to extraction below
+    }
+
+    // 2) Malformed JSON (e.g. {"content":"title", "Chapter 1...", "prose..."}).
+    //    Grab the longest quoted string — that is almost always the real prose.
+    const quoted = [...text.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((m) =>
+      m[1].replace(/\\"/g, '"')
+    );
+    const longest = quoted
+      .filter((s) => s.trim().length >= 50)
+      .sort((a, b) => b.length - a.length)[0];
+    if (longest) return longest.trim();
+
+    // 3) Last resort: strip the outer braces/brackets and use what's left
+    const stripped = text.replace(/^[\[{]+/, '').replace(/[\]}]+$/, '').trim();
+    if (stripped.length >= 50) return stripped;
+  }
+
+  // Plain prose: drop a leading line that is just the chapter title (redundant with UI)
+  const lines = text.split(/\r?\n/);
+  if (
+    lines.length > 1 &&
+    lines[0].trim().toLowerCase() === chapterTitle.trim().toLowerCase()
+  ) {
+    text = lines.slice(1).join('\n').trim();
+  }
+
+  return text;
+}
 
 /**
  * Initial entry point to start the book generation process.
@@ -266,8 +317,17 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       chapterUser = getChapterUserPrompt(chapter.title, chapter.synopsis, chapter.wordTarget);
     }
 
-    const rawResult = await askLLMJSONWithFallback<unknown>(fullSystemPrompt, chapterUser, 0.7);
-    const chapterResult = validateOrThrow(ChapterGenerationSchema, rawResult);
+    const rawText = (await askLLMWithFallback(fullSystemPrompt, chapterUser, 0.7, 8192)).trim();
+    if (rawText.length < 50) {
+      throw new Error(`Chapter generation returned insufficient content (${rawText.length} chars)`);
+    }
+
+    const content = cleanChapterText(rawText, chapter.title);
+    const chapterResult = {
+      content,
+      charactersIntroduced: [] as string[],
+      summaryForNextChapter: '',
+    };
 
     // If the model omitted the continuity summary, derive one from the chapter ending
     let summaryForNext = chapterResult.summaryForNextChapter;

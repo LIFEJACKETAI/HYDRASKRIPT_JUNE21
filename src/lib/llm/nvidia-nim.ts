@@ -203,7 +203,9 @@ export async function generateJSON<T>(options: CompletionOptions): Promise<T> {
 export async function askLLM(
   systemPrompt: string,
   userPrompt: string,
-  temperature: number = 0.7
+  temperature: number = 0.7,
+  model?: string,
+  maxTokens?: number
 ): Promise<string> {
   return generateCompletion({
     messages: [
@@ -211,6 +213,8 @@ export async function askLLM(
       { role: 'user', content: userPrompt },
     ],
     temperature,
+    model,
+    maxTokens,
   });
 }
 

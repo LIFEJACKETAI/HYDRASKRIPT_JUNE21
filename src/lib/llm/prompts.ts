@@ -99,12 +99,7 @@ export function getChapterWritePrompt(
 
 ${continuityNote}${characterNote}
 
-IMPORTANT: Respond with valid JSON only in this exact format:
-{
-  "content": "The full chapter text here...",
-  "charactersIntroduced": ["Character Name - brief description"],
-  "summaryForNextChapter": "A 2-3 sentence summary of how this chapter ends, for continuity with the next chapter"
-}
+Write the COMPLETE chapter as continuous prose. Output ONLY the chapter text — no JSON, no markdown, no code fences, no commentary, and no separate "title" or "summary" lines. Begin directly with the narrative.
 
 Writing guidelines:
 - Write compelling, vivid prose that pulls the reader in
@@ -123,7 +118,7 @@ export function getChapterUserPrompt(
 
 Chapter synopsis: ${synopsis}
 
-Write the complete chapter now. Remember: output valid JSON with content, charactersIntroduced, and summaryForNextChapter fields.`;
+Write the complete chapter now as plain prose. Output ONLY the chapter text.`;
 }
 
 // ─── Style Analysis ───────────────────────────────────────────────────────────
