@@ -3,10 +3,11 @@ import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits, consumeCredits, refundCredits, refundOutstandingReservation, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
 import { askLLMJSONWithFallback, askLLMWithFallback } from '@/lib/llm/fallback';
-import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt } from '@/lib/llm/prompts';
-import { BookOutlineSchema, validateOrThrow } from '@/lib/llm/schema';
+import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt, getManuscriptImportPrompt } from '@/lib/llm/prompts';
+import { BookOutlineSchema, validateOrThrow, ManuscriptImportSchema } from '@/lib/llm/schema';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
 import { getStyleSystemPrompt } from '@/lib/services/styleAnalyzer';
+import { truncateManuscript } from '@/lib/manuscript';
 import type { TargetAudience, Genre, ColoringTheme } from '@/types';
 import { AUDIENCE_CONFIG, COLORING_THEMES } from '@/types';
 
@@ -430,6 +431,90 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
 }
 
 /**
+ * PHASE 3.5: Auto Story Bible & Universe population
+ * After the book is fully written, extract its lore (characters, locations,
+ * objects, themes, history) from the manuscript and persist Story Bible
+ * entities for this book. The Universe & Series Architect reads these entities
+ * across every book, so populating the Story Bible automatically feeds the
+ * Universe view as well. Best-effort: failures are logged but never block
+ * finalization.
+ */
+async function generateStoryBibleFromBook(bookId: string, ownerId: string): Promise<void> {
+  try {
+    const book = await db.book.findUnique({
+      where: { id: bookId },
+      include: { chapters: { orderBy: { index: 'asc' } } },
+    });
+    if (!book) return;
+
+    // Assemble a manuscript from the outline + every written chapter.
+    const parts: string[] = [`# ${book.title}`];
+    if (book.description) parts.push(book.description);
+    try {
+      const outline = JSON.parse(book.outline || '{}');
+      if (Array.isArray(outline.chapters)) {
+        for (const ch of outline.chapters) {
+          parts.push(`\n## ${ch.title}\n${ch.synopsis ?? ''}`);
+        }
+      }
+    } catch {}
+    for (const ch of book.chapters ?? []) {
+      if (ch.content && ch.content.trim().length > 50) {
+        parts.push(`\n## ${ch.title}\n${ch.content}`);
+      }
+    }
+
+    const manuscript = truncateManuscript(parts.join('\n'));
+    if (!manuscript || manuscript.length < 200) {
+      console.log(`[StoryBible] Book ${bookId} has too little content to auto-populate. Skipping.`);
+      return;
+    }
+
+    const validated = await askLLMJSONWithFallback<unknown>(
+      getManuscriptImportPrompt(),
+      manuscript,
+      0.2
+    );
+    const parsed = validateOrThrow(ManuscriptImportSchema, validated);
+
+    // Skip entities that already exist for this book (idempotent re-runs).
+    const existing = await db.storyBibleEntity.findMany({
+      where: { bookId },
+      select: { kind: true, name: true },
+    });
+    const seen = new Set(existing.map((e) => `${e.kind}:${e.name.toLowerCase()}`));
+
+    const toCreate = parsed.entities
+      .slice(0, 60)
+      .filter((e) => e.name && e.name.trim())
+      .filter((e) => !seen.has(`${e.kind}:${e.name.toLowerCase()}`))
+      .map((e) => ({
+        ownerId,
+        bookId,
+        kind: e.kind,
+        name: e.name.trim(),
+        role: e.role ?? '',
+        summary: e.summary ?? '',
+        motivation: e.motivation ?? '',
+        description: e.description ?? '',
+        physicalTraits: JSON.stringify({ tags: e.tags ?? [], notes: '' }),
+        secrets: JSON.stringify({ confidential: '', isPrivate: true }),
+      }));
+
+    if (toCreate.length === 0) {
+      console.log(`[StoryBible] No new entities to create for book ${bookId}.`);
+      return;
+    }
+
+    await db.storyBibleEntity.createMany({ data: toCreate });
+    console.log(`[StoryBible] Auto-created ${toCreate.length} Story Bible entities for book ${bookId}`);
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[StoryBible] Auto-population failed (non-fatal):', msg);
+  }
+}
+
+/**
  * PHASE 3: Final Assembly
  * Completes the book, generates the cover, and charges credits.
  */
@@ -465,6 +550,10 @@ export async function finalizeBook(bookId: string, ownerId: string, jobId: strin
         totalCreditsCharged: totalCredits
       }
     });
+
+    // Auto-populate the Story Bible (and therefore the Universe) for this book
+    // from the finished manuscript. Non-fatal — never blocks completion.
+    await generateStoryBibleFromBook(bookId, ownerId);
 
     // Settle the escrow reservation against the actual cost.
     // The estimate was deducted at generation start; reconcile any difference.
