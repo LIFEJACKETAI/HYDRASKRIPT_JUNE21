@@ -33,6 +33,7 @@ ensureDir(path.join(STORAGE_DIR, 'covers'));
 ensureDir(path.join(STORAGE_DIR, 'illustrations'));
 ensureDir(path.join(STORAGE_DIR, 'pdfs'));
 ensureDir(path.join(STORAGE_DIR, 'audio'));
+ensureDir(path.join(STORAGE_DIR, 'listings'));
 
 // ─── File Operations ──────────────────────────────────────────────────────────
 

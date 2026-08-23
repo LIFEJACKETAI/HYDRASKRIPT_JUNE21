@@ -47,6 +47,7 @@ model Profile {
   storyBible            StoryBibleEntity[]
   editorialReviews      EditorialReview[]
   founderSale           FounderSale?
+  bookListings          BookListing[]
 
   @@map("profiles")
 }
@@ -328,4 +329,30 @@ model EditorialReview {
   job   Job?  @relation(fields: [jobId], references: [id], onDelete: SetNull)
 
   @@map("editorial_reviews")
+}
+
+// ─── Bookstore Listings ───────────────────────────────────────────────────────
+// Author-submitted books listed for sale in the Bookstore marketplace.
+
+model BookListing {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId     String   @db.Uuid
+  title       String
+  author      String   @default("")
+  description String   @default("")
+  price       Float    @default(0) // USD
+  format      String   @default("ebook") // ebook, audiobook, both
+  fileName    String?  // Original uploaded filename
+  fileUrl     String?  // Public URL of the uploaded file (stored under /assets/listings)
+  coverUrl    String?  // Optional cover image URL
+  status      String   @default("active") // active, draft, removed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([status])
+  @@map("book_listings")
 }

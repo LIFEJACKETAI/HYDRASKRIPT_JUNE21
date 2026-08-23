@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
@@ -1004,6 +1004,7 @@ export default function HomePage() {
   function BookstoreView() {
     const [activeTab, setActiveTab] = useState<'browse' | 'sell'>('browse');
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
 
     const categories = ['all', 'fiction', 'non-fiction', 'romance', 'mystery', 'fantasy', 'sci-fi', 'children', 'audiobook'];
 
@@ -1015,6 +1016,143 @@ export default function HomePage() {
       { id: 5, title: 'The Silent Observer', author: 'Robert K. Hayes', price: 7.99, format: 'audiobook', cover: '🎵', rating: 4.6, sales: 4102 },
       { id: 6, title: 'Digital Nomad Handbook', author: 'Alex Rivera', price: 2.99, format: 'ebook', cover: '📙', rating: 4.4, sales: 8765 },
     ];
+
+    // ── Sell tab state ──
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [title, setTitle] = useState('');
+    const [author, setAuthor] = useState('');
+    const [format, setFormat] = useState('ebook');
+    const [price, setPrice] = useState('');
+    const [description, setDescription] = useState('');
+    const [file, setFile] = useState<File | null>(null);
+    const [dragOver, setDragOver] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [formMsg, setFormMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+    const [myListings, setMyListings] = useState<Array<{ id: string; title: string; author: string; price: number; format: string; fileName: string | null; createdAt: string }>>([]);
+
+    type MarketBook = { id: string; title: string; author: string; price: number; format: string; createdAt: string };
+    const [marketListings, setMarketListings] = useState<MarketBook[] | null>(null);
+    const [marketLoading, setMarketLoading] = useState(true);
+
+    const SUPPORTED = ['pdf', 'epub', 'mp3', 'm4b', 'txt', 'docx'];
+    const MAX_BYTES = 500 * 1024 * 1024;
+
+    const loadMyListings = useCallback(async () => {
+      try {
+        const res = await fetch('/api/bookstore/listings?scope=mine');
+        const json = await res.json();
+        if (json.success) setMyListings(json.data ?? []);
+      } catch {
+        /* non-fatal */
+      }
+    }, []);
+
+    const loadMarketListings = useCallback(async () => {
+      try {
+        const res = await fetch('/api/bookstore/listings?scope=market');
+        const json = await res.json();
+        if (json.success) setMarketListings(json.data ?? []);
+        else setMarketListings([]);
+      } catch {
+        setMarketListings([]);
+      } finally {
+        setMarketLoading(false);
+      }
+    }, []);
+
+    useEffect(() => {
+      if (activeTab === 'sell') loadMyListings();
+      else loadMarketListings();
+    }, [activeTab, loadMyListings, loadMarketListings]);
+
+    // Map real listings (or fall back to sample books) into the card shape,
+    // then apply the search box and category filter.
+    const displayBooks = useMemo(() => {
+      const coverFor = (fmt: string) => (fmt === 'audiobook' ? '🎧' : fmt === 'both' ? '📚' : '📘');
+
+      const real = (marketListings ?? []).map((l) => ({
+        id: l.id,
+        title: l.title,
+        author: l.author || 'Unknown author',
+        price: l.price.toFixed(2),
+        format: l.format,
+        cover: coverFor(l.format),
+        createdAt: l.createdAt,
+        isSample: false,
+        rating: 0,
+        sales: 0,
+      }));
+
+      const sample = featuredBooks.map((b) => ({ ...b, price: b.price.toFixed(2), isSample: true as const, createdAt: '' }));
+      const source = real.length > 0 ? real : sample;
+
+      const q = searchTerm.trim().toLowerCase();
+      return source.filter((b) => {
+        const matchesSearch =
+          !q ||
+          b.title.toLowerCase().includes(q) ||
+          (b.author ?? '').toLowerCase().includes(q);
+        const matchesCategory =
+          selectedCategory === 'all' ||
+          (selectedCategory === 'audiobook'
+            ? b.format === 'audiobook' || b.format === 'both'
+            : b.format !== 'audiobook');
+        return matchesSearch && matchesCategory;
+      });
+    }, [marketListings, featuredBooks, searchTerm, selectedCategory]);
+
+    function pickFile(f: File | null) {
+      if (!f) return;
+      const ext = f.name.split('.').pop()?.toLowerCase() ?? '';
+      if (!SUPPORTED.includes(ext)) {
+        setFormMsg({ type: 'err', text: `Unsupported file type ".${ext}". Use PDF, EPUB, MP3, M4B, TXT, or DOCX.` });
+        return;
+      }
+      if (f.size > MAX_BYTES) {
+        setFormMsg({ type: 'err', text: 'File exceeds the 500MB limit.' });
+        return;
+      }
+      setFile(f);
+      setFormMsg(null);
+    }
+
+    async function submitListing(e: React.FormEvent) {
+      e.preventDefault();
+      setFormMsg(null);
+      if (!title.trim()) return setFormMsg({ type: 'err', text: 'Book title is required.' });
+      if (!file) return setFormMsg({ type: 'err', text: 'Please choose a file to upload.' });
+      const numericPrice = parseFloat(price);
+      if (isNaN(numericPrice) || numericPrice < 0) {
+        return setFormMsg({ type: 'err', text: 'Please enter a valid price.' });
+      }
+
+      setSubmitting(true);
+      try {
+        const body = new FormData();
+        body.append('title', title.trim());
+        body.append('author', author.trim());
+        body.append('format', format);
+        body.append('price', String(numericPrice));
+        body.append('description', description);
+        body.append('file', file);
+
+        const res = await fetch('/api/bookstore/listings', { method: 'POST', body });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Upload failed');
+
+        setFormMsg({ type: 'ok', text: `Listed "${json.data.title}" for sale!` });
+        setTitle(''); setAuthor(''); setPrice(''); setDescription(''); setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        loadMyListings();
+      } catch (err) {
+        setFormMsg({ type: 'err', text: err instanceof Error ? err.message : 'Upload failed' });
+      } finally {
+        setSubmitting(false);
+      }
+    }
+
+    const formatIcon = (fmt: string) =>
+      fmt === 'audiobook' ? '🎧' : fmt === 'both' ? '📚' : '📘';
 
     return (
       <div className="space-y-6">
@@ -1033,59 +1171,114 @@ export default function HomePage() {
         </div>
 
         {activeTab === 'sell' ? (
+          <div className="space-y-6">
           <Card className="bg-[#2a2a2a] border-emerald-500/30">
             <CardHeader>
               <CardTitle className="text-white text-lg">List Your Book for Sale</CardTitle>
               <p className="text-xs text-slate-500 mt-1">Upload your ebook (PDF, EPUB) or audiobook (MP3, M4B) and set your price.</p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-400">Book Title</label>
-                  <input type="text" placeholder="Enter your book title" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
+            <CardContent>
+              <form onSubmit={submitListing} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-400">Book Title</label>
+                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter your book title" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-400">Author Name</label>
+                    <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Your name or pen name" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-400">Format</label>
+                    <select value={format} onChange={(e) => setFormat(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                      <option value="ebook">Ebook (PDF, EPUB)</option>
+                      <option value="audiobook">Audiobook (MP3, M4B)</option>
+                      <option value="both">Both</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-400">Price (USD)</label>
+                    <input type="number" min="0.99" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="9.99" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-xs font-medium text-slate-400">Description</label>
+                    <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe your book..." className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 resize-none" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-400">Author Name</label>
-                  <input type="text" placeholder="Your name or pen name" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-400">Format</label>
-                  <select className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                    <option value="ebook">Ebook (PDF, EPUB)</option>
-                    <option value="audiobook">Audiobook (MP3, M4B)</option>
-                    <option value="both">Both</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-400">Price (USD)</label>
-                  <input type="number" min="0.99" step="0.01" placeholder="9.99" className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500" />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs font-medium text-slate-400">Description</label>
-                  <textarea rows={3} placeholder="Describe your book..." className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 resize-none" />
-                </div>
-              </div>
 
-              <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center">
-                <Upload className="h-8 w-8 mx-auto text-slate-600 mb-2" />
-                <p className="text-sm text-slate-400">Drag and drop your files here, or click to browse</p>
-                <p className="text-[10px] text-slate-600 mt-1">PDF, EPUB, MP3, M4B — Max 500MB</p>
-                <Button variant="ghost" size="sm" className="mt-3 text-emerald-400 hover:text-emerald-300">Choose files</Button>
-              </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.epub,.mp3,.m4b,.txt,.docx"
+                  className="hidden"
+                  onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+                />
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => { e.preventDefault(); setDragOver(false); pickFile(e.dataTransfer.files?.[0] ?? null); }}
+                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${dragOver ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 hover:border-emerald-500/50'}`}
+                >
+                  <Upload className="h-8 w-8 mx-auto text-slate-600 mb-2" />
+                  {file ? (
+                    <p className="text-sm text-emerald-300 font-medium">{file.name} <span className="text-slate-500">({(file.size / 1024 / 1024).toFixed(1)} MB)</span></p>
+                  ) : (
+                    <>
+                      <p className="text-sm text-slate-400">Drag and drop your files here, or click to browse</p>
+                      <p className="text-[10px] text-slate-600 mt-1">PDF, EPUB, MP3, M4B, TXT, DOCX — Max 500MB</p>
+                    </>
+                  )}
+                  <Button type="button" variant="ghost" size="sm" className="mt-3 text-emerald-400 hover:text-emerald-300">Choose files</Button>
+                </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <p className="text-[10px] text-slate-600">You keep 85% of every sale. We handle hosting and payments.</p>
-                <Button className="bg-emerald-600 hover:bg-emerald-500 text-white">List for Sale</Button>
-              </div>
+                {formMsg && (
+                  <p className={`text-xs ${formMsg.type === 'ok' ? 'text-emerald-400' : 'text-red-400'}`}>{formMsg.text}</p>
+                )}
+
+                <div className="flex items-center justify-between pt-2">
+                  <p className="text-[10px] text-slate-600">You keep 85% of every sale. We handle hosting and payments.</p>
+                  <Button type="submit" disabled={submitting} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+                    {submitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading...</> : 'List for Sale'}
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </Card>
+
+          {/* My listings */}
+          <div>
+            <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">Your Listings</h2>
+            {myListings.length === 0 ? (
+              <p className="text-xs text-slate-500">No books listed yet. Upload one above to see it here.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {myListings.map((b) => (
+                  <div key={b.id} className="rounded-xl border border-white/10 overflow-hidden bg-[#0d0d10]">
+                    <div className="aspect-[3/4] bg-gradient-to-br from-emerald-900/30 to-cyan-900/30 flex items-center justify-center text-5xl">
+                      {formatIcon(b.format)}
+                    </div>
+                    <div className="p-3 space-y-1">
+                      <h3 className="text-sm font-bold text-white truncate">{b.title}</h3>
+                      <p className="text-[10px] text-slate-500">{b.author || 'Unknown author'}</p>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-sm font-bold text-emerald-400">${b.price.toFixed(2)}</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 uppercase">{b.format}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          </div>
         ) : (
           <>
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                <input type="text" placeholder="Search titles, authors..." className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500" />
+                <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search titles, authors..." className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500" />
               </div>
               <div className="flex flex-wrap gap-2">
                 {categories.map(cat => (
@@ -1097,29 +1290,45 @@ export default function HomePage() {
             </div>
 
             {/* Book Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {featuredBooks.map(book => (
-                <div key={book.id} className="group rounded-xl border border-white/10 overflow-hidden bg-[#0d0d10] hover:border-emerald-500/50 transition-all">
-                  <div className="aspect-[3/4] bg-gradient-to-br from-emerald-900/30 to-cyan-900/30 flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
-                    {book.cover}
-                  </div>
-                  <div className="p-3 space-y-1">
-                    <h3 className="text-sm font-bold text-white truncate">{book.title}</h3>
-                    <p className="text-[10px] text-slate-500">{book.author}</p>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-sm font-bold text-emerald-400">${book.price}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 uppercase">{book.format}</span>
+            {marketLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[3/4] rounded-xl bg-white/5" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {displayBooks.length === 0 ? (
+                  <p className="col-span-full text-sm text-slate-500 text-center py-16">No books listed yet. Be the first to sell!</p>
+                ) : (
+                  displayBooks.map(book => (
+                    <div key={book.id} className="group rounded-xl border border-white/10 overflow-hidden bg-[#0d0d10] hover:border-emerald-500/50 transition-all">
+                      <div className="aspect-[3/4] bg-gradient-to-br from-emerald-900/30 to-cyan-900/30 flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
+                        {book.cover}
+                      </div>
+                      <div className="p-3 space-y-1">
+                        <h3 className="text-sm font-bold text-white truncate">{book.title}</h3>
+                        <p className="text-[10px] text-slate-500">{book.author}</p>
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-sm font-bold text-emerald-400">${book.price}</span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 uppercase">{book.format}</span>
+                        </div>
+                        {book.isSample ? (
+                          <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                            <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                            <span>{book.rating}</span>
+                            <span className="text-slate-600">·</span>
+                            <span>{book.sales.toLocaleString()} sold</span>
+                          </div>
+                        ) : (
+                          <p className="text-[10px] text-slate-600">Listed {new Date(book.createdAt).toLocaleDateString()}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-[10px] text-slate-500">
-                      <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-                      <span>{book.rating}</span>
-                      <span className="text-slate-600">·</span>
-                      <span>{book.sales.toLocaleString()} sold</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  ))
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
