@@ -52,6 +52,58 @@ export interface ReviewWindow {
   text: string;
 }
 
+/**
+ * Create and enqueue an Editorial (Universe) review for a book or manuscript.
+ * Idempotent per book: if a non-failed review already exists for the book, the
+ * existing review id is returned and no new job is enqueued. Callers should
+ * treat any thrown error as non-fatal (best-effort auto-population).
+ */
+export async function enqueueEditorialReview(params: {
+  ownerId: string;
+  bookId: string | null;
+  scope: 'book' | 'manuscript';
+  sourceLabel: string;
+  sourceText: string;
+}): Promise<string | null> {
+  if (params.bookId) {
+    const existing = await db.editorialReview.findFirst({
+      where: { bookId: params.bookId, status: { in: ['queued', 'active', 'completed'] } },
+      select: { id: true },
+    });
+    if (existing) return existing.id;
+  }
+
+  const text =
+    params.sourceText.length > MAX_REVIEW_CHARS
+      ? params.sourceText.slice(0, MAX_REVIEW_CHARS)
+      : params.sourceText;
+  if (!text.trim()) return null;
+
+  const review = await db.editorialReview.create({
+    data: {
+      ownerId: params.ownerId,
+      bookId: params.bookId,
+      scope: params.scope,
+      sourceLabel: params.sourceLabel,
+      status: 'queued',
+      sourceText: text,
+      textLength: text.length,
+    },
+  });
+
+  const jobId = await jobQueue.createJob({
+    bookId: params.bookId ?? undefined,
+    ownerId: params.ownerId,
+    jobType: 'editorial_review',
+    creditsReserved: 0,
+  });
+
+  await db.editorialReview.update({ where: { id: review.id }, data: { jobId } });
+  await jobQueue.startJob(jobId, 'editorial_review');
+
+  return review.id;
+}
+
 export async function assembleBooksManuscript(bookIds: string[], ownerId: string): Promise<string> {
   const books = await db.book.findMany({
     where: { id: { in: bookIds }, ownerId },

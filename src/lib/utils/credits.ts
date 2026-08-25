@@ -5,8 +5,18 @@
 import { db } from '@/lib/db';
 import { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, type TargetAudience, type ColoringTheme } from '@/types';
 
-// Admin account that gets unlimited free generation (see consumeFromWallets).
-const ADMIN_FREE_EMAIL = 'admin@hydraskript.com';
+// Accounts that get unlimited free generation (see consumeFromWallets).
+// Configured via the ADMIN_FREE_EMAIL env var (comma-separated). When unset,
+// no account bypasses credit enforcement. Prefer gating on a role flag instead.
+const ADMIN_FREE_EMAILS = (process.env.ADMIN_FREE_EMAIL ?? '')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+function isAdminFreeEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return ADMIN_FREE_EMAILS.includes(email.trim().toLowerCase());
+}
 
 // ─── Credit Calculation ───────────────────────────────────────────────────────
 
@@ -195,8 +205,8 @@ async function consumeFromWallets(
 
   if (!profile) return { success: false, consumed: { monthly: 0, lifetime: 0, purchased: 0, legacy: 0 } };
 
-  // ADMIN BYPASS: Unlimited credits for admin@hydraskript.com
-  if (profile.email === ADMIN_FREE_EMAIL) {
+  // ADMIN BYPASS: Unlimited credits for configured admin emails
+  if (isAdminFreeEmail(profile.email)) {
     await tx.creditLedger.create({
       data: {
         profileId,
@@ -370,7 +380,7 @@ export async function consumeCredits(
             where: { id: profileId },
             select: { email: true },
           });
-          if (profile?.email !== ADMIN_FREE_EMAIL) {
+          if (!isAdminFreeEmail(profile?.email)) {
             await tx.profile.update({
               where: { id: profileId },
               data: { monthlyCredits: { increment: -diff } },
@@ -455,7 +465,7 @@ export async function refundCredits(
         select: { email: true },
       });
 
-      if (owner?.email !== ADMIN_FREE_EMAIL) {
+      if (!isAdminFreeEmail(owner?.email)) {
         await tx.profile.update({
           where: { id: job.ownerId },
           data: { monthlyCredits: { increment: job.creditsReserved } },

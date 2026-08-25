@@ -742,7 +742,7 @@ function ExportHubView() {
   const handleExport = async (bookId: string, format: string) => {
     setExporting(`${bookId}-${format}`);
     try {
-      const result = await exportBook(bookId);
+      const result = await exportBook(bookId, format);
       if (result.success && result.data?.downloadUrl) {
         window.open(result.data.downloadUrl, '_blank');
         toast({ title: `Export ready`, description: `Your ${format.toUpperCase()} download has started.` });

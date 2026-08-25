@@ -39,12 +39,14 @@
     "node_modules",
     ".next",
     "HYDRASKRIPT_220526",
+    "HYDRASKRIPT_JUNE21",
     "hydraskript_stitch_50_50_1",
     "hydraskript_stitch_50_50_2",
     "examples",
     "download",
     "upload",
     "mini-services",
+    "tests",
     "test_audiobook_pipeline.ts",
     "test_audiobook_pipeline.js"
   ]

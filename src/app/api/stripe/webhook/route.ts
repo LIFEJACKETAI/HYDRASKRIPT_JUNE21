@@ -6,6 +6,7 @@ import {
   fulfillPaymentBySession,
   fulfillFounderSale,
   syncPaymentInvoice,
+  fulfillSubscriptionRenewal,
 } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
@@ -41,6 +42,17 @@ export async function POST(request: NextRequest) {
           && typeof invoice.parent.subscription_details.subscription === 'string'
           ? invoice.parent.subscription_details.subscription
           : null;
+
+        // Renewal invoices grant recurring credits; the initial invoice was
+        // already credited at checkout (fulfillPaymentBySession).
+        const billingReason = (invoice as { billing_reason?: string }).billing_reason;
+        if (billingReason === 'subscription_cycle' && subscriptionId) {
+          await fulfillSubscriptionRenewal({
+            subscriptionId,
+            invoiceId: invoice.id,
+            amountCents: invoice.amount_paid,
+          });
+        }
 
         await syncPaymentInvoice({
           invoiceId: invoice.id,

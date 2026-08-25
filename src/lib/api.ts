@@ -31,7 +31,9 @@ async function apiFetch<T>(
     }
 
     const result = await response.json();
-    console.log(`[API DEBUG] ${path} →`, response.status, result);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[API DEBUG] ${path} →`, response.status, result);
+    }
     return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Network error';
@@ -159,9 +161,10 @@ export async function startGeneration(bookId: string) {
   );
 }
 
-export async function exportBook(bookId: string) {
-  return apiFetch<{ downloadUrl: string }>(`/books/${bookId}/export`, {
+export async function exportBook(bookId: string, format: string = 'pdf') {
+  return apiFetch<{ downloadUrl: string; format: string }>(`/books/${bookId}/export`, {
     method: 'POST',
+    body: JSON.stringify({ format }),
   });
 }
 

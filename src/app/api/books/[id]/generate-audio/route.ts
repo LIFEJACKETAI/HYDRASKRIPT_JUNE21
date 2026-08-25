@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthEmail } from '@/lib/auth-helpers';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
-import { calculateAudiobookCost, consumeCredits, getCreditBalances } from '@/lib/utils/credits';
+import { calculateAudiobookCost, reserveCredits, getCreditBalances } from '@/lib/utils/credits';
 import { db } from '@/lib/db';
 
 export async function POST(
@@ -93,13 +93,24 @@ export async function POST(
       result: JSON.stringify({ voiceId, totalWords }),
     });
 
-    // Reserve credits
-    const reserved = await consumeCredits(profile.id, cost, jobId, 'Audiobook generation');
+    // Reserve credits (escrow). This is what actually deducts from the wallet;
+    // consumeCredits later only reconciles the diff to zero.
+    const reserved = await reserveCredits(profile.id, cost, jobId, 'Audiobook generation');
     if (!reserved) {
-      // This shouldn't happen since we checked, but just in case
+      // Insufficient credits: remove the orphaned job so the active queue does
+      // not pick it up and generate an audiobook for free.
+      await db.job.delete({ where: { id: jobId } }).catch(() => {});
       return NextResponse.json(
-        { success: false, error: 'Failed to reserve credits' },
-        { status: 500 }
+        {
+          success: false,
+          error: 'Insufficient credits',
+          data: {
+            required: cost,
+            available: balances.total,
+            shortfall: cost - balances.total,
+          },
+        },
+        { status: 402 }
       );
     }
 

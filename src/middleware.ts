@@ -8,9 +8,12 @@ const PROTECTED_PATHS = [
   '/training',
 ];
 
+// API paths that must remain reachable without a session (Stripe webhooks,
+// health checks). Stripe calls /api/stripe/webhook from outside the app, so it
+// must never be subjected to the auth gate.
 const PUBLIC_API_PATHS = [
-  '/api/route',
   '/api/health',
+  '/api/stripe/webhook',
 ];
 
 function isProtectedPath(pathname: string) {

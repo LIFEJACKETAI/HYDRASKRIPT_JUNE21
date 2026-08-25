@@ -16,12 +16,12 @@ The app currently validates with:
 
 ### Important build note
 
-`output: 'standalone'` was removed from `next.config.js` because the current Next 16 middleware build path was failing with a missing `middleware.js.nft.json` artifact during production builds.
+`output: 'standalone'` was removed from `next.config.js` because the current Next 15 middleware build path was failing with a missing `middleware.js.nft.json` artifact during production builds.
 
 HydraSkript now uses the stable production flow:
 
 - `next build`
-- `next start -p 3000`
+- `next start -p 3002`
 
 ---
 
@@ -29,7 +29,7 @@ HydraSkript now uses the stable production flow:
 
 | Layer | Technology |
 | :--- | :--- |
-| Framework | Next.js 16 (App Router) |
+| Framework | Next.js 15 (App Router) |
 | Language | TypeScript 5 |
 | Database | Supabase PostgreSQL via Prisma |
 | Auth | Supabase Auth + `@supabase/ssr` |
@@ -156,7 +156,7 @@ npm run dev
 
 App runs at:
 
-- `http://localhost:3000`
+- `http://localhost:3002`
 
 ---
 
@@ -249,7 +249,7 @@ docker build -t hydraskript .
 ### Run container
 
 ```bash
-docker run -p 3000:3000 --env-file .env.local hydraskript
+docker run -p 3002:3002 --env-file .env.local hydraskript
 ```
 
 ### Current Docker behavior
@@ -298,10 +298,10 @@ docker compose up --build
 
 ### Current compose behavior
 
-- binds to `3000:3000`
+- binds to `3002:3002`
 - loads `.env`
 - includes health check:
-  - `http://localhost:3000/api/health`
+  - `http://localhost:3002/api/health`
 
 ---
 
@@ -398,7 +398,7 @@ After deployment, test this order:
 
 ## Known Build Note
 
-The app intentionally does **not** use `output: 'standalone'` right now because of an upstream Next 16 middleware artifact issue affecting builds.
+The app intentionally does **not** use `output: 'standalone'` right now because of an upstream Next 15 middleware artifact issue affecting builds.
 
 Current validated production flow is:
 

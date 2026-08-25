@@ -35,3 +35,4 @@ Tracking
 dev.log
 *.log
 .vercel
+.env*

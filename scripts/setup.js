@@ -10,11 +10,12 @@ const envPath = path.join(root, '.env');
 const examplePath = path.join(root, '.env.example');
 
 if (!fs.existsSync(envPath)) {
-  console.log('[setup] No .env found — generating from .env.example...');
-  const dbPath = path.join(root, 'prisma', 'dev.db');
-  const envContent = `DATABASE_URL="file:${dbPath}"\n`;
-  fs.writeFileSync(envPath, envContent);
-  console.log(`[setup] Created .env with DATABASE_URL pointing to ${dbPath}`);
+  if (fs.existsSync(examplePath)) {
+    fs.copyFileSync(examplePath, envPath);
+    console.log('[setup] Created .env from .env.example (Postgres DATABASE_URL placeholder). Edit it with your Supabase credentials before running db push.');
+  } else {
+    console.log('[setup] No .env or .env.example found. Create .env with your Supabase Postgres DATABASE_URL.');
+  }
 } else {
   console.log('[setup] .env already exists — skipping creation.');
 }

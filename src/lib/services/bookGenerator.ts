@@ -7,6 +7,7 @@ import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapt
 import { BookOutlineSchema, validateOrThrow, ManuscriptImportSchema } from '@/lib/llm/schema';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
 import { getStyleSystemPrompt } from '@/lib/services/styleAnalyzer';
+import { assembleBooksManuscript, enqueueEditorialReview } from '@/lib/services/editorialReview';
 import { truncateManuscript } from '@/lib/manuscript';
 import type { TargetAudience, Genre, ColoringTheme } from '@/types';
 import { AUDIENCE_CONFIG, COLORING_THEMES } from '@/types';
@@ -554,6 +555,24 @@ export async function finalizeBook(bookId: string, ownerId: string, jobId: strin
     // Auto-populate the Story Bible (and therefore the Universe) for this book
     // from the finished manuscript. Non-fatal — never blocks completion.
     await generateStoryBibleFromBook(bookId, ownerId);
+
+    // Auto-populate the Universe (Editorial Review) for this generated book
+    // from the finished manuscript. Non-fatal — never blocks completion.
+    try {
+      const manuscript = await assembleBooksManuscript([bookId], ownerId);
+      if (manuscript && manuscript.trim().length > 0) {
+        await enqueueEditorialReview({
+          ownerId,
+          bookId,
+          scope: 'book',
+          sourceLabel: book.title,
+          sourceText: manuscript,
+        });
+        console.log(`[Universe] Auto-enqueued editorial review for book ${bookId}`);
+      }
+    } catch (e) {
+      console.error('[Universe] Auto-review enqueue failed (non-fatal):', e);
+    }
 
     // Settle the escrow reservation against the actual cost.
     // The estimate was deducted at generation start; reconcile any difference.

@@ -19,12 +19,9 @@ export default function AuthForm() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    console.log('[Auth] Starting...', { email, isSignUp });
 
     try {
       if (isSignUp) {
-        console.log('[Auth] Calling signUp...');
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -33,8 +30,6 @@ export default function AuthForm() {
           },
         });
 
-        console.log('[Auth] SignUp Response:', { data, error });
-
         if (error) throw error;
 
         toast({
@@ -42,20 +37,16 @@ export default function AuthForm() {
           description: 'We sent a confirmation link.',
         });
       } else {
-        console.log('[Auth] Calling signInWithPassword...');
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-
-        console.log('[Auth] SignIn Response:', { data, error });
         if (error) throw error;
 
         toast({ title: 'Welcome back!' });
         window.location.href = '/';
       }
     } catch (error: any) {
-      console.error('[Auth] CRITICAL ERROR:', error);
       toast({
         title: 'Authentication failed',
         description: error.message || 'Please check your credentials',

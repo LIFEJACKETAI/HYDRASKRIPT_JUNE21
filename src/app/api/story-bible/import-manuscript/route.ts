@@ -10,6 +10,7 @@ import { extractTextFromManuscript, SUPPORTED_MANUSCRIPT_EXTENSIONS, truncateMan
 import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
 import { ManuscriptImportSchema, validateOrThrow } from '@/lib/llm/schema';
 import { getManuscriptImportPrompt } from '@/lib/llm/prompts';
+import { enqueueEditorialReview } from '@/lib/services/editorialReview';
 
 export async function POST(request: NextRequest) {
   try {
@@ -85,6 +86,21 @@ export async function POST(request: NextRequest) {
     }, {});
 
     console.log(`[API/story-bible/import-manuscript] Created ${created.length} entities for "${file.name}"`, counts);
+
+    // Auto-populate the Universe (Editorial Review) for this uploaded manuscript.
+    // Non-fatal — never blocks the import response.
+    try {
+      await enqueueEditorialReview({
+        ownerId: profile.id,
+        bookId,
+        scope: 'manuscript',
+        sourceLabel: file.name,
+        sourceText: manuscript,
+      });
+      console.log(`[Universe] Auto-enqueued editorial review for uploaded manuscript (book ${bookId})`);
+    } catch (e) {
+      console.error('[Universe] Auto-review enqueue failed (non-fatal):', e);
+    }
 
     return NextResponse.json({
       success: true,

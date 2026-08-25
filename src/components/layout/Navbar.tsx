@@ -5,14 +5,22 @@ import { Menu, X, LogOut, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/lib/store';
 import { getUserEmail, setUserEmail } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Navbar() {
   const { currentView, setCurrentView, sidebarOpen, setSidebarOpen, profile } = useAppStore();
   const email = profile?.email || '';
 
-  const handleSignOut = () => {
-    setCurrentView('landing');
-    useAppStore.getState().setProfile(null);
+  const handleSignOut = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('[Navbar] signOut failed:', error);
+    } finally {
+      useAppStore.getState().setProfile(null);
+      setCurrentView('landing');
+    }
   };
 
   if (currentView === 'landing') return null;

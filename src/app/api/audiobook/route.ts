@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { CREDIT_COSTS } from '@/types';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
+import { reserveCredits } from '@/lib/utils/credits';
 
 const SUPPORTED_UPLOAD_EXTENSIONS = new Set(['txt', 'pdf', 'docx']);
 
@@ -263,12 +264,20 @@ export async function POST(request: NextRequest) {
       creditsReserved: creditCost,
     });
 
+    const reserved = await reserveCredits(profile.id, creditCost, jobId, 'Audiobook generation');
+    if (!reserved) {
+      // Insufficient credits: remove the orphaned job so the (now-active) queue
+      // does not pick it up and generate an audiobook for free.
+      await db.job.delete({ where: { id: jobId } }).catch(() => {});
+      return NextResponse.json(
+        { success: false, error: 'Insufficient credits', data: { required: creditCost } },
+        { status: 402 }
+      );
+    }
+
     console.log(`[API/audiobook] Created job ${jobId} for book "${bookTitle}" (${chapterList.length} chapters, voice: ${voiceId}${uploadedFileName ? `, upload: ${uploadedFileName}` : ''})`);
 
     // ── Enqueue async worker ───────────────────────────────────────────────────
-
-    const profileId = profile.id;
-    const resolvedBookId = bookId;
 
     jobQueue.startJob(jobId, 'generate_audiobook');
 

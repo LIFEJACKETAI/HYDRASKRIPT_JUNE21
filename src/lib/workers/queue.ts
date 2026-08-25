@@ -219,7 +219,6 @@ class PersistentJobQueue {
         const queuedJob = await tx.job.findFirst({
           where: {
             status: 'queued',
-            retryCount: { lte: tx.job.fields.maxRetries },
           },
           orderBy: { createdAt: 'asc' },
         });

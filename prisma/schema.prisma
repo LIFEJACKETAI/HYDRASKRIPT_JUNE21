@@ -101,6 +101,7 @@ model Book {
   storyBible       StoryBibleEntity[]
   editorialReviews EditorialReview[]
 
+  @@index([ownerId])
   @@map("books")
 }
 
@@ -176,6 +177,9 @@ model MediaAsset {
   owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   book  Book?   @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
+  @@index([bookId])
+  @@index([ownerId])
+  @@index([assetType])
   @@map("media_assets")
 }
 
@@ -255,6 +259,9 @@ model Job {
   creditLedger     CreditLedger[]
   editorialReviews EditorialReview[]
 
+  @@index([status, leaseExpiresAt])
+  @@index([ownerId])
+  @@index([bookId])
   @@map("jobs")
 }
 
@@ -270,6 +277,8 @@ model CreditLedger {
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   job     Job?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
 
+  @@index([profileId])
+  @@index([jobId])
   @@map("credit_ledger")
 }
 
@@ -313,22 +322,49 @@ model FounderSale {
 }
 
 model EditorialReview {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  bookId      String   @db.Uuid
-  ownerId     String   @db.Uuid
-  jobId       String?  @db.Uuid
-  status      String   @default("queued") // queued, active, completed, failed
-  feedback    String   @default("") // JSON string of review feedback
-  score       Int?     // Overall quality score
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId      String   @db.Uuid
+  bookId       String?  @db.Uuid
+  jobId        String?  @db.Uuid
+  scope        String // 'book' | 'manuscript'
+  sourceLabel  String
+  status       String   @default("queued") // queued, active, completed, failed
+  textLength   Int      @default(0)
+  errorMessage String?
+  sourceText   String?
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  book  Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  owner Profile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  job   Job?  @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  book     Book?             @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  owner    Profile           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  job      Job?              @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  findings EditorialFinding[]
 
+  @@index([ownerId, createdAt])
   @@map("editorial_reviews")
+}
+
+model EditorialFinding {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reviewId    String   @db.Uuid
+  severity    String
+  category    String
+  title       String
+  description String
+  quote       String   @default("")
+  location    String   @default("")
+  bookTitle   String   @default("")
+  suggestion  String   @default("")
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+
+  // Relations
+  review EditorialReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@map("editorial_findings")
 }
 
 // ─── Bookstore Listings ───────────────────────────────────────────────────────

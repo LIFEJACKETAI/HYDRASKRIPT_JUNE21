@@ -225,3 +225,59 @@ export async function syncPaymentInvoice(params: {
     },
   });
 }
+
+/**
+ * Grant recurring credits when a subscription invoice is paid.
+ * Idempotent per invoice. Only call this for renewal invoices
+ * (billing_reason === 'subscription_cycle'); the initial invoice is already
+ * credited by fulfillPaymentBySession at checkout time.
+ */
+export async function fulfillSubscriptionRenewal(params: {
+  subscriptionId: string;
+  invoiceId: string;
+  amountCents?: number | null;
+}): Promise<boolean> {
+  if (!params.subscriptionId || !params.invoiceId) return false;
+
+  // One credit grant per invoice (idempotent across webhook retries).
+  const existing = await db.payment.findFirst({
+    where: { stripeInvoiceId: params.invoiceId },
+  });
+  if (existing) return true;
+
+  // Locate the original subscription payment to derive profile + plan.
+  const original = await db.payment.findFirst({
+    where: { stripeSubscriptionId: params.subscriptionId, mode: 'subscription' },
+  });
+  if (!original) return false; // not a tracked subscription (e.g. one-time Founder sale)
+
+  const pricingKey = original.pricingKey as PricingKey | undefined;
+  const pricing = pricingKey ? PRICING_CONFIG[pricingKey] : undefined;
+  if (!pricing) return false;
+
+  const credits = pricing.credits;
+  const added = await addCredits(
+    original.profileId,
+    credits,
+    `Stripe subscription renewal: ${pricing.label}`,
+    'monthly'
+  );
+  if (!added) return false;
+
+  await db.payment.create({
+    data: {
+      profileId: original.profileId,
+      pricingKey: pricingKey ?? 'subscription',
+      provider: 'stripe',
+      mode: 'subscription',
+      status: 'paid',
+      stripeInvoiceId: params.invoiceId,
+      stripeSubscriptionId: params.subscriptionId,
+      amountCents: params.amountCents ?? 0,
+      creditsGranted: credits,
+      fulfilledAt: new Date(),
+    },
+  });
+
+  return true;
+}
