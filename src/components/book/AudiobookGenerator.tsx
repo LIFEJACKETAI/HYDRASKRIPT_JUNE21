@@ -192,24 +192,27 @@ function GenerationDisplay({ jobId, selectedVoice, onComplete, onError }: Genera
   // Poll for job updates every 3 seconds
   useEffect(() => {
     let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     async function poll() {
       const data = await getJob(jobId);
       if (!cancelled && data) {
         setJob(data);
         if (data.status === 'completed') {
+          if (interval) clearInterval(interval);
           onCompleteRef.current(data);
         } else if (data.status === 'failed') {
+          if (interval) clearInterval(interval);
           onErrorRef.current(data.errorMessage || 'Audiobook generation failed.');
         }
       }
     }
 
     poll();
-    const interval = setInterval(poll, 3000);
+    interval = setInterval(poll, 3000);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [jobId]);
 

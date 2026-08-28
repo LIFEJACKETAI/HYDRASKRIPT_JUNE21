@@ -40,24 +40,27 @@ export default function GenerationProgress({ jobId, genre, estimatedDuration, on
 
   useEffect(() => {
     let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     async function poll() {
       const data = await getJob(jobId);
       if (!cancelled && data) {
         setJob(data);
         if (data.status === 'completed') {
+          if (interval) clearInterval(interval);
           onCompleteRef.current?.();
         } else if (data.status === 'failed') {
+          if (interval) clearInterval(interval);
           onErrorRef.current?.(data.errorMessage || 'Generation failed');
         }
       }
     }
 
     poll();
-    const interval = setInterval(poll, 2000);
+    interval = setInterval(poll, 2000);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
   }, [jobId]);
 
