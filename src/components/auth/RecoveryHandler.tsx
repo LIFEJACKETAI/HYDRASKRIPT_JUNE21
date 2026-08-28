@@ -2,12 +2,11 @@
 
 import { useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 export function RecoveryHandler() {
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {

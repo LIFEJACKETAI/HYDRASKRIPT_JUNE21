@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { RecoveryHandler } from "@/components/auth/RecoveryHandler";
+import RouteTransitionIndicator from "@/components/layout/RouteTransitionIndicator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
       >
         <RecoveryHandler />
         {children}
+        <RouteTransitionIndicator />
         <Toaster />
       </body>
     </html>

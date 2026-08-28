@@ -14,7 +14,7 @@ const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'hydraskr
 
 function isSupabaseStorageEnabled() {
   return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.SUPABASE_URL &&
     process.env.SUPABASE_SERVICE_ROLE_KEY &&
     SUPABASE_STORAGE_BUCKET
   );

@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Replace the default Next.js dev indicator (the small box with the "N"/"h"
+  // mark at the bottom-left during route navigation) with our own branded one.
+  devIndicators: false,
   // pdfkit is a server-only dependency. We mark it as an external on the
   // server so it is required at runtime from node_modules rather than
   // bundled. This preserves the package's internal `__dirname`-based
