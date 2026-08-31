@@ -1,5 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,10 +33,22 @@ export default function AuthForm() {
 
         if (error) throw error;
 
-        toast({
-          title: 'Check your email!',
-          description: 'We sent a confirmation link.',
-        });
+        if (data.user && !data.session) {
+          // User needs to confirm their email
+          toast({
+            title: 'Check your email!',
+            description: 'We sent a confirmation link. Please check your inbox to activate your account.',
+          });
+          // Optionally redirect to login page
+          router.push('/login?signup=confirmed&email=' + encodeURIComponent(email));
+        } else if (data.session) {
+          // Account created and confirmed immediately
+          toast({
+            title: 'Welcome!',
+            description: 'Your account has been created successfully.',
+          });
+          router.push('/');
+        }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -44,7 +57,8 @@ export default function AuthForm() {
         if (error) throw error;
 
         toast({ title: 'Welcome back!' });
-        window.location.href = '/';
+        // FIXED: Use router.push for proper navigation
+        router.push('/');
       }
     } catch (error: any) {
       toast({
