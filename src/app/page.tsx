@@ -973,10 +973,16 @@ export default function HomePage() {
             setProfile(prof);
             setCurrentView('dashboard');
             setSidebarOpen(true);
+          } else {
+            toast({
+              title: 'Session issue',
+              description: 'We could not load your profile. If this persists, try logging in again.',
+              variant: 'destructive',
+            });
           }
         }
       } catch (error) {
-        console.log('User not authenticated, staying on landing page.');
+        console.log('User not authenticated, staying on landing page.', error);
       } finally {
         setInitialized(true);
       }

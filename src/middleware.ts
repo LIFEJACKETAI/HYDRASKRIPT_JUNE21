@@ -26,33 +26,45 @@ function isPublicApiPath(pathname: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const { supabaseResponse, user } = await updateSession(request);
+  
+  try {
+    const { supabaseResponse, user } = await updateSession(request);
 
-  const isAPI = pathname.startsWith('/api');
+    const isAPI = pathname.startsWith('/api');
 
-  // Handle protected paths - if user is authenticated, allow access
-  if (!isProtectedPath(pathname) || isPublicApiPath(pathname)) {
-    return supabaseResponse;
-  }
-
-  // Always return JSON responses for unauthorized API access
-  // This ensures apiFetch receives valid JSON instead of HTML redirects
-  if (!user) {
-    if (isAPI) {
-      // Return JSON for API routes to prevent HTML parsing errors
-      return NextResponse.json({
-        success: false,
-        error: 'Authentication required'
-      }, { status: 401 });
+    // Handle protected paths - if user is authenticated, allow access
+    if (!isProtectedPath(pathname) || isPublicApiPath(pathname)) {
+      return supabaseResponse;
     }
 
-    // For non-API routes, redirect to login page
+    // Always return JSON responses for unauthorized API access
+    // This ensures apiFetch receives valid JSON instead of HTML redirects
+    if (!user) {
+      if (isAPI) {
+        // Return JSON for API routes to prevent HTML parsing errors
+        return NextResponse.json({
+          success: false,
+          error: 'Authentication required'
+        }, { status: 401 });
+      }
+
+      // For non-API routes, redirect to login page
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('next', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    return supabaseResponse;
+  } catch (error) {
+    console.error('[Middleware] Error:', error);
+    const isAPI = pathname.startsWith('/api');
+    if (isAPI) {
+      return NextResponse.json({ success: false, error: 'Authentication error' }, { status: 500 });
+    }
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('next', pathname);
     return NextResponse.redirect(loginUrl);
   }
-
-  return supabaseResponse;
 }
 
 export const config = {

@@ -26,16 +26,30 @@ export default function LoginPage() {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[Auth] Sign-in error:', error);
+        toast({
+          title: 'Authentication failed',
+          description: error.message || 'Please check your credentials',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       // Verify session is established before redirecting
       if (data.session) {
         toast({ title: 'Welcome back!' });
         // Use window.location for full page reload to ensure cookies are sent
         window.location.href = '/';
-      } else {
-        throw new Error('Session not established');
+        return;
       }
+
+      console.error('[Auth] No session returned after sign-in');
+      toast({
+        title: 'Authentication failed',
+        description: 'Sign-in succeeded, but no session was established. Try refreshing.',
+        variant: 'destructive',
+      });
     } catch (error: any) {
       console.error('[Auth] Sign-in error:', error);
       toast({

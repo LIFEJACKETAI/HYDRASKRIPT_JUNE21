@@ -6,14 +6,11 @@ import { getAuthEmail } from '@/lib/auth-helpers';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { getFounderOfferStatus, FOUNDER_PACK } from '@/config/founderPack';
 import { db } from '@/lib/db';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-04-10' as any,
-});
+import { getStripeClient } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripeClient();
     const email = await getAuthEmail(request);
 
     if (!email) {

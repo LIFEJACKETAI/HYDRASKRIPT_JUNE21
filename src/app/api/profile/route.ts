@@ -9,8 +9,13 @@ export async function GET(request: NextRequest) {
   try {
     const { profile } = await requireProfile(request);
 
-    // credits = total across all wallets so every UI surface shows the same balance
-    const credits = await getCreditBalance(profile.id);
+    let credits = 0;
+    try {
+      credits = await getCreditBalance(profile.id);
+    } catch (balanceError) {
+      console.error('[API /profile] Credit balance lookup failed:', balanceError);
+      credits = 0;
+    }
 
     return NextResponse.json({
       success: true,
@@ -26,6 +31,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    console.error('[API /profile] Error:', error);
     if (isUnauthorizedError(error)) {
       return unauthorizedResponse();
     }
@@ -48,7 +54,13 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    const credits = await getCreditBalance(updated.id);
+    let credits = 0;
+    try {
+      credits = await getCreditBalance(updated.id);
+    } catch (balanceError) {
+      console.error('[API /profile] Credit balance lookup failed:', balanceError);
+      credits = 0;
+    }
 
     return NextResponse.json({
       success: true,
@@ -61,6 +73,7 @@ export async function PUT(request: NextRequest) {
       },
     });
   } catch (error) {
+    console.error('[API /profile] Error:', error);
     if (isUnauthorizedError(error)) {
       return unauthorizedResponse();
     }
