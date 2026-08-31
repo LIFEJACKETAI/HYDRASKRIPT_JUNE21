@@ -16,12 +16,26 @@ const PUBLIC_API_PATHS = [
   '/api/stripe/webhook',
 ];
 
+// Auth entry points that should never be blocked/redirected by the auth gate.
+const PUBLIC_AUTH_PATHS = [
+  '/login',
+  '/auth/callback',
+  '/auth/auth-code-error',
+  '/auth/forgot-password',
+  '/auth/update-password',
+  '/auth/recovery',
+];
+
 function isProtectedPath(pathname: string) {
   return PROTECTED_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
 function isPublicApiPath(pathname: string) {
   return PUBLIC_API_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+}
+
+function isPublicAuthPath(pathname: string) {
+  return PUBLIC_AUTH_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
 export async function middleware(request: NextRequest) {
@@ -33,7 +47,7 @@ export async function middleware(request: NextRequest) {
     const isAPI = pathname.startsWith('/api');
 
     // Handle protected paths - if user is authenticated, allow access
-    if (!isProtectedPath(pathname) || isPublicApiPath(pathname)) {
+    if (!isProtectedPath(pathname) || isPublicApiPath(pathname) || isPublicAuthPath(pathname)) {
       return supabaseResponse;
     }
 
@@ -60,6 +74,9 @@ export async function middleware(request: NextRequest) {
     const isAPI = pathname.startsWith('/api');
     if (isAPI) {
       return NextResponse.json({ success: false, error: 'Authentication error' }, { status: 500 });
+    }
+    if (isPublicAuthPath(pathname) || !isProtectedPath(pathname)) {
+      return NextResponse.next({ request });
     }
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('next', pathname);

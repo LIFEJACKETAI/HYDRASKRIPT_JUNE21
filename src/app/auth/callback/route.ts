@@ -17,15 +17,9 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${encodeURIComponent(error.message)}`);
     }
 
-    // SUCCESS: Set a cookie to indicate successful auth for client-side handling
-    const response = NextResponse.redirect(`${origin}/auth/callback?success=auth_completed`);
-    response.cookies.set('auth_success_redirect', 'true', { 
-      maxAge: 300, // 5 minutes
-      httpOnly: false, // Needed for client-side JavaScript to read
-      path: '/' 
-    });
-    
-    return response;
+    // Redirect to the intended destination (or root)
+    const redirectTo = next.startsWith('/') ? next : '/';
+    return NextResponse.redirect(`${origin}${redirectTo}`);
   }
 
   // Handle password recovery - uses hash fragment, redirect to client-side recovery handler

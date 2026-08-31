@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') || '/';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,8 +41,8 @@ export default function LoginPage() {
       // Verify session is established before redirecting
       if (data.session) {
         toast({ title: 'Welcome back!' });
-        // Use window.location for full page reload to ensure cookies are sent
-        window.location.href = '/';
+        const redirectTo = next.startsWith('/') ? next : '/';
+        window.location.href = redirectTo;
         return;
       }
 

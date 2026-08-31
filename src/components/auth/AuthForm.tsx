@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from 'lucide-react';
 
 export default function AuthForm() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -47,7 +48,7 @@ export default function AuthForm() {
             title: 'Welcome!',
             description: 'Your account has been created successfully.',
           });
-          router.push('/');
+          window.location.href = '/';
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -57,8 +58,7 @@ export default function AuthForm() {
         if (error) throw error;
 
         toast({ title: 'Welcome back!' });
-        // FIXED: Use router.push for proper navigation
-        router.push('/');
+        window.location.href = '/';
       }
     } catch (error: any) {
       toast({
