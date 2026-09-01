@@ -48,7 +48,7 @@ export default function AuthForm() {
             title: 'Welcome!',
             description: 'Your account has been created successfully.',
           });
-          window.location.href = '/';
+          router.push('/');
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -58,7 +58,7 @@ export default function AuthForm() {
         if (error) throw error;
 
         toast({ title: 'Welcome back!' });
-        window.location.href = '/';
+        router.push('/');
       }
     } catch (error: any) {
       toast({

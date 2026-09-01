@@ -11,15 +11,25 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    
+
     if (error) {
       console.error('Auth callback error:', error);
       return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${encodeURIComponent(error.message)}`);
     }
 
-    // Redirect to the intended destination (or root)
+    // SUCCESS: Redirect to the intended destination with a success indicator
+    // The middleware will validate the session and allow access
     const redirectTo = next.startsWith('/') ? next : '/';
-    return NextResponse.redirect(`${origin}${redirectTo}`);
+    const response = NextResponse.redirect(`${origin}${redirectTo}`);
+    
+    // Set a short-lived cookie to indicate successful auth for client-side handling
+    response.cookies.set('auth_callback_success', 'true', {
+      maxAge: 60, // 1 minute
+      path: '/',
+      sameSite: 'lax',
+    });
+
+    return response;
   }
 
   // Handle password recovery - uses hash fragment, redirect to client-side recovery handler

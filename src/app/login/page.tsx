@@ -42,7 +42,7 @@ function LoginForm() {
       if (data.session) {
         toast({ title: 'Welcome back!' });
         const redirectTo = next.startsWith('/') ? next : '/';
-        window.location.href = redirectTo;
+        router.push(redirectTo);
         return;
       }
 
