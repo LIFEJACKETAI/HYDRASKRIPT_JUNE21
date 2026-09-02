@@ -12,6 +12,12 @@ const globalForPrisma = globalThis as unknown as {
 // Reserve connections for: API routes (10), Queue workers (5), Prisma (15), Buffer (5)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  // Supabase serves Postgres TLS from its own CA, which Node rejects with
+  // "self-signed certificate in certificate chain". libpq's sslmode=require
+  // means "encrypt, don't verify" — replicate that semantics here.
+  ssl: /supabase\.(co|com)/.test(process.env.DATABASE_URL ?? '')
+    ? { rejectUnauthorized: false }
+    : undefined,
   min: 2,
   max: parseInt(process.env.DATABASE_POOL_MAX || '20', 10),
   idleTimeoutMillis: 60000,
