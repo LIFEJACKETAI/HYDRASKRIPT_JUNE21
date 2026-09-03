@@ -4,6 +4,7 @@
  * Copy per PDF plan: one short sentence per stage.
  */
 
+"use client"
 import { motion } from 'framer-motion'
 
 export function JourneyPipeline() {

@@ -14,6 +14,7 @@
  * Retains dark/gradient aesthetic, framer-motion, Button, Card
  */
 
+"use client"
 import { LandingHero } from '@/components/marketing/LandingHero'
 import { Problem } from '@/components/marketing/Problem'
 import { JourneyPipeline } from '@/components/marketing/JourneyPipeline'

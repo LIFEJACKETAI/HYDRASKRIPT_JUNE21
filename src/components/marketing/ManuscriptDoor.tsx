@@ -5,6 +5,7 @@
  * Prominent upload block: "Your book doesn't have to start here. It just has to finish here."
  */
 
+"use client"
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

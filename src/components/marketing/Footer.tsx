@@ -2,6 +2,7 @@
  * Footer - Footer for marketing pages
  */
 
+"use client"
 import { motion } from 'framer-motion'
 
 export function Footer() {

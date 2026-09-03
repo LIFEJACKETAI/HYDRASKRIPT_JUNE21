@@ -2,6 +2,7 @@
  * NavBar - Simple navbar for marketing pages
  */
 
+"use client"
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 

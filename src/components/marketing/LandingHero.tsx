@@ -5,6 +5,7 @@
  * Two CTAs: [Start Creating Free] and [Already Have a Manuscript? Upload It]
  */
 
+"use client"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'

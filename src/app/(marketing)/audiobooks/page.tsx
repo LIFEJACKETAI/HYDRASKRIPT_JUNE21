@@ -1,3 +1,4 @@
+"use client"
 /** 
  * audiobooks page - Audiobook generator
  * 
