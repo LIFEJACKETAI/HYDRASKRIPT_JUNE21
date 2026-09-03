@@ -5,6 +5,9 @@
 import { db } from '@/lib/db';
 import { CREDIT_COSTS, AUDIENCE_CONFIG, COLORING_THEMES, type TargetAudience, type ColoringTheme } from '@/types';
 
+// ─── Credit Constants ──────────────────────────────────────────────
+export const FREE_SIGNUP_CREDITS = 100
+
 // Accounts that get unlimited free generation (see consumeFromWallets).
 // Configured via the ADMIN_FREE_EMAIL env var (comma-separated). When unset,
 // no account bypasses credit enforcement. Prefer gating on a role flag instead.
@@ -91,7 +94,7 @@ export function calculateAudiobookCost(wordCount: number): number {
   
   // Base cost + Variable cost per minute
   // Example: 10 credits base + 5 credits per minute
-  const cost = 10 + (estimatedMinutes * 5);
+  const cost = CREDIT_COSTS.audiobookBase + CREDIT_COSTS.audiobookPerMinute * estimatedMinutes;
   
   return cost;
 }
@@ -640,7 +643,7 @@ export async function grantFreeTierCredits(profileId: string): Promise<boolean> 
       await tx.profile.update({
         where: { id: profileId },
         data: { 
-          monthlyCredits: 25,
+          monthlyCredits: 100,
           freeCreditsGranted: true,
         },
       });

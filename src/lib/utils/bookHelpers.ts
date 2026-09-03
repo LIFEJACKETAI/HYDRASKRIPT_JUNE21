@@ -2,6 +2,7 @@
 // Common operations for book and chapter management
 
 import { db } from '@/lib/db';
+import { FREE_SIGNUP_CREDITS } from '@/lib/utils/credits';
 import type { BookStatus, ChapterStatus } from '@/types';
 
 /**
@@ -94,8 +95,8 @@ export async function getOrCreateProfile(email: string, name?: string) {
     data: {
       email,
       name: name || email.split('@')[0],
-      credits: 100, // Free starter credits
-      tier: 'starter',
+      monthlyCredits: FREE_SIGNUP_CREDITS, // 100 free signup credits
+      tier: 'free',
     },
   });
 }

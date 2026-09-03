@@ -349,22 +349,7 @@ export const AUDIOBOOK_VOICES = [
   { id: 'en-AU-Neural2-B', label: 'Hunter',   gender: 'male'   as const, style: 'Australian & Bold' },
 ] as const;
 
-// ─── Tier Pricing ─────────────────────────────────────────────────────────────
 
-export const TIER_CONFIG: Record<Tier, { credits: number; price: number; label: string }> = {
-  free: { credits: 25, price: 0, label: 'Free' },
-  starter: { credits: 200, price: 29, label: 'Starter' },
-  author: { credits: 700, price: 79, label: 'Author' },
-  publisher: { credits: 1500, price: 149, label: 'Publisher' },
-  studio: { credits: 3500, price: 299, label: 'Studio' },
-  founder: { credits: 500, price: 399, label: 'Founder Lifetime' },
-};
-
-export const CREDIT_PACK_CONFIG: Record<CreditPackKey, { credits: number; price: number; label: string }> = {
-  pack_100: { credits: 100, price: 15, label: 'A - LA CARTE (PACK 100)' },
-  pack_500: { credits: 500, price: 60, label: 'A - LA CARTE (PACK 500)' },
-  pack_1000: { credits: 1000, price: 100, label: 'A - LA CARTE (PACK 1000)' },
-};
 
 export const STRIPE_PRICE_ENV_KEYS: Record<PricingKey, string> = {
   starter: 'STRIPE_PRICE_STARTER',

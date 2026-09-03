@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { addCredits, getCreditBalance } from '@/lib/utils/credits';
-import { TIER_CONFIG, type Tier } from '@/types';
+import type { Tier } from '@/types';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // GET - Get credit balance and recent ledger
