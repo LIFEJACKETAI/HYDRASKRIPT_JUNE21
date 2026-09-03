@@ -42,14 +42,18 @@ export function LandingHero() {
           asChild
           className="btn-gradient h-12 px-6 shrink-0"
         >
-          <Coins className="h-4 w-4 mr-2" /> Start Creating Free
+          <span className="inline-flex items-center">
+            <Coins className="h-4 w-4 mr-2" /> Start Creating Free
+          </span>
         </Button>
 
         <Button
           asChild
           className="btn-outline h-12 px-6 shrink-0"
         >
-          <Upload className="h-4 w-4 mr-2" /> Already Have a Manuscript? Upload It
+          <span className="inline-flex items-center">
+            <Upload className="h-4 w-4 mr-2" /> Already Have a Manuscript? Upload It
+          </span>
         </Button>
       </div>
     </motion.div>
