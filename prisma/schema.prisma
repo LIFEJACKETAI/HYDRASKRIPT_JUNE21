@@ -242,6 +242,12 @@ model Job {
   progressPercent Int       @default(0)
   creditsReserved Int       @default(0) // Held in escrow
   creditsConsumed Int       @default(0)
+  estimatedCostCents Int?   // Estimated cost before generation (before work begins)
+  actualCostCents Int?      // Actual cost after generation completed
+  provider               String?   // NVIDIA NIM, OpenRouter, Gemini, etc.
+  modelName              String?   // The specific model used
+  tokensIn               Int?      // Input tokens consumed
+  tokensOut              Int?      // Output tokens generated
   errorMessage    String?
   stepIndex       Int       @default(0) // For idempotency: which step is this
   retryCount      Int       @default(0)

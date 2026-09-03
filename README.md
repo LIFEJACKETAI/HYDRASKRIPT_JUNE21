@@ -14,14 +14,46 @@ The app currently validates with:
 - `npx eslint src --ext .ts,.tsx` ✅
 - `npm run build` ✅
 
-### Important build note
+### Phase 0 — Pricing alignment ✅ Complete
+- Single pricing source of truth (`PRICING_CONFIG`) matching Stripe authoritative data
+- Tier grants: Free=100 signup credits, Starter=300, Author=1000, Publisher=3000, Studio=10000
+- Credit packs: 100/500/1000 at $15/$60/$100 (PDF's 500/2000/5000 was a misread, discarded)
+- Audiobook cost fixed: 20 base + 2/min (was 10 + 5/min)
+- Free tier now grants 100 credits on signup (was 25)
 
-`output: 'standalone'` was removed from `next.config.js` because the current Next 15 middleware build path was failing with a missing `middleware.js.nft.json` artifact during production builds.
+### Phase 1 — Landing page repositioned ✅ Complete
+- 7-section journey: Hero → Problem → Journey Pipeline → Differentiators → Manuscript Door → Final CTA
+- Two front doors: "Start Creating Free" and "Already Have a Manuscript? Upload It"
+- Removed fabricated stats (50K books, 12K authors, 4.9★)
+- Dark/gradient aesthetic retained with framer-motion animations
 
-HydraSkript now uses the stable production flow:
+### Phase 2 — Marketing routes created ✅ Complete
+- 7 App Router routes: features, editorial-review, story-bible, series, audiobooks, publishing, bookstore
+- Comparison table: "Traditional AI writing tool vs HydraSkript" showing 7 features ✗ vs ✓
+- All routes link to real implemented features
 
-- `next build`
-- `next start -p 3002`
+### Phase 3 — Pricing page overhaul ✅ Complete
+- Outcome-led headlines: "Start your publishing journey", "Your complete author workspace", etc.
+- "What kind of creator are you?" tier selector
+- Annual billing toggle (≈2 months free) noted for future implementation
+- Webhook verification needed for end-to-end Stripe flow
+
+### Phase 4 — Entitlements config ✅ Complete
+- `src/config/entitlements.ts` maps each tier to capabilities and limits
+- `src/lib/server/requireCapability.ts` server-side guard for API routes and UI
+- Tier caps: Free=1 book, Starter=3, Author=10, Publisher=30, Studio=unlimited
+
+### Phase 5 — Cost telemetry (in progress)
+- Prisma `Job` model extended with `estimatedCostCents`, `actualCostCents`, `provider`, `modelName`, `tokensIn`, `tokensOut`
+- Admin margin view planned for future implementation
+
+### Phase 6 — Production hardening (in progress)
+- `ignoreBuildErrors` removed from `next.config.js`
+- `cookies.txt` in repo root flagged for removal
+- Auth security: all protected routes derive identity from server session
+- Durable storage: move assets from local `public/assets` to Cloudflare R2/S3
+- Queue hardening: activate lease/retry fields via Prisma migrations
+- CI: enforce `tsc`/`eslint`/`build` in CI/CD pipeline
 
 ---
 
