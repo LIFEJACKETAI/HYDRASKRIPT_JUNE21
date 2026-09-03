@@ -227,7 +227,6 @@ export default function PricingPage() {
             Annual billing ≈ 2 months free (coming soon)
           </p>
           <Button
-            asChild
             className="btn-outline text-sm py-2 px-6"
           >
             Switch to Annual
