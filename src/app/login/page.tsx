@@ -14,47 +14,66 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get('next') || '/';
+  const isSignUp = searchParams.get('mode') === 'signup';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const supabase = useMemo(() => createClient(), []);
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const safeNext = next.startsWith('/') ? next : '/';
+
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const { error, data } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      if (isSignUp) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNext)}`,
+          },
+        });
 
-      if (error) {
-        console.error('[Auth] Sign-in error:', error);
+        if (error) throw error;
+
+        if (data.user && !data.session) {
+          toast({
+            title: 'Check your email!',
+            description: 'We sent a confirmation link. Please check your inbox to activate your account.',
+          });
+          return;
+        }
+
+        if (data.session) {
+          toast({ title: 'Welcome!', description: 'Your account has been created successfully.' });
+          router.push(safeNext);
+          return;
+        }
+      } else {
+        const { error, data } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          toast({ title: 'Welcome back!' });
+          router.push(safeNext);
+          return;
+        }
+
+        console.error('[Auth] No session returned after sign-in');
         toast({
           title: 'Authentication failed',
-          description: error.message || 'Please check your credentials',
+          description: 'Sign-in succeeded, but no session was established. Try refreshing.',
           variant: 'destructive',
         });
-        return;
       }
-
-      // Verify session is established before redirecting
-      if (data.session) {
-        toast({ title: 'Welcome back!' });
-        const redirectTo = next.startsWith('/') ? next : '/';
-        router.push(redirectTo);
-        return;
-      }
-
-      console.error('[Auth] No session returned after sign-in');
-      toast({
-        title: 'Authentication failed',
-        description: 'Sign-in succeeded, but no session was established. Try refreshing.',
-        variant: 'destructive',
-      });
     } catch (error: any) {
-      console.error('[Auth] Sign-in error:', error);
+      console.error('[Auth] Error:', error);
       toast({
         title: 'Authentication failed',
         description: error.message || 'Please check your credentials',
@@ -63,6 +82,14 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleMode = () => {
+    const params = new URLSearchParams();
+    if (!isSignUp) params.set('mode', 'signup');
+    if (next !== '/') params.set('next', next);
+    const qs = params.toString();
+    router.replace(qs ? `/login?${qs}` : '/login');
   };
 
   return (
@@ -80,11 +107,17 @@ function LoginForm() {
         </Button>
 
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-sm text-slate-400">Enter your credentials to access your account.</p>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {isSignUp ? 'Create Your Free Account' : 'Welcome Back'}
+          </h2>
+          <p className="text-sm text-slate-400">
+            {isSignUp
+              ? '100 free credits on signup — no credit card required.'
+              : 'Enter your credentials to access your account.'}
+          </p>
         </div>
 
-        <form onSubmit={handleSignIn} className="space-y-4">
+        <form onSubmit={handleAuth} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-slate-300 text-xs">Email Address</Label>
             <Input
@@ -113,19 +146,32 @@ function LoginForm() {
           </div>
 
           <Button type="submit" disabled={loading} className="btn-gradient w-full py-6">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign In'}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isSignUp ? 'Create Account' : 'Sign In'}
           </Button>
         </form>
 
-        <div className="mt-4">
+        <div className="mt-4 space-y-2">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/auth/forgot-password')}
-            className="text-slate-400 hover:text-white text-sm w-full"
+            onClick={toggleMode}
+            className="text-purple-300 hover:text-purple-200 text-sm w-full"
           >
-            Forgot your password?
+            {isSignUp
+              ? 'Already have an account? Sign In'
+              : 'New to HydraSkript? Create a Free Account'}
           </Button>
+
+          {!isSignUp && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push('/auth/forgot-password')}
+              className="text-slate-400 hover:text-white text-sm w-full"
+            >
+              Forgot your password?
+            </Button>
+          )}
         </div>
       </div>
     </div>

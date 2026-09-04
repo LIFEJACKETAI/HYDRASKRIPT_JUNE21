@@ -2,13 +2,12 @@
  * ManuscriptDoor - Prominent upload block for authors who already have a manuscript
  * 
  * Copy per PDF plan: "Your book doesn't have to start here. It just has to finish here."
- * Prominent upload block: "Your book doesn't have to start here. It just has to finish here."
  */
 
 "use client"
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import Link from 'next/link'
 import { Upload } from 'lucide-react'
 
 export function ManuscriptDoor() {
@@ -17,7 +16,8 @@ export function ManuscriptDoor() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-[#050505] border-t border-white/5 py-24"
+      id="manuscript"
+      className="bg-[#050505] border-t border-white/5 py-24 scroll-mt-20"
     >
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
@@ -38,16 +38,15 @@ export function ManuscriptDoor() {
             Bring your finished manuscript and we'll help you polish, format, and publish it.
           </p>
 
-          <Input
-            type="email"
-            placeholder="your@email.com"
-            className="w-full bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl p-4 mb-6 text-sm"
-          />
           <Button
+            asChild
             className="btn-gradient w-full h-12 px-6"
           >
-            Start With Manuscript
+            <Link href="/login">Start With Manuscript</Link>
           </Button>
+          <p className="text-xs text-gray-600 mt-4">
+            Free account required to upload — 100 free credits on signup.
+          </p>
         </div>
       </div>
     </motion.div>

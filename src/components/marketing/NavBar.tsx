@@ -28,13 +28,13 @@ export function NavBar() {
 
         <div className="hidden lg:flex items-center gap-8">
           <Link
-            href="/(marketing)/features"
+            href="/features"
             className="text-white text-sm hover:text-purple-300 transition-colors"
           >
             Features
           </Link>
           <Link
-            href="/(marketing)/pricing"
+            href="/pricing"
             className="text-white text-sm hover:text-purple-300 transition-colors"
           >
             Pricing

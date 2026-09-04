@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 
 export function JourneyPipeline() {
   const stages = [
-    { key: 'idea', title: 'IDEWA', description: 'Concept & outline' },
+    { key: 'idea', title: 'IDEA', description: 'Concept & outline' },
     { key: 'story', title: 'STORY', description: 'Characters & world' },
     { key: 'write', title: 'WRITE', description: 'Chapter generation' },
     { key: 'review', title: 'REVIEW', description: 'Editorial polish' },
