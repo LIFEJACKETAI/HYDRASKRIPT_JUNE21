@@ -458,3 +458,13 @@ If you want to keep pushing toward production-grade readiness, the highest-value
 ## License
 
 Proprietary — developed for HydraSkript / LIFEJACKETAI.
+
+## Page Backgrounds
+
+Marketing/auth pages (pricing, audiobooks, features, bookstore, story-bible,
+publishing, editorial-review, login) render a themed Pexels photo behind
+content via `<PageBackground>` (`src/components/PageBackground.tsx`).
+Images live in `public/backgrounds/` — see `BACKGROUND_IMAGES.md` for the
+mapping, credits, and alternates; `bash scripts/download-backgrounds.sh`
+refetches them at 1920px. Keep public images web-sized with
+`node scripts/compress-images.mjs`.
