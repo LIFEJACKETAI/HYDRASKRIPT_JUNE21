@@ -17,16 +17,12 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${encodeURIComponent(error.message)}`);
     }
 
-    // SUCCESS: Redirect to the intended destination with a success indicator
-    // The middleware will validate the session and allow access
-    const redirectTo = next.startsWith('/') ? next : '/';
-    const response = NextResponse.redirect(`${origin}${redirectTo}`);
-    
-    // Set a short-lived cookie to indicate successful auth for client-side handling
-    response.cookies.set('auth_callback_success', 'true', {
-      maxAge: 60, // 1 minute
+    // SUCCESS: Set a cookie to indicate successful auth for client-side handling
+    const response = NextResponse.redirect(`${origin}/auth/callback?success=auth_completed`);
+    response.cookies.set('auth_success_redirect', 'true', {
+      maxAge: 300, // 5 minutes
+      httpOnly: false, // Needed for client-side JavaScript to read
       path: '/',
-      sameSite: 'lax',
     });
 
     return response;

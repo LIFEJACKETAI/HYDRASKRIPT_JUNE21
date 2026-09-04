@@ -17,6 +17,7 @@
 
 "use client"
 import { motion } from 'framer-motion'
+import { PageBackground } from '@/components/PageBackground'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -127,11 +128,12 @@ const tierData = {
 
 export default function PricingPage() {
   return (
+<PageBackground image="/backgrounds/pricing.jpg" overlay="light">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="py-24 bg-[#050505]"
+      className="py-24"
     >
       <div className="max-w-7xl mx-auto px-6">
         {/* Creator Type Selector */}
@@ -234,5 +236,6 @@ export default function PricingPage() {
         </div>
       </div>
     </motion.div>
+    </PageBackground>
   )
 }

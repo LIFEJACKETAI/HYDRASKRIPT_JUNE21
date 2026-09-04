@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, Suspense } from 'react';
+import { PageBackground } from '@/components/PageBackground'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -65,7 +66,8 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090b]">
+<PageBackground image="/backgrounds/voice-cloning.jpg" overlay="subtle">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-md p-8 rounded-2xl bg-[#0d0d10] border border-white/10 shadow-2xl" suppressHydrationWarning>
         <Button
           variant="ghost"
@@ -127,6 +129,7 @@ function LoginForm() {
         </div>
       </div>
     </div>
+    </PageBackground>
   );
 }
 
