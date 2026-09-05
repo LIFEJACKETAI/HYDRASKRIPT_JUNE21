@@ -28,7 +28,7 @@ export default function Navbar() {
   if (currentView === 'landing') return null;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#312839] bg-[#09090b]/80 backdrop-blur-md">
+    <header className="relative z-50 w-full shrink-0 border-b border-[#312839] bg-[#09090b]/90 backdrop-blur-md">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         {/* Left: hamburger + logo */}
         <div className="flex items-center gap-3">

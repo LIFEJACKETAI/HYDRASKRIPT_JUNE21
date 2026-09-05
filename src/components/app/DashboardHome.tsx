@@ -80,11 +80,11 @@ export default function DashboardHome() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-64 rounded-2xl bg-[#0d0d10] border border-[#312839] animate-pulse" />
+            <div key={i} className="h-64 rounded-2xl bg-[#0d0d10]/70 backdrop-blur-md border border-[#312839] animate-pulse" />
           ))}
         </div>
       ) : books.length === 0 ? (
-        <div className="rounded-2xl border border-[#312839] bg-[#0d0d10] py-20 text-center">
+        <div className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md py-20 text-center">
           <BookOpen className="h-12 w-12 text-slate-600 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-white mb-2">No books yet</h2>
           <p className="text-slate-500 max-w-md mx-auto mb-6">
@@ -134,7 +134,7 @@ function Stat({
   return (
     <Comp
       onClick={onClick}
-      className="rounded-2xl border border-[#312839] bg-[#0d0d10] p-4 text-left hover:border-purple-500/30 transition-colors"
+      className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-4 text-left hover:border-purple-500/30 transition-colors"
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs uppercase tracking-wider text-slate-500">{label}</span>
