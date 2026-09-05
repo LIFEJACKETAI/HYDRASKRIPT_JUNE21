@@ -42,7 +42,9 @@ export function ManuscriptDoor() {
             asChild
             className="btn-gradient w-full h-12 px-6"
           >
-            <Link href="/login">Start With Manuscript</Link>
+            <Link href={`/login?mode=signup&next=${encodeURIComponent('/dashboard?intent=manuscript')}`}>
+              Start With Manuscript
+            </Link>
           </Button>
           <p className="text-xs text-gray-600 mt-4">
             Free account required to upload — 100 free credits on signup.

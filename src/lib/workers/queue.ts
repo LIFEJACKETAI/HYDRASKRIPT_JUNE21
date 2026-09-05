@@ -61,7 +61,12 @@ class PersistentJobQueue {
                                   lastError.message.includes('Can\'t reach database') ||
                                   lastError.message.includes('ECONNREFUSED');
 
-        if (!isTimeout && !isConnectionError || attempt === maxRetries) {
+        const isAuthError =
+          lastError.message.includes('P1000') ||
+          lastError.message.includes('Authentication failed') ||
+          lastError.message.includes('credentials are not valid');
+
+        if (isAuthError || (!isTimeout && !isConnectionError) || attempt === maxRetries) {
           console.error(`[Queue] ${context} failed after ${attempt + 1} attempts:`, lastError.message);
           throw lastError;
         }

@@ -91,13 +91,24 @@ export async function getOrCreateProfile(email: string, name?: string) {
 
   if (existing) return existing;
 
-  return db.profile.create({
-    data: {
-      email,
-      name: name || email.split('@')[0],
-      monthlyCredits: FREE_SIGNUP_CREDITS, // 100 free signup credits
-      tier: 'free',
-    },
+  return db.$transaction(async (tx) => {
+    const profile = await tx.profile.create({
+      data: {
+        email,
+        name: name || email.split('@')[0],
+        monthlyCredits: FREE_SIGNUP_CREDITS,
+        freeCreditsGranted: true,
+        tier: 'free',
+      },
+    });
+    await tx.creditLedger.create({
+      data: {
+        profileId: profile.id,
+        amount: FREE_SIGNUP_CREDITS,
+        reason: 'Free tier signup bonus',
+      },
+    });
+    return profile;
   });
 }
 

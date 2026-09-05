@@ -21,7 +21,16 @@ export async function GET(request: NextRequest) {
     const profile = await getOrCreateProfile(email);
     const books = await listUserBooks(profile.id);
 
-    return NextResponse.json({ success: true, data: books });
+    return NextResponse.json({
+      success: true,
+      data: books.map((book: (typeof books)[number]) => ({
+        ...book,
+        chapters: Array.from({ length: book._count.chapters }, (_, index) => ({
+          id: `${book.id}-ch-${index}`,
+          index,
+        })),
+      })),
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] List books failed:', message);

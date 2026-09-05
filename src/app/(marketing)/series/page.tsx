@@ -59,10 +59,12 @@ export function SeriesPage() {
 
         <div className="mt-12 text-center">
           <Button asChild className="btn-gradient">
-            <span>Build Universe</span>
+            <a href="/login?mode=signup&next=/dashboard">Build Universe</a>
           </Button>
         </div>
       </div>
     </motion.div>
   )
 }
+
+export default SeriesPage

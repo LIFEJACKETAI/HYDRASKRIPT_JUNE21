@@ -1,6 +1,9 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  outputFileTracingRoot: path.join(__dirname),
   // Replace the default Next.js dev indicator (the small box with the "N"/"h"
   // mark at the bottom-left during route navigation) with our own branded one.
   devIndicators: false,

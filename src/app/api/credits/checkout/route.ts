@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
       mode: pricing.mode,
       customer_email: profile.email,
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${baseUrl}/?checkout=success`,
-      cancel_url: `${baseUrl}/?checkout=cancelled`,
+      success_url: `${baseUrl}/dashboard?checkout=success`,
+      cancel_url: `${baseUrl}/pricing?checkout=cancelled`,
       metadata: {
         paymentId: pendingPayment.id,
         pricingKey,
