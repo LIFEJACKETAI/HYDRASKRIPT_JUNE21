@@ -33,9 +33,16 @@ function inspectDbUrl(raw?: string) {
 export async function GET() {
   const started = Date.now();
   const dbUrl = inspectDbUrl(process.env.DATABASE_URL);
+  // Presence-only flags (never values/lengths) so this stays safe to expose.
+  const llm = {
+    nvidiaNimKeyPresent: (process.env.NVIDIA_NIM_API_KEY?.length ?? 0) > 0,
+    openrouterKeyPresent: (process.env.OPENROUTER_API_KEY?.length ?? 0) > 0,
+    nimModel: process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-8b-instruct (default)',
+    openrouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free (default)',
+  };
 
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json({ ok: false, dbUrl });
+    return NextResponse.json({ ok: false, dbUrl, llm });
   }
 
   try {
@@ -44,6 +51,7 @@ export async function GET() {
       ok: true,
       latencyMs: Date.now() - started,
       dbUrl,
+      llm,
       note: 'Database reachable — if login still fails, the problem is elsewhere (paste me this JSON).',
     });
   } catch (e: unknown) {
@@ -52,6 +60,7 @@ export async function GET() {
       ok: false,
       latencyMs: Date.now() - started,
       dbUrl,
+      llm,
       errorName: err?.name ?? 'unknown',
       errorCode: err?.code ?? err?.meta?.code ?? 'none',
       errorMessage: String(err?.message ?? e).slice(0, 400),
