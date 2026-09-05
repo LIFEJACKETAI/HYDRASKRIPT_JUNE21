@@ -88,7 +88,7 @@ export function PublishingPage() {
 
         <div className="mt-12 text-center">
           <Button asChild className="btn-gradient">
-            <span>Export My Book</span>
+            <a href={`/login?next=${encodeURIComponent('/dashboard?intent=export')}`}>Export My Book</a>
           </Button>
         </div>
       </div>
@@ -96,3 +96,5 @@ export function PublishingPage() {
     </PageBackground>
   )
 }
+
+export default PublishingPage

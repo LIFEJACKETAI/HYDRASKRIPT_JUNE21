@@ -39,7 +39,7 @@ export function getStripePriceId(pricingKey: PricingKey) {
 }
 
 export function getAppBaseUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  return process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3002';
 }
 
 export async function createPendingPayment(params: {
@@ -127,6 +127,7 @@ export async function fulfillFounderSale(session: Stripe.Checkout.Session) {
   const profileId = session.metadata?.profileId;
   const founderPriceCents = session.metadata?.founderPrice;
   const founderPhase = session.metadata?.founderPhase;
+  const paymentId = session.metadata?.paymentId;
 
   if (!profileId || !founderPriceCents) {
     throw new Error('Founder session metadata is incomplete');
@@ -142,8 +143,15 @@ export async function fulfillFounderSale(session: Stripe.Checkout.Session) {
   if (existing) return existing;
 
   return db.$transaction(async (tx) => {
-    const soldCount = await tx.founderSale.count();
-    const founderNumber = soldCount + 1;
+    const last = await tx.founderSale.findFirst({
+      orderBy: { founderNumber: 'desc' },
+      select: { founderNumber: true },
+    });
+    const founderNumber = (last?.founderNumber ?? 0) + 1;
+
+    if (founderNumber > 500) {
+      throw new Error('Founder offer closed — no remaining seats.');
+    }
 
     await tx.profile.update({
       where: { id: profileId },
@@ -170,21 +178,32 @@ export async function fulfillFounderSale(session: Stripe.Checkout.Session) {
       },
     });
 
-    await tx.payment.create({
-      data: {
-        profileId,
-        pricingKey: 'founder',
-        provider: 'stripe',
-        mode: 'payment',
-        status: 'paid',
-        stripeSessionId: session.id,
-        stripeCustomerId: typeof session.customer === 'string' ? session.customer : null,
-        amountCents: priceCents,
-        creditsGranted: 500,
-        tierApplied: 'founder',
-        fulfilledAt: new Date(),
-      },
-    });
+    const paidFields = {
+      status: 'paid' as const,
+      stripeSessionId: session.id,
+      stripeCustomerId: typeof session.customer === 'string' ? session.customer : null,
+      amountCents: priceCents,
+      creditsGranted: 500,
+      tierApplied: 'founder',
+      fulfilledAt: new Date(),
+    };
+
+    if (paymentId) {
+      await tx.payment.update({
+        where: { id: paymentId },
+        data: paidFields,
+      });
+    } else {
+      await tx.payment.create({
+        data: {
+          profileId,
+          pricingKey: 'founder',
+          provider: 'stripe',
+          mode: 'payment',
+          ...paidFields,
+        },
+      });
+    }
 
     await tx.creditLedger.create({
       data: {

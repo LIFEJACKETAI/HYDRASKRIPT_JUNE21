@@ -93,7 +93,7 @@ export function FeaturesPage() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <Button asChild className="btn-gradient">
-            <span>View Pricing</span>
+            <a href="/pricing">View Pricing</a>
           </Button>
         </div>
       </div>
@@ -101,3 +101,5 @@ export function FeaturesPage() {
     </PageBackground>
   )
 }
+
+export default FeaturesPage

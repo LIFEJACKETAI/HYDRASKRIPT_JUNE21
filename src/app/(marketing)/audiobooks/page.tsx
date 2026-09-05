@@ -61,7 +61,7 @@ export function AudiobooksPage() {
 
         <div className="mt-12 text-center">
           <Button asChild className="btn-gradient">
-            <span>Generate Audiobook</span>
+            <a href={`/login?mode=signup&next=${encodeURIComponent('/dashboard?intent=audiobook')}`}>Generate Audiobook</a>
           </Button>
         </div>
       </div>
@@ -69,3 +69,5 @@ export function AudiobooksPage() {
     </PageBackground>
   )
 }
+
+export default AudiobooksPage

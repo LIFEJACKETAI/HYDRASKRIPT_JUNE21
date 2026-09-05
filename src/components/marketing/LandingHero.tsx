@@ -51,7 +51,7 @@ export function LandingHero() {
             className="btn-gradient h-12 px-6 shrink-0"
           >
             <Link
-              href="/login?mode=signup"
+              href="/login?mode=signup&next=/dashboard"
               className="inline-flex items-center"
             >
               <Coins className="h-4 w-4 mr-2" /> Start Creating Free

@@ -1,13 +1,14 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Menu, X, LogOut, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/lib/store';
-import { getUserEmail, setUserEmail } from '@/lib/api';
 import { createClient } from '@/lib/supabase/client';
 
 export default function Navbar() {
+  const router = useRouter();
   const { currentView, setCurrentView, sidebarOpen, setSidebarOpen, profile } = useAppStore();
   const email = profile?.email || '';
 
@@ -20,6 +21,7 @@ export default function Navbar() {
     } finally {
       useAppStore.getState().setProfile(null);
       setCurrentView('landing');
+      router.push('/');
     }
   };
 

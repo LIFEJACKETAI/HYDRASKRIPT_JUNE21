@@ -61,7 +61,7 @@ export function BookstorePage() {
 
         <div className="mt-12 text-center">
           <Button asChild className="btn-gradient">
-            <span>Browse Bookstore</span>
+            <a href="/login?next=/dashboard">Browse Bookstore</a>
           </Button>
         </div>
       </div>
@@ -69,3 +69,5 @@ export function BookstorePage() {
     </PageBackground>
   )
 }
+
+export default BookstorePage

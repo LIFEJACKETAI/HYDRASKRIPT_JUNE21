@@ -1,9 +1,28 @@
-/** 
+/**
  * Footer - Footer for marketing pages
  */
 
-"use client"
-import { motion } from 'framer-motion'
+'use client';
+
+import Link from 'next/link';
+
+const LINKS = {
+  Product: [
+    { href: '/features', label: 'Features' },
+    { href: '/pricing', label: 'Pricing' },
+    { href: '/audiobooks', label: 'Audiobooks' },
+  ],
+  Resources: [
+    { href: '/story-bible', label: 'Story Bible' },
+    { href: '/series', label: 'Series Builder' },
+    { href: '/publishing', label: 'Publishing' },
+  ],
+  Company: [
+    { href: '/editorial-review', label: 'Editorial Review' },
+    { href: '/bookstore', label: 'Bookstore' },
+    { href: '/login?mode=signup&next=/dashboard', label: 'Create account' },
+  ],
+};
 
 export function Footer() {
   return (
@@ -17,61 +36,26 @@ export function Footer() {
             </p>
           </div>
 
-          <div>
-            <h5 className="font-bold text-white mb-4">Product</h5>
-            <ul className="space-y-2">
-              <li>
-                <a href="/(marketing)/features" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Features
-                </a>
-              </li>
-              <li>
-                <a href="/(marketing)/pricing" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Pricing
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h5 className="font-bold text-white mb-4">Resources</h5>
-            <ul className="space-y-2">
-              <li>
-                <a href="/(marketing)/story-bible" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Story Bible
-                </a>
-              </li>
-              <li>
-                <a href="/(marketing)/series" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Series Builder
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h5 className="font-bold text-white mb-4">Company</h5>
-            <ul className="space-y-2">
-              <li>
-                <a href="/(marketing)/editorial-review" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Editorial Review
-                </a>
-              </li>
-              <li>
-                <a href="/(marketing)/audiobooks" className="text-gray-400 hover:text-white transition-colors text-sm">
-                  Audiobooks
-                </a>
-              </li>
-            </ul>
-          </div>
+          {Object.entries(LINKS).map(([heading, items]) => (
+            <div key={heading}>
+              <h5 className="font-bold text-white mb-4">{heading}</h5>
+              <ul className="space-y-2">
+                {items.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href} className="text-gray-400 hover:text-white transition-colors text-sm">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         <div className="mt-8 pt-8 border-t border-white/10 text-center">
-          <p className="text-gray-500 text-sm">
-            2026 HydraSkript. All rights reserved.
-          </p>
+          <p className="text-gray-500 text-sm">2026 HydraSkript. All rights reserved.</p>
         </div>
       </div>
     </footer>
-  )
+  );
 }

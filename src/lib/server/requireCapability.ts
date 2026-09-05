@@ -20,7 +20,10 @@ export async function requireCapability(
     
     const entitlements = getTierEntitlements(profile.tier)
     const cap = entitlements[capability as keyof TierEntitlements]
-    const allowed = cap === -1 || (typeof cap === 'number' && cap > 0)
+    const allowed =
+      typeof cap === 'boolean'
+        ? cap
+        : cap === -1 || (typeof cap === 'number' && cap > 0)
     
     if (!allowed) {
       console.log(`[Entitlements] Profile ${profileId} tier ${profile.tier} does not have: ${capability}`)
@@ -43,6 +46,7 @@ function getTierEntitlements(tier: string): TierEntitlements {
     author: { activeBooks: 10, styleTraining: true, editorialReview: true, seriesUniverse: true, audiobook: true, exportEpub: true, exportPdf: true, exportDocx: true, apiAccess: false, teamSeats: 0 },
     publisher: { activeBooks: 30, styleTraining: true, editorialReview: true, seriesUniverse: true, audiobook: true, exportEpub: true, exportPdf: true, exportDocx: true, apiAccess: true, teamSeats: 0 },
     studio: { activeBooks: -1, styleTraining: true, editorialReview: true, seriesUniverse: true, audiobook: true, exportEpub: true, exportPdf: true, exportDocx: true, apiAccess: true, teamSeats: 5 },
+    founder: { activeBooks: 5, styleTraining: true, editorialReview: true, seriesUniverse: true, audiobook: false, exportEpub: true, exportPdf: true, exportDocx: true, apiAccess: false, teamSeats: 0 },
   }
   
   return tierMap[tier] || { activeBooks: 1, styleTraining: false, editorialReview: false, seriesUniverse: false, audiobook: false, exportEpub: false, exportPdf: false, exportDocx: false, apiAccess: false, teamSeats: 0 }

@@ -2,12 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
-import { getCreditBalance } from '@/lib/utils/credits';
+import { getCreditBalance, grantFounderMonthlyCredits, grantFreeTierCredits } from '@/lib/utils/credits';
 
 // GET - Get profile
 export async function GET(request: NextRequest) {
   try {
     const { profile } = await requireProfile(request);
+
+    try {
+      if (profile.isLifetime) {
+        await grantFounderMonthlyCredits(profile.id);
+      } else if (profile.tier === 'free' && !profile.freeCreditsGranted) {
+        await grantFreeTierCredits(profile.id);
+      }
+    } catch (grantError) {
+      console.error('[API /profile] Credit grant failed:', grantError);
+    }
 
     let credits = 0;
     try {
@@ -26,6 +36,8 @@ export async function GET(request: NextRequest) {
         credits,
         tier: profile.tier,
         isAdmin: profile.isAdmin,
+        founderBadge: profile.founderBadge,
+        isLifetime: profile.isLifetime,
         createdAt: profile.createdAt,
         updatedAt: profile.updatedAt,
       },

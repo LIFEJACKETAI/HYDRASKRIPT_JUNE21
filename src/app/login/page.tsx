@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { PageBackground } from '@/components/PageBackground'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,14 +13,20 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/';
+  const next = searchParams.get('next') || '/dashboard';
   const isSignUp = searchParams.get('mode') === 'signup';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const supabase = useMemo(() => createClient(), []);
 
-  const safeNext = next.startsWith('/') ? next : '/';
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard';
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) router.replace(safeNext);
+    });
+  }, [router, safeNext, supabase]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();

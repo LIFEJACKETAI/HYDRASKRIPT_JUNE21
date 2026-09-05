@@ -51,6 +51,8 @@ export interface ProfileData {
   credits: number;
   tier: string;
   isAdmin: boolean;
+  founderBadge?: boolean;
+  isLifetime?: boolean;
   createdAt: string;
 }
 

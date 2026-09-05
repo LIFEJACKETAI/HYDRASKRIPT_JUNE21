@@ -59,7 +59,7 @@ export function StoryBiblePage() {
 
         <div className="mt-12 text-center">
           <Button asChild className="btn-gradient">
-            <span>Create Story Bible</span>
+            <a href={`/login?mode=signup&next=${encodeURIComponent('/dashboard?intent=manuscript')}`}>Create Story Bible</a>
           </Button>
         </div>
       </div>
@@ -67,3 +67,5 @@ export function StoryBiblePage() {
     </PageBackground>
   )
 }
+
+export default StoryBiblePage

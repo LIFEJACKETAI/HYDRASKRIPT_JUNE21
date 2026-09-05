@@ -625,7 +625,7 @@ export async function grantFounderMonthlyCredits(profileId: string): Promise<boo
 }
 
 /**
- * Grant free tier signup credits (25 credits one-time).
+ * Grant free tier signup credits (100 credits one-time).
  */
 export async function grantFreeTierCredits(profileId: string): Promise<boolean> {
   try {
@@ -639,20 +639,18 @@ export async function grantFreeTierCredits(profileId: string): Promise<boolean> 
         return false; // Already granted or not free tier
       }
 
-      // Grant 25 credits to monthlyCredits (expire monthly for free tier)
       await tx.profile.update({
         where: { id: profileId },
-        data: { 
-          monthlyCredits: 100,
+        data: {
+          monthlyCredits: FREE_SIGNUP_CREDITS,
           freeCreditsGranted: true,
         },
       });
 
-      // Record in ledger
       await tx.creditLedger.create({
         data: {
           profileId,
-          amount: 25,
+          amount: FREE_SIGNUP_CREDITS,
           reason: 'Free tier signup bonus',
         },
       });

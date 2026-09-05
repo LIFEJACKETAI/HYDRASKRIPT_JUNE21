@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FOUNDER_PACK, getFounderOfferStatus } from '@/config/founderPack';
+import { startFounderCheckout } from '@/lib/checkout-client';
 
 type FounderPackCTAProps = {
   soldCount: number;
@@ -16,16 +17,8 @@ export function FounderPackCTA({ soldCount }: FounderPackCTAProps) {
     setStartingCheckout(true);
     setCheckoutError(null);
     try {
-      const response = await fetch('/api/checkout/founder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await response.json();
-      if (result.success && result.data?.checkoutUrl) {
-        window.location.href = result.data.checkoutUrl;
-        return;
-      }
-      setCheckoutError(result.error || 'Unable to start Founder checkout.');
+      const error = await startFounderCheckout();
+      if (error) setCheckoutError(error);
     } catch {
       setCheckoutError('Failed to start Founder checkout. Please try again.');
     } finally {
@@ -128,7 +121,7 @@ export function FounderPackCTA({ soldCount }: FounderPackCTAProps) {
 
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm uppercase tracking-wide text-gray-400">Early Bird</span>
-                  <span className="text-2xl font-bold text-white">${FOUNDER_PACK.earlyBird.displayPrice}</span>
+                  <span className="text-2xl font-bold text-white">{FOUNDER_PACK.earlyBird.displayPrice}</span>
                 </div>
                 <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden mb-3">
                   <div 
@@ -138,7 +131,7 @@ export function FounderPackCTA({ soldCount }: FounderPackCTAProps) {
                 </div>
                 <div className="flex justify-between text-xs text-gray-400">
                   <span>{earlyBirdSold} / {FOUNDER_PACK.earlyBird.slots} claimed</span>
-                  <span>{100 - earlyBirdPercent} spots remaining</span>
+                  <span>{FOUNDER_PACK.earlyBird.slots - earlyBirdSold} spots remaining</span>
                 </div>
                 <p className="mt-3 text-sm text-gray-300">
                   {phaseStatus === 'early_bird' 
@@ -168,7 +161,7 @@ export function FounderPackCTA({ soldCount }: FounderPackCTAProps) {
 
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm uppercase tracking-wide text-gray-400">Standard</span>
-                  <span className="text-2xl font-bold text-white">${FOUNDER_PACK.standard.displayPrice}</span>
+                  <span className="text-2xl font-bold text-white">{FOUNDER_PACK.standard.displayPrice}</span>
                 </div>
                 <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden mb-3">
                   <div 
