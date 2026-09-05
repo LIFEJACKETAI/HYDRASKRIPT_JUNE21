@@ -125,7 +125,7 @@ function DashboardShell() {
         <Sidebar />
         <div className="relative flex-1 min-w-0 min-h-0 flex flex-col">
           <StudioBackground image={studioBackgroundForView(view)} />
-          <main className="relative flex-1 min-h-0 overflow-y-auto p-4 md:p-8">
+          <main className="relative flex-1 min-h-0 overflow-y-auto overflow-x-clip p-4 md:p-8">
           {view === 'dashboard' && <DashboardHome />}
           {view === 'create-book' && <CreateBookForm />}
           {view === 'book-detail' && <BookDetail />}

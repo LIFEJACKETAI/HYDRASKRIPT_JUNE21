@@ -68,16 +68,16 @@ export default function Sidebar() {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/60 md:hidden"
+          className="fixed inset-0 z-30 bg-black/60 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed md:sticky top-0 left-0 z-40 h-dvh md:h-full flex flex-col shrink-0 overflow-hidden border-r border-[#312839] bg-[#0d0d10]/85 backdrop-blur-xl transition-[width,transform,opacity] duration-300 ease-in-out ${
+        className={`fixed lg:sticky top-0 left-0 z-40 h-dvh lg:h-full flex flex-col shrink-0 overflow-hidden border-r border-[#312839] bg-[#0d0d10]/85 backdrop-blur-xl transition-[width,transform,opacity] duration-300 ease-in-out ${
           sidebarOpen
-            ? 'w-64 translate-x-0 opacity-100'
-            : 'w-64 -translate-x-full opacity-0 md:w-0 md:translate-x-0 md:border-transparent pointer-events-none'
+            ? 'w-60 translate-x-0 opacity-100'
+            : 'w-60 -translate-x-full opacity-0 lg:w-0 lg:translate-x-0 lg:border-transparent pointer-events-none'
         }`}
       >
         {/* Sidebar brand */}
@@ -110,7 +110,7 @@ export default function Sidebar() {
                 key={item.view}
                 onClick={() => {
                   setCurrentView(item.view);
-                  if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false);
+                  if (typeof window !== 'undefined' && window.innerWidth < 1024) setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                   isActive

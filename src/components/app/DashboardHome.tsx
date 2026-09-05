@@ -40,18 +40,18 @@ export default function DashboardHome() {
   ).length;
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
+    <div className="space-y-8 min-w-0">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-widest text-cyan-400 mb-2">Studio</p>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-2xl md:text-3xl font-bold text-white break-words">
             Welcome{profile?.name ? `, ${profile.name}` : ''}
           </h1>
-          <p className="text-slate-400 mt-1">
+          <p className="text-slate-400 mt-1 text-sm md:text-base">
             Create a book from an idea, or open Story Bible to upload a manuscript.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 shrink-0">
           <Button
             variant="outline"
             onClick={() => setCurrentView('story-bible')}
@@ -65,7 +65,7 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 *:min-w-0">
         <Stat label="Books" value={books.length} icon={BookOpen} />
         <Stat label="Completed" value={completed} icon={Sparkles} />
         <Stat label="In progress" value={generating} icon={Library} />
@@ -78,7 +78,7 @@ export default function DashboardHome() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 *:min-w-0">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="h-64 rounded-2xl bg-[#0d0d10]/70 backdrop-blur-md border border-[#312839] animate-pulse" />
           ))}
@@ -104,7 +104,7 @@ export default function DashboardHome() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 *:min-w-0">
           {books.map((book) => (
             <BookCard
               key={book.id}
@@ -134,13 +134,13 @@ function Stat({
   return (
     <Comp
       onClick={onClick}
-      className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-4 text-left hover:border-purple-500/30 transition-colors"
+      className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-4 text-left hover:border-purple-500/30 transition-colors min-w-0"
     >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs uppercase tracking-wider text-slate-500">{label}</span>
-        <Icon className="h-4 w-4 text-purple-400" />
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <span className="text-xs uppercase tracking-wider text-slate-500 truncate">{label}</span>
+        <Icon className="h-4 w-4 text-purple-400 shrink-0" />
       </div>
-      <p className="text-2xl font-bold text-white">{value}</p>
+      <p className="text-xl md:text-2xl font-bold text-white truncate">{value}</p>
     </Comp>
   );
 }
