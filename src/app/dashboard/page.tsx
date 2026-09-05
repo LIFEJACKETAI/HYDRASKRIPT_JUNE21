@@ -9,6 +9,7 @@ import { useAppStore } from '@/lib/store';
 import type { AppView } from '@/lib/store';
 import { listBooks, type BookData, type ProfileData } from '@/lib/api';
 import DashboardHome from '@/components/app/DashboardHome';
+import StudioBackground, { studioBackgroundForView } from '@/components/app/StudioBackground';
 import CreateBookForm from '@/components/book/CreateBookForm';
 import BookDetail from '@/components/book/BookDetail';
 import StyleUploader from '@/components/book/StyleUploader';
@@ -32,7 +33,7 @@ const INTENT_VIEWS: Record<string, AppView> = {
 function DashboardShell() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { currentView, setCurrentView, setProfile, sidebarOpen } = useAppStore();
+  const { currentView, setCurrentView, setProfile } = useAppStore();
   const [bootstrapping, setBootstrapping] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [books, setBooks] = useState<BookData[]>([]);
@@ -94,7 +95,7 @@ function DashboardShell() {
 
   if (bootstrapping) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+      <div className="h-dvh bg-[#09090b] flex items-center justify-center overflow-hidden">
         <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
       </div>
     );
@@ -102,7 +103,7 @@ function DashboardShell() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-6">
+      <div className="h-dvh bg-[#09090b] flex items-center justify-center p-6 overflow-hidden">
         <div className="max-w-lg rounded-2xl border border-red-500/30 bg-[#0d0d10] p-8 text-center">
           <h1 className="text-xl font-bold text-white mb-2">Studio unavailable</h1>
           <p className="text-sm text-slate-400 mb-6">{error}</p>
@@ -118,11 +119,13 @@ function DashboardShell() {
   const view = currentView === 'landing' ? 'dashboard' : currentView;
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white">
+    <div className="h-dvh flex flex-col overflow-hidden bg-[#09090b] text-white">
       <Navbar />
-      <div className="flex">
+      <div className="flex flex-1 min-h-0 relative">
         <Sidebar />
-        <main className="flex-1 min-w-0 p-4 md:p-8 overflow-y-auto min-h-[calc(100vh-4rem)]">
+        <div className="relative flex-1 min-w-0 min-h-0 flex flex-col">
+          <StudioBackground image={studioBackgroundForView(view)} />
+          <main className="relative flex-1 min-h-0 overflow-y-auto overflow-x-clip p-4 md:p-8">
           {view === 'dashboard' && <DashboardHome />}
           {view === 'create-book' && <CreateBookForm />}
           {view === 'book-detail' && <BookDetail />}
@@ -142,7 +145,8 @@ function DashboardShell() {
           )}
           {view === 'ai-cover-designer' && <AICoverDesigner />}
           {view === 'bookstore' && <BookstoreView />}
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
@@ -152,7 +156,7 @@ export default function DashboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+        <div className="h-dvh bg-[#09090b] flex items-center justify-center overflow-hidden">
           <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
         </div>
       }
