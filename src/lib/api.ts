@@ -342,15 +342,25 @@ export async function deleteStoryBibleEntity(id: string) {
 }
 
 export interface ManuscriptImportResult {
+  bookId?: string;
+  createdBook?: boolean;
+  bookTitle?: string;
   fileName: string;
   entities: StoryBibleEntity[];
   counts: Record<string, number>;
   total: number;
 }
 
-export async function importManuscriptToStoryBible(bookId: string, file: File) {
+export async function importManuscriptToStoryBible(
+  bookId: string | null | undefined,
+  file: File,
+  title?: string
+) {
   const formData = new FormData();
-  formData.append('bookId', bookId);
+  // Omit bookId for standalone uploads — the server creates a dedicated
+  // Story Bible container so it appears in the Story Bibles dropdown.
+  if (bookId) formData.append('bookId', bookId);
+  if (title) formData.append('title', title);
   formData.append('file', file);
   const response = await fetch('/api/story-bible/import-manuscript', {
     method: 'POST',

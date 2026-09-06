@@ -9,7 +9,19 @@ import BookCard from '@/components/book/BookCard';
 import { toast } from '@/hooks/use-toast';
 
 export default function DashboardHome() {
-  const { setCurrentView, setSelectedBookId, profile } = useAppStore();
+  const { setCurrentView, setSelectedBookId, setStoryBibleBookId, profile } = useAppStore();
+
+  const handleOpenBook = (id: string) => {
+    const book = books.find((b) => b.id === id);
+    // Standalone Story Bibles (uploaded manuscript) open in the Story Bible view,
+    // not the writing book-detail flow (they have no chapters).
+    if (book?.status === 'bible_imported') {
+      setStoryBibleBookId(id);
+      setCurrentView('story-bible');
+      return;
+    }
+    setSelectedBookId(id);
+  };
   const [books, setBooks] = useState<BookData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -110,7 +122,7 @@ export default function DashboardHome() {
               key={book.id}
               book={book}
               onDelete={handleDelete}
-              onClick={(id) => setSelectedBookId(id)}
+              onClick={handleOpenBook}
             />
           ))}
         </div>
