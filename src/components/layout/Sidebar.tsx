@@ -68,18 +68,20 @@ export default function Sidebar() {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/60 md:hidden"
+          className="fixed inset-0 z-30 bg-black/60 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed md:relative z-40 top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-[#0d0d10] border-r border-[#312839] transition-transform duration-300 ease-in-out flex flex-col shrink-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed lg:sticky top-0 left-0 z-40 h-dvh lg:h-full flex flex-col shrink-0 overflow-hidden border-r border-[#312839] bg-[#0d0d10]/85 backdrop-blur-xl transition-[width,transform,opacity] duration-300 ease-in-out ${
+          sidebarOpen
+            ? 'w-60 translate-x-0 opacity-100'
+            : 'w-60 -translate-x-full opacity-0 lg:w-0 lg:translate-x-0 lg:border-transparent pointer-events-none'
         }`}
       >
         {/* Sidebar brand */}
-        <div className="px-4 pt-4 pb-3">
+        <div className="px-4 pt-4 pb-3 shrink-0">
           <button
             onClick={() => setCurrentView('dashboard')}
             className="w-full flex items-center justify-center rounded-2xl border border-white/8 bg-black/20 px-3 py-3 hover:bg-white/[0.03] transition-colors"
@@ -100,7 +102,7 @@ export default function Sidebar() {
         <Separator className="bg-[#312839]" />
 
         {/* Nav items */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+        <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1">
           {filteredItems.map((item) => {
             const isActive = currentView === item.view;
             return (
@@ -108,7 +110,7 @@ export default function Sidebar() {
                 key={item.view}
                 onClick={() => {
                   setCurrentView(item.view);
-                  if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false);
+                  if (typeof window !== 'undefined' && window.innerWidth < 1024) setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                   isActive
@@ -134,7 +136,7 @@ export default function Sidebar() {
         <Separator className="bg-[#312839]" />
 
         {/* Credits bar */}
-        <div className="p-4">
+        <div className="p-4 shrink-0">
           <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-cyan-500/10 border border-white/10">
             <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-1">Credits</p>
             <p className="text-lg font-bold text-white mb-2">

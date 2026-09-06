@@ -45,6 +45,7 @@ The app currently validates with:
 
 ### Phase 5 — Cost telemetry (in progress)
 - Prisma `Job` model extended with `estimatedCostCents`, `actualCostCents`, `provider`, `modelName`, `tokensIn`, `tokensOut`
+- Additive database migration: `20260905_add_job_cost_telemetry` — apply separately from the application build; see the [Supabase repair guide](docs/job-telemetry-database-repair.md).
 - Admin margin view planned for future implementation
 
 ### Phase 6 — Production hardening (in progress)
@@ -152,18 +153,25 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
 ### Storage note
 
-The app now prefers **Supabase Storage** for generated assets when these are configured:
+Generated assets use **Supabase Storage** when configured:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_STORAGE_BUCKET`
+- `SUPABASE_URL` **or** `NEXT_PUBLIC_SUPABASE_URL` (either is accepted server-side)
+- `SUPABASE_SERVICE_ROLE_KEY` (server-only; never prefix it with `NEXT_PUBLIC_`)
+- `SUPABASE_STORAGE_BUCKET` (defaults to `hydraskript-assets`)
 
-If they are not configured, it falls back to local filesystem storage under:
+Provision the bucket in the same Supabase project before generating files. The
+current asset URL implementation uses a **public bucket**; do not put sensitive
+manuscripts in it. Merely setting the bucket name does not create the bucket.
 
-- `public/assets`
+Only local development may fall back to `public/assets`, with directories created
+on the first write. Production and Vercel require persistent storage and reject
+missing configuration instead of writing into the read-only deployment bundle.
+Uploads that fail in Supabase never silently fall back to local disk. `/tmp` is
+scratch space, not a durable/public asset store.
 
-For production, create a public Supabase Storage bucket matching `SUPABASE_STORAGE_BUCKET`.
-Local fallback remains useful for development, but should not be your primary production storage strategy.
+`GET /api/health` reports `storage.driver` (`supabase`, `local`, or `unconfigured`)
+and `storage.bucket`. These are **configuration diagnostics**, not a verification
+that the bucket exists or accepts uploads.
 
 ---
 
@@ -262,11 +270,12 @@ Before deploying, confirm all of the following:
 - `npm run build` passes
 - `.env.local` values are mirrored into the deployment platform
 - Supabase project is configured correctly
-- Prisma schema is synced:
-  - `npm run db:generate`
-  - `npm run db:push`
+- Database changes are deployed separately from the application build:
+  - `npm run db:generate` generates the client only; it does **not** migrate the database
+  - For an established Prisma migration history: review `npm run db:status`, then run `npm run db:deploy`
+  - For a populated database created by manual SQL/`db push`, reconcile its history before deploying migrations; see the [targeted Job-column repair](docs/job-telemetry-database-repair.md)
 - FFmpeg is available in the deployment runtime
-- Supabase Storage bucket exists and matches `SUPABASE_STORAGE_BUCKET` (or an intentional persistent-volume fallback is in place)
+- Supabase Storage bucket exists and matches `SUPABASE_STORAGE_BUCKET`
 
 ---
 
@@ -350,6 +359,23 @@ You can deploy to Vercel, but it is **not the recommended primary production tar
 
 If you still use Vercel:
 
+1. Set the database, Supabase, storage, and provider variables in the **Production**
+   environment (and separately in **Preview** if testing a branch).
+2. Build the intended commit and deploy it to **Production**. A green Preview
+   deployment on a PR does **not** update `www.hydraskript.com`. Check the commit
+   and environment in Vercel's deployment details before promoting a build.
+3. Check the live domain's `/api/health`: `storage.driver` must be `supabase`.
+   Then open an existing draft and test generation; do not create duplicate
+   books just because a failed load was previously shown as "Book not found".
+4. For remaining 500 responses, inspect **Network → request → Response** and
+   the matching Vercel runtime log. A successful `select 1` health check only
+   proves database connectivity, not that all Prisma tables/columns exist.
+   Inspect migration/schema state before applying any database changes.
+
+An HTML 500 is a server failure, not evidence of a login redirect. The client
+preserves the HTTP status, and book detail now offers Retry for load errors;
+only a real 404 is displayed as "Book not found".
+
 ```bash
 vercel --prod
 ```
@@ -357,6 +383,20 @@ vercel --prod
 ---
 
 ## Database Notes
+
+### New or empty Supabase project
+
+Use the [complete Supabase SQL setup guide](supabase/README.md):
+
+1. Run [`supabase/00-preflight.sql`](supabase/00-preflight.sql) to check the project/schema without changing data.
+2. In the correct project's SQL Editor, run all of [`supabase/01-hydraskript-setup.sql`](supabase/01-hydraskript-setup.sql).
+
+This creates all 13 application tables, enum types, indexes, foreign keys,
+private server-side table permissions, and the public asset bucket. It does not
+create additional databases, seed admin users/credits, or restore deleted data.
+It is rerunnable after a successful setup and aborts on incompatible existing
+schemas instead of overwriting them. Review the storage privacy and migration
+history notes in the guide before running it on an existing project.
 
 Schema lives in:
 
@@ -374,10 +414,27 @@ Key models:
 
 ### Apply schema updates
 
+For local development/prototyping:
+
 ```bash
 npm run db:generate
 npm run db:push
 ```
+
+For production databases with an established Prisma migration history, review
+pending migrations and explicitly deploy them as a controlled release step:
+
+```bash
+npm run db:status
+npm run db:deploy
+```
+
+Generating the Prisma client or redeploying Vercel alone does not apply SQL.
+Do not reset production or use `--accept-data-loss` to repair schema drift. If
+book loading/generation fails with `jobs.estimatedCostCents does not exist`, use
+the [additive Supabase repair and migration-history guide](docs/job-telemetry-database-repair.md).
+Legacy databases populated via manual SQL/`db push` need their migration history
+reconciled before the full set of historical migrations can be safely deployed.
 
 ---
 
@@ -397,8 +454,8 @@ HydraSkript currently supports:
 
 These are the main remaining production limitations:
 
-1. **Storage falls back to local filesystem if Supabase Storage is not configured**
-   - generated files can still be lost on restart/redeploy if you rely on fallback storage instead of a real bucket
+1. **Production storage must be provisioned separately**
+   - Supabase credentials and an existing bucket are required; local fallback is development-only
 
 2. **Queue is single-instance oriented**
    - suitable for one-node deployments today

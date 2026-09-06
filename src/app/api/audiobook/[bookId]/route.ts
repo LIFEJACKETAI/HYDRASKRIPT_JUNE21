@@ -8,6 +8,9 @@ import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits } from '@/lib/utils/credits';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
+// Auth + DB backed — never statically prerender at build time.
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ bookId: string }> }

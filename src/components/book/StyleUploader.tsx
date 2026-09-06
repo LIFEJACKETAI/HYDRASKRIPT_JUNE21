@@ -241,16 +241,26 @@ export default function StyleUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
+  const resetConfigForm = () => {
+    setName('');
+    setDescription('');
+    setExemplarTexts(['']);
+    setSelectedDescriptors([]);
+  };
+
   const loadProfileIntoConfig = (p: StyleProfileData) => {
     setActiveProfile(p);
     setName(p.name || '');
     setDescription(p.description || '');
-    if (p.exemplarTexts && p.exemplarTexts.length > 0) {
-      setExemplarTexts(p.exemplarTexts);
-    }
+    // Always reset — never carry the previously-viewed style's texts/tags over.
+    setExemplarTexts(
+      p.exemplarTexts && p.exemplarTexts.length > 0 ? [...p.exemplarTexts] : ['']
+    );
     const tagsMatch = (p.description || '').match(/Tags:\s*(.+)/);
     if (tagsMatch) {
       setSelectedDescriptors(tagsMatch[1].split(',').map(t => t.trim()).filter(t => DESCRIPTOR_OPTIONS.includes(t)));
+    } else {
+      setSelectedDescriptors([]);
     }
   };
 
@@ -258,14 +268,12 @@ export default function StyleUploader() {
     setLoading(true);
     const data = await listStyleProfiles();
     setProfiles(data);
-    if (data.length > 0) {
-      if (activeProfile) {
-        const stillThere = data.find(p => p.id === activeProfile.id);
-        if (stillThere) loadProfileIntoConfig(stillThere);
-        else loadProfileIntoConfig(data[0]);
-      } else {
-        loadProfileIntoConfig(data[0]);
-      }
+    if (data.length === 0) {
+      setActiveProfile(null);
+      resetConfigForm();
+    } else if (!activeProfile) {
+      // Initial load only — never clobber the form while the user is working.
+      loadProfileIntoConfig(data[0]);
     }
     setLoading(false);
   };
@@ -298,9 +306,20 @@ export default function StyleUploader() {
       });
       if (result.success) {
         toast({ title: 'Style saved!', description: `"${name}" is ready to use.` });
-        setName(''); setDescription(''); setExemplarTexts(['']); setSelectedDescriptors([]);
         setShowCreateModal(false);
-        fetchProfiles();
+        // Select the profile that was JUST created — never fall back to the
+        // previously-active one, or the form looks like the old style's
+        // exemplars replaced the new text (it didn't; this was a display bug).
+        const createdId = (result.data as { id?: string } | undefined)?.id;
+        const data = await listStyleProfiles();
+        setProfiles(data);
+        const created = createdId ? data.find((p) => p.id === createdId) : undefined;
+        if (created) {
+          loadProfileIntoConfig(created);
+        } else {
+          resetConfigForm();
+          if (data.length > 0 && !activeProfile) loadProfileIntoConfig(data[0]);
+        }
       } else {
         toast({ title: 'Failed to save', description: result.error, variant: 'destructive' });
       }
@@ -313,13 +332,22 @@ export default function StyleUploader() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    const wasActive = activeProfile?.id === deleteTarget.id;
     setIsDeleting(true);
     try {
       const result = await deleteStyleProfile(deleteTarget.id);
       if (result.success) {
         toast({ title: 'Profile deleted', description: `"${deleteTarget.name}" removed.` });
-        if (activeProfile?.id === deleteTarget.id) setActiveProfile(null);
-        fetchProfiles();
+        const data = await listStyleProfiles();
+        setProfiles(data);
+        if (wasActive) {
+          // The deleted style was on screen — move to the next one (or clear).
+          if (data.length > 0) loadProfileIntoConfig(data[0]);
+          else {
+            setActiveProfile(null);
+            resetConfigForm();
+          }
+        }
       } else {
         toast({ title: 'Failed', description: result.error, variant: 'destructive' });
       }

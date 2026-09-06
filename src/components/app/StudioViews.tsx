@@ -48,7 +48,7 @@ export function CreditsView() {
         <p className="text-slate-400 mt-1">Monthly Founder credits refresh and do not roll over. Purchased packs never expire.</p>
       </div>
 
-      <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 p-6">
+      <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 backdrop-blur-md p-6">
         <p className="text-xs uppercase tracking-wider text-cyan-300 mb-1">Available credits</p>
         <p className="text-4xl font-bold text-white">
           {(data?.credits ?? profile?.credits ?? 0).toLocaleString()}
@@ -65,7 +65,7 @@ export function CreditsView() {
         <h2 className="text-lg font-bold text-white mb-4">Monthly plans</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {plans.map((plan) => (
-            <div key={plan.key} className="rounded-2xl border border-[#312839] bg-[#0d0d10] p-5">
+            <div key={plan.key} className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-5">
               <p className="font-bold text-white">{plan.label}</p>
               <p className="text-2xl font-bold text-white mt-2">${plan.price}<span className="text-sm text-slate-500">/mo</span></p>
               <p className="text-sm text-purple-300 mt-1">{plan.credits.toLocaleString()} credits/mo</p>
@@ -85,7 +85,7 @@ export function CreditsView() {
         <h2 className="text-lg font-bold text-white mb-4">À la carte credit packs</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {packs.map((pack) => (
-            <div key={pack.key} className="rounded-2xl border border-[#312839] bg-[#0d0d10] p-5">
+            <div key={pack.key} className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-5">
               <p className="font-bold text-white">{pack.label}</p>
               <p className="text-2xl font-bold text-white mt-2">${pack.price}</p>
               <Button
@@ -102,7 +102,7 @@ export function CreditsView() {
 
       <div>
         <h2 className="text-lg font-bold text-white mb-4">Recent activity</h2>
-        <div className="rounded-2xl border border-[#312839] bg-[#0d0d10] divide-y divide-white/5">
+        <div className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md divide-y divide-white/5">
           {(data?.recentTransactions ?? []).length === 0 ? (
             <p className="p-6 text-sm text-slate-500">No credit activity yet.</p>
           ) : (
@@ -162,7 +162,7 @@ export function ExportHubView() {
       ) : (
         <div className="space-y-3">
           {books.map((book) => (
-            <div key={book.id} className="rounded-2xl border border-[#312839] bg-[#0d0d10] p-5 flex flex-col md:flex-row md:items-center gap-4">
+            <div key={book.id} className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-5 flex flex-col md:flex-row md:items-center gap-4">
               <button className="flex-1 text-left" onClick={() => setSelectedBookId(book.id)}>
                 <p className="font-semibold text-white">{book.title}</p>
                 <p className="text-xs text-slate-500 capitalize">{book.genre} · {book.status}</p>
@@ -221,7 +221,7 @@ export function AdminView() {
       </div>
       <div className="grid grid-cols-4 gap-3 text-center">
         {Object.entries(analytics.jobStats).map(([k, v]) => (
-          <div key={k} className="rounded-xl border border-[#312839] bg-[#0d0d10] p-3">
+          <div key={k} className="rounded-xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-3">
             <p className="text-xs text-slate-500 uppercase">{k}</p>
             <p className="text-xl font-bold text-white">{v}</p>
           </div>
@@ -229,7 +229,7 @@ export function AdminView() {
       </div>
       <div className="rounded-2xl border border-[#312839] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-[#0d0d10] text-slate-400">
+          <thead className="bg-[#0d0d10]/75 backdrop-blur-md text-slate-400">
             <tr>
               <th className="text-left p-3">Job</th>
               <th className="text-left p-3">Status</th>
@@ -255,7 +255,7 @@ export function AdminView() {
 
 function AdminStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-[#312839] bg-[#0d0d10] p-4">
+    <div className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-4">
       <p className="text-xs uppercase tracking-wider text-slate-500">{label}</p>
       <p className="text-2xl font-bold text-white mt-1">{value.toLocaleString()}</p>
     </div>
@@ -330,7 +330,7 @@ export function BookstoreView() {
         <p className="text-slate-400 mt-1">List a finished book for sale, or browse community titles.</p>
       </div>
 
-      <form onSubmit={handleCreate} className="rounded-2xl border border-[#312839] bg-[#0d0d10] p-6 space-y-4 max-w-xl">
+      <form onSubmit={handleCreate} className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-6 space-y-4 max-w-xl">
         <h2 className="font-bold text-white">New listing</h2>
         <div className="space-y-1.5">
           <Label>Title</Label>
@@ -368,7 +368,7 @@ function ListingGrid({ title, items }: { title: string; items: Listing[] }) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => (
-            <div key={item.id} className="rounded-2xl border border-[#312839] bg-[#0d0d10] p-5">
+            <div key={item.id} className="rounded-2xl border border-[#312839] bg-[#0d0d10]/75 backdrop-blur-md p-5">
               <p className="font-semibold text-white">{item.title}</p>
               <p className="text-xs text-slate-500 mt-1">{item.author || 'Unknown author'} · {item.format}</p>
               <p className="text-purple-300 font-bold mt-3">${item.price.toFixed(2)}</p>

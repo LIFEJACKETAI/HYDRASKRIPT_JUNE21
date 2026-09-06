@@ -83,6 +83,7 @@ export default function BookCard({ book, onDelete, onClick }: BookCardProps) {
       <motion.div
         whileHover={{ y: -4 }}
         transition={{ duration: 0.2 }}
+        className="min-w-0"
       >
         <Card
           className="bg-[#2a2a2a] border-gray-800 cursor-pointer card-hover group overflow-hidden"

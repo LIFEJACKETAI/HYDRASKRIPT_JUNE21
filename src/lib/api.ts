@@ -5,10 +5,17 @@ const API_BASE = '/api';
 
 // ─── Fetch Helper ─────────────────────────────────────────────────────────────
 
+export interface ApiResult<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  status?: number;
+}
+
 async function apiFetch<T>(
   path: string,
   options?: RequestInit
-): Promise<{ success: boolean; data?: T; error?: string }> {
+): Promise<ApiResult<T>> {
   try {
     const response = await fetch(`${API_BASE}${path}`, {
       ...options,
@@ -18,23 +25,37 @@ async function apiFetch<T>(
       },
     });
 
-    // Check if response is JSON before parsing
+    const status = response.status;
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      // If it's HTML (login page), treat as auth failure
-      if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
-        console.warn(`[API Client] ${path} returned HTML (likely login redirect)`);
-        return { success: false, error: 'Authentication required' };
-      }
-      return { success: false, error: `Unexpected response: ${text.slice(0, 100)}` };
+      // A Next.js/Vercel runtime crash can return HTML too. Only an actual
+      // 401 or a successful redirect to /login is evidence of an auth failure.
+      const loginRedirect = response.ok && response.redirected && response.url &&
+        new URL(response.url).pathname === '/login';
+      console.warn(`[API Client] ${path} returned non-JSON (HTTP ${status})`);
+      return {
+        success: false,
+        status,
+        error: status === 401 || loginRedirect
+          ? 'Authentication required'
+          : status >= 500
+            ? `Server error (HTTP ${status}). Please try again.`
+            : `Unexpected server response (HTTP ${status}). Please try again.`,
+      };
     }
 
     const result = await response.json();
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`[API DEBUG] ${path} →`, response.status, result);
+      console.log(`[API DEBUG] ${path} →`, status, result);
     }
-    return result;
+    if (!response.ok) {
+      return {
+        success: false,
+        status,
+        error: typeof result?.error === 'string' ? result.error : `Request failed (HTTP ${status})`,
+      };
+    }
+    return { ...result, status };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Network error';
     console.error(`[API Client] ${path} failed:`, message);
@@ -140,9 +161,15 @@ export async function listBooks(): Promise<BookData[]> {
   return result.data ?? [];
 }
 
+export async function getBookResult(id: string): Promise<ApiResult<BookData>> {
+  return apiFetch<BookData>(`/books/${id}`);
+}
+
+// Convenience helper for background polling. Interactive views should use
+// getBookResult so a server/network error is not mistaken for a missing book.
 export async function getBook(id: string): Promise<BookData | null> {
-  const result = await apiFetch<BookData>(`/books/${id}`);
-  return result.data ?? null;
+  const result = await getBookResult(id);
+  return result.success ? result.data ?? null : null;
 }
 
 export async function createBook(input: CreateBookInput) {

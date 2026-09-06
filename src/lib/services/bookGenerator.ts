@@ -1,5 +1,6 @@
 // HydraSkript - Book Generator Service (Interactive Studio Version)
 import { db } from '@/lib/db';
+import { requireStorageConfig } from '@/lib/storage-config';
 import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits, consumeCredits, refundCredits, refundOutstandingReservation, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
 import { askLLMJSONWithFallback, askLLMWithFallback } from '@/lib/llm/fallback';
@@ -80,6 +81,10 @@ export async function startBookGeneration(
   if (['outlining', 'writing', 'finalizing'].includes(book.status)) {
     return { error: 'Book is already in a generation state' };
   }
+
+  // Reject missing production storage before creating a job or reserving credits.
+  // Bucket existence/access still needs to be provisioned in Supabase Storage.
+  requireStorageConfig();
 
   const defaults = getBookDefaults(book.targetAudience as TargetAudience);
   const isChildrenBook = ['0-5', '6-9', '10-14'].includes(book.targetAudience);

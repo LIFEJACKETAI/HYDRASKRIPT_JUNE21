@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getStorageConfig } from '@/lib/storage-config';
 
 // TEMPORARY DIAGNOSTIC ROUTE — safe to delete once login is fixed.
 // Visits /api/health, tries `select 1` against the database, and reports
@@ -33,9 +34,28 @@ function inspectDbUrl(raw?: string) {
 export async function GET() {
   const started = Date.now();
   const dbUrl = inspectDbUrl(process.env.DATABASE_URL);
+  // Configuration only, not a bucket connectivity/access check. No credentials.
+  const storage = getStorageConfig();
+  // Presence-only flags (never values/lengths) so this stays safe to expose.
+  const llm = {
+    nvidiaNimKeyPresent: (process.env.NVIDIA_NIM_API_KEY?.length ?? 0) > 0,
+    openrouterKeyPresent: (process.env.OPENROUTER_API_KEY?.length ?? 0) > 0,
+    nimModel: process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-8b-instruct (default)',
+    openrouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free (default)',
+  };
+  // Same presence-only treatment for Supabase (this is what the Vercel build needs).
+  const supabase = {
+    urlPresent:
+      ((process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL)?.length ?? 0) > 0,
+    anonKeyPresent:
+      ((process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)?.length ?? 0) >
+      0,
+    serviceKeyPresent: (process.env.SUPABASE_SERVICE_ROLE_KEY?.length ?? 0) > 0,
+    databaseUrlPresent: (process.env.DATABASE_URL?.length ?? 0) > 0,
+  };
 
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json({ ok: false, dbUrl });
+    return NextResponse.json({ ok: false, dbUrl, llm, supabase, storage });
   }
 
   try {
@@ -44,6 +64,9 @@ export async function GET() {
       ok: true,
       latencyMs: Date.now() - started,
       dbUrl,
+      llm,
+      supabase,
+      storage,
       note: 'Database reachable — if login still fails, the problem is elsewhere (paste me this JSON).',
     });
   } catch (e: unknown) {
@@ -52,6 +75,9 @@ export async function GET() {
       ok: false,
       latencyMs: Date.now() - started,
       dbUrl,
+      llm,
+      supabase,
+      storage,
       errorName: err?.name ?? 'unknown',
       errorCode: err?.code ?? err?.meta?.code ?? 'none',
       errorMessage: String(err?.message ?? e).slice(0, 400),
