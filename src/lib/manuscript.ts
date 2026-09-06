@@ -18,6 +18,12 @@ export async function extractTextFromManuscript(file: File, extension: string): 
   }
 
   if (extension === 'pdf') {
+    // Ensure DOMMatrix/Path2D/ImageData globals exist before pdf-parse loads.
+    // In serverless bundles pdf-parse's self-polyfill doesn't resolve, which
+    // otherwise throws "DOMMatrix is not defined" on PDF upload.
+    const { ensurePdfCanvasGlobals } = await import('@/lib/server/pdfCanvasPolyfill');
+    await ensurePdfCanvasGlobals();
+
     const { PDFParse } = await import('pdf-parse');
     const parser = new PDFParse({ data: new Uint8Array(buffer) });
 
