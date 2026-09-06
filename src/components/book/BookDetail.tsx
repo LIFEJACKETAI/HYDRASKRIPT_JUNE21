@@ -30,7 +30,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAppStore } from '@/lib/store';
-import { getBook, deleteBook, startGeneration, exportBook } from '@/lib/api';
+import { getBook, getBookResult, deleteBook, startGeneration, exportBook } from '@/lib/api';
 import type { BookData } from '@/lib/api';
 import ChapterEditor from '@/components/book/ChapterEditor';
 import GenerationProgress from '@/components/book/GenerationProgress';
@@ -66,6 +66,7 @@ export default function BookDetail() {
   const { selectedBookId, setSelectedBookId, setCurrentView, setIsGenerating, activeJobId, setActiveJobId } = useAppStore();
   const [book, setBook] = useState<BookData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<{ message: string; status?: number } | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -75,10 +76,23 @@ export default function BookDetail() {
   const [isAutoCompleting, setIsAutoCompleting] = useState(false);
 
   const fetchBook = useCallback(async () => {
-    if (!selectedBookId) return;
+    setLoadError(null);
+    if (!selectedBookId) {
+      setBook(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const data = await getBook(selectedBookId);
-    setBook(data);
+    const result = await getBookResult(selectedBookId);
+    if (result.success && result.data) {
+      setBook(result.data);
+    } else {
+      setBook(null);
+      setLoadError({
+        message: result.error || 'The book could not be loaded. Please try again.',
+        status: result.status,
+      });
+    }
     setLoading(false);
   }, [selectedBookId]);
 
@@ -300,7 +314,17 @@ const handleAutoApproveAll = async () => {
     return (
       <div className="text-center py-12">
         <BookOpen className="h-12 w-12 mx-auto text-gray-600 mb-4" />
-        <p className="text-gray-400">Book not found.</p>
+        <p className="text-gray-200 font-medium">
+          {loadError?.status === 404 ? 'Book not found.' : loadError ? 'Unable to load book.' : 'No book selected.'}
+        </p>
+        {loadError && loadError.status !== 404 && (
+          <div role="alert" className="mx-auto mt-3 max-w-xl space-y-3">
+            <p className="text-sm text-gray-400 break-words">{loadError.message}</p>
+            <Button variant="outline" onClick={fetchBook}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Retry
+            </Button>
+          </div>
+        )}
         <Button variant="ghost" onClick={() => setCurrentView('dashboard')} className="mt-4 text-purple-400">
           ← Back to Dashboard
         </Button>

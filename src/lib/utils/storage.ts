@@ -5,21 +5,12 @@ import fs from 'fs';
 import path from 'path';
 import { db } from '@/lib/db';
 import { getSupabaseAdmin } from '@/lib/supabase';
+import { requireStorageConfig } from '@/lib/storage-config';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
 const STORAGE_DIR = path.join(process.cwd(), 'public', 'assets');
 const PUBLIC_BASE = '/assets';
-const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'hydraskript-assets';
-
-function isSupabaseStorageEnabled() {
-  return Boolean(
-    process.env.SUPABASE_URL &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY &&
-    SUPABASE_STORAGE_BUCKET
-  );
-}
-
 // Ensure storage directory exists
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
@@ -27,19 +18,15 @@ function ensureDir(dir: string) {
   }
 }
 
-// Initialize storage on module load
-ensureDir(STORAGE_DIR);
-ensureDir(path.join(STORAGE_DIR, 'covers'));
-ensureDir(path.join(STORAGE_DIR, 'illustrations'));
-ensureDir(path.join(STORAGE_DIR, 'pdfs'));
-ensureDir(path.join(STORAGE_DIR, 'audio'));
-ensureDir(path.join(STORAGE_DIR, 'listings'));
+// Never create directories at module scope. Vercel's deployed application is
+// read-only, and importing a worker/service must not break unrelated API routes.
+// Local directories are created only by saveFile() in development.
 
 // ─── File Operations ──────────────────────────────────────────────────────────
 
 /**
  * Save a buffer to storage and return the public URL.
- * Prefers Supabase Storage when configured, otherwise falls back to local disk.
+ * Uses Supabase Storage in production; local disk is a development-only fallback.
  */
 export async function saveFile(
   subfolder: string,
@@ -47,21 +34,22 @@ export async function saveFile(
   buffer: Buffer,
   options?: { contentType?: string }
 ): Promise<string> {
-  if (isSupabaseStorageEnabled()) {
+  const config = requireStorageConfig();
+  if (config.driver === 'supabase') {
     const objectPath = `${subfolder}/${filename}`;
     const { error } = await getSupabaseAdmin().storage
-      .from(SUPABASE_STORAGE_BUCKET)
+      .from(config.bucket)
       .upload(objectPath, buffer, {
         upsert: true,
         contentType: options?.contentType ?? 'application/octet-stream',
       });
 
     if (error) {
-      throw new Error(`Supabase storage upload failed: ${error.message}`);
+      throw new Error(`Supabase Storage upload to "${config.bucket}" failed: ${error.message}`);
     }
 
     const { data } = getSupabaseAdmin().storage
-      .from(SUPABASE_STORAGE_BUCKET)
+      .from(config.bucket)
       .getPublicUrl(objectPath);
 
     return data.publicUrl;
@@ -94,8 +82,9 @@ export async function saveBase64File(
  */
 export async function deleteFile(publicUrl: string): Promise<boolean> {
   try {
-    if (isSupabaseStorageEnabled()) {
-      const marker = `/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/`;
+    const config = requireStorageConfig();
+    if (config.driver === 'supabase') {
+      const marker = `/storage/v1/object/public/${config.bucket}/`;
       const markerIndex = publicUrl.indexOf(marker);
 
       if (markerIndex === -1) {
@@ -104,7 +93,7 @@ export async function deleteFile(publicUrl: string): Promise<boolean> {
 
       const objectPath = publicUrl.slice(markerIndex + marker.length);
       const { error } = await getSupabaseAdmin().storage
-        .from(SUPABASE_STORAGE_BUCKET)
+        .from(config.bucket)
         .remove([objectPath]);
 
       if (error) {
@@ -133,8 +122,9 @@ export async function deleteFile(publicUrl: string): Promise<boolean> {
  * Check if a file exists in storage.
  */
 export async function fileExists(publicUrl: string): Promise<boolean> {
-  if (isSupabaseStorageEnabled()) {
-    const marker = `/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/`;
+  const config = requireStorageConfig();
+  if (config.driver === 'supabase') {
+    const marker = `/storage/v1/object/public/${config.bucket}/`;
     const markerIndex = publicUrl.indexOf(marker);
 
     if (markerIndex === -1) {
@@ -146,7 +136,7 @@ export async function fileExists(publicUrl: string): Promise<boolean> {
     const fileName = objectPath.includes('/') ? objectPath.slice(objectPath.lastIndexOf('/') + 1) : objectPath;
 
     const { data, error } = await getSupabaseAdmin().storage
-      .from(SUPABASE_STORAGE_BUCKET)
+      .from(config.bucket)
       .list(directory, { search: fileName });
 
     if (error) {

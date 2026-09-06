@@ -152,18 +152,25 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
 ### Storage note
 
-The app now prefers **Supabase Storage** for generated assets when these are configured:
+Generated assets use **Supabase Storage** when configured:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_STORAGE_BUCKET`
+- `SUPABASE_URL` **or** `NEXT_PUBLIC_SUPABASE_URL` (either is accepted server-side)
+- `SUPABASE_SERVICE_ROLE_KEY` (server-only; never prefix it with `NEXT_PUBLIC_`)
+- `SUPABASE_STORAGE_BUCKET` (defaults to `hydraskript-assets`)
 
-If they are not configured, it falls back to local filesystem storage under:
+Provision the bucket in the same Supabase project before generating files. The
+current asset URL implementation uses a **public bucket**; do not put sensitive
+manuscripts in it. Merely setting the bucket name does not create the bucket.
 
-- `public/assets`
+Only local development may fall back to `public/assets`, with directories created
+on the first write. Production and Vercel require persistent storage and reject
+missing configuration instead of writing into the read-only deployment bundle.
+Uploads that fail in Supabase never silently fall back to local disk. `/tmp` is
+scratch space, not a durable/public asset store.
 
-For production, create a public Supabase Storage bucket matching `SUPABASE_STORAGE_BUCKET`.
-Local fallback remains useful for development, but should not be your primary production storage strategy.
+`GET /api/health` reports `storage.driver` (`supabase`, `local`, or `unconfigured`)
+and `storage.bucket`. These are **configuration diagnostics**, not a verification
+that the bucket exists or accepts uploads.
 
 ---
 
@@ -266,7 +273,7 @@ Before deploying, confirm all of the following:
   - `npm run db:generate`
   - `npm run db:push`
 - FFmpeg is available in the deployment runtime
-- Supabase Storage bucket exists and matches `SUPABASE_STORAGE_BUCKET` (or an intentional persistent-volume fallback is in place)
+- Supabase Storage bucket exists and matches `SUPABASE_STORAGE_BUCKET`
 
 ---
 
@@ -350,6 +357,23 @@ You can deploy to Vercel, but it is **not the recommended primary production tar
 
 If you still use Vercel:
 
+1. Set the database, Supabase, storage, and provider variables in the **Production**
+   environment (and separately in **Preview** if testing a branch).
+2. Build the intended commit and deploy it to **Production**. A green Preview
+   deployment on a PR does **not** update `www.hydraskript.com`. Check the commit
+   and environment in Vercel's deployment details before promoting a build.
+3. Check the live domain's `/api/health`: `storage.driver` must be `supabase`.
+   Then open an existing draft and test generation; do not create duplicate
+   books just because a failed load was previously shown as "Book not found".
+4. For remaining 500 responses, inspect **Network → request → Response** and
+   the matching Vercel runtime log. A successful `select 1` health check only
+   proves database connectivity, not that all Prisma tables/columns exist.
+   Inspect migration/schema state before applying any database changes.
+
+An HTML 500 is a server failure, not evidence of a login redirect. The client
+preserves the HTTP status, and book detail now offers Retry for load errors;
+only a real 404 is displayed as "Book not found".
+
 ```bash
 vercel --prod
 ```
@@ -397,8 +421,8 @@ HydraSkript currently supports:
 
 These are the main remaining production limitations:
 
-1. **Storage falls back to local filesystem if Supabase Storage is not configured**
-   - generated files can still be lost on restart/redeploy if you rely on fallback storage instead of a real bucket
+1. **Production storage must be provisioned separately**
+   - Supabase credentials and an existing bucket are required; local fallback is development-only
 
 2. **Queue is single-instance oriented**
    - suitable for one-node deployments today
