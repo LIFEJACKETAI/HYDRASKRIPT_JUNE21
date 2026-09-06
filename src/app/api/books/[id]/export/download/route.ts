@@ -16,7 +16,15 @@ import fs from 'fs';
 import path from 'path';
 import { db } from '@/lib/db';
 
-const STORAGE_DIR = path.join(process.cwd(), 'public', 'assets');
+// On serverless the local-disk fallback lives in /tmp (public/ is read-only /
+// CDN-served at runtime). Local dev writes under public/assets so files are
+// directly served. Keep this in sync with src/lib/utils/storage.ts.
+const IS_SERVERLESS = Boolean(
+  process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.AWS_EXECUTION_ENV
+);
+const STORAGE_DIR = IS_SERVERLESS
+  ? path.join('/tmp', 'hydraskript-assets')
+  : path.join(process.cwd(), 'public', 'assets');
 
 function contentTypeFor(format: string): string {
   switch (format) {

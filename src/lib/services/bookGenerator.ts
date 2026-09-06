@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits, consumeCredits, refundCredits, refundOutstandingReservation, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
 import { askLLMJSONWithFallback, askLLMWithFallback } from '@/lib/llm/fallback';
+import { z } from 'zod';
 import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt, getManuscriptImportPrompt } from '@/lib/llm/prompts';
 import { BookOutlineSchema, validateOrThrow, ManuscriptImportSchema } from '@/lib/llm/schema';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
@@ -61,6 +62,78 @@ function cleanChapterText(raw: string, chapterTitle: string): string {
   }
 
   return text;
+}
+
+// ─── Chapter recap (continuity memory) ────────────────────────────────────────
+
+const ChapterRecapSchema = z.object({
+  characters: z.array(z.string()).catch([]),
+  summary: z.string().catch(''),
+});
+
+/**
+ * Extract a tight continuity recap from a freshly written chapter:
+ *  - characters: every named character present (canonical spellings), so later
+ *    chapters know exactly who exists and never rename/swap/invent the cast;
+ *  - summary: a 2-3 sentence recap covering who was present, what happened, and
+ *    where the scene left off — the plot thread handed to the next chapter.
+ *
+ * Falls back to a heuristic extraction if the recap call fails, so continuity
+ * never hard-fails a book.
+ */
+async function buildChapterRecap(
+  content: string,
+  chapterTitle: string,
+  canonicalNames: string[]
+): Promise<{ characters: string[]; summary: string }> {
+  // Heuristic fallback first (always available) — prefer canonical spellings
+  // present in the text, capitalized name tokens otherwise.
+  const heuristic = () => {
+    const found = new Set<string>();
+    for (const name of canonicalNames) {
+      if (name && new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(content)) {
+        found.add(name);
+      }
+    }
+    // Capture capitalized 1-2 word names not already included (e.g. "Dr. Vane")
+    const nameTokens = content.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\b/g) ?? [];
+    const common = new Set(['The','She','He','They','It','We','I','You','His','Her','Their','When','Then','But','And','After','Before','Chapter','As','If','So','At','In','On','No','Yes','Mom','Dad']);
+    for (const tok of nameTokens) {
+      if (!common.has(tok) && tok.length > 2) found.add(tok);
+      if (found.size >= 8) break;
+    }
+    const sentences = content.match(/[^.!?]+[.!?]+/g) ?? [];
+    const opening = sentences.slice(0, 1).join(' ').trim();
+    const ending = sentences.slice(-2).join(' ').trim();
+    const summary = ([opening, ending].filter(Boolean).join(' ').trim() || content.slice(-400)).slice(0, 600);
+    return { characters: [...found].slice(0, 10), summary };
+  };
+
+  try {
+    const system = `You are a continuity editor. From the chapter text, extract:
+1) "characters": a JSON array of every named character present (use their exact canonical spellings), including minor but named roles.
+2) "summary": a 2-3 sentence recap — who was present, the key events, and exactly where the scene leaves off (cliffhanger). Do not editorialize.
+Respond with valid JSON only: {"characters": ["..."], "summary": "..."}.`;
+    const user = `Canonical cast: ${canonicalNames.join(', ') || '(none given)'}\n\nChapter "${chapterTitle}":\n\n${content.slice(0, 6000)}`;
+    const result = await askLLMJSONWithFallback<unknown>(system, user, 0.1);
+    const parsed = ChapterRecapSchema.parse(result);
+    if (parsed.summary && parsed.summary.trim().length >= 20) {
+      // Merge model-found names with canonical matches so spellings stay stable.
+      const merged = new Set<string>();
+      for (const name of canonicalNames) {
+        if (name && new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(content)) {
+          merged.add(name);
+        }
+      }
+      for (const c of parsed.characters || []) {
+        if (typeof c === 'string' && c.trim()) merged.add(c.trim());
+      }
+      return { characters: [...merged].slice(0, 12), summary: parsed.summary.trim().slice(0, 800) };
+    }
+    return heuristic();
+  } catch {
+    return heuristic();
+  }
 }
 
 /**
@@ -270,20 +343,28 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
   try {
     await jobQueue.updateJobStatus(jobId, { progressMessage: `Writing chapter ${chapterIndex + 1}...`, progressPercent: 20 });
 
-    // Continuity: gather summaries from the last few chapters (not just the
-    // previous one) so the model knows who has actually been introduced so
-    // far. Each summaryForNext is a short fallback excerpt, so chaining 2-3
-    // of them preserves the cast + plot thread far better than one alone.
+    // Continuity: gather recaps from the last few chapters so the model knows
+    // both the plot thread AND exactly which characters have already appeared
+    // (canonical names). This is the primary guard against mixing up / swapping
+    // / inventing characters as the book progresses.
     const prevChapters = await db.chapter.findMany({
       where: { bookId, index: { lt: chapterIndex } },
       orderBy: { index: 'desc' },
-      take: 3,
+      take: 4,
     });
+    const priorCast = new Set<string>();
+    for (const c of [...prevChapters].reverse()) {
+      try {
+        const names = JSON.parse(c.charactersIntroduced || '[]');
+        if (Array.isArray(names)) names.forEach((n) => typeof n === 'string' && n && priorCast.add(n));
+      } catch {}
+    }
     const previousSummary = prevChapters.length > 0
       ? [...prevChapters].reverse()
           .map((c) => `Ch ${c.index + 1} (${c.title}): ${c.summaryForNext || 'no summary'}`)
           .join('\n')
       : 'This is the beginning of the story.';
+    const introducedCast = [...priorCast].slice(0, 15);
 
     const stylePrompt = await getStyleSystemPrompt(book.styleProfileId);
     const targetAudience = book.targetAudience as TargetAudience;
@@ -321,19 +402,20 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
     let fullSystemPrompt: string;
     let chapterUser: string;
 
+    // characterNames is Postgres String[] — Prisma returns a JS array directly, never a JSON string
+    const characterNames: string[] = Array.isArray(book.characterNames)
+      ? (book.characterNames as string[])
+      : [];
+
     if (isColoringBook && coloringTheme && COLORING_THEMES[coloringTheme]) {
       fullSystemPrompt = getColoringChapterPrompt(coloringTheme, chapterIndex, totalChapters);
       chapterUser = `Write a brief, poetic description for the coloring page titled "${chapter.title}". Visual subject: ${chapter.synopsis}`;
     } else {
-      // characterNames is Postgres String[] — Prisma returns a JS array directly, never a JSON string
-      const characterNames: string[] = Array.isArray(book.characterNames)
-        ? (book.characterNames as string[])
-        : [];
-
       const chapterPrompt = getChapterWritePrompt(stylePrompt, book.title, genre, chapterIndex, totalChapters, previousSummary, characterNames.length > 0 ? characterNames : undefined, {
         description: book.description ?? undefined,
         fullOutline: fullOutline || undefined,
         currentSynopsis: `${chapter.title}: ${chapter.synopsis}`,
+        introducedCast: introducedCast.length > 0 ? introducedCast : undefined,
       });
       const childrensPrompt = isChildrenBook ? getChildrensChapterPrompt(targetAudience) : '';
       fullSystemPrompt = childrensPrompt ? `${childrensPrompt}\n\n${chapterPrompt}` : chapterPrompt;
@@ -346,24 +428,18 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
     }
 
     const content = cleanChapterText(rawText, chapter.title);
+
+    // Build a real continuity recap (cast + 2-3 sentence summary) instead of the
+    // old heuristic that kept an empty character list and stitched the first &
+    // last sentences. This is what later chapters read to stay on-outline and
+    // keep names straight.
+    const recap = await buildChapterRecap(content, chapter.title, characterNames);
     const chapterResult = {
       content,
-      charactersIntroduced: [] as string[],
-      summaryForNextChapter: '',
+      charactersIntroduced: recap.characters,
+      summaryForNextChapter: recap.summary,
     };
-
-    // If the model omitted the continuity summary, derive one from the chapter
-    // itself. Capture the opening (who/where is established) plus the ending
-    // (where the plot left off) so the next chapter inherits the cast, not
-    // just the final hook.
-    let summaryForNext = chapterResult.summaryForNextChapter;
-    if (!summaryForNext || summaryForNext.length < 10) {
-      const sentences = chapterResult.content.match(/[^.!?]+[.!?]+/g) ?? [];
-      const opening = sentences.slice(0, 1).join(' ').trim();
-      const ending = sentences.slice(-2).join(' ').trim();
-      const combined = [opening, ending].filter(Boolean).join(' ').trim();
-      summaryForNext = (combined || chapterResult.content.slice(-300)).slice(0, 600);
-    }
+    const summaryForNext = recap.summary;
 
     await db.chapter.update({
       where: { id: chapter.id },

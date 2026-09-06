@@ -81,6 +81,7 @@ export function getChapterWritePrompt(
     description?: string | null;
     fullOutline?: string | null;
     currentSynopsis?: string | null;
+    introducedCast?: string[] | null;
   }
 ): string {
   const isFirstChapter = chapterIndex === 0;
@@ -102,23 +103,38 @@ export function getChapterWritePrompt(
     ? `\nCANONICAL CAST (exact spelling, use consistently): ${characterNames.join(', ')}.\n- These are the ONLY protagonists/core characters. Do NOT rename them, swap them for other characters, or invent new named characters unless the chapter synopsis below explicitly calls for it.\n- Do NOT pull characters from later chapters into this chapter early. If the synopsis does not mention a cast member, leave them out.`
     : '\nNo canonical cast was provided. Only use characters named in the chapter synopsis below — do NOT invent new named characters unless the story genuinely requires a minor walk-on role.';
 
-  const plotNote = extraContext?.description?.trim()
-    ? `\nOVERALL PLOT (the user's premise — the chapter MUST stay true to this):\n${extraContext.description.trim().slice(0, 2000)}`
+  // Characters established in earlier chapters. The model must treat these as
+  // already existing (same names, traits, relationships) and never re-introduce
+  // them differently or confuse who is who.
+  const introducedNote = extraContext?.introducedCast && extraContext.introducedCast.length > 0
+    ? `\nCHARACTERS ALREADY INTRODUCED (in prior chapters — they exist and keep their exact names/traits; do NOT rename, replace, or re-cast them): ${extraContext.introducedCast.join(', ')}.`
     : '';
 
+  const plotNote = extraContext?.description?.trim()
+    ? `\nOVERALL PLOT (the user's premise — the chapter MUST stay true to this):\n${extraContext.description.trim().slice(0, 4000)}`
+    : '';
+
+  // Include the FULL outline (do not truncate mid-book — cutting it at 4000
+  // chars dropped later chapters' briefs entirely for long books, which let the
+  // model free-associate and drift from the plan).
   const outlineNote = extraContext?.fullOutline?.trim()
-    ? `\nFULL BOOK OUTLINE (chapter-by-chapter plan — you are writing chapter ${chapterIndex + 1} of ${totalChapters}. Respect where each character/event belongs; do not move later-chapter events or characters forward):\n${extraContext.fullOutline.trim().slice(0, 4000)}`
+    ? `\nFULL BOOK OUTLINE (chapter-by-chapter plan — you are writing chapter ${chapterIndex + 1} of ${totalChapters}. Respect where each character/event belongs; do not move later-chapter events or characters forward):\n${extraContext.fullOutline.trim().slice(0, 12000)}`
     : '';
 
   const synopsisNote = extraContext?.currentSynopsis?.trim()
-    ? `\nTHIS CHAPTER'S BRIEF (follow it exactly — characters, events, and setting must match):\n${extraContext.currentSynopsis.trim().slice(0, 1500)}`
+    ? `\nTHIS CHAPTER'S BRIEF — follow it EXACTLY. The events, named characters, and setting in your prose must match this brief; do not substitute a different scene or different characters:\n${extraContext.currentSynopsis.trim().slice(0, 2000)}`
     : '';
 
   return `You are an expert ${genre} author writing chapter ${chapterIndex + 1} of "${bookTitle}". ${stylePrompt ? `Write in this style: ${stylePrompt}` : ''}
 
-${continuityNote}${characterNote}${plotNote}${outlineNote}${synopsisNote}
+${continuityNote}${characterNote}${introducedNote}${plotNote}${outlineNote}${synopsisNote}
 
 Write the COMPLETE chapter as continuous prose. Output ONLY the chapter text — no JSON, no markdown, no code fences, no commentary, and no separate "title" or "summary" lines. Begin directly with the narrative.
+
+STRICT ADHERENCE:
+- The chapter's plot, characters, and setting must follow THIS CHAPTER'S BRIEF above — not a different chapter from the outline.
+- Use ONLY the canonical names, spelled exactly as given. Never rename a character, merge two characters, or bring in a character whose first appearance is in a later chapter.
+- Do not contradict what happened in the previous-chapter summaries.
 
 Writing guidelines:
 - Write compelling, vivid prose that pulls the reader in

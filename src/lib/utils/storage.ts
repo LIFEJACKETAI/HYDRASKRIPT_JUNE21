@@ -8,7 +8,23 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
-const STORAGE_DIR = path.join(process.cwd(), 'public', 'assets');
+// On serverless (Vercel/Lambda) the application directory (/var/task) is
+// READ-ONLY and `public/` is served from the CDN, not present at runtime.
+// Writing there throws ENOENT/EROFS — the root cause of the
+// "mkdir '/var/task/public/assets/covers'" 500s. In production the primary path
+// is Supabase Storage; the local-disk fallback must target the writable /tmp
+// volume there instead of public/. Local dev keeps writing to public/assets so
+// files are visible at http://localhost:PORT/assets/...
+const isServerlessRuntime = Boolean(
+  process.env.VERCEL ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.env.AWS_EXECUTION_ENV ||
+    process.env.FUNCTION_TARGET
+);
+
+const STORAGE_DIR = isServerlessRuntime
+  ? path.join('/tmp', 'hydraskript-assets')
+  : path.join(process.cwd(), 'public', 'assets');
 const PUBLIC_BASE = '/assets';
 const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'hydraskript-assets';
 

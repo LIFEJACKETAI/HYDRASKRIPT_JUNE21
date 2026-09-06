@@ -5,8 +5,13 @@
 import { askLLMJSON, askLLM } from '@/lib/llm/openrouter';
 import { askLLMJSON as askLLMNimJSON, askLLM as askLLMNim } from '@/lib/llm/nvidia-nim';
 
-const DEFAULT_NIM_MODEL = process.env.NVIDIA_NIM_MODEL || 'minimax-3.0';
-const DEFAULT_FALLBACK_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free';
+// Default models. NOTE: 'minimax-3.0' and 'openrouter/free' are NOT real model
+// ids and caused every JSON call to fail over (or fail outright). Use capable
+// instruction-following models — small 8B models routinely ignore long
+// outline/cast instructions, which is why chapters drifted from the outline and
+// mixed up characters.
+const DEFAULT_NIM_MODEL = process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-70b-instruct';
+const DEFAULT_FALLBACK_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-70b-instruct:free';
 
 export async function askLLMJSONWithFallback<T>(
   systemPrompt: string,
@@ -63,8 +68,10 @@ export async function askLLMWithFallback(
   temperature: number = 0.7,
   maxTokens: number = 8192
 ): Promise<string> {
-  const primaryModel = process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-8b-instruct';
-  const fallbackModel = process.env.OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
+  // Use a 70B-class model for prose: the 8B model reliably ignored long
+  // outline/cast instructions (drifted from the synopsis, renamed characters).
+  const primaryModel = process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-70b-instruct';
+  const fallbackModel = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-70b-instruct:free';
 
   try {
     return await askLLMNim(systemPrompt, userPrompt, temperature, primaryModel, maxTokens);
