@@ -20,20 +20,27 @@ function isSupabaseStorageEnabled() {
   );
 }
 
-// Ensure storage directory exists
+// Ensure storage directory exists.
+// NOTE: This must ONLY ever run lazily (inside a function), never at module
+// load. A top-level mkdir here previously crashed EVERY serverless function
+// whose import graph touched this module: Vercel's runtime filesystem is
+// read-only outside /tmp, so mkdirSync threw ENOENT and the route returned a
+// non-JSON 500 before its handler ran. Production file writes must go to
+// Supabase Storage (see isSupabaseStorageEnabled); local disk is dev-only.
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch (e) {
+      throw new Error(
+        `Cannot create local storage directory "${dir}". Server filesystems ` +
+          `are read-only in production — configure SUPABASE_URL, ` +
+          `SUPABASE_SERVICE_ROLE_KEY and SUPABASE_STORAGE_BUCKET so uploads ` +
+          `use Supabase Storage instead. Original error: ${e instanceof Error ? e.message : String(e)}`
+      );
+    }
   }
 }
-
-// Initialize storage on module load
-ensureDir(STORAGE_DIR);
-ensureDir(path.join(STORAGE_DIR, 'covers'));
-ensureDir(path.join(STORAGE_DIR, 'illustrations'));
-ensureDir(path.join(STORAGE_DIR, 'pdfs'));
-ensureDir(path.join(STORAGE_DIR, 'audio'));
-ensureDir(path.join(STORAGE_DIR, 'listings'));
 
 // ─── File Operations ──────────────────────────────────────────────────────────
 
