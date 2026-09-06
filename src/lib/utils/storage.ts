@@ -4,7 +4,7 @@
 import fs from 'fs';
 import path from 'path';
 import { db } from '@/lib/db';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
@@ -49,7 +49,7 @@ export async function saveFile(
 ): Promise<string> {
   if (isSupabaseStorageEnabled()) {
     const objectPath = `${subfolder}/${filename}`;
-    const { error } = await supabaseAdmin.storage
+    const { error } = await getSupabaseAdmin().storage
       .from(SUPABASE_STORAGE_BUCKET)
       .upload(objectPath, buffer, {
         upsert: true,
@@ -60,7 +60,7 @@ export async function saveFile(
       throw new Error(`Supabase storage upload failed: ${error.message}`);
     }
 
-    const { data } = supabaseAdmin.storage
+    const { data } = getSupabaseAdmin().storage
       .from(SUPABASE_STORAGE_BUCKET)
       .getPublicUrl(objectPath);
 
@@ -103,7 +103,7 @@ export async function deleteFile(publicUrl: string): Promise<boolean> {
       }
 
       const objectPath = publicUrl.slice(markerIndex + marker.length);
-      const { error } = await supabaseAdmin.storage
+      const { error } = await getSupabaseAdmin().storage
         .from(SUPABASE_STORAGE_BUCKET)
         .remove([objectPath]);
 
@@ -145,7 +145,7 @@ export async function fileExists(publicUrl: string): Promise<boolean> {
     const directory = objectPath.includes('/') ? objectPath.slice(0, objectPath.lastIndexOf('/')) : '';
     const fileName = objectPath.includes('/') ? objectPath.slice(objectPath.lastIndexOf('/') + 1) : objectPath;
 
-    const { data, error } = await supabaseAdmin.storage
+    const { data, error } = await getSupabaseAdmin().storage
       .from(SUPABASE_STORAGE_BUCKET)
       .list(directory, { search: fileName });
 
