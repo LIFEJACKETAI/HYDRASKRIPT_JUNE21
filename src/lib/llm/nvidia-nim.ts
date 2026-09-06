@@ -15,13 +15,20 @@ function getApiKey(): string {
 }
 
 function getModel(): string {
-  // Use a valid NVIDIA NIM model - minimax-3.0 doesn't exist on NIM
-  // Common models: meta/llama-3.1-70b-instruct, meta/llama-3.1-8b-instruct, 
-  // mistralai/mixtral-8x7b-instruct-v0.1, nvidia/nemotron-3-ultra
-  return process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-70b-instruct';
+  // Valid NVIDIA NIM models (Sep 2026). NOTE: meta/llama-3.1-8b-instruct and
+  // meta/llama-3.1-70b-instruct have been retired (410 Gone). The fallback chain
+  // in fallback.ts rotates through multiple valid models anyway.
+  return process.env.NVIDIA_NIM_MODEL || 'nvidia/llama-3.1-nemotron-70b-instruct';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────
+
+// Terminal HTTP errors: do NOT retry the same model — let fallback.ts rotate to
+// the next model/provider instead. 410 = model retired, 404 = not found, 401 =
+// auth, 400/403/422 = bad request, 429 = rate limited (free tier), timeout.
+function isTerminalLLMError(message: string): boolean {
+  return /\b(400|401|403|404|410|422|429)\b/.test(message) || message.includes('timed out');
+}
 
 interface RetryOptions {
   maxAttempts?: number;
@@ -42,9 +49,9 @@ async function withRetry<T>(
       lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`[LLM] NVIDIA NIM Attempt ${attempt}/${maxAttempts} failed:`, lastError.message);
 
-      // Don't retry on 404 (model not found), 401 (auth error), or timeout
-      // (let fallback.ts switch providers instead of burning the full timeout again)
-      if (lastError.message.includes('404') || lastError.message.includes('401') || lastError.message.includes('timed out')) {
+      // On terminal errors (model retired/410, not found, rate limited, auth,
+      // timeout) stop retrying this model so fallback.ts rotates immediately.
+      if (isTerminalLLMError(lastError.message)) {
         throw lastError;
       }
 

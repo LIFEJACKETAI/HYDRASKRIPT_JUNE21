@@ -15,13 +15,19 @@ function getApiKey(): string {
 }
 
 function getModel(): string {
-  // Use a valid OpenRouter model - "openrouter/free" is not a valid model
-  // Common free models: meta-llama/llama-3.1-8b-instruct:free, 
-  // google/gemma-2-9b-it:free, microsoft/phi-3-mini-128k-instruct:free
-  return process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
+  // Valid OpenRouter FREE models (Sep 2026). Free models rotate and get rate
+  // limited (429); fallback.ts chains several and falls back to NVIDIA NIM.
+  return process.env.OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────
+
+// Terminal HTTP errors: do NOT retry the same model — let fallback.ts rotate to
+// the next model/provider instead. 410 = model retired, 404 = not found, 401 =
+// auth, 400/403/422 = bad request, 429 = rate limited (free tier), timeout.
+function isTerminalLLMError(message: string): boolean {
+  return /\b(400|401|403|404|410|422|429)\b/.test(message) || message.includes('timed out');
+}
 
 interface RetryOptions {
   maxAttempts?: number;
@@ -42,9 +48,9 @@ async function withRetry<T>(
       lastError = error instanceof Error ? error : new Error(String(error));
       console.error(`[LLM] OpenRouter Attempt ${attempt}/${maxAttempts} failed:`, lastError.message);
 
-      // Don't retry on 404 (model not found), 401 (auth error), or timeout
-      // (let fallback.ts switch providers instead of burning the full timeout again)
-      if (lastError.message.includes('404') || lastError.message.includes('401') || lastError.message.includes('timed out')) {
+      // On terminal errors (model retired/410, not found, rate limited, auth,
+      // timeout) stop retrying this model so fallback.ts rotates immediately.
+      if (isTerminalLLMError(lastError.message)) {
         throw lastError;
       }
 
