@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { fetchWithTimeout } from './fetchWithTimeout'
 
 export async function createClient() {
   const cookieStore = await cookies()
@@ -15,6 +16,9 @@ export async function createClient() {
     supabaseUrl,
     supabaseAnonKey,
     {
+      // Same rationale as in middleware.ts: never let an Auth network hang
+      // outlive the serverless function (which surfaces as a non-JSON 500).
+      global: { fetch: fetchWithTimeout() },
       cookies: {
         getAll() {
           return cookieStore.getAll()

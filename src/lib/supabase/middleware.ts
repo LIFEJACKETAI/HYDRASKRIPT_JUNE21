@@ -4,6 +4,7 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { NextRequest, NextResponse } from 'next/server';
+import { fetchWithTimeout } from './fetchWithTimeout';
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -19,6 +20,10 @@ export async function updateSession(request: NextRequest) {
     supabaseUrl,
     supabaseAnonKey,
     {
+      // Cap Auth network waits so a hung Auth endpoint degrades to a fast
+      // 401 (via the getUser try/catch below) instead of hanging the request
+      // past the serverless function timeout (non-JSON 500 in the UI).
+      global: { fetch: fetchWithTimeout() },
       cookies: {
         getAll() {
           return request.cookies.getAll();

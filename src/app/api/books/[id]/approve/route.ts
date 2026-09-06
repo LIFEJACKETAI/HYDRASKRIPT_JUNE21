@@ -6,6 +6,11 @@ import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
+// Approving kicks off chapter generation: allow the function room beyond the
+// platform default so cold starts + queued DB work don't get killed early.
+// (Clamped to the plan maximum where lower.)
+export const maxDuration = 60;
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -30,11 +35,23 @@ export async function POST(
     }
 
     if (type === 'outline') {
-      // 1. Update outline if user provided edits
+      // 1. Update outline if user provided edits.
+      // The editor sends a bare chapters ARRAY, but every downstream reader
+      // (chapter worker, BookDetail, finalizer) expects the outline OBJECT
+      // shape { title, chapters }. Merge so we never clobber the object
+      // shape — otherwise totalChapters resolves to 0 and chapter writing
+      // silently breaks right after approval.
       if (updatedOutline) {
+        let merged: unknown = { chapters: updatedOutline };
+        try {
+          const current = JSON.parse(book.outline || '{}');
+          merged = { ...current, chapters: updatedOutline };
+        } catch {
+          // keep the chapters-only fallback
+        }
         await db.book.update({
           where: { id },
-          data: { outline: JSON.stringify(updatedOutline) },
+          data: { outline: JSON.stringify(merged) },
         });
       }
 
