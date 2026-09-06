@@ -40,9 +40,19 @@ export async function GET() {
     nimModel: process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-8b-instruct (default)',
     openrouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free (default)',
   };
+  // Same presence-only treatment for Supabase (this is what the Vercel build needs).
+  const supabase = {
+    urlPresent:
+      ((process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL)?.length ?? 0) > 0,
+    anonKeyPresent:
+      ((process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)?.length ?? 0) >
+      0,
+    serviceKeyPresent: (process.env.SUPABASE_SERVICE_ROLE_KEY?.length ?? 0) > 0,
+    databaseUrlPresent: (process.env.DATABASE_URL?.length ?? 0) > 0,
+  };
 
   if (!process.env.DATABASE_URL) {
-    return NextResponse.json({ ok: false, dbUrl, llm });
+    return NextResponse.json({ ok: false, dbUrl, llm, supabase });
   }
 
   try {
@@ -52,6 +62,7 @@ export async function GET() {
       latencyMs: Date.now() - started,
       dbUrl,
       llm,
+      supabase,
       note: 'Database reachable — if login still fails, the problem is elsewhere (paste me this JSON).',
     });
   } catch (e: unknown) {
@@ -61,6 +72,7 @@ export async function GET() {
       latencyMs: Date.now() - started,
       dbUrl,
       llm,
+      supabase,
       errorName: err?.name ?? 'unknown',
       errorCode: err?.code ?? err?.meta?.code ?? 'none',
       errorMessage: String(err?.message ?? e).slice(0, 400),
