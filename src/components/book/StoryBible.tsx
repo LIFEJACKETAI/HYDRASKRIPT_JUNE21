@@ -51,6 +51,19 @@ function groupByKind(entities: StoryBibleEntity[]): EntityMap {
   return map;
 }
 
+// Standalone Story Bibles created from an uploaded manuscript are tagged via
+// status=bible_imported (and an outline marker). Give them a clear label so
+// users can tell them apart from platform-generated books in dropdowns/cards.
+function isImportedBible(book: BookData): boolean {
+  if (book.status === 'bible_imported') return true;
+  try {
+    const o = JSON.parse(book.outline || '{}');
+    return o?.storyBibleImport === true;
+  } catch {
+    return false;
+  }
+}
+
 export default function StoryBible() {
   const { selectedBookId, setStoryBibleBookId, setCurrentView } = useAppStore();
 
@@ -75,6 +88,12 @@ export default function StoryBible() {
   const currentBook = books.find((b) => b.id === selectedBookId) ?? null;
 
   // Load user's books once (needed for the book switcher).
+  const loadBooks = useCallback(async () => {
+    const data = await listBooks();
+    setBooks(data);
+    setBooksLoading(false);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     listBooks().then((data) => {
@@ -134,7 +153,6 @@ export default function StoryBible() {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!selectedBookId) return;
 
     const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
     if (!['txt', 'pdf', 'docx'].includes(extension)) {
@@ -149,12 +167,25 @@ export default function StoryBible() {
     setUploading(true);
     setUploadResult(null);
     try {
+      // bookId may be null when uploading from the picker — the server then
+      // creates a standalone Story Bible that shows up in the dropdown.
       const result = await importManuscriptToStoryBible(selectedBookId, file);
       if (result.success && result.data) {
         setUploadResult({ fileName: result.data.fileName, counts: result.data.counts, total: result.data.total });
+
+        // Refresh the book list so the new standalone bible appears.
+        await loadBooks();
+
+        // If a new container was created, switch into it immediately.
+        if (result.data.createdBook && result.data.bookId) {
+          setStoryBibleBookId(result.data.bookId);
+        }
+
         toast({
-          title: 'Manuscript imported!',
-          description: `${result.data.total} story bible entities extracted from "${result.data.fileName}".`,
+          title: result.data.createdBook ? 'Story Bible created!' : 'Manuscript imported!',
+          description: result.data.createdBook
+            ? `${result.data.total} entities extracted from "${result.data.fileName}" into "${result.data.bookTitle ?? result.data.fileName}".`
+            : `${result.data.total} story bible entities extracted from "${result.data.fileName}".`,
         });
         reload();
       } else {
@@ -178,15 +209,37 @@ export default function StoryBible() {
   if (!selectedBookId) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
               <Library className="h-6 w-6 text-cyan-400" /> Story Bible
             </h1>
             <p className="text-sm text-slate-400 mt-1">
-              The canonical lore store the AI reads while writing. Pick a book to manage its profiles.
+              The canonical lore store the AI reads while writing. Pick a book to manage its profiles, or upload a manuscript to build a fresh Story Bible.
             </p>
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.pdf,.docx"
+            onChange={handleManuscriptChange}
+            className="hidden"
+          />
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="btn-gradient shrink-0"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Importing...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4 mr-2" /> Upload Manuscript
+              </>
+            )}
+          </Button>
         </div>
 
         {booksLoading ? (
@@ -212,27 +265,38 @@ export default function StoryBible() {
           <>
             <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Select a book</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {books.map((book) => (
-                <button
-                  key={book.id}
-                  onClick={() => setStoryBibleBookId(book.id)}
-                  className="group text-left rounded-2xl bg-[#0d0d10] border border-[#312839] p-5 hover:border-cyan-500/40 transition-all card-hover"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-16 rounded-lg bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center shrink-0">
-                      <BookOpen className="h-5 w-5 text-purple-400" />
+              {books.map((book) => {
+                const imported = isImportedBible(book);
+                return (
+                  <button
+                    key={book.id}
+                    onClick={() => setStoryBibleBookId(book.id)}
+                    className="group text-left rounded-2xl bg-[#0d0d10] border border-[#312839] p-5 hover:border-cyan-500/40 transition-all card-hover"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-16 rounded-lg bg-gradient-to-br from-purple-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center shrink-0">
+                        {imported ? (
+                          <FileText className="h-5 w-5 text-cyan-400" />
+                        ) : (
+                          <BookOpen className="h-5 w-5 text-purple-400" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-white truncate group-hover:text-cyan-300 transition-colors">
+                          {book.title}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-1 capitalize">
+                          {imported ? (
+                            <span className="text-cyan-400/80">Uploaded manuscript · Story Bible</span>
+                          ) : (
+                            <>{book.genre} · {book.chapters?.length ?? 0} chapters</>
+                          )}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-white truncate group-hover:text-cyan-300 transition-colors">
-                        {book.title}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-1 capitalize">
-                        {book.genre} · {book.chapters?.length ?? 0} chapters
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </>
         )}
@@ -298,11 +362,11 @@ export default function StoryBible() {
             value={selectedBookId}
             onChange={(e) => setStoryBibleBookId(e.target.value || null)}
             className="bg-[#0d0d10] border border-[#312839] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50 max-w-[220px]"
-            aria-label="Switch book"
+            aria-label="Switch story bible"
           >
             {books.map((book) => (
               <option key={book.id} value={book.id} className="bg-[#0d0d10]">
-                {book.title}
+                {isImportedBible(book) ? `📜 ${book.title} (Story Bible)` : book.title}
               </option>
             ))}
           </select>

@@ -36,6 +36,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   generating: { label: 'Generating', className: 'bg-purple-500/20 text-purple-300 border-purple-500/30 pulse-glow' },
   completed: { label: 'Completed', className: 'bg-green-500/20 text-green-300 border-green-500/30' },
   failed: { label: 'Failed', className: 'bg-red-500/20 text-red-300 border-red-500/30' },
+  bible_imported: { label: 'Story Bible', className: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
 };
 
 const audienceLabels: Record<string, string> = {
