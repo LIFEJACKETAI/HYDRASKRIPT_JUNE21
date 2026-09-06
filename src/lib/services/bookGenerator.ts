@@ -270,12 +270,20 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
   try {
     await jobQueue.updateJobStatus(jobId, { progressMessage: `Writing chapter ${chapterIndex + 1}...`, progressPercent: 20 });
 
-    // Find the previous chapter to get the continuity summary
-    const prevChapter = await db.chapter.findFirst({
+    // Continuity: gather summaries from the last few chapters (not just the
+    // previous one) so the model knows who has actually been introduced so
+    // far. Each summaryForNext is a short fallback excerpt, so chaining 2-3
+    // of them preserves the cast + plot thread far better than one alone.
+    const prevChapters = await db.chapter.findMany({
       where: { bookId, index: { lt: chapterIndex } },
       orderBy: { index: 'desc' },
+      take: 3,
     });
-    const previousSummary = prevChapter?.summaryForNext || 'This is the beginning of the story.';
+    const previousSummary = prevChapters.length > 0
+      ? [...prevChapters].reverse()
+          .map((c) => `Ch ${c.index + 1} (${c.title}): ${c.summaryForNext || 'no summary'}`)
+          .join('\n')
+      : 'This is the beginning of the story.';
 
     const stylePrompt = await getStyleSystemPrompt(book.styleProfileId);
     const targetAudience = book.targetAudience as TargetAudience;
@@ -291,11 +299,20 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
 
     if (!chapter) throw new Error(`Chapter ${chapterIndex} not found`);
 
-    // Resolve totalChapters from the outline JSON, fall back to DB count
+    // Resolve totalChapters from the outline JSON, fall back to DB count.
+    // Also build a compact full-outline string so the chapter model knows the
+    // whole arc (which characters belong in which chapter) instead of only
+    // seeing its own synopsis.
     let totalChapters = 0;
+    let fullOutline = '';
     try {
       const outlineData = JSON.parse(book.outline || '{}');
       totalChapters = outlineData?.chapters?.length ?? 0;
+      if (Array.isArray(outlineData?.chapters)) {
+        fullOutline = outlineData.chapters
+          .map((c: { title?: string; synopsis?: string }, i: number) => `Ch ${i + 1} "${c.title ?? ''}": ${c.synopsis ?? ''}`)
+          .join('\n');
+      }
     } catch {}
     if (totalChapters === 0) {
       totalChapters = await db.chapter.count({ where: { bookId } });
@@ -313,7 +330,11 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
         ? (book.characterNames as string[])
         : [];
 
-      const chapterPrompt = getChapterWritePrompt(stylePrompt, book.title, genre, chapterIndex, totalChapters, previousSummary, characterNames.length > 0 ? characterNames : undefined);
+      const chapterPrompt = getChapterWritePrompt(stylePrompt, book.title, genre, chapterIndex, totalChapters, previousSummary, characterNames.length > 0 ? characterNames : undefined, {
+        description: book.description ?? undefined,
+        fullOutline: fullOutline || undefined,
+        currentSynopsis: `${chapter.title}: ${chapter.synopsis}`,
+      });
       const childrensPrompt = isChildrenBook ? getChildrensChapterPrompt(targetAudience) : '';
       fullSystemPrompt = childrensPrompt ? `${childrensPrompt}\n\n${chapterPrompt}` : chapterPrompt;
       chapterUser = getChapterUserPrompt(chapter.title, chapter.synopsis, chapter.wordTarget);
@@ -331,11 +352,17 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       summaryForNextChapter: '',
     };
 
-    // If the model omitted the continuity summary, derive one from the chapter ending
+    // If the model omitted the continuity summary, derive one from the chapter
+    // itself. Capture the opening (who/where is established) plus the ending
+    // (where the plot left off) so the next chapter inherits the cast, not
+    // just the final hook.
     let summaryForNext = chapterResult.summaryForNextChapter;
     if (!summaryForNext || summaryForNext.length < 10) {
       const sentences = chapterResult.content.match(/[^.!?]+[.!?]+/g) ?? [];
-      summaryForNext = (sentences.slice(-2).join(' ').trim() || chapterResult.content.slice(-200)).slice(0, 400);
+      const opening = sentences.slice(0, 1).join(' ').trim();
+      const ending = sentences.slice(-2).join(' ').trim();
+      const combined = [opening, ending].filter(Boolean).join(' ').trim();
+      summaryForNext = (combined || chapterResult.content.slice(-300)).slice(0, 600);
     }
 
     await db.chapter.update({

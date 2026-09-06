@@ -21,8 +21,7 @@ export function getOutlinePrompt(
 
   let characterNote = '';
   if (characterNames && characterNames.length > 0) {
-    const [hero, ...friends] = characterNames;
-    characterNote = `\nCharacter names to use: The main character is named "${hero}".${friends.length > 0 ? ` Their friends are: ${friends.join(', ')}.` : ''} Use these exact names throughout — do NOT invent other character names.`;
+    characterNote = `\nCanonical cast (exact spelling, use consistently): ${characterNames.join(', ')}. Use these exact names throughout — do NOT invent other character names unless the story genuinely requires a minor walk-on role.`;
   }
 
   let adventureNote = '';
@@ -77,27 +76,47 @@ export function getChapterWritePrompt(
   chapterIndex: number,
   totalChapters: number,
   previousSummary: string,
-  characterNames?: string[]
+  characterNames?: string[],
+  extraContext?: {
+    description?: string | null;
+    fullOutline?: string | null;
+    currentSynopsis?: string | null;
+  }
 ): string {
   const isFirstChapter = chapterIndex === 0;
   const isLastChapter = chapterIndex === totalChapters - 1;
 
   let continuityNote = '';
   if (isFirstChapter) {
-    continuityNote = 'This is the first chapter. Establish the setting, introduce the main characters, and hook the reader immediately.';
+    continuityNote = 'This is the first chapter. Establish the setting, introduce ONLY the characters the chapter synopsis calls for, and hook the reader immediately. Do NOT introduce characters who first appear in later chapters.';
   } else if (isLastChapter) {
     continuityNote = 'This is the FINAL chapter. Resolve all major plot threads, provide a satisfying conclusion, and tie back to the beginning. The previous chapter ended with: ' + previousSummary;
   } else {
     continuityNote = `The previous chapter ended with: ${previousSummary}. Maintain narrative continuity and advance the plot.`;
   }
 
+  // Canonical cast — strict roster. The outline was built around these names,
+  // so swapping one sister for a later-book character (or inventing new names)
+  // breaks continuity for the whole book.
   const characterNote = characterNames && characterNames.length > 0
-    ? `\nCharacter names: Main character is "${characterNames[0]}". ${characterNames.slice(1).length > 0 ? `Friends: ${characterNames.slice(1).join(', ')}.` : ''} Use these names consistently.`
+    ? `\nCANONICAL CAST (exact spelling, use consistently): ${characterNames.join(', ')}.\n- These are the ONLY protagonists/core characters. Do NOT rename them, swap them for other characters, or invent new named characters unless the chapter synopsis below explicitly calls for it.\n- Do NOT pull characters from later chapters into this chapter early. If the synopsis does not mention a cast member, leave them out.`
+    : '\nNo canonical cast was provided. Only use characters named in the chapter synopsis below — do NOT invent new named characters unless the story genuinely requires a minor walk-on role.';
+
+  const plotNote = extraContext?.description?.trim()
+    ? `\nOVERALL PLOT (the user's premise — the chapter MUST stay true to this):\n${extraContext.description.trim().slice(0, 2000)}`
+    : '';
+
+  const outlineNote = extraContext?.fullOutline?.trim()
+    ? `\nFULL BOOK OUTLINE (chapter-by-chapter plan — you are writing chapter ${chapterIndex + 1} of ${totalChapters}. Respect where each character/event belongs; do not move later-chapter events or characters forward):\n${extraContext.fullOutline.trim().slice(0, 4000)}`
+    : '';
+
+  const synopsisNote = extraContext?.currentSynopsis?.trim()
+    ? `\nTHIS CHAPTER'S BRIEF (follow it exactly — characters, events, and setting must match):\n${extraContext.currentSynopsis.trim().slice(0, 1500)}`
     : '';
 
   return `You are an expert ${genre} author writing chapter ${chapterIndex + 1} of "${bookTitle}". ${stylePrompt ? `Write in this style: ${stylePrompt}` : ''}
 
-${continuityNote}${characterNote}
+${continuityNote}${characterNote}${plotNote}${outlineNote}${synopsisNote}
 
 Write the COMPLETE chapter as continuous prose. Output ONLY the chapter text — no JSON, no markdown, no code fences, no commentary, and no separate "title" or "summary" lines. Begin directly with the narrative.
 

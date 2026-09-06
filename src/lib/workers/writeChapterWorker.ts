@@ -39,12 +39,17 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
     const stylePrompt = await getStyleSystemPrompt(book.styleProfileId);
     const targetAudience = book.targetAudience as TargetAudience;
 
-    // Get summary of previous chapter for continuity
-    const prevChapter = await db.chapter.findFirst({
+    // Get summaries of previous chapters for continuity (last 3, oldest first)
+    const prevChapters = await db.chapter.findMany({
       where: { bookId: book.id, index: { lt: chapter.index } },
-      orderBy: { index: 'desc' }
+      orderBy: { index: 'desc' },
+      take: 3,
     });
-    const previousSummary = prevChapter?.summaryForNext || 'This is the beginning of the story.';
+    const previousSummary = prevChapters.length > 0
+      ? [...prevChapters].reverse()
+          .map((c) => `Ch ${c.index + 1} (${c.title}): ${c.summaryForNext || 'no summary'}`)
+          .join('\n')
+      : 'This is the beginning of the story.';
 
     // characterNames is a Postgres String[] — Prisma always returns it as a JS string[].
     // No JSON.parse needed; that would throw on a real array value.
@@ -53,11 +58,17 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
       : [];
 
     // 3. Prompt Construction
-    // Get total chapters from book outline for accurate progress reporting
+    // Get total chapters + full outline from book outline for continuity
     let totalChapters = 0;
+    let fullOutline = '';
     try {
       const outlineData = JSON.parse(book.outline || '{}');
       totalChapters = outlineData?.chapters?.length ?? 0;
+      if (Array.isArray(outlineData?.chapters)) {
+        fullOutline = outlineData.chapters
+          .map((c: { title?: string; synopsis?: string }, i: number) => `Ch ${i + 1} "${c.title ?? ''}": ${c.synopsis ?? ''}`)
+          .join('\n');
+      }
     } catch {}
     if (totalChapters === 0) {
       totalChapters = await db.chapter.count({ where: { bookId: book.id } });
@@ -70,7 +81,12 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
       chapter.index,
       totalChapters,
       previousSummary,
-      characterNames.length > 0 ? characterNames : undefined
+      characterNames.length > 0 ? characterNames : undefined,
+      {
+        description: (book as { description?: string | null }).description ?? undefined,
+        fullOutline: fullOutline || undefined,
+        currentSynopsis: `${chapter.title}: ${chapter.synopsis}`,
+      }
     );
 
     const childrensPrompt = ['0-5', '6-9', '10-14'].includes(targetAudience)
