@@ -39,7 +39,22 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: Do not add logic between createServerClient and getUser().
   // A simple mistake could make it hard to debug issues with users being
   // randomly logged out. getUser() refreshes the session if expired.
-  const { data: { user } } = await supabase.auth.getUser();
+  //
+  // getUser() can THROW (not just return an error) on transient network
+  // failures between the server and Supabase Auth, malformed cookies, or
+  // edge-runtime quirks. A throw here bubbles to src/middleware.ts, which
+  // answers API routes with a 500 — e.g. users who idle on a review screen
+  // past session expiry then click approve get a cryptic 500 instead of a
+  // 401 they can recover from by logging in again. Degrade to user: null
+  // so the request follows the normal unauthenticated path (401 JSON).
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (e) {
+    console.warn('[Supabase Middleware] getUser() threw, treating as unauthenticated:', e instanceof Error ? e.message : e);
+    user = null;
+  }
 
   return { supabaseResponse, user };
 }

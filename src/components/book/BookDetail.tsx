@@ -162,6 +162,13 @@ export default function BookDetail() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'outline', updatedOutline }),
       });
+      if (response.status === 401) {
+        // Session expired while reviewing (e.g. user idled on the outline
+        // screen). Send them back through login, then to the dashboard.
+        toast({ title: 'Session expired', description: 'Please log in again to continue.' });
+        window.location.href = `/login?next=${encodeURIComponent('/dashboard')}`;
+        return;
+      }
       const result = await response.json();
       if (result.success) {
         toast({ title: 'Outline approved!', description: 'The AI is now writing your first chapter.' });

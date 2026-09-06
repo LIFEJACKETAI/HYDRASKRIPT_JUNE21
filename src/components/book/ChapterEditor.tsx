@@ -41,6 +41,12 @@ export default function ChapterEditor({ chapters, bookId, onChapterApproved }: C
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'chapter', chapterIndex: index }),
       });
+      if (response.status === 401) {
+        // Session expired while reviewing. Send them back through login.
+        toast({ title: 'Session expired', description: 'Please log in again to continue.' });
+        window.location.href = `/login?next=${encodeURIComponent('/dashboard')}`;
+        return;
+      }
       const result = await response.json();
       if (result.success) {
         toast({ title: 'Chapter approved!', description: 'Moving to the next chapter...' });
