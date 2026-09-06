@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function PublishingPage() {
   return (
-<PageBackground image="/backgrounds/dashboard.jpg" overlay="light">
+<PageBackground image="/book_printing.jpg" overlay="light" gradient="from-slate-900/40 via-transparent to-cyan-950/20">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}

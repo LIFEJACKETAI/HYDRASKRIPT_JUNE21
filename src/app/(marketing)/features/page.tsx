@@ -35,7 +35,7 @@ export function FeaturesPage() {
   ]
 
   return (
-<PageBackground image="/backgrounds/coloring-book.jpg" overlay="light">
+<PageBackground image="/open_pages_book.jpg" overlay="light" gradient="from-purple-950/30 via-transparent to-cyan-950/20">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}

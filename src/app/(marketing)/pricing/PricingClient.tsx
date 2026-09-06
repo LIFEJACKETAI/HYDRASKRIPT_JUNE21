@@ -160,7 +160,7 @@ export function PricingClient({ soldCount }: { soldCount: number }) {
   const packs = (['pack_100', 'pack_500', 'pack_1000'] as PricingKey[]).map((key) => PRICING_CONFIG[key]);
 
   return (
-    <PageBackground image="/backgrounds/pricing.jpg" overlay="light">
+    <PageBackground image="/backgrounds/pricing.jpg" overlay="light" gradient="from-cyan-950/30 via-transparent to-purple-950/20">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

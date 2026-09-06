@@ -8,14 +8,16 @@
 import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageBackground } from '@/components/PageBackground'
 
 export function SeriesPage() {
   return (
+    <PageBackground image="/circle_of_books.jpg" overlay="light" gradient="from-purple-950/30 via-transparent to-cyan-950/20">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="py-24 bg-[#050505]"
+      className="py-24"
     >
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
@@ -64,6 +66,7 @@ export function SeriesPage() {
         </div>
       </div>
     </motion.div>
+    </PageBackground>
   )
 }
 
