@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "jest",
-    "test:db-migrations": "node --test tests/job-telemetry-migration.test.mjs",
+    "test:db-migrations": "node --test --test-concurrency=1 tests/job-telemetry-migration.test.mjs tests/supabase-setup.test.mjs",
     "test:integration": "jest --testPathPattern=integration",
     "test:types": "tsc --noEmit",
     "test:e2e": "playwright test",

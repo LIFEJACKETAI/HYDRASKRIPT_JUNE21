@@ -384,6 +384,20 @@ vercel --prod
 
 ## Database Notes
 
+### New or empty Supabase project
+
+Use the [complete Supabase SQL setup guide](supabase/README.md):
+
+1. Run [`supabase/00-preflight.sql`](supabase/00-preflight.sql) to check the project/schema without changing data.
+2. In the correct project's SQL Editor, run all of [`supabase/01-hydraskript-setup.sql`](supabase/01-hydraskript-setup.sql).
+
+This creates all 13 application tables, enum types, indexes, foreign keys,
+private server-side table permissions, and the public asset bucket. It does not
+create additional databases, seed admin users/credits, or restore deleted data.
+It is rerunnable after a successful setup and aborts on incompatible existing
+schemas instead of overwriting them. Review the storage privacy and migration
+history notes in the guide before running it on an existing project.
+
 Schema lives in:
 
 - `prisma/schema.prisma`
