@@ -45,6 +45,7 @@ The app currently validates with:
 
 ### Phase 5 — Cost telemetry (in progress)
 - Prisma `Job` model extended with `estimatedCostCents`, `actualCostCents`, `provider`, `modelName`, `tokensIn`, `tokensOut`
+- Additive database migration: `20260905_add_job_cost_telemetry` — apply separately from the application build; see the [Supabase repair guide](docs/job-telemetry-database-repair.md).
 - Admin margin view planned for future implementation
 
 ### Phase 6 — Production hardening (in progress)
@@ -269,9 +270,10 @@ Before deploying, confirm all of the following:
 - `npm run build` passes
 - `.env.local` values are mirrored into the deployment platform
 - Supabase project is configured correctly
-- Prisma schema is synced:
-  - `npm run db:generate`
-  - `npm run db:push`
+- Database changes are deployed separately from the application build:
+  - `npm run db:generate` generates the client only; it does **not** migrate the database
+  - For an established Prisma migration history: review `npm run db:status`, then run `npm run db:deploy`
+  - For a populated database created by manual SQL/`db push`, reconcile its history before deploying migrations; see the [targeted Job-column repair](docs/job-telemetry-database-repair.md)
 - FFmpeg is available in the deployment runtime
 - Supabase Storage bucket exists and matches `SUPABASE_STORAGE_BUCKET`
 
@@ -398,10 +400,27 @@ Key models:
 
 ### Apply schema updates
 
+For local development/prototyping:
+
 ```bash
 npm run db:generate
 npm run db:push
 ```
+
+For production databases with an established Prisma migration history, review
+pending migrations and explicitly deploy them as a controlled release step:
+
+```bash
+npm run db:status
+npm run db:deploy
+```
+
+Generating the Prisma client or redeploying Vercel alone does not apply SQL.
+Do not reset production or use `--accept-data-loss` to repair schema drift. If
+book loading/generation fails with `jobs.estimatedCostCents does not exist`, use
+the [additive Supabase repair and migration-history guide](docs/job-telemetry-database-repair.md).
+Legacy databases populated via manual SQL/`db push` need their migration history
+reconciled before the full set of historical migrations can be safely deployed.
 
 ---
 
