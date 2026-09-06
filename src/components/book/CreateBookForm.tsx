@@ -31,6 +31,7 @@ const GENRES: { value: Genre; label: string }[] = [
   { value: 'romance',   label: 'Romance' },
   { value: 'horror',    label: 'Horror' },
   { value: 'children',  label: "Children's" },
+  { value: 'young-adult', label: 'Young Adult' },
   { value: 'coloring',  label: 'Coloring Book' },
   { value: 'poetry',    label: 'Poetry' },
   { value: 'non-fiction', label: 'Non-Fiction' },

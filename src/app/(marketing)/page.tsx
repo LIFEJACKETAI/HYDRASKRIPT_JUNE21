@@ -21,16 +21,17 @@ import { JourneyPipeline } from '@/components/marketing/JourneyPipeline'
 import { Differentiators } from '@/components/marketing/Differentiators'
 import { ManuscriptDoor } from '@/components/marketing/ManuscriptDoor'
 import { FinalCTA } from '@/components/marketing/FinalCTA'
+import { PageBackground } from '@/components/PageBackground'
 
 export default function MarketingPage() {
   return (
-    <section className="bg-black">
+    <PageBackground image="/backgrounds/home.jpg" overlay="subtle">
       <LandingHero />
       <Problem />
       <JourneyPipeline />
       <Differentiators />
       <ManuscriptDoor />
       <FinalCTA />
-    </section>
+    </PageBackground>
   )
 }

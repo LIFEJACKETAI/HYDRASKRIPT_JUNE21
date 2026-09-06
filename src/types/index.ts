@@ -12,7 +12,7 @@ export type ChapterStatus = 'pending' | 'writing' | 'reviewing' | 'completed' | 
 export type JobStatus = 'queued' | 'active' | 'completed' | 'failed';
 export type JobType = 'generate_outline' | 'write_chapter' | 'generate_image' | 'generate_audiobook' | 'export_pdf' | 'finalize_book' | 'editorial_review';
 export type AssetType = 'cover' | 'illustration' | 'coloring_page' | 'audiobook_chapter' | 'audiobook_complete' | 'pdf_export';
-export type Genre = 'fiction' | 'non-fiction' | 'fantasy' | 'sci-fi' | 'mystery' | 'romance' | 'horror' | 'children' | 'coloring' | 'poetry' | 'self-help' | 'biography';
+export type Genre = 'fiction' | 'non-fiction' | 'fantasy' | 'sci-fi' | 'mystery' | 'romance' | 'horror' | 'children' | 'young-adult' | 'coloring' | 'poetry' | 'self-help' | 'biography';
 
 export type ColoringTheme = 'mandalas' | 'undersea-creatures' | 'birds' | 'animals-of-the-wild' | 'famous-landmarks' | 'exotic-sports-cars' | 'flowers-gardens' | 'fantasy-dragons' | 'zen-patterns' | 'architectural-details' | 'butterflies-insects' | 'vintage-botanicals';
 
@@ -276,6 +276,12 @@ export const GENERATION_FLAVOR: Record<string, string[]> = {
     'Friendly characters are saying hello...',
     'The adventure is just beginning...',
     'Magic is in the air...',
+  ],
+  'young-adult': [
+    'The stakes are getting higher...',
+    'The world is changing around them...',
+    'Secrets are coming to light...',
+    'The journey of self-discovery continues...',
   ],
   coloring: [
     'Lines are being drawn with care...',

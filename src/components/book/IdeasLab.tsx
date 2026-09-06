@@ -91,6 +91,7 @@ const GENRES = [
   { value: 'romance', label: 'Romance' },
   { value: 'horror', label: 'Horror' },
   { value: 'children', label: "Children's" },
+  { value: 'young-adult', label: 'Young Adult' },
   { value: 'poetry', label: 'Poetry' },
   { value: 'non-fiction', label: 'Non-Fiction' },
   { value: 'self-help', label: 'Self-Help' },
@@ -423,7 +424,7 @@ export default function IdeasLab() {
 
       // Create a new project (book) first if requested.
       if (transferMode === 'new') {
-        const safeGenre = ['fiction', 'non-fiction', 'fantasy', 'sci-fi', 'mystery', 'romance', 'horror', 'children', 'poetry', 'self-help', 'biography'].includes(genre)
+        const safeGenre = ['fiction', 'non-fiction', 'fantasy', 'sci-fi', 'mystery', 'romance', 'horror', 'children', 'young-adult', 'coloring', 'poetry', 'self-help', 'biography'].includes(genre)
           ? genre
           : 'fiction';
         const safeAudience = ['adult', '0-5', '6-9', '10-14'].includes(targetAudience)

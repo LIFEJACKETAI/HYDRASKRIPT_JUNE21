@@ -49,7 +49,7 @@ export type ValidatedImagePrompt = z.infer<typeof ImagePromptSchema>;
 
 export const CreateBookSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title must be under 200 characters'),
-  genre: z.enum(['fiction', 'non-fiction', 'fantasy', 'sci-fi', 'mystery', 'romance', 'horror', 'children', 'coloring', 'poetry', 'self-help', 'biography']),
+  genre: z.enum(['fiction', 'non-fiction', 'fantasy', 'sci-fi', 'mystery', 'romance', 'horror', 'children', 'young-adult', 'coloring', 'poetry', 'self-help', 'biography']),
   targetAudience: z.enum(['adult', '0-5', '6-9', '10-14']),
   coloringTheme: z.enum(['mandalas', 'undersea-creatures', 'birds', 'animals-of-the-wild', 'famous-landmarks', 'exotic-sports-cars', 'flowers-gardens', 'fantasy-dragons', 'zen-patterns', 'architectural-details', 'butterflies-insects', 'vintage-botanicals']).optional(),
   styleProfileId: z.string().optional(),

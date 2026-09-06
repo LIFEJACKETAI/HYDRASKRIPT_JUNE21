@@ -317,7 +317,7 @@ export default function AICoverDesigner() {
                       <SelectValue placeholder="Select genre" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#0a0a0a] border-white/10">
-                      {['fiction', 'non-fiction', 'fantasy', 'sci-fi', 'mystery', 'romance', 'horror', 'children', 'coloring', 'poetry', 'self-help', 'biography'].map((g) => (
+                      {['fiction', 'non-fiction', 'fantasy', 'sci-fi', 'mystery', 'romance', 'horror', 'children', 'young-adult', 'coloring', 'poetry', 'self-help', 'biography'].map((g) => (
                         <SelectItem key={g} value={g} className="text-slate-400 focus:bg-[#161b1d] focus:text-white">{g}</SelectItem>
                       ))}
                     </SelectContent>

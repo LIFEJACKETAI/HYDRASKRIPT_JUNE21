@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { PageBackground } from '@/components/PageBackground';
 import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 import { useAppStore } from '@/lib/store';
@@ -20,6 +21,23 @@ import AICoverDesigner from '@/components/book/AICoverDesigner';
 import EditorialReviewPanel from '@/components/book/EditorialReviewPanel';
 import { AdminView, BookstoreView, CreditsView, ExportHubView } from '@/components/app/StudioViews';
 import { toast } from '@/hooks/use-toast';
+
+const VIEW_BACKGROUNDS: Record<string, string> = {
+  dashboard: '/backgrounds/dashboard.jpg',
+  'create-book': '/backgrounds/ebook-wizard.jpg',
+  'book-detail': '/backgrounds/ebook-wizard.jpg',
+  'style-training': '/backgrounds/home.jpg',
+  audiobook: '/backgrounds/audiobook.jpg',
+  'ideas-lab': '/backgrounds/home.jpg',
+  credits: '/backgrounds/pricing.jpg',
+  pricing: '/backgrounds/pricing.jpg',
+  'export-hub': '/book_printing.jpg',
+  admin: '/backgrounds/dashboard.jpg',
+  'story-bible': '/amazing_library_1.jpg',
+  universe: '/open_pages_book.jpg',
+  'ai-cover-designer': '/backgrounds/coloring-book.jpg',
+  bookstore: '/amazing_library_2.jpg',
+};
 
 const INTENT_VIEWS: Record<string, AppView> = {
   manuscript: 'story-bible',
@@ -123,25 +141,27 @@ function DashboardShell() {
       <div className="flex">
         <Sidebar />
         <main className="flex-1 min-w-0 p-4 md:p-8 overflow-y-auto min-h-[calc(100vh-4rem)]">
-          {view === 'dashboard' && <DashboardHome />}
-          {view === 'create-book' && <CreateBookForm />}
-          {view === 'book-detail' && <BookDetail />}
-          {view === 'style-training' && <StyleUploader />}
-          {view === 'audiobook' && <AudiobookGenerator />}
-          {view === 'ideas-lab' && <IdeasLab />}
-          {view === 'credits' && <CreditsView />}
-          {view === 'pricing' && <CreditsView />}
-          {view === 'export-hub' && <ExportHubView />}
-          {view === 'admin' && <AdminView />}
-          {view === 'story-bible' && <StoryBible />}
-          {view === 'universe' && (
-            <div className="space-y-10">
-              <UniverseArchitect />
-              <EditorialReviewPanel books={books} />
-            </div>
-          )}
-          {view === 'ai-cover-designer' && <AICoverDesigner />}
-          {view === 'bookstore' && <BookstoreView />}
+          <PageBackground image={VIEW_BACKGROUNDS[view] || '/backgrounds/home.jpg'} overlay="subtle">
+            {view === 'dashboard' && <DashboardHome />}
+            {view === 'create-book' && <CreateBookForm />}
+            {view === 'book-detail' && <BookDetail />}
+            {view === 'style-training' && <StyleUploader />}
+            {view === 'audiobook' && <AudiobookGenerator />}
+            {view === 'ideas-lab' && <IdeasLab />}
+            {view === 'credits' && <CreditsView />}
+            {view === 'pricing' && <CreditsView />}
+            {view === 'export-hub' && <ExportHubView />}
+            {view === 'admin' && <AdminView />}
+            {view === 'story-bible' && <StoryBible />}
+            {view === 'universe' && (
+              <div className="space-y-10">
+                <UniverseArchitect />
+                <EditorialReviewPanel books={books} />
+              </div>
+            )}
+            {view === 'ai-cover-designer' && <AICoverDesigner />}
+            {view === 'bookstore' && <BookstoreView />}
+          </PageBackground>
         </main>
       </div>
     </div>
