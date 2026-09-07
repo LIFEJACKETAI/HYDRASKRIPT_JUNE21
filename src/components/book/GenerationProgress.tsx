@@ -57,7 +57,7 @@ export default function GenerationProgress({ jobId, genre, estimatedDuration, on
     }
 
     poll();
-    interval = setInterval(poll, 2000);
+    interval = setInterval(poll, 5000);
     return () => {
       cancelled = true;
       if (interval) clearInterval(interval);

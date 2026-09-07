@@ -122,7 +122,7 @@ export default function BookDetail() {
         setEstimatedDuration(null);
         toast({ title: 'Generation failed', description: 'One or more chapters failed to generate.', variant: 'destructive' });
       }
-    }, 3000);
+    }, 5000);
     return () => {
       stopped = true;
       clearInterval(interval);

@@ -49,19 +49,19 @@ export async function POST(
         } catch {
           // keep the chapters-only fallback
         }
+        // Combine outline update + status transition into one write.
         await db.book.update({
           where: { id },
-          data: { outline: JSON.stringify(merged) },
+          data: { outline: JSON.stringify(merged), status: 'writing' },
+        });
+      } else {
+        await db.book.update({
+          where: { id },
+          data: { status: 'writing' },
         });
       }
 
-      // 2. Transition to writing state
-      await db.book.update({
-        where: { id },
-        data: { status: 'writing' },
-      });
-
-      // 3. Trigger the first chapter generation
+      // 2. Trigger the first chapter generation
       const jobId = await jobQueue.createJob({
         bookId: id,
         ownerId: profile.id,
@@ -80,17 +80,18 @@ export async function POST(
         return NextResponse.json({ success: false, error: 'chapterIndex is required for chapter approval' }, { status: 400 });
       }
 
-      // 1. Mark chapter as approved
-      await db.chapter.update({
-        where: { bookId_index: { bookId: id, index: chapterIndex } },
-        data: { approvalStatus: 'approved', status: 'completed' },
-      });
-
-      // 2. Find the next chapter
-      const nextChapter = await db.chapter.findFirst({
-        where: { bookId: id, index: { gt: chapterIndex } },
-        orderBy: { index: 'asc' },
-      });
+      // 1. Mark chapter as approved + find next chapter in one transaction.
+      const [updatedChapter, nextChapter] = await db.$transaction([
+        db.chapter.update({
+          where: { bookId_index: { bookId: id, index: chapterIndex } },
+          data: { approvalStatus: 'approved', status: 'completed' },
+        }),
+        db.chapter.findFirst({
+          where: { bookId: id, index: { gt: chapterIndex } },
+          orderBy: { index: 'asc' },
+          select: { index: true },
+        }),
+      ]);
 
       if (nextChapter) {
         // More chapters to write
@@ -107,9 +108,8 @@ export async function POST(
         return NextResponse.json({ success: true, data: { jobId, nextChapterIndex: nextChapter.index } });
       } else {
         // Last chapter approved -> Finalize the book
-        // We need totalCredits for final consumption
-        const bookWithCredits = await db.book.findUnique({ where: { id } });
-        const totalCredits = bookWithCredits?.totalCreditsEstimated || 0;
+        // Use the book we already fetched earlier (no extra DB call).
+        const totalCredits = book.totalCreditsEstimated || 0;
 
         const jobId = await jobQueue.createJob({
           bookId: id,

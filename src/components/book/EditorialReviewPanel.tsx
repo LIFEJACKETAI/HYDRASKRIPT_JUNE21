@@ -178,7 +178,7 @@ export default function EditorialReviewPanel({ books, onReviewsChanged }: Editor
     };
 
     poll();
-    interval = setInterval(poll, 2500);
+    interval = setInterval(poll, 5000);
     return () => { cancelled = true; if (interval) clearInterval(interval); };
   }, [runningJobId, runningReviewId, loadReviews, loadDetail]);
 

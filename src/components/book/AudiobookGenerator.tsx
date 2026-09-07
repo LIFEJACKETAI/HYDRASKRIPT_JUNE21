@@ -209,7 +209,7 @@ function GenerationDisplay({ jobId, selectedVoice, onComplete, onError }: Genera
     }
 
     poll();
-    interval = setInterval(poll, 3000);
+    interval = setInterval(poll, 5000);
     return () => {
       cancelled = true;
       if (interval) clearInterval(interval);

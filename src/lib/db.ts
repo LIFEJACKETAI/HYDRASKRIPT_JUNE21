@@ -37,8 +37,8 @@ const pool = new Pool({
   ssl: /supabase\.(co|com)/.test(process.env.DATABASE_URL ?? '')
     ? { rejectUnauthorized: false }
     : undefined,
-  min: 2,
-  max: parseInt(process.env.DATABASE_POOL_MAX || '20', 10),
+  min: 1,
+  max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10),
   idleTimeoutMillis: 60000,
   connectionTimeoutMillis: 30000,
 })
