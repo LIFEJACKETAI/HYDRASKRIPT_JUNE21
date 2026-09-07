@@ -346,11 +346,12 @@ export interface ManuscriptImportResult {
   entities: StoryBibleEntity[];
   counts: Record<string, number>;
   total: number;
+  bookId?: string;
 }
 
-export async function importManuscriptToStoryBible(bookId: string, file: File) {
+export async function importManuscriptToStoryBible(bookId: string | null, file: File) {
   const formData = new FormData();
-  formData.append('bookId', bookId);
+  if (bookId) formData.append('bookId', bookId);
   formData.append('file', file);
   const response = await fetch('/api/story-bible/import-manuscript', {
     method: 'POST',

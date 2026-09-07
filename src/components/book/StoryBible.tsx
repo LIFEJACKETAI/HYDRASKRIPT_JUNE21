@@ -69,7 +69,9 @@ export default function StoryBible() {
 
   // Manuscript upload
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const newProjectFileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [newProjectUploading, setNewProjectUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ fileName: string; counts: Record<string, number>; total: number } | null>(null);
 
   const currentBook = books.find((b) => b.id === selectedBookId) ?? null;
@@ -168,6 +170,46 @@ export default function StoryBible() {
     }
   };
 
+  const handleNewProjectUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!['txt', 'pdf', 'docx'].includes(extension)) {
+      toast({
+        title: 'Unsupported file type',
+        description: 'Please upload a .txt, .pdf, or .docx manuscript.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setNewProjectUploading(true);
+    try {
+      const result = await importManuscriptToStoryBible(null, file);
+      if (result.success && result.data) {
+        toast({
+          title: 'New project created!',
+          description: `${result.data.total} story bible entities extracted from "${result.data.fileName}".`,
+        });
+        // Refresh the book list and auto-select the newly created book.
+        const updatedBooks = await listBooks();
+        setBooks(updatedBooks);
+        if (result.data.bookId) {
+          setStoryBibleBookId(result.data.bookId);
+        }
+      } else {
+        toast({ title: 'Import failed', description: result.error || 'An error occurred.', variant: 'destructive' });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Network error';
+      toast({ title: 'Import failed', description: msg, variant: 'destructive' });
+    } finally {
+      setNewProjectUploading(false);
+    }
+  };
+
   const entities = byKind[activeKind];
   const cfg = KIND_CONFIG[activeKind];
   const selected = entities.find((e) => e.id === selectedId) ?? null;
@@ -184,9 +226,32 @@ export default function StoryBible() {
               <Library className="h-6 w-6 text-cyan-400" /> Story Bible
             </h1>
             <p className="text-sm text-slate-400 mt-1">
-              The canonical lore store the AI reads while writing. Pick a book to manage its profiles.
+              The canonical lore store the AI reads while writing. Pick a book to manage its profiles, or start a new project from a manuscript.
             </p>
           </div>
+          <input
+            ref={newProjectFileInputRef}
+            type="file"
+            accept=".txt,.pdf,.docx"
+            onChange={handleNewProjectUpload}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            onClick={() => newProjectFileInputRef.current?.click()}
+            disabled={newProjectUploading}
+            className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 shrink-0"
+          >
+            {newProjectUploading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating project...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4 mr-2" /> New Project
+              </>
+            )}
+          </Button>
         </div>
 
         {booksLoading ? (
@@ -202,11 +267,20 @@ export default function StoryBible() {
             </div>
             <h3 className="text-lg font-bold text-white mb-2">No books yet</h3>
             <p className="text-sm text-slate-500 max-w-xs">
-              Create a book first, then build its story bible.
+              Upload a manuscript to start a new project, or create a book first.
             </p>
-            <Button onClick={() => setCurrentView('create-book')} className="btn-gradient mt-6">
-              <Plus className="h-4 w-4 mr-2" /> Create a Book
-            </Button>
+            <div className="flex items-center gap-3 mt-6">
+              <Button onClick={() => newProjectFileInputRef.current?.click()} disabled={newProjectUploading} variant="outline" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
+                {newProjectUploading ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating...</>
+                ) : (
+                  <><Upload className="h-4 w-4 mr-2" /> Upload Manuscript</>
+                )}
+              </Button>
+              <Button onClick={() => setCurrentView('create-book')} className="btn-gradient">
+                <Plus className="h-4 w-4 mr-2" /> Create a Book
+              </Button>
+            </div>
           </div>
         ) : (
           <>

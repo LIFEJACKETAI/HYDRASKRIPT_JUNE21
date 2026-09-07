@@ -17,18 +17,35 @@ export async function POST(request: NextRequest) {
     const { profile } = await requireProfile(request);
 
     const formData = await request.formData();
-    const bookId = formData.get('bookId');
+    const bookIdRaw = formData.get('bookId');
     const file = formData.get('file');
 
-    if (typeof bookId !== 'string' || !bookId) {
-      return NextResponse.json({ success: false, error: 'bookId is required' }, { status: 400 });
-    }
+    const bookId = typeof bookIdRaw === 'string' && bookIdRaw ? bookIdRaw : null;
 
     if (!(file instanceof File)) {
       return NextResponse.json({ success: false, error: 'A manuscript file is required.' }, { status: 400 });
     }
 
-    await assertBookOwnership(bookId, profile.id);
+    // If no bookId provided, auto-create a Draft Book from the manuscript.
+    let resolvedBookId = bookId;
+    let newBookCreated = false;
+    if (!resolvedBookId) {
+      const titleFromFilename = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ').trim() || 'Untitled Manuscript';
+      const newBook = await db.book.create({
+        data: {
+          title: titleFromFilename,
+          genre: 'fiction',
+          targetAudience: 'adult',
+          status: 'draft',
+          ownerId: profile.id,
+        },
+      });
+      resolvedBookId = newBook.id;
+      newBookCreated = true;
+      console.log(`[API/story-bible/import-manuscript] Auto-created draft book "${titleFromFilename}" (${newBook.id})`);
+    } else {
+      await assertBookOwnership(resolvedBookId, profile.id);
+    }
 
     const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
     if (!SUPPORTED_MANUSCRIPT_EXTENSIONS.has(extension)) {
@@ -48,7 +65,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`[API/story-bible/import-manuscript] Parsing "${file.name}" (${manuscript.length} chars) for book ${bookId}`);
+    console.log(`[API/story-bible/import-manuscript] Parsing "${file.name}" (${manuscript.length} chars) for book ${resolvedBookId}`);
 
     const validated = await askLLMJSONWithFallback<unknown>(
       getManuscriptImportPrompt(),
@@ -66,7 +83,7 @@ export async function POST(request: NextRequest) {
         db.storyBibleEntity.create({
           data: {
             ownerId: profile.id,
-            bookId,
+            bookId: resolvedBookId!,
             kind: entity.kind,
             name: entity.name.trim(),
             role: entity.role,
@@ -92,12 +109,12 @@ export async function POST(request: NextRequest) {
     try {
       await enqueueEditorialReview({
         ownerId: profile.id,
-        bookId,
+        bookId: resolvedBookId!,
         scope: 'manuscript',
         sourceLabel: file.name,
         sourceText: manuscript,
       });
-      console.log(`[Universe] Auto-enqueued editorial review for uploaded manuscript (book ${bookId})`);
+      console.log(`[Universe] Auto-enqueued editorial review for uploaded manuscript (book ${resolvedBookId})`);
     } catch (e) {
       console.error('[Universe] Auto-review enqueue failed (non-fatal):', e);
     }
@@ -109,6 +126,7 @@ export async function POST(request: NextRequest) {
         entities: created.map(toDTO),
         counts,
         total: created.length,
+        ...(newBookCreated ? { bookId: resolvedBookId } : {}),
       },
     });
   } catch (error) {
