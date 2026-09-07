@@ -22,47 +22,50 @@ export function Problem() {
           <h2 className="text-4xl font-bold text-white mb-4">
             The Problem
           </h2>
-          <p className="text-gray-500 max-w-xl mx-auto">
-            Writing a book shouldn't require juggling fifteen different services and six logins. From
-            story intelligence to editorial review, formatting to audiobook production, every step
-            today is fragmented.
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            You&apos;ve finished your manuscript. Congratulations — that&apos;s the easy part. Now you need
+            an editor, a formatter, a cover designer, an audio producer, a distributor, and a marketer.
+            That&apos;s six logins, five invoices, and months of coordination.
+          </p>
+          <p className="text-gray-500 max-w-xl mx-auto mt-3">
+            Or you could use one platform that does all of it.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+          <Card className="border-white/10 bg-[#0d0d10]">
             <CardHeader>
-              <CardTitle>Editing & Continuity</CardTitle>
+              <CardTitle className="text-white">Editing & Continuity</CardTitle>
             </CardHeader>
-            <CardContent>
-              Story intelligence, plot hole detection, timeline consistency
+            <CardContent className="text-gray-400 text-sm">
+              Story intelligence, plot hole detection, timeline consistency across chapters and series.
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-white/10 bg-[#0d0d10]">
             <CardHeader>
-              <CardTitle>Formatting & Export</CardTitle>
+              <CardTitle className="text-white">Formatting & Export</CardTitle>
             </CardHeader>
-            <CardContent>
-              PDF, EPUB, DOCX, print-ready formatting
+            <CardContent className="text-gray-400 text-sm">
+              PDF, EPUB, DOCX — print-ready formatting in one click, not three freelancers.
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-white/10 bg-[#0d0d10]">
             <CardHeader>
-              <CardTitle>Cover & Illustrations</CardTitle>
+              <CardTitle className="text-white">Cover & Illustrations</CardTitle>
             </CardHeader>
-            <CardContent>
-              AI cover designer, chapter illustrations
+            <CardContent className="text-gray-400 text-sm">
+              AI cover designer and chapter illustrations — no designer needed.
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-white/10 bg-[#0d0d10]">
             <CardHeader>
-              <CardTitle>Publishing & Distribution</CardTitle>
+              <CardTitle className="text-white">Publishing & Distribution</CardTitle>
             </CardHeader>
-            <CardContent>
-              Bookstore, metadata, metadata, audiobook publishing
+            <CardContent className="text-gray-400 text-sm">
+              Bookstore listing, metadata generation, and audiobook production — all built in.
             </CardContent>
           </Card>
         </div>

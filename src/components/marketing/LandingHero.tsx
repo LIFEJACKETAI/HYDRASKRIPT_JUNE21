@@ -41,7 +41,9 @@ export function LandingHero() {
         </h1>
 
         <p className="text-lg text-gray-400 max-w-xl leading-relaxed">
-          From idea to publication-ready book. Choose your path below.
+          Whether you&apos;re starting from a spark or polishing a finished manuscript — HydraSkript
+          takes your book from idea to publication-ready. Writing, intelligence, editorial,
+          formatting, audio, and selling. One platform. Your voice.
         </p>
 
         {/* Two front-door CTAs */}

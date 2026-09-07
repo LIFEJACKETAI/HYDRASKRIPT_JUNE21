@@ -24,45 +24,50 @@ export function Differentiators() {
             We're Not Just Another AI Writing Tool
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto">
-            AI generates words. HydraSkript builds a book. Every stage, from intelligence to
-            publication, is governed by your vision.
+            AI generates words. HydraSkript builds a book. Every stage — from intelligence to
+            publication — is governed by your vision, not a text box.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+          <Card className="border-white/10 bg-[#0d0d10]">
             <CardHeader>
-              <CardTitle>Story Intelligence</CardTitle>
+              <CardTitle className="text-white">Story Intelligence</CardTitle>
             </CardHeader>
-            <CardContent>
-              Story Bible, characters, locations, continuity, series/universe mapping
+            <CardContent className="text-gray-400 text-sm leading-relaxed">
+              Other tools forget your characters between sessions. HydraSkript&apos;s Story Bible
+              remembers every relationship, every location, every timeline detail — across your
+              entire series.
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-white/10 bg-[#0d0d10]">
             <CardHeader>
-              <CardTitle>Build Your Universe</CardTitle>
+              <CardTitle className="text-white">Build Your Universe</CardTitle>
             </CardHeader>
-            <CardContent>
-              Series continuity, world-building, genealogies, timeline tracking
+            <CardContent className="text-gray-400 text-sm leading-relaxed">
+              Write one book or twenty. Series continuity, world-building, character genealogies,
+              and timeline tracking — all connected, all automatic.
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-white/10 bg-[#0d0d10]">
             <CardHeader>
-              <CardTitle>AI Editorial Review</CardTitle>
+              <CardTitle className="text-white">AI Editorial Review</CardTitle>
             </CardHeader>
-            <CardContent>
-              Plot holes, timeline gaps, structure issues, continuity errors detected
+            <CardContent className="text-gray-400 text-sm leading-relaxed">
+              Catch the plot hole your beta readers missed. Our AI reviews for timeline gaps,
+              structural issues, and continuity errors before your readers do.
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-white/10 bg-[#0d0d10]">
             <CardHeader>
-              <CardTitle>Publishing Workflow</CardTitle>
+              <CardTitle className="text-white">Publishing Workflow</CardTitle>
             </CardHeader>
-            <CardContent>
-              EPUB/PDF/DOCX export, audiobook generation, bookstore listing, metadata
+            <CardContent className="text-gray-400 text-sm leading-relaxed">
+              One click from manuscript to market. EPUB, PDF, DOCX, audiobook, cover design,
+              and bookstore listing — all from one dashboard.
             </CardContent>
           </Card>
         </div>

@@ -22,20 +22,25 @@ export function ManuscriptDoor() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-4">
-            Your Book Doesn't Have to Start Here
+            Already Have a Manuscript?
           </h2>
-          <p className="text-gray-500 max-w-xl mx-auto">
-            "Your book doesn't have to start here. It just has to finish here."
+          <p className="text-gray-400 max-w-xl mx-auto text-lg leading-relaxed">
+            Your book doesn&apos;t have to start here. It just has to finish here.
           </p>
         </div>
 
-        <div className="border-2 border-white/10 rounded-2xl p-8 text-center">
+        <div className="border-2 border-white/10 rounded-2xl p-8 text-center max-w-2xl mx-auto">
           <Upload className="w-16 h-16 mx-auto mb-6 text-purple-500" />
-          <h3 className="text-2xl font-bold text-white mb-2">
+          <h3 className="text-2xl font-bold text-white mb-3">
             Upload Your Manuscript
           </h3>
-          <p className="text-gray-400 mb-6">
-            Bring your finished manuscript and we'll help you polish, format, and publish it.
+          <p className="text-gray-400 mb-3 leading-relaxed">
+            Upload your finished manuscript and HydraSkript&apos;s AI will extract your characters,
+            map your locations, identify your themes, and build a complete Story Bible — automatically.
+          </p>
+          <p className="text-gray-500 text-sm mb-6">
+            Then polish, format, and publish it. EPUB, PDF, DOCX, audiobook, and bookstore listing
+            — all from one platform.
           </p>
 
           <Button

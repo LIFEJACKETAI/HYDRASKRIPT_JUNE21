@@ -17,21 +17,29 @@ export function FeaturesPage() {
   const comparison = [
     { feature: 'Persistent Story Bible', traditional: '✗', hydraskript: '✓' },
     { feature: 'Series/Universe Continuity', traditional: '✗', hydraskript: '✓' },
-    { feature: 'Style Training', traditional: '✗', hydraskript: '✓' },
+    { feature: 'Style Training (Your Voice)', traditional: '✗', hydraskript: '✓' },
     { feature: 'AI Editorial Review', traditional: '✗', hydraskript: '✓' },
-    { feature: 'Production Exports', traditional: '✗', hydraskript: '✓' },
-    { feature: 'Integrated Audio', traditional: '✗', hydraskript: '✓' },
-    { feature: 'Bookstore', traditional: '✗', hydraskript: '✓' },
+    { feature: 'Production Exports (EPUB/PDF/DOCX)', traditional: '✗', hydraskript: '✓' },
+    { feature: 'Integrated Audiobook (TTS)', traditional: '✗', hydraskript: '✓' },
+    { feature: 'AI Cover & Illustrations', traditional: '✗', hydraskript: '✓' },
+    { feature: 'Public Bookstore', traditional: '✗', hydraskript: '✓' },
+    { feature: 'Manuscript Upload & Analysis', traditional: '✗', hydraskript: '✓' },
+    { feature: 'Coloring Book Generation', traditional: '✗', hydraskript: '✓' },
+    { feature: 'Kids Storybook Mode', traditional: '✗', hydraskript: '✓' },
   ]
 
   const benefits = [
     'Persistent Story Bible on all plans',
     'Series/universe continuity tracking',
-    'Custom style profiles from your voice',
-    'Plot hole & timeline detection',
+    'Custom style profiles — write in your voice, not the AI\'s',
+    'Plot hole, timeline & structure detection',
     'EPUB, PDF, DOCX export in one click',
-    'AI-generated audiobook with TTS',
+    'AI-generated audiobook with multiple voices',
+    'AI cover designer and chapter illustrations',
     'Public bookstore to sell your book',
+    'Upload any manuscript for instant analysis',
+    'Coloring book generation (kids & adult)',
+    'Kids storybook mode with age-appropriate content',
   ]
 
   return (
@@ -45,10 +53,10 @@ export function FeaturesPage() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-4">
-            Traditional AI Writing Tool vs HydraSkript
+            Why Authors Choose HydraSkript
           </h2>
-          <p className="text-gray-500 max-w-xl mx-auto">
-            See why serious authors are choosing HydraSkript over generic AI writing tools.
+          <p className="text-gray-400 max-w-xl mx-auto">
+            See what you get with HydraSkript that generic AI writing tools simply can&apos;t offer.
           </p>
         </div>
 
