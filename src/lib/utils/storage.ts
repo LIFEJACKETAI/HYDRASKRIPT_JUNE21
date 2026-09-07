@@ -1,16 +1,44 @@
 // HydraSkript - Storage Utility
-// Uses Supabase Storage when configured, with local filesystem fallback for development
+// Priority: Cloudflare R2 → Supabase Storage → local filesystem (dev only)
 
 import fs from 'fs';
 import path from 'path';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { db } from '@/lib/db';
-import { supabaseAdmin } from '@/lib/supabase';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
 const STORAGE_DIR = path.join(process.cwd(), 'public', 'assets');
 const PUBLIC_BASE = '/assets';
 const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'hydraskript-assets';
+
+// ─── Cloudflare R2 ──────────────────────────────────────────────────────────
+
+function isR2Enabled() {
+  return Boolean(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_KEY);
+}
+
+let _r2Client: S3Client | null = null;
+
+function getR2Client(): S3Client {
+  if (!_r2Client) {
+    _r2Client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+      },
+    });
+  }
+  return _r2Client;
+}
+
+function getR2PublicUrl(): string {
+  return process.env.R2_PUBLIC_URL || '';
+}
+
+// ─── Supabase Storage ───────────────────────────────────────────────────────
 
 function isSupabaseStorageEnabled() {
   return Boolean(
@@ -20,13 +48,14 @@ function isSupabaseStorageEnabled() {
   );
 }
 
-// Ensure storage directory exists.
-// NOTE: This must ONLY ever run lazily (inside a function), never at module
-// load. A top-level mkdir here previously crashed EVERY serverless function
-// whose import graph touched this module: Vercel's runtime filesystem is
-// read-only outside /tmp, so mkdirSync threw ENOENT and the route returned a
-// non-JSON 500 before its handler ran. Production file writes must go to
-// Supabase Storage (see isSupabaseStorageEnabled); local disk is dev-only.
+// Lazy import to avoid circular dependency at module load
+async function getSupabaseAdmin() {
+  const { supabaseAdmin } = await import('@/lib/supabase');
+  return supabaseAdmin;
+}
+
+// ─── Local filesystem (dev only) ────────────────────────────────────────────
+
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
     try {
@@ -34,9 +63,8 @@ function ensureDir(dir: string) {
     } catch (e) {
       throw new Error(
         `Cannot create local storage directory "${dir}". Server filesystems ` +
-          `are read-only in production — configure SUPABASE_URL, ` +
-          `SUPABASE_SERVICE_ROLE_KEY and SUPABASE_STORAGE_BUCKET so uploads ` +
-          `use Supabase Storage instead. Original error: ${e instanceof Error ? e.message : String(e)}`
+          `are read-only in production — configure R2 or Supabase Storage. ` +
+          `Original error: ${e instanceof Error ? e.message : String(e)}`
       );
     }
   }
@@ -46,7 +74,7 @@ function ensureDir(dir: string) {
 
 /**
  * Save a buffer to storage and return the public URL.
- * Prefers Supabase Storage when configured, otherwise falls back to local disk.
+ * Priority: Cloudflare R2 → Supabase Storage → local disk.
  */
 export async function saveFile(
   subfolder: string,
@@ -54,32 +82,52 @@ export async function saveFile(
   buffer: Buffer,
   options?: { contentType?: string }
 ): Promise<string> {
+  const contentType = options?.contentType ?? 'application/octet-stream';
+
+  // 1. Cloudflare R2
+  if (isR2Enabled()) {
+    const key = `${subfolder}/${filename}`;
+    const client = getR2Client();
+    await client.send(new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_KEY,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    }));
+    const publicUrl = `${getR2PublicUrl()}/${key}`;
+    console.log(`[Storage] Uploaded to R2: ${key}`);
+    return publicUrl;
+  }
+
+  // 2. Supabase Storage
   if (isSupabaseStorageEnabled()) {
+    const supabase = await getSupabaseAdmin();
     const objectPath = `${subfolder}/${filename}`;
-    const { error } = await supabaseAdmin.storage
+    const { error } = await supabase.storage
       .from(SUPABASE_STORAGE_BUCKET)
       .upload(objectPath, buffer, {
         upsert: true,
-        contentType: options?.contentType ?? 'application/octet-stream',
+        contentType,
       });
 
     if (error) {
       throw new Error(`Supabase storage upload failed: ${error.message}`);
     }
 
-    const { data } = supabaseAdmin.storage
+    const { data } = supabase.storage
       .from(SUPABASE_STORAGE_BUCKET)
       .getPublicUrl(objectPath);
 
+    console.log(`[Storage] Uploaded to Supabase: ${objectPath}`);
     return data.publicUrl;
   }
 
+  // 3. Local filesystem (dev only)
   const dir = path.join(STORAGE_DIR, subfolder);
   ensureDir(dir);
-
   const filePath = path.join(dir, filename);
   fs.writeFileSync(filePath, buffer);
-
+  console.log(`[Storage] Saved locally: ${filePath}`);
   return `${PUBLIC_BASE}/${subfolder}/${filename}`;
 }
 
@@ -101,16 +149,28 @@ export async function saveBase64File(
  */
 export async function deleteFile(publicUrl: string): Promise<boolean> {
   try {
+    // R2 URLs contain the bucket key
+    if (isR2Enabled() && publicUrl.includes('.r2.cloudflarestorage.com')) {
+      const r2Base = getR2PublicUrl();
+      const key = publicUrl.replace(r2Base + '/', '');
+      const client = getR2Client();
+      await client.send(new DeleteObjectCommand({
+        Bucket: process.env.R2_BUCKET_KEY,
+        Key: key,
+      }));
+      console.log(`[Storage] Deleted from R2: ${key}`);
+      return true;
+    }
+
+    // Supabase URLs
     if (isSupabaseStorageEnabled()) {
+      const supabase = await getSupabaseAdmin();
       const marker = `/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/`;
       const markerIndex = publicUrl.indexOf(marker);
-
-      if (markerIndex === -1) {
-        return false;
-      }
+      if (markerIndex === -1) return false;
 
       const objectPath = publicUrl.slice(markerIndex + marker.length);
-      const { error } = await supabaseAdmin.storage
+      const { error } = await supabase.storage
         .from(SUPABASE_STORAGE_BUCKET)
         .remove([objectPath]);
 
@@ -118,13 +178,12 @@ export async function deleteFile(publicUrl: string): Promise<boolean> {
         console.error('[Storage] Supabase delete failed:', error.message);
         return false;
       }
-
       return true;
     }
 
+    // Local filesystem
     const relativePath = publicUrl.replace(PUBLIC_BASE, '');
     const filePath = path.join(STORAGE_DIR, relativePath);
-
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
       return true;
@@ -140,33 +199,49 @@ export async function deleteFile(publicUrl: string): Promise<boolean> {
  * Check if a file exists in storage.
  */
 export async function fileExists(publicUrl: string): Promise<boolean> {
-  if (isSupabaseStorageEnabled()) {
-    const marker = `/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/`;
-    const markerIndex = publicUrl.indexOf(marker);
-
-    if (markerIndex === -1) {
-      return false;
+  try {
+    // R2 — use HEAD request
+    if (isR2Enabled() && publicUrl.includes('.r2.cloudflarestorage.com')) {
+      const r2Base = getR2PublicUrl();
+      const key = publicUrl.replace(r2Base + '/', '');
+      const client = getR2Client();
+      try {
+        await client.send(new HeadObjectCommand({
+          Bucket: process.env.R2_BUCKET_KEY,
+          Key: key,
+        }));
+        return true;
+      } catch {
+        return false;
+      }
     }
 
-    const objectPath = publicUrl.slice(markerIndex + marker.length);
-    const directory = objectPath.includes('/') ? objectPath.slice(0, objectPath.lastIndexOf('/')) : '';
-    const fileName = objectPath.includes('/') ? objectPath.slice(objectPath.lastIndexOf('/') + 1) : objectPath;
+    // Supabase
+    if (isSupabaseStorageEnabled()) {
+      const supabase = await getSupabaseAdmin();
+      const marker = `/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/`;
+      const markerIndex = publicUrl.indexOf(marker);
+      if (markerIndex === -1) return false;
 
-    const { data, error } = await supabaseAdmin.storage
-      .from(SUPABASE_STORAGE_BUCKET)
-      .list(directory, { search: fileName });
+      const objectPath = publicUrl.slice(markerIndex + marker.length);
+      const directory = objectPath.includes('/') ? objectPath.slice(0, objectPath.lastIndexOf('/')) : '';
+      const fileName = objectPath.includes('/') ? objectPath.slice(objectPath.lastIndexOf('/') + 1) : objectPath;
 
-    if (error) {
-      console.error('[Storage] Supabase exists check failed:', error.message);
-      return false;
+      const { data, error } = await supabase.storage
+        .from(SUPABASE_STORAGE_BUCKET)
+        .list(directory, { search: fileName });
+
+      if (error) return false;
+      return (data ?? []).some((file) => file.name === fileName);
     }
 
-    return (data ?? []).some((file) => file.name === fileName);
+    // Local filesystem
+    const relativePath = publicUrl.replace(PUBLIC_BASE, '');
+    const filePath = path.join(STORAGE_DIR, relativePath);
+    return fs.existsSync(filePath);
+  } catch {
+    return false;
   }
-
-  const relativePath = publicUrl.replace(PUBLIC_BASE, '');
-  const filePath = path.join(STORAGE_DIR, relativePath);
-  return fs.existsSync(filePath);
 }
 
 /**
