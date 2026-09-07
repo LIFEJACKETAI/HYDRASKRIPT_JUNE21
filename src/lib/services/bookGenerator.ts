@@ -270,6 +270,13 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
   try {
     await jobQueue.updateJobStatus(jobId, { progressMessage: `Writing chapter ${chapterIndex + 1}...`, progressPercent: 20 });
 
+    // Mark chapter as 'writing' immediately so the UI shows progress
+    // instead of leaving it as 'pending' during the long LLM call.
+    await db.chapter.update({
+      where: { bookId_index: { bookId, index: chapterIndex } },
+      data: { status: 'writing' },
+    });
+
     // Continuity: gather summaries from the last few chapters (not just the
     // previous one) so the model knows who has actually been introduced so
     // far. Each summaryForNext is a short fallback excerpt, so chaining 2-3
@@ -340,7 +347,14 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       chapterUser = getChapterUserPrompt(chapter.title, chapter.synopsis, chapter.wordTarget);
     }
 
-    const rawText = (await askLLMWithFallback(fullSystemPrompt, chapterUser, 0.7, 8192)).trim();
+    // Per-chapter timeout: 10 minutes max for the entire LLM call chain.
+    // Prevents the triple-redundancy fallback from hanging for 2+ hours.
+    const CHAPTER_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+    const llmCall = askLLMWithFallback(fullSystemPrompt, chapterUser, 0.7, 8192);
+    const timeoutCall = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Chapter generation timed out after ${CHAPTER_TIMEOUT_MS / 1000}s — all LLM providers may be unreachable`)), CHAPTER_TIMEOUT_MS)
+    );
+    const rawText = (await Promise.race([llmCall, timeoutCall])).trim();
     if (rawText.length < 50) {
       throw new Error(`Chapter generation returned insufficient content (${rawText.length} chars)`);
     }

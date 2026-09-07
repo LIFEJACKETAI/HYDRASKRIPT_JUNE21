@@ -13,7 +13,7 @@ const GEMINI_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-2.0-flash';
 const NIM_MODEL_JSON = process.env.NVIDIA_NIM_MODEL || 'minimax-3.0';
 const NIM_MODEL_TEXT = process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-8b-instruct';
 
-const MAX_CYCLES = 3;
+const MAX_CYCLES = 2;
 
 type ProviderName = 'OpenRouter' | 'Gemini' | 'NVIDIA NIM';
 
