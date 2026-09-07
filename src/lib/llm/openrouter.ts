@@ -15,10 +15,10 @@ function getApiKey(): string {
 }
 
 function getModel(): string {
-  // Use a valid OpenRouter model - "openrouter/free" is not a valid model
-  // Common free models: meta-llama/llama-3.1-8b-instruct:free, 
-  // google/gemma-2-9b-it:free, microsoft/phi-3-mini-128k-instruct:free
-  return process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
+  // OpenRouter free models use a `:free` suffix (there is no model literally
+  // named "openrouter/free"). google/gemma-4-31b-it:free is a current, valid
+  // free general-purpose model. See: https://openrouter.ai/models
+  return process.env.OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────

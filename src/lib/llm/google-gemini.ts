@@ -15,7 +15,7 @@ function getApiKey(): string {
 }
 
 function getModel(): string {
-  return process.env.GEMINI_TEXT_MODEL || 'gemini-2.0-flash';
+  return process.env.GEMINI_TEXT_MODEL || 'gemini-2.5-flash';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────
