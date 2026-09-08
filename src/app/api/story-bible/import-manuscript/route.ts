@@ -15,6 +15,9 @@ import { enqueueEditorialReview } from '@/lib/services/editorialReview';
 // Entity extraction is a single synchronous LLM call over the manuscript text.
 // Without these exports the platform default function timeout kills the request
 // mid-LLM-call and the browser reports `504` + `Failed to fetch`.
+// NOTE: `maxDuration` is only honored on platforms that support it (Vercel Pro+
+// and self-hosted). On Vercel Hobby this route is still hard-capped at 60s, so
+// large manuscripts can be killed mid-LLM-call there regardless of this value.
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
@@ -159,7 +162,48 @@ export async function POST(request: NextRequest) {
     }
 
     const message = error instanceof Error ? error.message : 'Unknown error';
+    // Always log the full chain — the browser only ever sees a generic 500 body,
+    // so the server console is the ONLY place the real reason is recorded.
     console.error('[API/story-bible/import-manuscript] Failed:', message, error instanceof Error ? error.stack : '');
+
+    // Let the client show the actual failure reason (missing AI keys, DB
+    // schema drift, etc.) instead of masking everything behind "500".
+    if (
+      message.startsWith('Text generation failed after') ||
+      message.startsWith('Validation error') ||
+      message.includes('OPENROUTER_API_KEY') ||
+      message.includes('GOOGLE_AI_API_KEY') ||
+      message.includes('NVIDIA_NIM_API_KEY') ||
+      message.includes('NIM_API_KEY')
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `The AI assistant could not process that manuscript right now. ${message}`,
+        },
+        { status: 502 }
+      );
+    }
+
+    // Not-found/ownership errors are the caller's mistake, not a server fault.
+    if (message === 'Book not found') {
+      return NextResponse.json({ success: false, error: 'That book no longer exists. Refresh and try again.' }, { status: 404 });
+    }
+    if (message === 'Forbidden') {
+      return NextResponse.json({ success: false, error: 'You do not have access to that book.' }, { status: 403 });
+    }
+    // If the DB rejected the write (relation/column missing = schema drift),
+    // name the real cause instead of a bare 500.
+    if (/relation .* does not exist|column .* does not exist|P2021|P2022|P2010|P2003|P2002/i.test(message)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'The database is missing a table or column this feature needs. Run `npm run db:push` (or `prisma migrate deploy`) against the production database, then retry.',
+        },
+        { status: 500 }
+      );
+    }
 
     const isTimeout =
       message.includes('timed out') ||
