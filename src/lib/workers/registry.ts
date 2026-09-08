@@ -7,6 +7,7 @@ import { exportBookAsPDF } from '@/lib/services/exportService';
 import { generateImageWorker } from '@/lib/workers/generateImageWorker';
 import { generateAudiobookWorker } from '@/lib/workers/generateAudiobookWorker';
 import { editorialReviewWorker } from '@/lib/workers/editorialReviewWorker';
+import { manuscriptImportWorker } from '@/lib/workers/manuscriptImportWorker';
 
 type QueueJob = {
   id: string;
@@ -54,5 +55,9 @@ export const WorkerRegistry: Record<string, WorkerFunction> = {
 
   editorial_review: async (job) => {
     await editorialReviewWorker(job);
+  },
+
+  manuscript_import: async (job) => {
+    await manuscriptImportWorker(job);
   },
 };

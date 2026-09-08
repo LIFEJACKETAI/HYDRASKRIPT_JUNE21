@@ -195,6 +195,7 @@ enum JobType {
   generate_outline
   finalize_book
   editorial_review
+  manuscript_import
 }
 
 enum JobStatus {

@@ -2,6 +2,10 @@
 // Uses Google AI Studio REST API directly (no SDK required)
 // MUST be used in backend code only
 
+import type { LLMCallOptions } from '@/lib/llm/types';
+
+export type { LLMCallOptions };
+
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
@@ -252,7 +256,8 @@ export async function askLLMJSON<T>(
   systemPrompt: string,
   userPrompt: string,
   temperature: number = 0.2,
-  model?: string
+  model?: string,
+  options?: LLMCallOptions
 ): Promise<T> {
   return generateJSON<T>({
     messages: [
@@ -261,5 +266,8 @@ export async function askLLMJSON<T>(
     ],
     temperature,
     model,
+    ...(options?.maxTokens !== undefined ? { maxTokens: options.maxTokens } : {}),
+    ...(options?.timeoutMs !== undefined ? { timeoutMs: options.timeoutMs } : {}),
+    ...(options?.retries !== undefined ? { retries: options.retries } : {}),
   });
 }

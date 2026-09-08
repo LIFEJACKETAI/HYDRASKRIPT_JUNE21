@@ -343,77 +343,235 @@ export async function deleteStoryBibleEntity(id: string) {
 
 export interface ManuscriptImportResult {
   fileName: string;
-  entities: StoryBibleEntity[];
   counts: Record<string, number>;
   total: number;
   bookId?: string;
 }
 
-export async function importManuscriptToStoryBible(bookId: string | null, file: File) {
-  // Fail fast on oversized files instead of hanging until the proxy 504s.
-  if (file.size > 15 * 1024 * 1024) {
+export interface ManuscriptImportProgress {
+  percent: number;
+  message: string;
+}
+
+export type ManuscriptImportResponse =
+  | { success: true; data: ManuscriptImportResult }
+  | { success: false; error: string };
+
+interface ManuscriptImportStart {
+  success: boolean;
+  error?: string;
+  data?: {
+    jobId: string;
+    bookId?: string | null;
+    fileName?: string;
+    textLength?: number;
+    status?: string;
+    progressMessage?: string;
+    progressPercent?: number;
+  };
+}
+
+interface ManuscriptImportJobStatus {
+  jobId: string;
+  bookId: string | null;
+  status: string;
+  progressMessage: string | null;
+  progressPercent: number;
+  errorMessage: string | null;
+  fileName?: string;
+  newBookCreated?: boolean;
+  counts?: Record<string, number>;
+  total?: number;
+}
+
+/**
+ * Vercel rejects a Serverless Function request body larger than 4.5 MB before
+ * the app ever sees it. Keep in sync with MAX_MANUSCRIPT_UPLOAD_BYTES in
+ * `src/lib/manuscript.ts`.
+ */
+const MAX_MANUSCRIPT_UPLOAD_BYTES = 4.5 * 1024 * 1024;
+/** Upload + server-side text extraction. The LLM work happens after this. */
+const IMPORT_UPLOAD_TIMEOUT_MS = 120_000;
+const IMPORT_POLL_INTERVAL_MS = 2500;
+const IMPORT_POLL_TIMEOUT_MS = 20_000;
+/** The server caps one LLM chain at 240s and the queue may retry the job. */
+const IMPORT_POLL_DEADLINE_MS = 10 * 60 * 1000;
+/** Consecutive failed polls tolerated before giving up (Wi-Fi handover, etc.). */
+const IMPORT_MAX_POLL_FAILURES = 5;
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function manuscriptGatewayError(status: number): string {
+  if (status === 504 || status === 502 || status === 503) {
+    return 'The server timed out while receiving that manuscript. Try a smaller file (or a .txt instead of a .pdf) and try again.';
+  }
+  if (status === 413) {
+    return 'That manuscript is too large to upload. Please keep it under 4.5 MB.';
+  }
+  if (status === 401) {
+    return 'Your session expired. Please sign in again, then re-upload the manuscript.';
+  }
+  return `Import failed (server error ${status}). Please try again.`;
+}
+
+async function readImportStartResponse(response: Response): Promise<ManuscriptImportStart> {
+  const contentType = response.headers.get('content-type') ?? '';
+  if (contentType.includes('application/json')) {
+    try {
+      return (await response.json()) as ManuscriptImportStart;
+    } catch {
+      // fall through to the gateway message
+    }
+  }
+  return { success: false, error: manuscriptGatewayError(response.status) };
+}
+
+/**
+ * Upload a manuscript and build its Story Bible.
+ *
+ * The server queues the extraction as a job and answers in ~1-2s, so this
+ * function polls `/api/story-bible/import-manuscript/[jobId]` until the job
+ * completes. That keeps a full-length manuscript off the HTTP request path —
+ * the old synchronous version was killed by Vercel's function timeout and the
+ * browser only ever saw a bodyless 504.
+ *
+ * @param onProgress optional callback for the progress bar / status line.
+ */
+export async function importManuscriptToStoryBible(
+  bookId: string | null,
+  file: File,
+  onProgress?: (progress: ManuscriptImportProgress) => void
+): Promise<ManuscriptImportResponse> {
+  // Fail fast on oversized files instead of letting the platform reject them.
+  if (file.size > MAX_MANUSCRIPT_UPLOAD_BYTES) {
     return {
-      success: false as const,
-      error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — please upload a manuscript under 15 MB (or paste it in as .txt).`,
+      success: false,
+      error:
+        `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — uploads are limited to 4.5 MB. ` +
+        `Re-save the manuscript as a plain .txt (or a text-based PDF rather than a scan) and try again.`,
     };
+  }
+
+  const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+  if (!['txt', 'pdf', 'docx'].includes(extension)) {
+    return { success: false, error: 'Please upload a .txt, .pdf, or .docx manuscript.' };
   }
 
   const formData = new FormData();
   if (bookId) formData.append('bookId', bookId);
   formData.append('file', file);
 
-  // The server extracts entities with a synchronous LLM call, so a full book
-  // can take several minutes. Time out just inside the server maxDuration and
-  // surface a friendly message instead of a raw `Failed to fetch`.
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 280_000);
+  onProgress?.({ percent: 2, message: `Uploading "${file.name}"...` });
+
+  // ── 1. Hand the file over and get a job id back ───────────────────────────
+  let jobId: string;
+  let queuedBookId: string | null = bookId;
   try {
-    const response = await fetch('/api/story-bible/import-manuscript', {
-      method: 'POST',
-      body: formData,
-      signal: controller.signal,
-    });
-
-    const contentType = response.headers.get('content-type') ?? '';
-    if (!contentType.includes('application/json')) {
-      if (response.status === 504 || response.status === 502 || response.status === 503) {
-        return {
-          success: false as const,
-          error:
-            'The server timed out while reading that manuscript. Try a smaller file (or .txt instead of .pdf), keep this tab open, and try again.',
-        };
-      }
-      return { success: false as const, error: `Import failed (server error ${response.status}). Please try again.` };
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), IMPORT_UPLOAD_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await fetch('/api/story-bible/import-manuscript', {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
     }
 
-    const body = (await response.json()) as {
-      success: boolean;
-      data?: ManuscriptImportResult;
-      error?: string;
-    };
-    if (!response.ok && body.success !== true) {
-      return {
-        success: false as const,
-        error: body.error || `Import failed (server error ${response.status}). Please try again.`,
-      };
+    const body = await readImportStartResponse(response);
+    if (!response.ok || body.success !== true || !body.data?.jobId) {
+      return { success: false, error: body.error || manuscriptGatewayError(response.status) };
     }
-    return body;
+
+    jobId = body.data.jobId;
+    queuedBookId = body.data.bookId ?? queuedBookId;
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       return {
-        success: false as const,
-        error:
-          'The import is taking longer than expected and was stopped. Try a smaller file (or .txt instead of .pdf) and keep this tab open while it processes.',
+        success: false,
+        error: 'The upload took too long and was stopped. Please check your connection and try again.',
       };
     }
     return {
-      success: false as const,
+      success: false,
       error:
-        'Lost connection to the server during upload (network changed or dropped). Check your connection, keep this tab open, and try again.',
+        'Lost connection to the server while uploading the manuscript (your network may have changed). ' +
+        'Keep this tab open and try again.',
     };
-  } finally {
-    clearTimeout(timeout);
   }
+
+  // ── 2. Poll until the import job finishes ─────────────────────────────────
+  const deadline = Date.now() + IMPORT_POLL_DEADLINE_MS;
+  let consecutiveFailures = 0;
+
+  while (Date.now() < deadline) {
+    await wait(IMPORT_POLL_INTERVAL_MS);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), IMPORT_POLL_TIMEOUT_MS);
+    let status;
+    try {
+      status = await apiFetch<ManuscriptImportJobStatus>(
+        `/story-bible/import-manuscript/${jobId}`,
+        { signal: controller.signal }
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (!status.success || !status.data) {
+      // A dropped poll is not a failed import — the job keeps running server
+      // side, so retry a few times before telling the user anything went wrong.
+      consecutiveFailures += 1;
+      if (consecutiveFailures >= IMPORT_MAX_POLL_FAILURES) {
+        return {
+          success: false,
+          error:
+            'Lost contact with the server while the manuscript was being imported. ' +
+            'The import may still finish in the background — reload the Story Bible in a minute to check.',
+        };
+      }
+      onProgress?.({ percent: 50, message: 'Reconnecting to the server...' });
+      continue;
+    }
+
+    consecutiveFailures = 0;
+    const job = status.data;
+
+    onProgress?.({
+      percent: Math.max(0, Math.min(100, job.progressPercent ?? 0)),
+      message: job.progressMessage || 'Importing your manuscript...',
+    });
+
+    if (job.status === 'completed') {
+      const resolvedBookId = job.bookId ?? queuedBookId ?? undefined;
+      return {
+        success: true,
+        data: {
+          fileName: job.fileName ?? file.name,
+          counts: job.counts ?? {},
+          total: job.total ?? 0,
+          ...(resolvedBookId ? { bookId: resolvedBookId } : {}),
+        },
+      };
+    }
+
+    if (job.status === 'failed') {
+      return {
+        success: false,
+        error: job.errorMessage || 'The manuscript import failed. Please try again.',
+      };
+    }
+  }
+
+  return {
+    success: false,
+    error:
+      'The import is taking much longer than expected. It may still be running — reload the Story Bible ' +
+      'in a few minutes, or try a smaller excerpt.',
+  };
 }
 
 export interface IdeaTransferInput {

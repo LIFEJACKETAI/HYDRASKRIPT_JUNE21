@@ -18,6 +18,7 @@ import {
   listStoryBibleEntities,
   deleteStoryBibleEntity,
   importManuscriptToStoryBible,
+  type ManuscriptImportProgress,
   type BookData,
   type StoryBibleEntity,
   type StoryBibleKind,
@@ -51,6 +52,34 @@ function groupByKind(entities: StoryBibleEntity[]): EntityMap {
   return map;
 }
 
+/**
+ * Live status for a running manuscript import. The extraction happens in a
+ * queued job on the server, so the UI gets real progress instead of an
+ * indefinite spinner that used to end in a 504.
+ */
+function ImportProgressBanner({ progress }: { progress: ManuscriptImportProgress | null }) {
+  if (!progress) return null;
+  return (
+    <div className="rounded-2xl bg-cyan-500/10 border border-cyan-500/30 px-5 py-4">
+      <div className="flex items-center justify-between gap-4 mb-2">
+        <p className="text-sm font-semibold text-cyan-200 flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" /> {progress.message}
+        </p>
+        <p className="text-xs text-cyan-300 font-bold shrink-0">{progress.percent}%</p>
+      </div>
+      <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-500"
+          style={{ width: `${progress.percent}%` }}
+        />
+      </div>
+      <p className="text-xs text-slate-500 mt-2">
+        Keep this tab open — a full manuscript takes a few minutes to read.
+      </p>
+    </div>
+  );
+}
+
 export default function StoryBible() {
   const { selectedBookId, setStoryBibleBookId, setCurrentView } = useAppStore();
 
@@ -73,6 +102,7 @@ export default function StoryBible() {
   const [uploading, setUploading] = useState(false);
   const [newProjectUploading, setNewProjectUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ fileName: string; counts: Record<string, number>; total: number } | null>(null);
+  const [importProgress, setImportProgress] = useState<ManuscriptImportProgress | null>(null);
 
   const currentBook = books.find((b) => b.id === selectedBookId) ?? null;
 
@@ -150,9 +180,10 @@ export default function StoryBible() {
 
     setUploading(true);
     setUploadResult(null);
+    setImportProgress({ percent: 1, message: `Uploading "${file.name}"...` });
     try {
-      const result = await importManuscriptToStoryBible(selectedBookId, file);
-      if (result.success && result.data) {
+      const result = await importManuscriptToStoryBible(selectedBookId, file, setImportProgress);
+      if (result.success) {
         setUploadResult({ fileName: result.data.fileName, counts: result.data.counts, total: result.data.total });
         toast({
           title: 'Manuscript imported!',
@@ -167,6 +198,7 @@ export default function StoryBible() {
       toast({ title: 'Import failed', description: msg, variant: 'destructive' });
     } finally {
       setUploading(false);
+      setImportProgress(null);
     }
   };
 
@@ -186,9 +218,10 @@ export default function StoryBible() {
     }
 
     setNewProjectUploading(true);
+    setImportProgress({ percent: 1, message: `Uploading "${file.name}"...` });
     try {
-      const result = await importManuscriptToStoryBible(null, file);
-      if (result.success && result.data) {
+      const result = await importManuscriptToStoryBible(null, file, setImportProgress);
+      if (result.success) {
         toast({
           title: 'New project created!',
           description: `${result.data.total} story bible entities extracted from "${result.data.fileName}".`,
@@ -207,6 +240,7 @@ export default function StoryBible() {
       toast({ title: 'Import failed', description: msg, variant: 'destructive' });
     } finally {
       setNewProjectUploading(false);
+      setImportProgress(null);
     }
   };
 
@@ -253,6 +287,8 @@ export default function StoryBible() {
             )}
           </Button>
         </div>
+
+        <ImportProgressBanner progress={importProgress} />
 
         {booksLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -418,6 +454,9 @@ export default function StoryBible() {
         </div>
       </div>
 
+      {/* Manuscript import progress */}
+      <ImportProgressBanner progress={importProgress} />
+
       {/* Manuscript upload result */}
       {uploadResult && (
         <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 px-5 py-4 flex items-start justify-between gap-4">
@@ -426,7 +465,7 @@ export default function StoryBible() {
               <FileText className="h-4 w-4" /> Imported "{uploadResult.fileName}"
             </p>
             <p className="text-xs text-slate-400 mt-1">
-              {uploadResult.total} entities added ·{' '}
+              {uploadResult.total} entities in your Story Bible ·{' '}
               {Object.entries(uploadResult.counts)
                 .map(([kind, count]) => `${KIND_CONFIG[kind as StoryBibleKind]?.label ?? kind}: ${count}`)
                 .join(' · ')}

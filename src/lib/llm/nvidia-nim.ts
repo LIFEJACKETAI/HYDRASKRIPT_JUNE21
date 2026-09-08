@@ -2,6 +2,10 @@
 // Uses NVIDIA NIM REST API directly
 // MUST be used in backend code only
 
+import type { LLMCallOptions } from '@/lib/llm/types';
+
+export type { LLMCallOptions };
+
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
 const NVIDIA_NIM_API_URL = process.env.NVIDIA_NIM_API_URL || 'https://integrate.api.nvidia.com/v1/chat/completions';
@@ -221,7 +225,8 @@ export async function askLLMJSON<T>(
   systemPrompt: string,
   userPrompt: string,
   temperature: number = 0.2,
-  model?: string
+  model?: string,
+  options?: LLMCallOptions
 ): Promise<T> {
   return generateJSON<T>({
     messages: [
@@ -230,5 +235,8 @@ export async function askLLMJSON<T>(
     ],
     temperature,
     model,
+    ...(options?.maxTokens !== undefined ? { maxTokens: options.maxTokens } : {}),
+    ...(options?.timeoutMs !== undefined ? { timeoutMs: options.timeoutMs } : {}),
+    ...(options?.retries !== undefined ? { retries: options.retries } : {}),
   });
 }

@@ -19,6 +19,7 @@ type QueueWorkerJob = {
   ownerId: string;
   stepIndex?: number | null;
   creditsConsumed?: number | null;
+  result?: string | null;
 };
 
 class PersistentJobQueue {
@@ -128,6 +129,22 @@ class PersistentJobQueue {
     void this.processNext();
   }
 
+  /**
+   * Claim and run one queued job to completion, awaiting it.
+   *
+   * `startJob()` deliberately does not await: it is called from route handlers
+   * that must answer immediately. On a serverless platform that fire-and-forget
+   * promise is frozen as soon as the response is flushed, so routes should
+   * *also* schedule `drainOnce()` inside `after()` (see `src/lib/background.ts`)
+   * to give the job a real execution window after the client has been answered.
+   *
+   * No-op when another job is already being processed on this instance.
+   */
+  async drainOnce(): Promise<void> {
+    await this.bootstrap();
+    await this.processNext();
+  }
+
   private async processNext(): Promise<void> {
     if (this.shutdown || this.activeJobs >= this.maxConcurrent || this.isProcessing) return;
     this.isProcessing = true;
@@ -168,6 +185,7 @@ class PersistentJobQueue {
         ownerId: jobToProcess.ownerId,
         stepIndex: jobToProcess.stepIndex,
         creditsConsumed: jobToProcess.creditsConsumed,
+        result: jobToProcess.result,
       };
 
       await workerFn(workerJob);
@@ -218,6 +236,7 @@ class PersistentJobQueue {
     maxRetries: number;
     stepIndex: number | null;
     creditsConsumed: number | null;
+    result: string;
   } | null> {
     return this.withTransactionRetry(
       async (tx) => {
@@ -255,6 +274,7 @@ class PersistentJobQueue {
           maxRetries: updated.maxRetries,
           stepIndex: updated.stepIndex,
           creditsConsumed: updated.creditsConsumed,
+          result: updated.result,
         };
       },
       'claimNextJob'
