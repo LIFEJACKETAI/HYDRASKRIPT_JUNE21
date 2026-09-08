@@ -350,18 +350,70 @@ export interface ManuscriptImportResult {
 }
 
 export async function importManuscriptToStoryBible(bookId: string | null, file: File) {
+  // Fail fast on oversized files instead of hanging until the proxy 504s.
+  if (file.size > 15 * 1024 * 1024) {
+    return {
+      success: false as const,
+      error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — please upload a manuscript under 15 MB (or paste it in as .txt).`,
+    };
+  }
+
   const formData = new FormData();
   if (bookId) formData.append('bookId', bookId);
   formData.append('file', file);
-  const response = await fetch('/api/story-bible/import-manuscript', {
-    method: 'POST',
-    body: formData,
-  });
-  return (await response.json()) as {
-    success: boolean;
-    data?: ManuscriptImportResult;
-    error?: string;
-  };
+
+  // The server extracts entities with a synchronous LLM call, so a full book
+  // can take several minutes. Time out just inside the server maxDuration and
+  // surface a friendly message instead of a raw `Failed to fetch`.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 280_000);
+  try {
+    const response = await fetch('/api/story-bible/import-manuscript', {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      if (response.status === 504 || response.status === 502 || response.status === 503) {
+        return {
+          success: false as const,
+          error:
+            'The server timed out while reading that manuscript. Try a smaller file (or .txt instead of .pdf), keep this tab open, and try again.',
+        };
+      }
+      return { success: false as const, error: `Import failed (server error ${response.status}). Please try again.` };
+    }
+
+    const body = (await response.json()) as {
+      success: boolean;
+      data?: ManuscriptImportResult;
+      error?: string;
+    };
+    if (!response.ok && body.success !== true) {
+      return {
+        success: false as const,
+        error: body.error || `Import failed (server error ${response.status}). Please try again.`,
+      };
+    }
+    return body;
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      return {
+        success: false as const,
+        error:
+          'The import is taking longer than expected and was stopped. Try a smaller file (or .txt instead of .pdf) and keep this tab open while it processes.',
+      };
+    }
+    return {
+      success: false as const,
+      error:
+        'Lost connection to the server during upload (network changed or dropped). Check your connection, keep this tab open, and try again.',
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export interface IdeaTransferInput {

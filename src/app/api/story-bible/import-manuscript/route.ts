@@ -12,6 +12,20 @@ import { ManuscriptImportSchema, validateOrThrow } from '@/lib/llm/schema';
 import { getManuscriptImportPrompt } from '@/lib/llm/prompts';
 import { enqueueEditorialReview } from '@/lib/services/editorialReview';
 
+// Entity extraction is a single synchronous LLM call over the manuscript text.
+// Without these exports the platform default function timeout kills the request
+// mid-LLM-call and the browser reports `504` + `Failed to fetch`.
+export const dynamic = 'force-dynamic';
+export const maxDuration = 300;
+
+// Fail fast on oversized uploads instead of hanging until the proxy times out.
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+// Entity extraction quality plateaus early (the prompt asks for the most
+// important entities first) while latency/cost scale with input length, so only
+// the head of the manuscript is sent to the LLM. The full text is still passed
+// to the background editorial review below.
+const MAX_LLM_CHARS = 30000;
+
 export async function POST(request: NextRequest) {
   try {
     const { profile } = await requireProfile(request);
@@ -24,6 +38,13 @@ export async function POST(request: NextRequest) {
 
     if (!(file instanceof File)) {
       return NextResponse.json({ success: false, error: 'A manuscript file is required.' }, { status: 400 });
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { success: false, error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — please upload a manuscript under 15 MB (or paste it in as .txt).` },
+        { status: 413 }
+      );
     }
 
     // If no bookId provided, auto-create a Draft Book from the manuscript.
@@ -67,9 +88,12 @@ export async function POST(request: NextRequest) {
 
     console.log(`[API/story-bible/import-manuscript] Parsing "${file.name}" (${manuscript.length} chars) for book ${resolvedBookId}`);
 
+    const manuscriptForLLM =
+      manuscript.length > MAX_LLM_CHARS ? manuscript.slice(0, MAX_LLM_CHARS) : manuscript;
+
     const validated = await askLLMJSONWithFallback<unknown>(
       getManuscriptImportPrompt(),
-      manuscript,
+      manuscriptForLLM,
       0.2
     );
 
@@ -136,6 +160,22 @@ export async function POST(request: NextRequest) {
 
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API/story-bible/import-manuscript] Failed:', message, error instanceof Error ? error.stack : '');
+
+    const isTimeout =
+      message.includes('timed out') ||
+      message.includes('aborted') ||
+      (error instanceof Error && error.name === 'AbortError');
+    if (isTimeout) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'The AI took too long to read that manuscript and the request timed out. Try a smaller file (or .txt instead of .pdf), then try again.',
+        },
+        { status: 504 }
+      );
+    }
+
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
