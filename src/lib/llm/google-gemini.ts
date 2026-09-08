@@ -134,9 +134,20 @@ export async function generateCompletion(options: CompletionOptions): Promise<st
       }
 
       const data = await response.json();
-      const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      // gemini-2.5+ are "thinking" models: the model's reasoning may be returned
+      // as a separate part flagged with `thought: true` (or, in some cases, as a
+      // "THOUGHT:" prefix). Collect only the real answer parts so we don't return
+      // an empty string or the model's private reasoning.
+      const parts = data.candidates?.[0]?.content?.parts;
+      const content = Array.isArray(parts)
+        ? parts
+            .filter((p: { thought?: boolean }) => !p || p.thought !== true)
+            .map((p: { text?: string }) => (p?.text || '').trim())
+            .filter(Boolean)
+            .join('\n')
+        : '';
 
-      if (!content || content.trim().length === 0) {
+      if (!content) {
         throw new Error('Empty response from Gemini');
       }
 
