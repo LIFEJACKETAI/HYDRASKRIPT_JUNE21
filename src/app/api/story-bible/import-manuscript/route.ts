@@ -22,7 +22,10 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 // Fail fast on oversized uploads instead of hanging until the proxy times out.
-const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+// Vercel deployments hard-cap serverless request payloads at 4.5 MB — a larger
+// body never reaches this route (the platform rejects it first with an opaque
+// 413), so the app-side cap must sit under that limit to show a friendly error.
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 // Entity extraction quality plateaus early (the prompt asks for the most
 // important entities first) while latency/cost scale with input length, so only
 // the head of the manuscript is sent to the LLM. The full text is still passed
@@ -45,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     if (file.size > MAX_UPLOAD_BYTES) {
       return NextResponse.json(
-        { success: false, error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — please upload a manuscript under 15 MB (or paste it in as .txt).` },
+        { success: false, error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — this hosting accepts manuscripts up to 4 MB. Try splitting the file into parts, converting to .txt, or trimming it.` },
         { status: 413 }
       );
     }

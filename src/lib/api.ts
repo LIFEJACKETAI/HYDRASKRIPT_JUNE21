@@ -351,10 +351,11 @@ export interface ManuscriptImportResult {
 
 export async function importManuscriptToStoryBible(bookId: string | null, file: File) {
   // Fail fast on oversized files instead of hanging until the proxy 504s.
-  if (file.size > 15 * 1024 * 1024) {
+  // Vercel caps serverless request payloads at 4.5 MB, so keep this under it.
+  if (file.size > 4 * 1024 * 1024) {
     return {
       success: false as const,
-      error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — please upload a manuscript under 15 MB (or paste it in as .txt).`,
+      error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — this hosting accepts manuscripts up to 4 MB. Try splitting the file into parts, converting to .txt, or trimming it.`,
     };
   }
 
