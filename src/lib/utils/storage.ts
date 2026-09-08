@@ -126,7 +126,16 @@ export async function saveFile(
   const dir = path.join(STORAGE_DIR, subfolder);
   ensureDir(dir);
   const filePath = path.join(dir, filename);
-  fs.writeFileSync(filePath, buffer);
+  try {
+    fs.writeFileSync(filePath, buffer);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(
+      `Cannot write file to local storage ("${filePath}"). Server filesystems ` +
+        `are read-only in production — configure R2 or Supabase Storage. ` +
+        `Original error: ${msg}`
+    );
+  }
   console.log(`[Storage] Saved locally: ${filePath}`);
   return `${PUBLIC_BASE}/${subfolder}/${filename}`;
 }

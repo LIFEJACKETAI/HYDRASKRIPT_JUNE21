@@ -7,6 +7,14 @@ import { exportBookAsEPUB } from '@/lib/services/epubService';
 import { exportBookAsDOCX } from '@/lib/services/docxService';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
+function downloadUrlFor(id: string, format: string, persistedUrl?: string): string {
+  // When the export was persisted to external storage, point straight at it.
+  // Otherwise fall back to the streaming download route, which generates and
+  // streams the file directly from memory (works on read-only filesystems).
+  if (persistedUrl) return persistedUrl;
+  return `/api/books/${id}/export/download?format=${format}`;
+}
+
 // POST - Export book
 export async function POST(
   request: NextRequest,
@@ -27,7 +35,7 @@ export async function POST(
       }
       return NextResponse.json({
         success: true,
-        data: { downloadUrl: result.publicUrl, format: 'pdf' },
+        data: { downloadUrl: downloadUrlFor(id, format, result.publicUrl), format: 'pdf' },
       });
     }
 
@@ -39,7 +47,7 @@ export async function POST(
       }
       return NextResponse.json({
         success: true,
-        data: { downloadUrl: result.publicUrl, format: 'epub' },
+        data: { downloadUrl: downloadUrlFor(id, format, result.publicUrl), format: 'epub' },
       });
     }
 
@@ -51,7 +59,7 @@ export async function POST(
       }
       return NextResponse.json({
         success: true,
-        data: { downloadUrl: result.publicUrl, format: 'docx' },
+        data: { downloadUrl: downloadUrlFor(id, format, result.publicUrl), format: 'docx' },
       });
     }
 
