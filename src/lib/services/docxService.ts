@@ -265,10 +265,23 @@ ${chapterXml}
 
 // ─── Main Export Function ──────────────────────────────────────────────────────
 
-export async function exportBookAsDOCX(
+export interface ExportBufferResult {
+  success: boolean;
+  buffer?: Buffer;
+  contentType?: string;
+  filename?: string;
+  error?: string;
+}
+
+/**
+ * Build the DOCX bytes for a completed book without touching the filesystem.
+ * Used by the download route to stream the file directly on read-only
+ * serverless filesystems (e.g. AWS Lambda `/var/task`).
+ */
+export async function generateDOCXBuffer(
   bookId: string,
   ownerId: string
-): Promise<{ success: boolean; publicUrl?: string; error?: string }> {
+): Promise<ExportBufferResult> {
   const book = await getBookWithChapters(bookId, ownerId);
 
   if (!book) return { success: false, error: 'Book not found' };
@@ -277,7 +290,7 @@ export async function exportBookAsDOCX(
   }
 
   try {
-    const chapters = book.chapters.sort((a: any, b: any) => a.index - b.index);
+    const chapters = book.chapters.slice().sort((a: any, b: any) => a.index - b.index);
 
     const entries: ZipEntry[] = [
       { name: '[Content_Types].xml', data: buildContentTypes(), compress: true },
@@ -290,9 +303,33 @@ export async function exportBookAsDOCX(
     ];
 
     const docxBuffer = buildZip(entries);
-    const filename = generateFilename(`book_${bookId}`, 'docx');
-    const publicUrl = await saveFile('exports', filename, docxBuffer, {
+    return {
+      success: true,
+      buffer: docxBuffer,
       contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      filename: generateFilename(`book_${bookId}`, 'docx'),
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[DOCXService] DOCX build failed:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+export async function exportBookAsDOCX(
+  bookId: string,
+  ownerId: string
+): Promise<{ success: boolean; publicUrl?: string; error?: string }> {
+  const generated = await generateDOCXBuffer(bookId, ownerId);
+
+  if (!generated.success || !generated.buffer) {
+    return { success: false, error: generated.error || 'Failed to generate DOCX' };
+  }
+
+  try {
+    const filename = generated.filename || generateFilename(`book_${bookId}`, 'docx');
+    const publicUrl = await saveFile('exports', filename, generated.buffer, {
+      contentType: generated.contentType || 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     });
 
     await createMediaAsset({
@@ -301,13 +338,15 @@ export async function exportBookAsDOCX(
       assetType: 'docx_export',
       storagePath: publicUrl,
       publicUrl,
-      metadata: { format: 'docx', chapters: chapters.length },
+      metadata: { format: 'docx' },
     });
 
     return { success: true, publicUrl: `${publicUrl}?download=true` };
   } catch (error) {
+    // Storage unavailable (e.g. read-only serverless filesystem). Not fatal —
+    // the download route streams the DOCX directly from memory.
     const msg = error instanceof Error ? error.message : String(error);
-    console.error('[DOCXService] Export failed:', msg);
-    return { success: false, error: msg };
+    console.warn('[DOCXService] DOCX generated but not persisted (will stream on download):', msg);
+    return { success: true };
   }
 }

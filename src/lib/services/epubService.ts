@@ -248,10 +248,23 @@ ${paragraphs}
 
 // ─── Main Export Function ──────────────────────────────────────────────────────
 
-export async function exportBookAsEPUB(
+export interface ExportBufferResult {
+  success: boolean;
+  buffer?: Buffer;
+  contentType?: string;
+  filename?: string;
+  error?: string;
+}
+
+/**
+ * Build the EPUB bytes for a completed book without touching the filesystem.
+ * Used by the download route to stream the file directly on read-only
+ * serverless filesystems (e.g. AWS Lambda `/var/task`).
+ */
+export async function generateEPUBBuffer(
   bookId: string,
   ownerId: string
-): Promise<{ success: boolean; publicUrl?: string; error?: string }> {
+): Promise<ExportBufferResult> {
   const book = await getBookWithChapters(bookId, ownerId);
 
   if (!book) return { success: false, error: 'Book not found' };
@@ -260,7 +273,7 @@ export async function exportBookAsEPUB(
   }
 
   try {
-    const chapters = book.chapters.sort((a: any, b: any) => a.index - b.index);
+    const chapters = book.chapters.slice().sort((a: any, b: any) => a.index - b.index);
 
     const entries: ZipEntry[] = [
       // mimetype MUST be first and MUST be uncompressed per EPUB spec
@@ -278,9 +291,33 @@ export async function exportBookAsEPUB(
     ];
 
     const epubBuffer = buildZip(entries);
-    const filename = generateFilename(`book_${bookId}`, 'epub');
-    const publicUrl = await saveFile('exports', filename, epubBuffer, {
+    return {
+      success: true,
+      buffer: epubBuffer,
       contentType: 'application/epub+zip',
+      filename: generateFilename(`book_${bookId}`, 'epub'),
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[EPUBService] EPUB build failed:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+export async function exportBookAsEPUB(
+  bookId: string,
+  ownerId: string
+): Promise<{ success: boolean; publicUrl?: string; error?: string }> {
+  const generated = await generateEPUBBuffer(bookId, ownerId);
+
+  if (!generated.success || !generated.buffer) {
+    return { success: false, error: generated.error || 'Failed to generate EPUB' };
+  }
+
+  try {
+    const filename = generated.filename || generateFilename(`book_${bookId}`, 'epub');
+    const publicUrl = await saveFile('exports', filename, generated.buffer, {
+      contentType: generated.contentType || 'application/epub+zip',
     });
 
     await createMediaAsset({
@@ -289,13 +326,15 @@ export async function exportBookAsEPUB(
       assetType: 'epub_export',
       storagePath: publicUrl,
       publicUrl,
-      metadata: { format: 'epub', chapters: chapters.length },
+      metadata: { format: 'epub' },
     });
 
     return { success: true, publicUrl: `${publicUrl}?download=true` };
   } catch (error) {
+    // Storage unavailable (e.g. read-only serverless filesystem). Not fatal —
+    // the download route streams the EPUB directly from memory.
     const msg = error instanceof Error ? error.message : String(error);
-    console.error('[EPUBService] Export failed:', msg);
-    return { success: false, error: msg };
+    console.warn('[EPUBService] EPUB generated but not persisted (will stream on download):', msg);
+    return { success: true };
   }
 }

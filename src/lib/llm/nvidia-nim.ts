@@ -15,10 +15,9 @@ function getApiKey(): string {
 }
 
 function getModel(): string {
-  // Use a valid NVIDIA NIM model - minimax-3.0 doesn't exist on NIM
-  // Common models: meta/llama-3.1-70b-instruct, meta/llama-3.1-8b-instruct, 
-  // mistralai/mixtral-8x7b-instruct-v0.1, nvidia/nemotron-3-ultra
-  return process.env.NVIDIA_NIM_MODEL || 'meta/llama-3.1-70b-instruct';
+  // NVIDIA NIM model ID (build.nvidia.com). "Nemotron 3.5 Lightning" is exposed
+  // as a free-to-prototype endpoint under this exact ID.
+  return process.env.NVIDIA_NIM_MODEL || 'nvidia/nemotron-3.5-lightning-30b-a3b';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────
