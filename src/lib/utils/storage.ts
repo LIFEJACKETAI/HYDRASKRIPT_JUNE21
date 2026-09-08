@@ -3,7 +3,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { db } from '@/lib/db';
 
 // ─── Configuration ────────────────────────────────────────────────────────────
@@ -35,7 +35,78 @@ function getR2Client(): S3Client {
 }
 
 function getR2PublicUrl(): string {
-  return process.env.R2_PUBLIC_URL || '';
+  // Public base URL used for browser-facing asset URLs (custom domain or
+  // r2.dev). Never include a trailing slash.
+  return (process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '');
+}
+
+/** The private S3-compatible object URL for a given key. */
+function r2ObjectUrl(key: string): string {
+  return `https://${process.env.R2_BUCKET_KEY}.${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${key}`;
+}
+
+/**
+ * Build the URL that gets stored/returned for an uploaded R2 object.
+ * Prefer the public base URL (custom domain / r2.dev) so images and downloads
+ * work in the browser. If none is configured, fall back to the private S3
+ * endpoint URL — the download route detects this and streams via a signed
+ * GetObject call instead.
+ */
+function r2PublicUrlForKey(key: string): string {
+  const base = getR2PublicUrl();
+  if (base) return `${base}/${key}`;
+  return r2ObjectUrl(key);
+}
+
+/**
+ * Extract the R2 object key from a stored URL, or null if the URL isn't R2.
+ * Handles both the public base URL (custom domain / r2.dev) and the private
+ * S3 endpoint URL (`.r2.cloudflarestorage.com`).
+ */
+export function extractR2Key(url: string): string | null {
+  if (!url) return null;
+  try {
+    if (url.includes('.r2.cloudflarestorage.com')) {
+      return decodeURIComponent(new URL(url).pathname.replace(/^\//, ''));
+    }
+    const base = getR2PublicUrl();
+    if (base && url.startsWith(base + '/')) {
+      return decodeURIComponent(url.slice(base.length + 1));
+    }
+  } catch {
+    // fall through — treat as non-R2
+  }
+  return null;
+}
+
+export function isR2StoredUrl(url: string): boolean {
+  return isR2Enabled() && extractR2Key(url) !== null;
+}
+
+/**
+ * Download an R2 object's bytes via a signed S3 GetObject call. This works
+ * regardless of whether the bucket has public access enabled, and is used by
+ * the export download route as a fallback when no public URL is configured.
+ */
+export async function downloadR2Object(key: string): Promise<Buffer | null> {
+  if (!isR2Enabled()) return null;
+  try {
+    const client = getR2Client();
+    const res = await client.send(new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET_KEY,
+      Key: key,
+    }));
+    const body = res.Body as unknown as AsyncIterable<Uint8Array> | undefined;
+    if (!body) return null;
+    const chunks: Buffer[] = [];
+    for await (const chunk of body) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
+  } catch (e) {
+    console.error('[Storage] R2 download failed:', e instanceof Error ? e.message : e);
+    return null;
+  }
 }
 
 // ─── Supabase Storage ───────────────────────────────────────────────────────
@@ -94,7 +165,7 @@ export async function saveFile(
       Body: buffer,
       ContentType: contentType,
     }));
-    const publicUrl = `${getR2PublicUrl()}/${key}`;
+    const publicUrl = r2PublicUrlForKey(key);
     console.log(`[Storage] Uploaded to R2: ${key}`);
     return publicUrl;
   }
@@ -158,16 +229,15 @@ export async function saveBase64File(
  */
 export async function deleteFile(publicUrl: string): Promise<boolean> {
   try {
-    // R2 URLs contain the bucket key
-    if (isR2Enabled() && publicUrl.includes('.r2.cloudflarestorage.com')) {
-      const r2Base = getR2PublicUrl();
-      const key = publicUrl.replace(r2Base + '/', '');
+    // R2 — public base URL (custom domain / r2.dev) or private S3 endpoint URL
+    const r2Key = extractR2Key(publicUrl);
+    if (r2Key) {
       const client = getR2Client();
       await client.send(new DeleteObjectCommand({
         Bucket: process.env.R2_BUCKET_KEY,
-        Key: key,
+        Key: r2Key,
       }));
-      console.log(`[Storage] Deleted from R2: ${key}`);
+      console.log(`[Storage] Deleted from R2: ${r2Key}`);
       return true;
     }
 
@@ -210,14 +280,13 @@ export async function deleteFile(publicUrl: string): Promise<boolean> {
 export async function fileExists(publicUrl: string): Promise<boolean> {
   try {
     // R2 — use HEAD request
-    if (isR2Enabled() && publicUrl.includes('.r2.cloudflarestorage.com')) {
-      const r2Base = getR2PublicUrl();
-      const key = publicUrl.replace(r2Base + '/', '');
+    const r2Key = extractR2Key(publicUrl);
+    if (r2Key) {
       const client = getR2Client();
       try {
         await client.send(new HeadObjectCommand({
           Bucket: process.env.R2_BUCKET_KEY,
-          Key: key,
+          Key: r2Key,
         }));
         return true;
       } catch {

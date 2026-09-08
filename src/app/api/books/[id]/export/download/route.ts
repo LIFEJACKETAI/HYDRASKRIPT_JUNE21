@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generatePDFBuffer } from '@/lib/services/exportService';
 import { generateEPUBBuffer } from '@/lib/services/epubService';
 import { generateDOCXBuffer } from '@/lib/services/docxService';
+import { extractR2Key, downloadR2Object } from '@/lib/utils/storage';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 import fs from 'fs';
 import path from 'path';
@@ -114,8 +115,19 @@ export async function GET(
       // Cached path exists in the DB but not on disk (e.g. serverless) —
       // fall through and regenerate from memory.
     } else if (cachedUrl) {
-      // External storage (R2 / Supabase) URL — redirect the browser to it.
-      return NextResponse.redirect(cachedUrl, { status: 302 });
+      // R2 object? Stream it via a signed S3 GetObject call — works whether or
+      // not the bucket has public access enabled.
+      const r2Key = extractR2Key(cachedUrl);
+      if (r2Key) {
+        const r2Buffer = await downloadR2Object(r2Key);
+        if (r2Buffer) {
+          return streamBuffer(r2Buffer, filename, contentTypeFor(format));
+        }
+        // Object missing → fall through and regenerate from scratch.
+      } else {
+        // Supabase / other public URL — redirect the browser to it.
+        return NextResponse.redirect(cachedUrl, { status: 302 });
+      }
     }
 
     // 2. No usable cache → generate in memory and stream directly.

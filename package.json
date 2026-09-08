@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "test:check-pdf": "tsx scripts/checkpdf.ts",
     "test:audiobook-upload": "node scripts/smoke-test-audiobook-upload.mjs",
+    "test:r2": "node scripts/test-r2.mjs",
     "test:ci": "npm run test:unit && npm run test:integration && npm run test:types",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
