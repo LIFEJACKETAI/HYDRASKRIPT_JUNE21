@@ -21,6 +21,47 @@ type QueueWorkerJob = {
   creditsConsumed?: number | null;
 };
 
+// ─── Serverless driver helpers ───────────────────────────────────────────────
+
+/** True when running on a serverless platform (Vercel/AWS Lambda). */
+export function isServerless(): boolean {
+  return Boolean(
+    process.env.VERCEL ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.AWS_EXECUTION_ENV ||
+      process.env.FUNCTION_TARGET
+  );
+}
+
+function getAppBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`;
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+  return 'http://localhost:3002';
+}
+
+/**
+ * Fire-and-forget HTTP kick to the durable queue pump. The pump runs on a fresh
+ * function instance with a full timeout budget, so long job chains survive
+ * instance freezes. Never awaited, never throws into the caller.
+ */
+export function kickQueuePump(): void {
+  if (!isServerless()) return; // local/dev uses the in-process loop
+  try {
+    const secret = process.env.CRON_SECRET || '';
+    const url = `${getAppBaseUrl()}/api/queue/pump`;
+    void fetch(url, {
+      method: 'POST',
+      headers: {
+        'x-queue-pump-secret': secret || 'serverless',
+        'cache-control': 'no-cache',
+      },
+    }).catch((e) => console.warn('[Queue] pump kick failed:', e));
+  } catch (e) {
+    console.warn('[Queue] kickQueuePump error:', e);
+  }
+}
+
 class PersistentJobQueue {
   private isProcessing = false;
   private maxConcurrent = 2;
@@ -125,86 +166,114 @@ class PersistentJobQueue {
   async startJob(jobId: string, jobType: JobType): Promise<void> {
     console.log(`[Queue] Job ${jobId} signaled for processing (${jobType})`);
     await this.bootstrap();
-    void this.processNext();
+
+    // In a serverless deployment the in-process loop only runs while a function
+    // is warm and serving traffic. Drive the job via the HTTP pump so the chain
+    // survives instance freezes; locally use the in-process loop directly.
+    if (isServerless()) {
+      kickQueuePump();
+    } else {
+      void this.processNext();
+    }
   }
 
-  private async processNext(): Promise<void> {
-    if (this.shutdown || this.activeJobs >= this.maxConcurrent || this.isProcessing) return;
-    this.isProcessing = true;
+  /**
+   * Public, idempotent driver used by the /api/queue/pump route and by
+   * serverless kicks. Claims and executes exactly ONE queued job, then returns.
+   * Returns:
+   *   'ran'  — a job was claimed and executed (caller should kick again)
+   *   'idle' — no job was available
+   *   'busy' — this instance is already at capacity or mid-claim
+   * Claims are atomic at the DB level (conditional update), so concurrent
+   * callers never process the same job twice.
+   */
+  async processOneQueuedJob(): Promise<'ran' | 'idle' | 'busy'> {
+    if (this.shutdown) return 'busy';
+    if (this.activeJobs >= this.maxConcurrent || this.isProcessing) return 'busy';
 
     let jobToProcess: Awaited<ReturnType<typeof this.claimNextJob>> = null;
-
+    this.isProcessing = true;
     try {
-      jobToProcess = await this.claimNextJob();
-    } catch (error) {
-      console.error('[Queue] Failed to claim next job:', error);
-      this.isProcessing = false;
-      this.scheduleNextPoll();
-      return;
-    }
-
-    if (!jobToProcess) {
-      this.isProcessing = false;
-      this.scheduleNextPoll();
-      return;
-    }
-
-    this.activeJobs++;
-    const heartbeatTimer = setInterval(() => {
-      void this.heartbeat(jobToProcess.id);
-    }, HEARTBEAT_INTERVAL_MS);
-
-    try {
-      console.log(`[Queue] Executing ${jobToProcess.jobType} job ${jobToProcess.id}`);
-
-      const workerFn = WorkerRegistry[jobToProcess.jobType];
-      if (!workerFn) {
-        throw new Error(`No worker registered for job type: ${jobToProcess.jobType}`);
+      try {
+        jobToProcess = await this.claimNextJob();
+      } catch (error) {
+        console.error('[Queue] Failed to claim next job:', error);
+        return 'idle';
       }
 
-      const workerJob: QueueWorkerJob = {
-        id: jobToProcess.id,
-        bookId: jobToProcess.bookId,
-        ownerId: jobToProcess.ownerId,
-        stepIndex: jobToProcess.stepIndex,
-        creditsConsumed: jobToProcess.creditsConsumed,
-      };
+      if (!jobToProcess) return 'idle';
 
-      await workerFn(workerJob);
-    } catch (error) {
-      const errMessage = error instanceof Error ? error.message : String(error);
-      console.error(`[Queue] Job ${jobToProcess.id} failed:`, errMessage);
-
-      const nextRetryCount = jobToProcess.retryCount + 1;
-      const canRetry = nextRetryCount <= jobToProcess.maxRetries;
+      this.activeJobs++;
+      const heartbeatTimer = setInterval(() => {
+        void this.heartbeat(jobToProcess!.id);
+      }, HEARTBEAT_INTERVAL_MS);
 
       try {
-        await this.updateJobStatus(jobToProcess.id, {
-          status: canRetry ? 'queued' : 'failed',
-          errorMessage: errMessage,
-          progressMessage: canRetry
-            ? `Retrying (${nextRetryCount}/${jobToProcess.maxRetries}) after failure: ${errMessage}`
-            : `Failed: ${errMessage}`,
-          retryCount: nextRetryCount,
-          leaseExpiresAt: null,
-          lastHeartbeatAt: null,
-        });
-      } catch (updateError) {
-        console.error('[Queue] Failed to update job status after failure:', updateError);
+        console.log(`[Queue] Executing ${jobToProcess.jobType} job ${jobToProcess.id}`);
+        const workerFn = WorkerRegistry[jobToProcess.jobType];
+        if (!workerFn) {
+          throw new Error(`No worker registered for job type: ${jobToProcess.jobType}`);
+        }
+
+        const workerJob: QueueWorkerJob = {
+          id: jobToProcess.id,
+          bookId: jobToProcess.bookId,
+          ownerId: jobToProcess.ownerId,
+          stepIndex: jobToProcess.stepIndex,
+          creditsConsumed: jobToProcess.creditsConsumed,
+        };
+
+        await workerFn(workerJob);
+      } catch (error) {
+        const errMessage = error instanceof Error ? error.message : String(error);
+        console.error(`[Queue] Job ${jobToProcess.id} failed:`, errMessage);
+
+        const nextRetryCount = jobToProcess.retryCount + 1;
+        const canRetry = nextRetryCount <= jobToProcess.maxRetries;
+
+        try {
+          await this.updateJobStatus(jobToProcess.id, {
+            status: canRetry ? 'queued' : 'failed',
+            errorMessage: errMessage,
+            progressMessage: canRetry
+              ? `Retrying (${nextRetryCount}/${jobToProcess.maxRetries}) after failure: ${errMessage}`
+              : `Failed: ${errMessage}`,
+            retryCount: nextRetryCount,
+            leaseExpiresAt: null,
+            lastHeartbeatAt: null,
+          });
+        } catch (updateError) {
+          console.error('[Queue] Failed to update job status after failure:', updateError);
+        }
+
+        if (!canRetry) {
+          try {
+            const { refundCredits } = await import('@/lib/utils/credits');
+            await refundCredits(jobToProcess.id, `Job failed: ${errMessage}`);
+          } catch (e) {
+            console.error('[Queue] Refund failed:', e);
+          }
+        }
+      } finally {
+        clearInterval(heartbeatTimer);
+        this.activeJobs--;
       }
 
-      if (!canRetry) {
-        try {
-          const { refundCredits } = await import('@/lib/utils/credits');
-          await refundCredits(jobToProcess.id, `Job failed: ${errMessage}`);
-        } catch (e) {
-          console.error('[Queue] Refund failed:', e);
-        }
-      }
+      return 'ran';
     } finally {
-      clearInterval(heartbeatTimer);
-      this.activeJobs--;
       this.isProcessing = false;
+    }
+  }
+
+  // In-process loop tick (local/dev + warm serverless instances). Delegates to
+  // the single-job processor so there is one code path for claim→execute→retry.
+  private async processNext(): Promise<void> {
+    if (this.shutdown) return;
+    try {
+      await this.processOneQueuedJob();
+    } catch (error) {
+      console.error('[Queue] processNext error:', error);
+    } finally {
       this.scheduleNextPoll();
     }
   }
@@ -221,10 +290,12 @@ class PersistentJobQueue {
   } | null> {
     return this.withTransactionRetry(
       async (tx) => {
+        // Pick the oldest queued job, then claim it ATOMICALLY with a
+        // conditional updateMany. If another pump/instance claimed it in the
+        // meantime the update affects 0 rows and we move on — this prevents two
+        // serverless invocations from running the same job twice.
         const queuedJob = await tx.job.findFirst({
-          where: {
-            status: 'queued',
-          },
+          where: { status: 'queued' },
           orderBy: { createdAt: 'asc' },
         });
 
@@ -232,8 +303,8 @@ class PersistentJobQueue {
 
         const now = new Date();
 
-        const updated = await tx.job.update({
-          where: { id: queuedJob.id },
+        const claimed = await tx.job.updateMany({
+          where: { id: queuedJob.id, status: 'queued' },
           data: {
             status: 'active',
             progressMessage: queuedJob.retryCount > 0
@@ -246,15 +317,21 @@ class PersistentJobQueue {
           },
         });
 
+        if (claimed.count === 0) {
+          // Lost the race — another worker took it. Signal nothing claimed;
+          // the caller/pump will find no more work or retry on the next pass.
+          return null;
+        }
+
         return {
-          id: updated.id,
-          bookId: updated.bookId,
-          ownerId: updated.ownerId,
-          jobType: updated.jobType as JobType,
-          retryCount: updated.retryCount,
-          maxRetries: updated.maxRetries,
-          stepIndex: updated.stepIndex,
-          creditsConsumed: updated.creditsConsumed,
+          id: queuedJob.id,
+          bookId: queuedJob.bookId,
+          ownerId: queuedJob.ownerId,
+          jobType: queuedJob.jobType as JobType,
+          retryCount: queuedJob.retryCount,
+          maxRetries: queuedJob.maxRetries,
+          stepIndex: queuedJob.stepIndex,
+          creditsConsumed: queuedJob.creditsConsumed,
         };
       },
       'claimNextJob'

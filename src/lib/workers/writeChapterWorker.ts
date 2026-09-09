@@ -114,27 +114,30 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
 
     console.log(`[WriteWorker] Successfully wrote chapter ${chapter.index}`);
 
-    // 6. Chain to next pending chapter or finalize
+    // 6. Chain to next pending chapter or finalize.
+    // NOTE: chaining is driven by the job queue (the /api/queue/pump in
+    // serverless). We only ENQUEUE the next job — the pump (or the in-process
+    // poll loop locally) picks it up with a fresh execution budget, so long
+    // chapter chains survive serverless instance freezes.
     const nextPendingChapter = await db.chapter.findFirst({
       where: { bookId: book.id, status: 'pending' },
       orderBy: { index: 'asc' },
     });
 
     if (nextPendingChapter) {
-      const nextJobId = await jobQueue.createJob({
+      await jobQueue.createJob({
         bookId: book.id,
         ownerId: book.ownerId,
         jobType: 'write_chapter',
         creditsReserved: 0,
         stepIndex: nextPendingChapter.index,
       });
-      await jobQueue.startJob(nextJobId, 'write_chapter');
-      console.log(`[WriteWorker] Chained to next pending chapter ${nextPendingChapter.index}`);
+      console.log(`[WriteWorker] Enqueued next pending chapter ${nextPendingChapter.index}`);
     } else {
       const bookWithCredits = await db.book.findUnique({ where: { id: book.id } });
       const totalCredits = bookWithCredits?.totalCreditsEstimated || 0;
 
-      const finalizeJobId = await jobQueue.createJob({
+      await jobQueue.createJob({
         bookId: book.id,
         ownerId: book.ownerId,
         jobType: 'finalize_book',
@@ -142,11 +145,9 @@ export async function writeChapterWorker(jobId: string, chapterId: string) {
         creditsConsumed: totalCredits,
       });
 
-      await jobQueue.startJob(finalizeJobId, 'finalize_book');
-
       await db.book.update({ where: { id: book.id }, data: { status: 'finalizing' } });
 
-      console.log(`[WriteWorker] All chapters complete. Starting finalization.`);
+      console.log(`[WriteWorker] All chapters enqueued for finalization.`);
     }
 
   } catch (error) {
