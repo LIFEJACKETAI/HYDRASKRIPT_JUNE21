@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function BookstorePage() {
   return (
-<PageBackground image="/backgrounds/kids-book.jpg" overlay="light">
+<PageBackground image="/amazing_library_2.jpg" overlay="light" gradient="from-amber-950/30 via-transparent to-cyan-950/20">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}

@@ -25,7 +25,7 @@ import { PageBackground } from '@/components/PageBackground'
 
 export default function MarketingPage() {
   return (
-    <PageBackground image="/backgrounds/home.jpg" overlay="subtle">
+    <PageBackground image="/backgrounds/home.jpg" overlay="subtle" gradient="from-purple-950/40 via-transparent to-cyan-950/30">
       <LandingHero />
       <Problem />
       <JourneyPipeline />

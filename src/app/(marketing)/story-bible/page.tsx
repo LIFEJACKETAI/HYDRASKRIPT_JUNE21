@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export function StoryBiblePage() {
   return (
-<PageBackground image="/backgrounds/ebook-wizard.jpg" overlay="light">
+<PageBackground image="/amazing_library_1.jpg" overlay="light" gradient="from-amber-950/30 via-transparent to-purple-950/20">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}

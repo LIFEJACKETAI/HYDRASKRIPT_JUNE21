@@ -26,16 +26,20 @@ const VIEW_BACKGROUNDS: Record<string, string> = {
   dashboard: '/backgrounds/dashboard.jpg',
   'create-book': '/backgrounds/ebook-wizard.jpg',
   'book-detail': '/backgrounds/ebook-wizard.jpg',
-  'style-training': '/backgrounds/home.jpg',
+  'style-training': '/backgrounds/voice-cloning.jpg',
   audiobook: '/backgrounds/audiobook.jpg',
-  'ideas-lab': '/backgrounds/home.jpg',
+  'ideas-lab': '/backgrounds/ebook-wizard.jpg',
   credits: '/backgrounds/pricing.jpg',
   pricing: '/backgrounds/pricing.jpg',
   'export-hub': '/book_printing.jpg',
   admin: '/backgrounds/dashboard.jpg',
+  // A "story bible" is a lore/reference library → use the library imagery.
   'story-bible': '/amazing_library_1.jpg',
+  // Universe / series architect → open pages / world-building feel.
   universe: '/open_pages_book.jpg',
+  // Cover designer + coloring → the coloring-book art plate.
   'ai-cover-designer': '/backgrounds/coloring-book.jpg',
+  // Bookstore / library browse.
   bookstore: '/amazing_library_2.jpg',
 };
 
@@ -141,7 +145,11 @@ function DashboardShell() {
       <div className="flex">
         <Sidebar />
         <main className="flex-1 min-w-0 p-4 md:p-8 overflow-y-auto min-h-[calc(100vh-4rem)]">
-          <PageBackground image={VIEW_BACKGROUNDS[view] || '/backgrounds/home.jpg'} overlay="subtle">
+          <PageBackground
+            image={VIEW_BACKGROUNDS[view] || '/backgrounds/home.jpg'}
+            overlay="strong"
+            gradient="from-purple-950/30 via-transparent to-cyan-950/20"
+          >
             {view === 'dashboard' && <DashboardHome />}
             {view === 'create-book' && <CreateBookForm />}
             {view === 'book-detail' && <BookDetail />}
