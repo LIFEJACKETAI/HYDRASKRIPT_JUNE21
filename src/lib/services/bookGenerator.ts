@@ -3,12 +3,12 @@ import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import { reserveCredits, consumeCredits, refundCredits, refundOutstandingReservation, estimateBookCredits, estimateColoringBookCredits, getBookDefaults } from '@/lib/utils/credits';
 import { askLLMJSONWithFallback, askLLMWithFallback } from '@/lib/llm/fallback';
-import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt, getManuscriptImportPrompt } from '@/lib/llm/prompts';
-import { BookOutlineSchema, validateOrThrow, ManuscriptImportSchema } from '@/lib/llm/schema';
+import { getOutlinePrompt, getOutlineUserPrompt, getChapterWritePrompt, getChapterUserPrompt, getChildrensChapterPrompt, getColoringOutlinePrompt, getColoringOutlineUserPrompt, getColoringChapterPrompt } from '@/lib/llm/prompts';
+import { BookOutlineSchema, validateOrThrow } from '@/lib/llm/schema';
 import { generateBookCover, generateChapterIllustration, generateColoringPage } from '@/lib/services/imageService';
 import { getStyleSystemPrompt } from '@/lib/services/styleAnalyzer';
 import { assembleBooksManuscript, enqueueEditorialReview } from '@/lib/services/editorialReview';
-import { truncateManuscript } from '@/lib/manuscript';
+import { extractEntitiesFromManuscript } from '@/lib/story-bible-extraction';
 import type { TargetAudience, Genre, ColoringTheme } from '@/types';
 import { AUDIENCE_CONFIG, COLORING_THEMES } from '@/types';
 
@@ -506,30 +506,34 @@ async function generateStoryBibleFromBook(bookId: string, ownerId: string): Prom
       }
     }
 
-    const manuscript = truncateManuscript(parts.join('\n'));
+    const manuscript = parts.join('\n').replace(/\u0000/g, '').trim();
     if (!manuscript || manuscript.length < 200) {
       console.log(`[StoryBible] Book ${bookId} has too little content to auto-populate. Skipping.`);
       return;
     }
 
-    const validated = await askLLMJSONWithFallback<unknown>(
-      getManuscriptImportPrompt(),
-      manuscript,
-      0.2
-    );
-    const parsed = validateOrThrow(ManuscriptImportSchema, validated);
-
+    // Mine the ENTIRE book (not just the opening chapters): the extractor
+    // walks the manuscript in overlapping windows, asks the LLM for new
+    // entities per window, and merges/dedupes the results.
+    const extraction = await extractEntitiesFromManuscript(manuscript);
+    for (const warning of extraction.warnings) {
+      console.warn(`[StoryBible] Book ${bookId}: ${warning}`);
+    }
+    if (extraction.windowsFailed > 0) {
+      console.warn(
+        `[StoryBible] Book ${bookId}: ${extraction.windowsFailed}/${extraction.windows} manuscript portion(s) failed during auto-population (continuing with what was extracted).`
+      );
+    }
     // Skip entities that already exist for this book (idempotent re-runs).
     const existing = await db.storyBibleEntity.findMany({
       where: { bookId },
       select: { kind: true, name: true },
     });
-    const seen = new Set(existing.map((e) => `${e.kind}:${e.name.toLowerCase()}`));
+    const seen = new Set(existing.map((e) => `${e.kind}:${e.name.toLowerCase().trim()}`));
 
-    const toCreate = parsed.entities
-      .slice(0, 60)
+    const toCreate = extraction.entities
       .filter((e) => e.name && e.name.trim())
-      .filter((e) => !seen.has(`${e.kind}:${e.name.toLowerCase()}`))
+      .filter((e) => !seen.has(`${e.kind}:${e.name.toLowerCase().trim()}`))
       .map((e) => ({
         ownerId,
         bookId,

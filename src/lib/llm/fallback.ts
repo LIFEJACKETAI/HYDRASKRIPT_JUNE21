@@ -1,195 +1,159 @@
-// HydraSkript - LLM fallback with triple redundancy
-// Chain: OpenRouter → Gemini → NVIDIA → (loop back to OpenRouter)
-// Each provider has internal 3 retries. Outer loop does up to 3 full cycles.
+// HydraSkript - LLM fallback
+// Primary provider: NVIDIA NIM. Secondary: OpenRouter.
 // Used for both structured JSON generation and free-form text (chapter prose).
+//
+// Instead of trusting a single model id (which 410s when NVIDIA retires a model
+// or 429s when an OpenRouter free model is rate-limited), each call rotates
+// through a CHAIN of currently-valid models per provider, then across providers.
+// An explicitly requested model is tried first, then the configured chain.
 
 import { askLLMJSON, askLLM } from '@/lib/llm/openrouter';
-import { askLLMJSON as askLLMGeminiJSON, askLLM as askLLMGemini } from '@/lib/llm/google-gemini';
 import { askLLMJSON as askLLMNimJSON, askLLM as askLLMNim } from '@/lib/llm/nvidia-nim';
 
-const OPENROUTER_MODEL_JSON = process.env.OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
-const OPENROUTER_MODEL_TEXT = process.env.OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
-const GEMINI_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-2.5-flash';
-const NIM_MODEL_JSON = process.env.NVIDIA_NIM_MODEL || 'nvidia/nemotron-3.5-lightning-30b-a3b';
-const NIM_MODEL_TEXT = process.env.NVIDIA_NIM_MODEL || 'nvidia/nemotron-3.5-lightning-30b-a3b';
+// Model lists verified against the NVIDIA NIM and OpenRouter catalogs (Sep 2026).
+// Older ids such as `meta/llama-3.1-8b-instruct` (410 Gone) and
+// `minimax-3.0` / `openrouter/free` (never existed) must NOT be used.
 
-const MAX_CYCLES = 2;
+// NVIDIA NIM model chains (prefer the newest, strongest instruction followers).
+const NIM_JSON_CHAIN = [
+  process.env.NVIDIA_NIM_MODEL_JSON,
+  'nvidia/llama-3.1-nemotron-70b-instruct',
+  'nvidia/nemotron-3-super-120b-a12b',
+  'google/gemma-4-31b-it',
+  'mistralai/mistral-large-2-instruct',
+];
 
-type ProviderName = 'OpenRouter' | 'Gemini' | 'NVIDIA NIM';
+const NIM_PROSE_CHAIN = [
+  process.env.NVIDIA_NIM_MODEL,
+  'nvidia/llama-3.1-nemotron-70b-instruct',
+  'nvidia/nemotron-3-super-120b-a12b',
+  'mistralai/mistral-large-2-instruct',
+  'google/gemma-4-31b-it',
+];
 
-interface ProviderAttempt {
-  provider: ProviderName;
-  model: string;
-  error: string;
-}
+// OpenRouter free-tier model chains (these rotate as free models get rate-limited).
+const OPENROUTER_JSON_CHAIN = [
+  process.env.OPENROUTER_MODEL_JSON,
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'google/gemma-4-31b-it:free',
+  'minimax/minimax-m3:free',
+];
 
-/**
- * Try a single provider, returning success or the error message.
- */
-async function tryProviderJSON<T>(
-  provider: ProviderName,
-  systemPrompt: string,
-  userPrompt: string,
-  temperature: number,
-  model: string,
-): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
-  try {
-    let data: T;
-    if (provider === 'OpenRouter') {
-      data = await askLLMJSON<T>(systemPrompt, userPrompt, temperature, model);
-    } else if (provider === 'Gemini') {
-      data = await askLLMGeminiJSON<T>(systemPrompt, userPrompt, temperature, model);
-    } else {
-      data = await askLLMNimJSON<T>(systemPrompt, userPrompt, temperature, model);
+const OPENROUTER_PROSE_CHAIN = [
+  process.env.OPENROUTER_MODEL,
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'google/gemma-4-31b-it:free',
+  'minimax/minimax-m3:free',
+];
+
+function buildChain(...models: (string | undefined | null)[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const m of models) {
+    const id = (m ?? '').trim();
+    if (id && !seen.has(id)) {
+      seen.add(id);
+      out.push(id);
     }
-    return { ok: true, data };
-  } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
+  return out;
 }
 
-async function tryProviderText(
-  provider: ProviderName,
-  systemPrompt: string,
-  userPrompt: string,
-  temperature: number,
-  model: string,
-  maxTokens: number,
-): Promise<{ ok: true; data: string } | { ok: false; error: string }> {
-  try {
-    let data: string;
-    if (provider === 'OpenRouter') {
-      data = await askLLM(systemPrompt, userPrompt, temperature, model, maxTokens);
-    } else if (provider === 'Gemini') {
-      data = await askLLMGemini(systemPrompt, userPrompt, temperature, model, maxTokens);
-    } else {
-      data = await askLLMNim(systemPrompt, userPrompt, temperature, model, maxTokens);
+/** Run one model id list against `fn` until one succeeds. Throws an aggregate error listing each attempt. */
+async function tryModelChain<T>(
+  label: string,
+  models: string[],
+  fn: (model: string) => Promise<T>
+): Promise<T> {
+  const errors: string[] = [];
+  for (const model of models) {
+    try {
+      return await fn(model);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      errors.push(`${model}: ${msg}`);
+      console.warn(`[LLM] ${label} model ${model} failed:`, msg);
+      // Continue to the next model in the chain.
     }
-    return { ok: true, data };
-  } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
+  throw new Error(`${label}: all ${models.length} model(s) failed -> ${errors.join(' | ')}`);
 }
 
-/**
- * Run one full cycle through all three providers.
- * Returns on first success, or accumulates errors.
- */
-async function runCycleJSON<T>(
-  systemPrompt: string,
-  userPrompt: string,
-  temperature: number,
-): Promise<{ ok: true; data: T } | { ok: false; attempts: ProviderAttempt[] }> {
-  const attempts: ProviderAttempt[] = [];
-
-  const providers: [ProviderName, string][] = [
-    ['OpenRouter', OPENROUTER_MODEL_JSON],
-    ['Gemini', GEMINI_MODEL],
-    ['NVIDIA NIM', NIM_MODEL_JSON],
-  ];
-
-  for (const [provider, model] of providers) {
-    const result = await tryProviderJSON<T>(provider, systemPrompt, userPrompt, temperature, model);
-    if (result.ok) return { ok: true, data: result.data };
-    attempts.push({ provider, model, error: result.error });
-    console.warn(`[LLM] ${provider} (${model}) failed: ${result.error}`);
+function safetyMessage(errors: string[]): string | null {
+  for (const e of errors) {
+    const m = e.match(/Safety Categories:([^\n]+)/i);
+    if (m && m[1]) return m[1].trim();
   }
-
-  return { ok: false, attempts };
+  return null;
 }
 
-async function runCycleText(
-  systemPrompt: string,
-  userPrompt: string,
-  temperature: number,
-  maxTokens: number,
-): Promise<{ ok: true; data: string } | { ok: false; attempts: ProviderAttempt[] }> {
-  const attempts: ProviderAttempt[] = [];
-
-  const providers: [ProviderName, string][] = [
-    ['OpenRouter', OPENROUTER_MODEL_TEXT],
-    ['Gemini', GEMINI_MODEL],
-    ['NVIDIA NIM', NIM_MODEL_TEXT],
-  ];
-
-  for (const [provider, model] of providers) {
-    const result = await tryProviderText(provider, systemPrompt, userPrompt, temperature, model, maxTokens);
-    if (result.ok) return { ok: true, data: result.data };
-    attempts.push({ provider, model, error: result.error });
-    console.warn(`[LLM] ${provider} (${model}) failed: ${result.error}`);
-  }
-
-  return { ok: false, attempts };
-}
-
-// ─── Public API ─────────────────────────────────────────────────────────────
-
-/**
- * Structured JSON generation with triple-redundancy loop.
- * Cycles: OpenRouter → Gemini → NVIDIA → OpenRouter → ... (up to 3 full cycles).
- */
 export async function askLLMJSONWithFallback<T>(
   systemPrompt: string,
   userPrompt: string,
   temperature: number = 0.2,
-  _model?: string,
+  preferredModel?: string
 ): Promise<T> {
-  const allAttempts: ProviderAttempt[] = [];
+  const nimModels = buildChain(preferredModel, ...NIM_JSON_CHAIN);
+  const orModels = buildChain(...OPENROUTER_JSON_CHAIN);
 
-  for (let cycle = 1; cycle <= MAX_CYCLES; cycle++) {
-    console.log(`[LLM] JSON cycle ${cycle}/${MAX_CYCLES} — trying OpenRouter → Gemini → NVIDIA`);
-    const result = await runCycleJSON<T>(systemPrompt, userPrompt, temperature);
-    if (result.ok) {
-      console.log(`[LLM] JSON succeeded on cycle ${cycle}`);
-      return result.data;
-    }
-    allAttempts.push(...result.attempts);
-    if (cycle < MAX_CYCLES) {
-      console.warn(`[LLM] Cycle ${cycle} exhausted all providers. Retrying...`);
-    }
-  }
-
-  // Check for safety filter errors
-  const safetyError = allAttempts.find(a => a.error.match(/safety/i));
-  if (safetyError) {
-    throw new Error(
-      `Content flagged by safety filter. Try adjusting book themes or descriptions.`
+  try {
+    return await tryModelChain('NVIDIA NIM', nimModels, (m) =>
+      askLLMNimJSON<T>(systemPrompt, userPrompt, temperature, m)
     );
-  }
+  } catch (nimError) {
+    const nimMessage = nimError instanceof Error ? nimError.message : String(nimError);
+    console.warn('[LLM] NVIDIA NIM chain exhausted, falling back to OpenRouter:', nimMessage);
 
-  throw new Error(
-    `Text generation failed after ${MAX_CYCLES} cycles (${allAttempts.length} attempts).\n` +
-    allAttempts.map(a => `  ${a.provider} (${a.model}): ${a.error}`).join('\n')
-  );
+    try {
+      return await tryModelChain('OpenRouter', orModels, (m) =>
+        askLLMJSON<T>(systemPrompt, userPrompt, temperature, m)
+      );
+    } catch (openrouterError) {
+      const orMessage = openrouterError instanceof Error ? openrouterError.message : String(openrouterError);
+
+      // Surface a friendly safety-filter error if any attempt was content-blocked.
+      const safety = safetyMessage([nimMessage, orMessage]);
+      if (safety) {
+        throw new Error(
+          `Content flagged by safety filter: ${safety}. Try adjusting book themes or descriptions.`
+        );
+      }
+
+      throw new Error(`Text generation failed across all models. NVIDIA NIM: ${nimMessage}. OpenRouter: ${orMessage}.`);
+    }
+  }
 }
 
 /**
- * Free-form text generation with triple-redundancy loop.
- * Cycles: OpenRouter → Gemini → NVIDIA → OpenRouter → ... (up to 3 full cycles).
+ * Free-form text generation (chapter prose). Rotates through prose-optimized
+ * models across NVIDIA NIM then OpenRouter. `maxTokens` must be large enough for
+ * a full chapter.
  */
 export async function askLLMWithFallback(
   systemPrompt: string,
   userPrompt: string,
   temperature: number = 0.7,
   maxTokens: number = 8192,
+  preferredModel?: string
 ): Promise<string> {
-  const allAttempts: ProviderAttempt[] = [];
+  const nimModels = buildChain(preferredModel, ...NIM_PROSE_CHAIN);
+  const orModels = buildChain(...OPENROUTER_PROSE_CHAIN);
 
-  for (let cycle = 1; cycle <= MAX_CYCLES; cycle++) {
-    console.log(`[LLM] Text cycle ${cycle}/${MAX_CYCLES} — trying OpenRouter → Gemini → NVIDIA`);
-    const result = await runCycleText(systemPrompt, userPrompt, temperature, maxTokens);
-    if (result.ok) {
-      console.log(`[LLM] Text succeeded on cycle ${cycle}`);
-      return result.data;
-    }
-    allAttempts.push(...result.attempts);
-    if (cycle < MAX_CYCLES) {
-      console.warn(`[LLM] Cycle ${cycle} exhausted all providers. Retrying...`);
+  try {
+    return await tryModelChain('NVIDIA NIM', nimModels, (m) =>
+      askLLMNim(systemPrompt, userPrompt, temperature, m, maxTokens)
+    );
+  } catch (nimError) {
+    const nimMessage = nimError instanceof Error ? nimError.message : String(nimError);
+    console.warn('[LLM] NVIDIA NIM prose chain exhausted, falling back to OpenRouter:', nimMessage);
+
+    try {
+      return await tryModelChain('OpenRouter', orModels, (m) =>
+        askLLM(systemPrompt, userPrompt, temperature, m, maxTokens)
+      );
+    } catch (openrouterError) {
+      const orMessage = openrouterError instanceof Error ? openrouterError.message : String(openrouterError);
+      throw new Error(`Text generation failed across all models. NVIDIA NIM: ${nimMessage}. OpenRouter: ${orMessage}.`);
     }
   }
-
-  throw new Error(
-    `Text generation failed after ${MAX_CYCLES} cycles (${allAttempts.length} attempts).\n` +
-    allAttempts.map(a => `  ${a.provider} (${a.model}): ${a.error}`).join('\n')
-  );
 }

@@ -275,8 +275,20 @@ IMPORTANT: Respond with valid JSON only in this exact format:
 
 // ─── Manuscript Import (Story Bible) ─────────────────────────────────────────
 
-export function getManuscriptImportPrompt(): string {
-  return `You are a master story bible architect. Read the provided manuscript and extract all recurring, plot-relevant story bible entities so an AI can keep them consistent while writing.
+export interface ManuscriptImportCapturedRef {
+  kind: string;
+  name: string;
+}
+
+/**
+ * Story-bible extraction prompt. Long manuscripts are mined in sequential
+ * windows; `alreadyCaptured` lists entities found in earlier windows so later
+ * windows report NEW lore instead of repeating the same cast each time.
+ */
+export function getManuscriptImportPrompt(
+  alreadyCaptured: ManuscriptImportCapturedRef[] = []
+): string {
+  let prompt = `You are a master story bible architect. You are given a manuscript in sequential portions. From the CURRENT portion, extract the story bible entities that appear or become significant there, so an AI can keep every part of the whole book consistent while writing. Characters, places, objects, themes, and history introduced ANYWHERE in the book (including late chapters) must eventually be captured.
 
 Extract entities into exactly these kinds:
 - CHARACTER: named characters who appear or are referenced meaningfully
@@ -294,22 +306,22 @@ For every entity provide:
 - tags: 2-5 short keyword tags (physical traits for CHARACTER, features for LOCATION, etc.)
 - kind: exactly one of CHARACTER, LOCATION, OBJECT, THEME, HISTORY
 
-Only include entities that genuinely appear in the text. Do not invent characters or places that are not in the manuscript. Aim for the most important entities first — quality over quantity.
+Rules:
+- Only include entities that genuinely appear in the text. Do not invent characters or places that are not in the manuscript.
+- Include recurring or plot-relevant entities — do not skip minor-but-recurring characters, locations that scenes repeatedly use, or items that matter to the plot.
+- Aim for the most important entities first — quality over quantity.
+- Return at most 20 entities per portion; list the most significant ones for that portion.`;
 
-IMPORTANT: Respond with valid JSON only in this exact format:
-{
-  "entities": [
-    {
-      "kind": "CHARACTER",
-      "name": "...",
-      "role": "...",
-      "summary": "...",
-      "motivation": "...",
-      "description": "...",
-      "tags": ["...", "..."]
-    }
-  ]
-}`;
+  if (alreadyCaptured.length > 0) {
+    const roster = alreadyCaptured
+      .map((ref) => `- ${ref.kind}: ${ref.name}`)
+      .join('\n');
+    prompt += `\n\nEntities already captured from earlier portions of this manuscript:\n${roster}\nDo NOT list those entities again in this portion unless the portion reveals important NEW canonical details about them. Prioritize finding entities not yet captured.`;
+  }
+
+  prompt += `\n\nIMPORTANT: Respond with valid JSON only in this exact format:\n{\n  "entities": [\n    {\n      "kind": "CHARACTER",\n      "name": "...",\n      "role": "...",\n      "summary": "...",\n      "motivation": "...",\n      "description": "...",\n      "tags": ["...", "..."]\n    }\n  ]\n}`;
+
+  return prompt;
 }
 
 // ─── Summary Generation ───────────────────────────────────────────────────────
