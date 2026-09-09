@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     // Let the client show the actual failure reason (missing AI keys, DB
     // schema drift, etc.) instead of masking everything behind "500".
     if (
-      message.startsWith('Text generation failed after') ||
+      message.startsWith('Text generation failed') ||
       message.startsWith('Validation error') ||
       message.includes('OPENROUTER_API_KEY') ||
       message.includes('GOOGLE_AI_API_KEY') ||

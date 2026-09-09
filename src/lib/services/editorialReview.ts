@@ -37,8 +37,7 @@ const MAX_PRIOR_CONTEXT_CHARS = 6000;
 const MAX_LEDGER_CHARS = 50000;
 const MAX_FINDINGS = 300;
 
-const REVIEW_MODEL =
-  process.env.EDITORIAL_REVIEW_MODEL || process.env.OPENROUTER_MODEL || 'google/gemma-4-31b-it:free';
+const REVIEW_MODEL = process.env.EDITORIAL_REVIEW_MODEL;
 
 // ─── Manuscript assembly ──────────────────────────────────────────────────────
 
