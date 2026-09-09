@@ -1,5 +1,5 @@
 // HydraSkript - LLM fallback
-// Primary provider: NVIDIA NIM. Secondary: OpenRouter.
+// Primary provider: NVIDIA NIM. Secondary: OpenRouter. Tertiary: Google Gemini.
 // Used for both structured JSON generation and free-form text (chapter prose).
 //
 // Instead of trusting a single model id (which 410s when NVIDIA retires a model
@@ -8,6 +8,7 @@
 // An explicitly requested model is tried first, then the configured chain.
 
 import { askLLMJSON, askLLM } from '@/lib/llm/openrouter';
+import { askLLMJSON as askLLMGeminiJSON, askLLM as askLLMGemini } from '@/lib/llm/google-gemini';
 import { askLLMJSON as askLLMNimJSON, askLLM as askLLMNim } from '@/lib/llm/nvidia-nim';
 
 // Model lists verified against the NVIDIA NIM and OpenRouter catalogs (Sep 2026).
@@ -44,6 +45,13 @@ const OPENROUTER_PROSE_CHAIN = [
   'nvidia/nemotron-3-super-120b-a12b:free',
   'google/gemma-4-31b-it:free',
   'minimax/minimax-m3:free',
+];
+
+// Gemini is an independent, third provider. Keep the configured model first, but
+// retain the known-good default so a stale pinned model does not disable Gemini.
+const GEMINI_CHAIN = [
+  process.env.GEMINI_TEXT_MODEL,
+  'gemini-2.5-flash',
 ];
 
 function buildChain(...models: (string | undefined | null)[]): string[] {
@@ -95,6 +103,7 @@ export async function askLLMJSONWithFallback<T>(
 ): Promise<T> {
   const nimModels = buildChain(preferredModel, ...NIM_JSON_CHAIN);
   const orModels = buildChain(...OPENROUTER_JSON_CHAIN);
+  const geminiModels = buildChain(...GEMINI_CHAIN);
 
   try {
     return await tryModelChain('NVIDIA NIM', nimModels, (m) =>
@@ -110,24 +119,36 @@ export async function askLLMJSONWithFallback<T>(
       );
     } catch (openrouterError) {
       const orMessage = openrouterError instanceof Error ? openrouterError.message : String(openrouterError);
+      console.warn('[LLM] OpenRouter chain exhausted, falling back to Gemini:', orMessage);
 
-      // Surface a friendly safety-filter error if any attempt was content-blocked.
-      const safety = safetyMessage([nimMessage, orMessage]);
-      if (safety) {
+      try {
+        return await tryModelChain('Google Gemini', geminiModels, (m) =>
+          askLLMGeminiJSON<T>(systemPrompt, userPrompt, temperature, m)
+        );
+      } catch (geminiError) {
+        const geminiMessage = geminiError instanceof Error ? geminiError.message : String(geminiError);
+
+        // Surface a friendly safety-filter error if any attempt was content-blocked.
+        const safety = safetyMessage([nimMessage, orMessage, geminiMessage]);
+        if (safety) {
+          throw new Error(
+            `Content flagged by safety filter: ${safety}. Try adjusting book themes or descriptions.`
+          );
+        }
+
         throw new Error(
-          `Content flagged by safety filter: ${safety}. Try adjusting book themes or descriptions.`
+          `Text generation failed across all providers. NVIDIA NIM: ${nimMessage}. ` +
+          `OpenRouter: ${orMessage}. Google Gemini: ${geminiMessage}.`
         );
       }
-
-      throw new Error(`Text generation failed across all models. NVIDIA NIM: ${nimMessage}. OpenRouter: ${orMessage}.`);
     }
   }
 }
 
 /**
  * Free-form text generation (chapter prose). Rotates through prose-optimized
- * models across NVIDIA NIM then OpenRouter. `maxTokens` must be large enough for
- * a full chapter.
+ * models across NVIDIA NIM, OpenRouter, then Google Gemini. `maxTokens` must be
+ * large enough for a full chapter.
  */
 export async function askLLMWithFallback(
   systemPrompt: string,
@@ -138,6 +159,7 @@ export async function askLLMWithFallback(
 ): Promise<string> {
   const nimModels = buildChain(preferredModel, ...NIM_PROSE_CHAIN);
   const orModels = buildChain(...OPENROUTER_PROSE_CHAIN);
+  const geminiModels = buildChain(...GEMINI_CHAIN);
 
   try {
     return await tryModelChain('NVIDIA NIM', nimModels, (m) =>
@@ -153,7 +175,26 @@ export async function askLLMWithFallback(
       );
     } catch (openrouterError) {
       const orMessage = openrouterError instanceof Error ? openrouterError.message : String(openrouterError);
-      throw new Error(`Text generation failed across all models. NVIDIA NIM: ${nimMessage}. OpenRouter: ${orMessage}.`);
+      console.warn('[LLM] OpenRouter prose chain exhausted, falling back to Gemini:', orMessage);
+
+      try {
+        return await tryModelChain('Google Gemini', geminiModels, (m) =>
+          askLLMGemini(systemPrompt, userPrompt, temperature, m, maxTokens)
+        );
+      } catch (geminiError) {
+        const geminiMessage = geminiError instanceof Error ? geminiError.message : String(geminiError);
+        const safety = safetyMessage([nimMessage, orMessage, geminiMessage]);
+        if (safety) {
+          throw new Error(
+            `Content flagged by safety filter: ${safety}. Try adjusting book themes or descriptions.`
+          );
+        }
+
+        throw new Error(
+          `Text generation failed across all providers. NVIDIA NIM: ${nimMessage}. ` +
+          `OpenRouter: ${orMessage}. Google Gemini: ${geminiMessage}.`
+        );
+      }
     }
   }
 }
