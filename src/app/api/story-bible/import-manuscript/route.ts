@@ -7,13 +7,12 @@ import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 import { assertBookOwnership, toDTO } from '@/lib/story-bible-helpers';
 import { extractTextFromManuscript, SUPPORTED_MANUSCRIPT_EXTENSIONS, truncateManuscript } from '@/lib/manuscript';
-import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
-import { ManuscriptImportSchema, validateOrThrow } from '@/lib/llm/schema';
-import { getManuscriptImportPrompt } from '@/lib/llm/prompts';
+import { extractEntitiesFromManuscript } from '@/lib/story-bible-extraction';
 import { enqueueEditorialReview } from '@/lib/services/editorialReview';
 
-// Entity extraction is a single synchronous LLM call over the manuscript text.
-// Without these exports the platform default function timeout kills the request
+// Entity extraction walks the WHOLE manuscript in overlapping windows and runs
+// one LLM call per window (see src/lib/story-bible-extraction.ts). Without
+// these exports the platform default function timeout kills the request
 // mid-LLM-call and the browser reports `504` + `Failed to fetch`.
 // NOTE: `maxDuration` is only honored on platforms that support it (Vercel Pro+
 // and self-hosted). On Vercel Hobby this route is still hard-capped at 60s, so
@@ -26,11 +25,9 @@ export const maxDuration = 300;
 // body never reaches this route (the platform rejects it first with an opaque
 // 413), so the app-side cap must sit under that limit to show a friendly error.
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
-// Entity extraction quality plateaus early (the prompt asks for the most
-// important entities first) while latency/cost scale with input length, so only
-// the head of the manuscript is sent to the LLM. The full text is still passed
-// to the background editorial review below.
-const MAX_LLM_CHARS = 30000;
+// Whole-book analysis budget (matches the editorial-review pipeline): the full
+// text up to this length is mined for entities — NOT just the opening chapters.
+const MAX_MANUSCRIPT_CHARS = 500000;
 
 export async function POST(request: NextRequest) {
   try {
@@ -83,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     const rawText = await extractTextFromManuscript(file, extension);
-    const manuscript = truncateManuscript(rawText);
+    const manuscript = truncateManuscript(rawText, MAX_MANUSCRIPT_CHARS);
 
     if (!manuscript) {
       return NextResponse.json(
@@ -94,22 +91,55 @@ export async function POST(request: NextRequest) {
 
     console.log(`[API/story-bible/import-manuscript] Parsing "${file.name}" (${manuscript.length} chars) for book ${resolvedBookId}`);
 
-    const manuscriptForLLM =
-      manuscript.length > MAX_LLM_CHARS ? manuscript.slice(0, MAX_LLM_CHARS) : manuscript;
+    // Extract entities across the ENTIRE manuscript — every chapter, not just
+    // the opening scenes. The extractor windows the text, mines each window
+    // with the LLM (telling it what was already captured), and merges the
+    // results by kind + name. Windows that fail are logged and skipped rather
+    // than voiding the whole import.
+    const extraction = await extractEntitiesFromManuscript(manuscript);
+    for (const warning of extraction.warnings) {
+      console.warn(`[API/story-bible/import-manuscript] ${warning}`);
+    }
+    const entities = extraction.entities;
 
-    const validated = await askLLMJSONWithFallback<unknown>(
-      getManuscriptImportPrompt(),
-      manuscriptForLLM,
-      0.2
-    );
+    // Re-imports are safe: skip entities already captured for this book so a
+    // retry (or a fix like a wider extraction pass) never duplicates entries.
+    let duplicatesSkipped = 0;
+    let entitiesToCreate = entities;
+    if (!newBookCreated) {
+      const existing = await db.storyBibleEntity.findMany({
+        where: { bookId: resolvedBookId! },
+        select: { kind: true, name: true },
+      });
+      const seen = new Set(existing.map((e) => `${e.kind}:${e.name.toLowerCase().trim()}`));
+      entitiesToCreate = entities.filter(
+        (e) => !seen.has(`${e.kind}:${e.name.toLowerCase().trim()}`)
+      );
+      duplicatesSkipped = entities.length - entitiesToCreate.length;
+      if (duplicatesSkipped > 0) {
+        console.log(
+          `[API/story-bible/import-manuscript] Skipped ${duplicatesSkipped}/${entities.length} entities already present in book ${resolvedBookId}`
+        );
+      }
+    }
 
-    const parsed = validateOrThrow(ManuscriptImportSchema, validated);
-
-    // Cap entity count to avoid runaway imports.
-    const entities = parsed.entities.slice(0, 60);
+    if (entitiesToCreate.length === 0) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          fileName: file.name,
+          entities: [],
+          counts: {},
+          total: 0,
+          duplicatesSkipped,
+          portionsSkipped: extraction.windowsFailed,
+          truncated: extraction.truncatedChars,
+        },
+      });
+    }
 
     const created = await db.$transaction(
-      entities.map((entity) =>
+      entitiesToCreate.map((entity) =>
         db.storyBibleEntity.create({
           data: {
             ownerId: profile.id,
@@ -156,6 +186,9 @@ export async function POST(request: NextRequest) {
         entities: created.map(toDTO),
         counts,
         total: created.length,
+        duplicatesSkipped,
+        portionsSkipped: extraction.windowsFailed,
+        truncated: extraction.truncatedChars,
         ...(newBookCreated ? { bookId: resolvedBookId } : {}),
       },
     });
@@ -189,6 +222,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Not-found/ownership errors are the caller's mistake, not a server fault.
+    if (message.startsWith('No story bible entities could be extracted')) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'The AI could not identify any story bible entities in that manuscript. Try a .txt file or a shorter portion of the book.',
+        },
+        { status: 422 }
+      );
+    }
     if (message === 'Book not found') {
       return NextResponse.json({ success: false, error: 'That book no longer exists. Refresh and try again.' }, { status: 404 });
     }
