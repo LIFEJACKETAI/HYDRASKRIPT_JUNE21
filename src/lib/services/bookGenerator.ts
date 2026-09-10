@@ -544,7 +544,7 @@ async function generateStoryBibleFromBook(bookId: string, ownerId: string): Prom
         motivation: e.motivation ?? '',
         description: e.description ?? '',
         physicalTraits: JSON.stringify({ tags: e.tags ?? [], notes: '' }),
-        secrets: JSON.stringify({ confidential: '', isPrivate: true }),
+        secrets: JSON.stringify({ confidential: e.secret ?? '', isPrivate: true }),
       }));
 
     if (toCreate.length === 0) {

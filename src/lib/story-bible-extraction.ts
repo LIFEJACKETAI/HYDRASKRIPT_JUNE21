@@ -15,7 +15,7 @@
 // end up in the Story Bible — not just the opening scenes.
 
 import { askLLMJSONWithFallback } from '@/lib/llm/fallback';
-import { getManuscriptImportPrompt } from '@/lib/llm/prompts';
+import { getManuscriptImportPrompt, getManuscriptCoveragePrompt } from '@/lib/llm/prompts';
 import {
   ManuscriptEntitySchema,
   ManuscriptImportSchema,
@@ -36,10 +36,23 @@ export interface ExtractionManifest {
   windows: number;
   windowsSucceeded: number;
   windowsFailed: number;
+  /** Entities added by the book-level coverage pass (filled empty sections). */
+  coverageFilled: number;
   /** True when the input was longer than the analysis budget (chars). */
   truncatedChars: boolean;
   warnings: string[];
 }
+
+/** The five story-bible sections that an import should populate. */
+export const EXTRACTION_KINDS = [
+  'CHARACTER',
+  'LOCATION',
+  'OBJECT',
+  'THEME',
+  'HISTORY',
+] as const;
+
+export type StoryBibleKindValue = (typeof EXTRACTION_KINDS)[number];
 
 export interface ExtractionOptions {
   windowChars?: number;
@@ -120,9 +133,42 @@ function absorbEntities(
     existing.summary = longerText(existing.summary ?? '', entity.summary ?? '');
     existing.motivation = longerText(existing.motivation ?? '', entity.motivation ?? '');
     existing.description = longerText(existing.description ?? '', entity.description ?? '');
+    existing.secret = longerText(existing.secret ?? '', entity.secret ?? '');
     const mergedTags = [...new Set([...(existing.tags ?? []), ...(entity.tags ?? [])])];
     existing.tags = mergedTags.slice(0, 16);
   }
+}
+
+/**
+ * Build a book-level digest for the coverage pass: the opening, the ending,
+ * and evenly spaced samples of the middle, all inside one LLM context budget.
+ * Themes, history and world objects are book-level lore, so they do not need
+ * the full text — just enough of the arc to identify them.
+ */
+export function buildManuscriptDigest(text: string, budgetChars = 40000): string {
+  if (text.length <= budgetChars) return text;
+
+  const headLen = 14000;
+  const tailLen = 10000;
+  const markerBudget = 800;
+  const head = text.slice(0, headLen);
+  const tail = text.slice(-tailLen);
+  const midStart = headLen;
+  const midEnd = text.length - tailLen;
+  const midSpan = Math.max(0, midEnd - midStart);
+
+  const sampleCount = 4;
+  const sampleLen = Math.max(1000, Math.floor((budgetChars - headLen - tailLen - markerBudget) / sampleCount));
+
+  let digest = head;
+  digest += `\n\n[...middle of the book omitted — ${sampleCount} evenly spaced samples follow...]\n`;
+  for (let i = 0; i < sampleCount; i++) {
+    const start = midStart + Math.floor((midSpan * i) / sampleCount);
+    digest += text.slice(start, start + sampleLen);
+    digest += `\n\n[...sample ${i + 1}/${sampleCount} ends...]\n`;
+  }
+  digest += '\n[...end of the book...]\n' + tail;
+  return digest;
 }
 
 /**
@@ -215,6 +261,61 @@ export async function extractEntitiesFromManuscript(
     }
   }
 
+  // ── Coverage pass: every story-bible section should have content ──────────
+  // Window models frequently report only the characters (especially later
+  // windows, once the roster grows), leaving Locations/Objects/Themes/History
+  // empty even though the book clearly contains them. Run one book-level call
+  // against a digest of the whole manuscript to fill ONLY the empty sections.
+  // Non-fatal: if it fails, the import still returns whatever the windows
+  // captured (a warning is recorded).
+  let coverageFilled = 0;
+  const missingKinds = EXTRACTION_KINDS.filter(
+    (kind) => ![...merged.values()].some((e) => e.kind === kind)
+  );
+  if (missingKinds.length > 0) {
+    try {
+      const digest = buildManuscriptDigest(text);
+      const raw = await askLLMJSONWithFallback<unknown>(
+        getManuscriptCoveragePrompt(capturedRefs, missingKinds),
+        digest,
+        0.3
+      );
+      const parsed = validateOrThrow(ManuscriptPortionSchema, raw);
+      const fillers = parsed.entities
+        .filter((e) => missingKinds.includes(e.kind as StoryBibleKindValue))
+        .slice(0, maxEntitiesPerPortion);
+      const before = merged.size;
+      absorbEntities(fillers, merged);
+      coverageFilled = merged.size - before;
+      for (const entity of fillers) {
+        const name = (entity.name ?? '').trim();
+        if (!name) continue;
+        const normalized = normalizeName(name);
+        if (
+          !capturedRefs.some(
+            (ref) => ref.kind === entity.kind && normalizeName(ref.name) === normalized
+          )
+        ) {
+          capturedRefs.push({ kind: entity.kind, name });
+        }
+      }
+      if (coverageFilled > 0) {
+        console.log(
+          `[StoryBibleExtraction] Coverage pass added ${coverageFilled} entit${coverageFilled === 1 ? 'y' : 'ies'} for empty sections: ${missingKinds.join(', ')}`
+        );
+      } else {
+        console.warn(
+          `[StoryBibleExtraction] Coverage pass for ${missingKinds.join(', ')} returned nothing new`
+        );
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      const warning = `Coverage pass for empty sections (${missingKinds.join(', ')}) failed: ${msg}`;
+      warnings.push(warning);
+      console.warn(`[StoryBibleExtraction] ${warning}`);
+    }
+  }
+
   const entities = [...merged.values()].slice(0, maxEntities);
   if (entities.length === 0) {
     throw (
@@ -231,13 +332,14 @@ export async function extractEntitiesFromManuscript(
   }
 
   console.log(
-    `[StoryBibleExtraction] Mined ${windows.length - windowsFailed}/${windows.length} windows of ${windows.length} → ${entities.length} unique entities`
+    `[StoryBibleExtraction] Mined ${windows.length - windowsFailed}/${windows.length} windows of ${windows.length} → ${entities.length} unique entities (+${coverageFilled} from coverage pass)`
   );
   return {
     entities,
     windows: windows.length,
     windowsSucceeded: windows.length - windowsFailed,
     windowsFailed,
+    coverageFilled,
     truncatedChars,
     warnings,
   };

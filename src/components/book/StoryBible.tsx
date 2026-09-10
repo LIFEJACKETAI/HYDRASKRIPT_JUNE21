@@ -21,6 +21,7 @@ import {
   type BookData,
   type StoryBibleEntity,
   type StoryBibleKind,
+  type ManuscriptImportResult,
 } from '@/lib/api';
 import {
   KIND_CONFIG,
@@ -72,7 +73,51 @@ export default function StoryBible() {
   const newProjectFileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [newProjectUploading, setNewProjectUploading] = useState(false);
-  const [uploadResult, setUploadResult] = useState<{ fileName: string; counts: Record<string, number>; total: number } | null>(null);
+  const [uploadResult, setUploadResult] = useState<{
+    fileName: string;
+    counts: Record<string, number>;
+    total: number;
+    duplicatesSkipped: number;
+    portionsSkipped: number;
+    emptyKinds: StoryBibleKind[];
+  } | null>(null);
+
+  // ── Import result helpers ──────────────────────────────────────────────────
+  // Honest success messaging: only celebrate when something was actually
+  // added. A re-import of the same manuscript is a "nothing new" outcome —
+  // never an empty "0 entities imported" success.
+
+  const saveUploadResult = (data: ManuscriptImportResult) => {
+    setUploadResult({
+      fileName: data.fileName,
+      counts: data.counts,
+      total: data.total,
+      duplicatesSkipped: data.duplicatesSkipped ?? 0,
+      portionsSkipped: data.portionsSkipped ?? 0,
+      emptyKinds: data.emptyKinds ?? [],
+    });
+  };
+
+  const toastImportResult = (data: ManuscriptImportResult) => {
+    if (data.total === 0) {
+      toast({
+        title: data.duplicatesSkipped ? 'Already in the story bible' : 'Nothing new found',
+        description: data.duplicatesSkipped
+          ? `All ${data.duplicatesSkipped} entities from "${data.fileName}" already exist for this book — nothing new was added.`
+          : `The AI did not find any story bible entities in "${data.fileName}". Check the file and try again.`,
+      });
+      return;
+    }
+    toast({
+      title: 'Manuscript imported!',
+      description:
+        `${data.total} story bible entities added from "${data.fileName}"` +
+        (data.duplicatesSkipped ? ` · ${data.duplicatesSkipped} duplicates skipped` : '') +
+        (data.emptyKinds?.length
+          ? ` · still empty: ${data.emptyKinds.map((k) => KIND_CONFIG[k]?.label ?? k).join(', ')}`
+          : ''),
+    });
+  };
 
   const currentBook = books.find((b) => b.id === selectedBookId) ?? null;
 
@@ -97,7 +142,19 @@ export default function StoryBible() {
     }
     setLoading(true);
     const result = await listStoryBibleEntities(selectedBookId);
-    setByKind(result.data ? groupByKind(result.data) : EMPTY_MAP);
+    if (result.success && result.data) {
+      setByKind(groupByKind(result.data));
+    } else {
+      // Never fail silently: an empty list with no explanation is exactly the
+      // "it says imported but it's not" confusion. Tell the user the load
+      // itself failed (e.g. session expired during a long import).
+      setByKind(EMPTY_MAP);
+      toast({
+        title: 'Could not load the story bible',
+        description: result.error || 'Unknown error',
+        variant: 'destructive',
+      });
+    }
     setLoading(false);
   }, [selectedBookId]);
 
@@ -153,11 +210,8 @@ export default function StoryBible() {
     try {
       const result = await importManuscriptToStoryBible(selectedBookId, file);
       if (result.success && result.data) {
-        setUploadResult({ fileName: result.data.fileName, counts: result.data.counts, total: result.data.total });
-        toast({
-          title: 'Manuscript imported!',
-          description: `${result.data.total} story bible entities extracted from "${result.data.fileName}".`,
-        });
+        saveUploadResult(result.data);
+        toastImportResult(result.data);
         reload();
       } else {
         toast({ title: 'Import failed', description: result.error || 'An error occurred.', variant: 'destructive' });
@@ -186,12 +240,17 @@ export default function StoryBible() {
     }
 
     setNewProjectUploading(true);
+    setUploadResult(null);
     try {
       const result = await importManuscriptToStoryBible(null, file);
       if (result.success && result.data) {
+        saveUploadResult(result.data);
         toast({
-          title: 'New project created!',
-          description: `${result.data.total} story bible entities extracted from "${result.data.fileName}".`,
+          title: result.data.total > 0 ? 'New project created!' : 'New project created — story bible is empty',
+          description:
+            result.data.total > 0
+              ? `${result.data.total} story bible entities added from "${result.data.fileName}".`
+              : `The AI did not find any story bible entities in "${result.data.fileName}".`,
         });
         // Refresh the book list and auto-select the newly created book.
         const updatedBooks = await listBooks();
@@ -423,14 +482,32 @@ export default function StoryBible() {
         <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 px-5 py-4 flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-emerald-300 flex items-center gap-2">
-              <FileText className="h-4 w-4" /> Imported "{uploadResult.fileName}"
+              <FileText className="h-4 w-4" />{" "}
+              {uploadResult.total > 0
+                ? `Imported "${uploadResult.fileName}"`
+                : `Imported "${uploadResult.fileName}" — nothing new to add`}
             </p>
             <p className="text-xs text-slate-400 mt-1">
-              {uploadResult.total} entities added ·{' '}
+              {uploadResult.total > 0 && `${uploadResult.total} entities added · `}
               {Object.entries(uploadResult.counts)
+                .filter(([, count]) => count > 0)
                 .map(([kind, count]) => `${KIND_CONFIG[kind as StoryBibleKind]?.label ?? kind}: ${count}`)
                 .join(' · ')}
+              {uploadResult.total === 0 && uploadResult.duplicatesSkipped > 0 &&
+                `All ${uploadResult.duplicatesSkipped} entities from this file already exist in the story bible.`}
             </p>
+            {uploadResult.portionsSkipped > 0 && (
+              <p className="text-xs text-amber-400/90 mt-1">
+                {uploadResult.portionsSkipped} portion{uploadResult.portionsSkipped === 1 ? '' : 's'} of the manuscript
+                could not be analyzed — the list may be incomplete. Re-upload to retry those portions.
+              </p>
+            )}
+            {uploadResult.emptyKinds.length > 0 && (
+              <p className="text-xs text-amber-400/90 mt-1">
+                Sections still empty: {uploadResult.emptyKinds.map((k) => KIND_CONFIG[k]?.label ?? k).join(', ')} — add
+                profiles manually or upload the manuscript again.
+              </p>
+            )}
           </div>
           <button
             onClick={() => setUploadResult(null)}

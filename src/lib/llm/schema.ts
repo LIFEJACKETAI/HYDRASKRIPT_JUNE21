@@ -80,6 +80,10 @@ export const ManuscriptEntitySchema = z.object({
   motivation: z.string().default(''),
   description: z.string().default(''),
   tags: z.array(z.string()).default([]),
+  // Hidden lore (plot secrets, later reveals). Optional — older model output
+  // and cached results may not include it, in which case the field defaults
+  // to an empty string.
+  secret: z.string().default(''),
 });
 
 export const ManuscriptImportSchema = z.object({

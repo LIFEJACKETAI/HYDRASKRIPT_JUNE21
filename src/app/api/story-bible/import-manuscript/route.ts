@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 import { assertBookOwnership, toDTO } from '@/lib/story-bible-helpers';
 import { extractTextFromManuscript, SUPPORTED_MANUSCRIPT_EXTENSIONS, truncateManuscript } from '@/lib/manuscript';
-import { extractEntitiesFromManuscript } from '@/lib/story-bible-extraction';
+import { extractEntitiesFromManuscript, EXTRACTION_KINDS } from '@/lib/story-bible-extraction';
 import { enqueueEditorialReview } from '@/lib/services/editorialReview';
 
 // Entity extraction walks the WHOLE manuscript in overlapping windows and runs
@@ -106,11 +106,13 @@ export async function POST(request: NextRequest) {
     // retry (or a fix like a wider extraction pass) never duplicates entries.
     let duplicatesSkipped = 0;
     let entitiesToCreate = entities;
+    const existingKinds = new Set<string>();
     if (!newBookCreated) {
       const existing = await db.storyBibleEntity.findMany({
         where: { bookId: resolvedBookId! },
         select: { kind: true, name: true },
       });
+      for (const row of existing) existingKinds.add(row.kind);
       const seen = new Set(existing.map((e) => `${e.kind}:${e.name.toLowerCase().trim()}`));
       entitiesToCreate = entities.filter(
         (e) => !seen.has(`${e.kind}:${e.name.toLowerCase().trim()}`)
@@ -124,6 +126,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (entitiesToCreate.length === 0) {
+      // Nothing new to add (re-import of the same manuscript, or the AI found
+      // only entries that already exist). Still report which story-bible
+      // sections are empty so the UI can be honest about it.
       return NextResponse.json({
         success: true,
         data: {
@@ -134,6 +139,7 @@ export async function POST(request: NextRequest) {
           duplicatesSkipped,
           portionsSkipped: extraction.windowsFailed,
           truncated: extraction.truncatedChars,
+          emptyKinds: EXTRACTION_KINDS.filter((k) => !existingKinds.has(k)),
         },
       });
     }
@@ -151,7 +157,9 @@ export async function POST(request: NextRequest) {
             motivation: entity.motivation,
             description: entity.description,
             physicalTraits: JSON.stringify({ tags: entity.tags, notes: '' }),
-            secrets: JSON.stringify({ confidential: '', isPrivate: true }),
+            // Auto-populate the "Secrets & Hidden Lore" section from what the
+            // extractor found (plot secrets, later reveals, hidden motives).
+            secrets: JSON.stringify({ confidential: entity.secret ?? '', isPrivate: true }),
           },
         })
       )
@@ -161,6 +169,11 @@ export async function POST(request: NextRequest) {
       acc[entity.kind] = (acc[entity.kind] ?? 0) + 1;
       return acc;
     }, {});
+
+    // Which story-bible sections still have no entries at all (so the UI can
+    // tell the user exactly what is missing instead of pretending all is well).
+    const presentKinds = new Set([...existingKinds, ...created.map((e) => e.kind)]);
+    const emptyKinds = EXTRACTION_KINDS.filter((k) => !presentKinds.has(k));
 
     console.log(`[API/story-bible/import-manuscript] Created ${created.length} entities for "${file.name}"`, counts);
 
@@ -189,6 +202,7 @@ export async function POST(request: NextRequest) {
         duplicatesSkipped,
         portionsSkipped: extraction.windowsFailed,
         truncated: extraction.truncatedChars,
+        emptyKinds,
         ...(newBookCreated ? { bookId: resolvedBookId } : {}),
       },
     });

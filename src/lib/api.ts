@@ -347,6 +347,14 @@ export interface ManuscriptImportResult {
   counts: Record<string, number>;
   total: number;
   bookId?: string;
+  /** Entities the AI found but skipped because they already exist for this book. */
+  duplicatesSkipped?: number;
+  /** Manuscript windows the AI could not analyze (flaky LLM calls). */
+  portionsSkipped?: number;
+  /** True when the manuscript was longer than the analysis budget. */
+  truncated?: boolean;
+  /** Story-bible sections (kinds) that still have no entries after the import. */
+  emptyKinds?: StoryBibleKind[];
 }
 
 export async function importManuscriptToStoryBible(bookId: string | null, file: File) {
