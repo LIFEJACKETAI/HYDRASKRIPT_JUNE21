@@ -304,11 +304,13 @@ For every entity provide:
 - motivation: for CHARACTER, their core drive; for LOCATION/OBJECT/THEME/HISTORY, its significance
 - description: 2-4 sentences of canonical details (appearance, personality, history, traits)
 - tags: 2-5 short keyword tags (physical traits for CHARACTER, features for LOCATION, etc.)
+- secret: hidden lore about this entity that a writer would use to maintain tension (a secret it keeps, a fact revealed only later, a hidden motive). One sentence. Use an empty string if the text reveals no such secret for this entity.
 - kind: exactly one of CHARACTER, LOCATION, OBJECT, THEME, HISTORY
 
 Rules:
 - Only include entities that genuinely appear in the text. Do not invent characters or places that are not in the manuscript.
 - Include recurring or plot-relevant entities — do not skip minor-but-recurring characters, locations that scenes repeatedly use, or items that matter to the plot.
+- Do NOT return only characters: whenever the portion contains them, also report the places scenes happen in (LOCATION), the items that matter to the plot (OBJECT), the ideas the story explores (THEME), and the backstory/events that shape the present (HISTORY). A portion with locations but no characters is a valid answer.
 - Aim for the most important entities first — quality over quantity.
 - Return at most 20 entities per portion; list the most significant ones for that portion.`;
 
@@ -319,7 +321,63 @@ Rules:
     prompt += `\n\nEntities already captured from earlier portions of this manuscript:\n${roster}\nDo NOT list those entities again in this portion unless the portion reveals important NEW canonical details about them. Prioritize finding entities not yet captured.`;
   }
 
-  prompt += `\n\nIMPORTANT: Respond with valid JSON only in this exact format:\n{\n  "entities": [\n    {\n      "kind": "CHARACTER",\n      "name": "...",\n      "role": "...",\n      "summary": "...",\n      "motivation": "...",\n      "description": "...",\n      "tags": ["...", "..."]\n    }\n  ]\n}`;
+  prompt += `\n\nIMPORTANT: Respond with valid JSON only in this exact format:\n{\n  "entities": [\n    {\n      "kind": "CHARACTER",\n      "name": "...",\n      "role": "...",\n      "summary": "...",\n      "motivation": "...",\n      "description": "...",\n      "tags": ["...", "..."],\n      "secret": "..."
+    }\n  ]\n}`;
+
+  return prompt;
+}
+
+/**
+ * Coverage pass: after the per-window mining, some story-bible sections are
+ * still empty (typically because the window model only reported characters).
+ * This prompt asks the model to fill ONLY the missing sections from a digest
+ * of the whole book, using book-level judgment (themes, history and world
+ * objects rarely belong to a single 36k-char window).
+ */
+export function getManuscriptCoveragePrompt(
+  alreadyCaptured: ManuscriptImportCapturedRef[] = [],
+  missingKinds: string[] = []
+): string {
+  const kindNotes: Record<string, string> = {
+    CHARACTER: 'named characters who appear or are referenced meaningfully',
+    LOCATION: 'settings where scenes happen (cities, rooms, worlds, planets)',
+    OBJECT: 'important items/artifacts that matter to the plot',
+    THEME: 'central ideas or motifs the story explores',
+    HISTORY: 'backstory, world events, or timeline facts that shape the present',
+  };
+  const kindLines = missingKinds
+    .map((k) => `- ${k}: ${kindNotes[k] ?? k.toLowerCase()}`)
+    .join('\n');
+
+  let prompt = `You are a master story bible architect. You have already mined a manuscript in portions and captured the entities listed below. The story bible still has EMPTY sections that a finished book should fill.
+
+From the digest of the manuscript you are given now, extract entities for EXACTLY these still-missing kinds — nothing else:
+${kindLines}
+
+For every entity provide:
+- name: the exact name as used in the story (capitalize properly)
+- role: one-line role (e.g. "Protagonist", "Capital City", "MacGuffin", "Central Theme")
+- summary: 1-2 sentence summary of who/what this entity is
+- motivation: for CHARACTER, their core drive; for LOCATION/OBJECT/THEME/HISTORY, its significance
+- description: 2-4 sentences of canonical details (appearance, personality, history, traits)
+- tags: 2-5 short keyword tags
+- secret: hidden lore a writer would use to maintain tension, or an empty string
+- kind: exactly one of the missing kinds listed above
+
+Rules:
+- Only include entities that genuinely appear in or are implied by the manuscript. Do not invent anything that is not in the text.
+- For every missing kind above, return at least one entity IF the book genuinely contains that kind of lore (a real story always has a setting, and nearly always has a theme and some history).
+- Do NOT return entities whose kind is not in the missing list.
+- Do NOT return entities already captured (listed below) even if they match a missing kind — if only captured entities fit, return an empty list for that kind.
+- Return at most 6 entities per missing kind.`;
+
+  if (alreadyCaptured.length > 0) {
+    const roster = alreadyCaptured.map((ref) => `- ${ref.kind}: ${ref.name}`).join('\n');
+    prompt += `\n\nEntities already captured from this manuscript (do NOT repeat them):\n${roster}`;
+  }
+
+  prompt += `\n\nIMPORTANT: Respond with valid JSON only in this exact format:\n{\n  "entities": [\n    {\n      "kind": "...",\n      "name": "...",\n      "role": "...",\n      "summary": "...",\n      "motivation": "...",\n      "description": "...",\n      "tags": ["..."],\n      "secret": "..."
+    }\n  ]\n}`;
 
   return prompt;
 }
