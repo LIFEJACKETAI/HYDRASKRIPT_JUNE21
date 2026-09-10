@@ -129,20 +129,8 @@ export async function POST(request: NextRequest) {
       // Nothing new to add (re-import of the same manuscript, or the AI found
       // only entries that already exist). Still report which story-bible
       // sections are empty so the UI can be honest about it.
-      return NextResponse.json({
-        success: true,
-        data: {
-          fileName: file.name,
-          entities: [],
-          counts: {},
-          total: 0,
-          duplicatesSkipped,
-          portionsSkipped: extraction.windowsFailed,
-          truncated: extraction.truncatedChars,
-          emptyKinds: EXTRACTION_KINDS.filter((k) => !existingKinds.has(k)),
-        },
-      });
-    }
+      const hadAnyEntities = entities.length > 0;
+      return NextResponse.json({\n        success: hadAnyEntities,\n        data: {\n          fileName: file.name,\n          entities: [],\n          counts: {},\n          total: 0,\n          duplicatesSkipped,\n          portionsSkipped: extraction.windowsFailed,\n          truncated: extraction.truncatedChars,\n          emptyKinds: EXTRACTION_KINDS.filter((k) => !existingKinds.has(k)),\n        },\n        error: hadAnyEntities ? '' : 'The AI could not identify any story bible entities in that manuscript. Try a .txt file or a shorter portion of the book.',\n      });\n    }
 
     const created = await db.$transaction(
       entitiesToCreate.map((entity) =>
