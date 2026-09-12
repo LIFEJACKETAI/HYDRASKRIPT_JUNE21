@@ -106,7 +106,10 @@ const mockQueue = {
     maxRetries?: number;
     result?: string | Record<string, unknown>;
   }) => {
-    const id = nextId('job');
+    // The poll GET validates that jobId is a UUID — mint a real-format one.
+    const rawId = nextId('job');
+    const n = parseInt(rawId.split('-')[1], 10);
+    const id = `36000000-0000-4000-8000-${n.toString(16).padStart(12, '0')}`;
     jobs[id] = {
       id,
       ownerId: params.ownerId,
@@ -184,8 +187,8 @@ jest.mock('@/lib/llm/fallback', () => ({
   },
 }));
 
-import { POST } from '@/app/api/story-bible/import-manuscript/route';
-import { GET } from '@/app/api/story-bible/route';
+import { POST, GET as importPollGET } from '@/app/api/story-bible/import-manuscript/route';
+import { GET as listStoryBible } from '@/app/api/story-bible/route';
 
 function makeManuscript(): string {
   // Long enough to produce 3+ windows (> 36k chars, step 32k → need > 64k for 3)
@@ -212,10 +215,31 @@ function makeRequest(bookId: string | null, fileName: string, content: string): 
   });
 }
 
+// Drive the chunked worker until the job reaches a terminal state, exactly the
+// way the pump does on production (`processOneQueuedJob` → worker → re-queue).
+async function runWorkerUntilDone(jobId: string): Promise<string> {
+  const { importManuscriptWorker } = await import('@/lib/workers/importManuscriptWorker');
+  for (let i = 0; i < 100; i++) {
+    const job = jobs[jobId];
+    if (!job) throw new Error(`job ${jobId} vanished`);
+    if (job.status === 'completed') return 'completed';
+    if (job.status === 'failed') return 'failed';
+    await importManuscriptWorker({ id: jobId });
+  }
+  throw new Error(`job ${jobId} did not finish after 100 worker runs`);
+}
+
+async function pollImport(jobId: string): Promise<{ status?: string; data?: any; error?: string }> {
+  const req = new NextRequest(`http://localhost:3002/api/story-bible/import-manuscript?jobId=${jobId}`);
+  const res = await importPollGET(req);
+  return res.json();
+}
+
 describe('Story Bible manuscript import', () => {
   beforeEach(() => {
     entities.length = 0;
     Object.keys(books).forEach((k) => delete books[k]);
+    Object.keys(jobs).forEach((k) => delete jobs[k]);
     llmCalls.length = 0;
   });
 
@@ -224,29 +248,39 @@ describe('Story Bible manuscript import', () => {
     await fakeDb.book.create({ data: { title: 'The Harbor Debts', ownerId: 'profile-1' } });
     const book = Object.values(books)[0];
 
+    // POST enqueues instantly and hands back a job id
     const res = await POST(makeRequest(book.id, 'harbor-debts.txt', makeManuscript()));
     const body = await res.json();
-
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(body.data.total).toBeGreaterThan(0);
+    expect(body.data.jobId).toBeTruthy();
+    expect(body.data.async).toBe(true);
+    // Nothing persisted yet — the lock-step import is gone
+    expect(entities.length).toBe(0);
+
+    // The queue drives the chunked worker to completion (as the pump would)
+    expect(await runWorkerUntilDone(body.data.jobId)).toBe('completed');
+
+    const pollBody = await pollImport(body.data.jobId);
+    expect(pollBody.status).toBe('completed');
+    expect(pollBody.data.total).toBeGreaterThan(0);
 
     // All five sections of the story bible must be populated
     for (const kind of ['CHARACTER', 'LOCATION', 'OBJECT', 'THEME', 'HISTORY']) {
-      expect(body.data.counts[kind]).toBeGreaterThanOrEqual(1);
+      expect(pollBody.data.counts[kind]).toBeGreaterThanOrEqual(1);
     }
 
     // Entities actually persisted in the (fake) DB
     const stored = entities.filter((e) => e.bookId === book.id);
-    expect(stored.length).toBe(body.data.total);
+    expect(stored.length).toBe(pollBody.data.total);
     expect(stored.some((e) => e.kind === 'CHARACTER' && e.name === 'Mara Voss')).toBe(true);
 
     // The list endpoint (what the Story Bible UI calls) returns them
     const listReq = new NextRequest(`http://localhost:3002/api/story-bible?bookId=${book.id}`);
-    const listRes = await GET(listReq);
+    const listRes = await listStoryBible(listReq);
     const listBody = await listRes.json();
     expect(listBody.success).toBe(true);
-    expect(listBody.data.length).toBe(body.data.total);
+    expect(listBody.data.length).toBe(pollBody.data.total);
     const kinds = new Set(listBody.data.map((e: EntityRow) => e.kind));
     for (const kind of ['CHARACTER', 'LOCATION', 'OBJECT', 'THEME', 'HISTORY']) {
       expect(kinds.has(kind)).toBe(true);
@@ -272,11 +306,18 @@ describe('Story Bible manuscript import', () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(body.data.bookId).toBeTruthy();
-    expect(books[body.data.bookId]).toBeDefined();
-    expect(books[body.data.bookId].title).toBe('my great book');
-    const stored = entities.filter((e) => e.bookId === body.data.bookId);
-    expect(stored.length).toBe(body.data.total);
+    expect(body.data.jobId).toBeTruthy();
+    expect(body.data.newBookCreated).toBe(true);
+
+    expect(await runWorkerUntilDone(body.data.jobId)).toBe('completed');
+
+    const pollBody = await pollImport(body.data.jobId);
+    expect(pollBody.status).toBe('completed');
+    expect(pollBody.data.bookId).toBeTruthy();
+    expect(books[pollBody.data.bookId]).toBeDefined();
+    expect(books[pollBody.data.bookId].title).toBe('my great book');
+    const stored = entities.filter((e) => e.bookId === pollBody.data.bookId);
+    expect(stored.length).toBe(pollBody.data.total);
   });
 
   test('re-importing the same manuscript does not duplicate and reports what was skipped', async () => {
@@ -286,18 +327,25 @@ describe('Story Bible manuscript import', () => {
     const first = await POST(makeRequest(book.id, 'harbor-debts.txt', makeManuscript()));
     const firstBody = await first.json();
     expect(firstBody.success).toBe(true);
+    expect(await runWorkerUntilDone(firstBody.data.jobId)).toBe('completed');
+    const firstPoll = await pollImport(firstBody.data.jobId);
     const totalAfterFirst = entities.length;
+    const firstTotal = firstPoll.data.total;
+    expect(firstTotal).toBeGreaterThan(0);
 
     // Second import of the SAME manuscript: LLM returns the same entities → all deduped
     const second = await POST(makeRequest(book.id, 'harbor-debts.txt', makeManuscript()));
     const secondBody = await second.json();
     expect(second.status).toBe(200);
     expect(secondBody.success).toBe(true);
+    expect(await runWorkerUntilDone(secondBody.data.jobId)).toBe('completed');
+    const secondPoll = await pollImport(secondBody.data.jobId);
+
     // No duplication
     expect(entities.length).toBe(totalAfterFirst);
     // And the response must be honest about what happened
-    expect(secondBody.data.duplicatesSkipped).toBe(firstBody.data.total);
-    expect(secondBody.data.total).toBe(0);
+    expect(secondPoll.data.duplicatesSkipped).toBe(firstTotal);
+    expect(secondPoll.data.total).toBe(0);
   });
 
   test('reports unreadable text as a 400, not a false success', async () => {

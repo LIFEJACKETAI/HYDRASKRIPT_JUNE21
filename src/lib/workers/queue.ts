@@ -19,6 +19,7 @@ type QueueWorkerJob = {
   ownerId: string;
   stepIndex?: number | null;
   creditsConsumed?: number | null;
+  result?: string | null;
 };
 
 // ─── Serverless driver helpers ───────────────────────────────────────────────
@@ -221,6 +222,7 @@ class PersistentJobQueue {
           ownerId: jobToProcess.ownerId,
           stepIndex: jobToProcess.stepIndex,
           creditsConsumed: jobToProcess.creditsConsumed,
+          result: jobToProcess.result,
         };
 
         await workerFn(workerJob);
@@ -287,6 +289,7 @@ class PersistentJobQueue {
     maxRetries: number;
     stepIndex: number | null;
     creditsConsumed: number | null;
+    result: string | null;
   } | null> {
     return this.withTransactionRetry(
       async (tx) => {
@@ -332,6 +335,7 @@ class PersistentJobQueue {
           maxRetries: queuedJob.maxRetries,
           stepIndex: queuedJob.stepIndex,
           creditsConsumed: queuedJob.creditsConsumed,
+          result: queuedJob.result,
         };
       },
       'claimNextJob'
