@@ -6,9 +6,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
+import { isUuid } from '@/lib/uuid';
 import { isStoryBibleKind, toDTO } from '@/lib/story-bible-helpers';
 
 async function loadOwnedEntity(id: string, ownerId: string) {
+  // Malformed ids must 404 here — Prisma would 500 on the uuid cast.
+  if (!isUuid(id)) return null;
   const entity = await db.storyBibleEntity.findUnique({ where: { id } });
   if (!entity) return null;
   if (entity.ownerId !== ownerId) return 'forbidden' as const;

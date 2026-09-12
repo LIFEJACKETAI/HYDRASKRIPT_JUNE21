@@ -11,24 +11,23 @@ import { askLLMJSON, askLLM } from '@/lib/llm/openrouter';
 import { askLLMJSON as askLLMGeminiJSON, askLLM as askLLMGemini } from '@/lib/llm/google-gemini';
 import { askLLMJSON as askLLMNimJSON, askLLM as askLLMNim } from '@/lib/llm/nvidia-nim';
 
-// Model lists verified against the NVIDIA NIM and OpenRouter catalogs (Sep 2026).
-// Older ids such as `meta/llama-3.1-8b-instruct` (410 Gone) and
-// `minimax-3.0` / `openrouter/free` (never existed) must NOT be used.
+// Model lists verified against the NVIDIA NIM, OpenRouter and Gemini catalogs
+// (live-tested 12 Sep 2026). Retired/renamed ids such as
+// `meta/llama-3.1-8b-instruct` (410 Gone), `nvidia/llama-3.1-nemotron-70b-instruct`
+// and `mistralai/mistral-large-2-instruct` (404 on NIM), `minimax/minimax-m3:free`
+// (no longer free on OpenRouter) and `gemini-2.5-flash` (404 for new Google AI
+// projects) must NOT be used.
 
 // NVIDIA NIM model chains (prefer the newest, strongest instruction followers).
 const NIM_JSON_CHAIN = [
   process.env.NVIDIA_NIM_MODEL_JSON,
-  'nvidia/llama-3.1-nemotron-70b-instruct',
   'nvidia/nemotron-3-super-120b-a12b',
   'google/gemma-4-31b-it',
-  'mistralai/mistral-large-2-instruct',
 ];
 
 const NIM_PROSE_CHAIN = [
   process.env.NVIDIA_NIM_MODEL,
-  'nvidia/llama-3.1-nemotron-70b-instruct',
   'nvidia/nemotron-3-super-120b-a12b',
-  'mistralai/mistral-large-2-instruct',
   'google/gemma-4-31b-it',
 ];
 
@@ -37,21 +36,24 @@ const OPENROUTER_JSON_CHAIN = [
   process.env.OPENROUTER_MODEL_JSON,
   'nvidia/nemotron-3-super-120b-a12b:free',
   'google/gemma-4-31b-it:free',
-  'minimax/minimax-m3:free',
+  'google/gemma-4-26b-a4b-it:free',
 ];
 
 const OPENROUTER_PROSE_CHAIN = [
   process.env.OPENROUTER_MODEL,
   'nvidia/nemotron-3-super-120b-a12b:free',
   'google/gemma-4-31b-it:free',
-  'minimax/minimax-m3:free',
+  'google/gemma-4-26b-a4b-it:free',
 ];
 
 // Gemini is an independent, third provider. Keep the configured model first, but
-// retain the known-good default so a stale pinned model does not disable Gemini.
+// retain known-good defaults (`gemini-3.6-flash` is the current generation;
+// `gemini-flash-latest` is Google's rolling alias) so a stale pinned model does
+// not disable Gemini.
 const GEMINI_CHAIN = [
   process.env.GEMINI_TEXT_MODEL,
-  'gemini-2.5-flash',
+  'gemini-3.6-flash',
+  'gemini-flash-latest',
 ];
 
 function buildChain(...models: (string | undefined | null)[]): string[] {

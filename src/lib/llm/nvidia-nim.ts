@@ -18,7 +18,7 @@ function getModel(): string {
   // Valid NVIDIA NIM models (Sep 2026). NOTE: meta/llama-3.1-8b-instruct and
   // meta/llama-3.1-70b-instruct have been retired (410 Gone). The fallback chain
   // in fallback.ts rotates through multiple valid models anyway.
-  return process.env.NVIDIA_NIM_MODEL || 'nvidia/llama-3.1-nemotron-70b-instruct';
+  return process.env.NVIDIA_NIM_MODEL || 'nvidia/nemotron-3-super-120b-a12b';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────

@@ -49,7 +49,7 @@ describe('LLM fallback', () => {
 
     expect(mockAskNimJSON).toHaveBeenCalled();
     expect(mockAskOpenRouterJSON).toHaveBeenCalled();
-    expect(mockAskGeminiJSON).toHaveBeenCalledWith('system', 'user', 0.2, 'gemini-2.5-flash');
+    expect(mockAskGeminiJSON).toHaveBeenCalledWith('system', 'user', 0.2, 'gemini-3.6-flash');
   });
 
   it('uses Gemini for chapter prose after the NVIDIA NIM and OpenRouter chains are exhausted', async () => {
@@ -62,6 +62,6 @@ describe('LLM fallback', () => {
 
     expect(mockAskNim).toHaveBeenCalled();
     expect(mockAskOpenRouter).toHaveBeenCalled();
-    expect(mockAskGemini).toHaveBeenCalledWith('system', 'user', 0.7, 'gemini-2.5-flash', 4096);
+    expect(mockAskGemini).toHaveBeenCalledWith('system', 'user', 0.7, 'gemini-3.6-flash', 4096);
   });
 });

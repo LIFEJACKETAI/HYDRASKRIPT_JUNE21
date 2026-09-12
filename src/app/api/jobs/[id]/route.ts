@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
+import { isUuid } from '@/lib/uuid';
 
 // GET - Get job progress
 export async function GET(
@@ -13,6 +14,11 @@ export async function GET(
   try {
     const { id } = await params;
     const { profile } = await requireProfile(request);
+
+    // Malformed ids must 404 here — Prisma would 500 on the uuid cast.
+    if (!isUuid(id)) {
+      return NextResponse.json({ success: false, error: 'Job not found' }, { status: 404 });
+    }
 
     const job = await db.job.findUnique({
       where: { id, ownerId: profile.id },

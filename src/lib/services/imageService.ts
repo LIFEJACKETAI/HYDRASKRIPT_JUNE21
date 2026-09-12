@@ -67,7 +67,7 @@ async function generateWithGemini(prompt: string, options: GenerateImageOptions)
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY as string);
-    const modelName = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
+    const modelName = process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image';
     const model = genAI.getGenerativeModel({ model: modelName });
 
     const maxRetries = 3;

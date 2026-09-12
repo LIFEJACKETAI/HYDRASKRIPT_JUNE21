@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
+import { isUuid } from '@/lib/uuid';
 
 const SEVERITY_ORDER = ['critical', 'warning', 'info'] as const;
 
@@ -15,6 +16,11 @@ export async function GET(
   try {
     const { id } = await params;
     const { profile } = await requireProfile(request);
+
+    // Malformed ids must 404 here — Prisma would 500 on the uuid cast.
+    if (!isUuid(id)) {
+      return NextResponse.json({ success: false, error: 'Review not found' }, { status: 404 });
+    }
 
     const review = await db.editorialReview.findUnique({
       where: { id, ownerId: profile.id },
@@ -74,6 +80,11 @@ export async function DELETE(
   try {
     const { id } = await params;
     const { profile } = await requireProfile(request);
+
+    // Malformed ids must 404 here — Prisma would 500 on the uuid cast.
+    if (!isUuid(id)) {
+      return NextResponse.json({ success: false, error: 'Review not found' }, { status: 404 });
+    }
 
     const existing = await db.editorialReview.findUnique({ where: { id, ownerId: profile.id } });
     if (!existing) {

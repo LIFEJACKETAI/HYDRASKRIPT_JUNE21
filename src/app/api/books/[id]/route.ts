@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { refundOutstandingReservation } from '@/lib/utils/credits';
+import { isUuid } from '@/lib/uuid';
 
 // GET /api/books/[id] - Get a single book
 export async function GET(
@@ -21,6 +22,11 @@ export async function GET(
     
     const profile = await getOrCreateProfile(email);
     const { id: bookId } = await params; 
+
+    // Malformed ids must 404 here — Prisma would 500 on the uuid cast.
+    if (!isUuid(bookId)) {
+      return NextResponse.json({ success: false, error: 'Book not found' }, { status: 404 });
+    }
 
     const book = await db.book.findFirst({
       where: { 
@@ -64,6 +70,12 @@ export async function DELETE(
     
     const profile = await getOrCreateProfile(email);
     const { id: bookId } = await params;
+
+    // Malformed ids must 404 here — Prisma would 500 on the uuid cast
+    // (both the escrow refund and the delete query by bookId).
+    if (!isUuid(bookId)) {
+      return NextResponse.json({ success: false, error: 'Book not found' }, { status: 404 });
+    }
 
     // Refund any outstanding escrow reservation before the book (and its jobs) are deleted
     await refundOutstandingReservation(bookId, 'Book deleted');
