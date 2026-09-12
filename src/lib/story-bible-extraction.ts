@@ -78,7 +78,7 @@ const DEFAULT_MAX_SOURCE_CHARS = 500000;
 // A later portion may legitimately contain zero NEW entities (everything was
 // already introduced earlier), so per-window parsing accepts an empty list.
 // The "must have found something" rule is enforced by callers after merging.
-const ManuscriptPortionSchema = ManuscriptImportSchema.extend({
+export const ManuscriptPortionSchema = ManuscriptImportSchema.extend({
   entities: z.array(ManuscriptEntitySchema).default([]),
 });
 
@@ -86,7 +86,7 @@ type PortionResult =
   | { ok: true; entities: ExtractedStoryBibleEntity[] }
   | { ok: false; message: string };
 
-function normalizeName(name: string): string {
+export function normalizeName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
@@ -113,7 +113,7 @@ export function splitManuscriptWindows(
 }
 
 /** Add one window's entities into the merged map, deduped by kind + name. */
-function absorbEntities(
+export function absorbEntities(
   incoming: ExtractedStoryBibleEntity[],
   into: Map<string, ExtractedStoryBibleEntity>
 ): void {
