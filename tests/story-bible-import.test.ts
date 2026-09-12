@@ -27,6 +27,20 @@ const nextId = (prefix: string) => `${prefix}-${++idCounter}`;
 const books: Record<string, { id: string; ownerId: string; title: string; genre: string; targetAudience: string; status: string }> = {};
 const entities: EntityRow[] = [];
 
+// Minimal in-memory `Job` store so the worker and the poll GET can run end-to-end.
+type JobRow = {
+  id: string;
+  ownerId: string;
+  bookId: string | null;
+  jobType: string;
+  status: string;
+  result: string;
+  progressMessage: string;
+  progressPercent: number;
+  errorMessage: string | null;
+};
+const jobs: Record<string, JobRow> = {};
+
 const fakeDb = {
   book: {
     create: async ({ data }: { data: Record<string, unknown> }) => {
@@ -39,6 +53,13 @@ const fakeDb = {
       if (!b) return null;
       if (where.ownerId && b.ownerId !== where.ownerId) return null;
       return { ...b };
+    },
+  },
+  job: {
+    findUnique: async ({ where }: { where: { id: string } }) => {
+      const j = jobs[where.id];
+      if (!j) return null;
+      return { ...j };
     },
   },
   storyBibleEntity: {
@@ -71,6 +92,58 @@ jest.mock('@/lib/api-auth', () => ({
   isUnauthorizedError: (e: unknown) => e instanceof Error && e.name === 'UnauthorizedError',
 }));
 jest.mock('@/lib/services/editorialReview', () => ({ enqueueEditorialReview: async () => ({ reviewId: 'rev-1', jobId: 'job-1' }) }));
+
+// ── Fake job queue (mocks @/lib/workers/queue) ────────────────────────────────
+// The route enqueues via `getJobQueue()`, the worker processes via `jobQueue`.
+// Both share this same mock so `createJob`/`startJob`/`updateJobStatus` all hit
+// the same in-memory `jobs` store the fake DB reads from.
+const mockQueue = {
+  createJob: async (params: {
+    ownerId: string;
+    bookId?: string | null;
+    jobType: string;
+    creditsReserved?: number;
+    maxRetries?: number;
+    result?: string | Record<string, unknown>;
+  }) => {
+    const id = nextId('job');
+    jobs[id] = {
+      id,
+      ownerId: params.ownerId,
+      bookId: params.bookId ?? null,
+      jobType: params.jobType,
+      status: 'queued',
+      result: params.result ? (typeof params.result === 'string' ? params.result : JSON.stringify(params.result)) : '{}',
+      progressMessage: 'Queued...',
+      progressPercent: 0,
+      errorMessage: null,
+    };
+    return id;
+  },
+  startJob: async () => {},
+  updateJobStatus: async (jobId: string, update: {
+    status?: string;
+    progressMessage?: string;
+    progressPercent?: number;
+    errorMessage?: string;
+    result?: unknown;
+  }) => {
+    const job = jobs[jobId];
+    if (!job) throw new Error(`no such job ${jobId}`);
+    if (update.status) job.status = update.status;
+    if (update.progressMessage) job.progressMessage = update.progressMessage;
+    if (update.progressPercent !== undefined) job.progressPercent = update.progressPercent;
+    if (update.errorMessage) job.errorMessage = update.errorMessage;
+    if (update.result !== undefined) {
+      job.result = typeof update.result === 'string' ? update.result : JSON.stringify(update.result);
+    }
+  },
+};
+
+jest.mock('@/lib/workers/queue', () => ({
+  getJobQueue: () => mockQueue,
+  jobQueue: mockQueue,
+}));
 
 // ── Mocked LLM ───────────────────────────────────────────────────────────────
 // Simulates a real model: window 0 returns a rich cast; later windows return

@@ -27,10 +27,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getJobQueue } from '@/lib/workers/queue';
 
-export const maxDuration = 60;
+// Long-running job types (e.g. manuscript import) mine one LLM window per
+// invocation, so give the pump a comfortable budget (Vercel Pro honors 300s).
+export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
-const DEADLINE_MS = 50_000; // leave headroom under maxDuration for the response
+const DEADLINE_MS = 270_000; // leave headroom under maxDuration for the response
 
 function isAuthorized(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET;

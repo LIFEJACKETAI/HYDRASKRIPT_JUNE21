@@ -371,57 +371,86 @@ export async function importManuscriptToStoryBible(bookId: string | null, file: 
   if (bookId) formData.append('bookId', bookId);
   formData.append('file', file);
 
-  // The server extracts entities with a synchronous LLM call, so a full book
-  // can take several minutes. Time out just inside the server maxDuration and
-  // surface a friendly message instead of a raw `Failed to fetch`.
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 280_000);
+  // POST is async now: the route enqueues a background job and returns a jobId
+  // immediately. We then poll until the job completes (a full novel can take
+  // several minutes, split across many queue invocations). No request is ever
+  // held open past the serverless budget, so no more 504 timeouts.
   try {
     const response = await fetch('/api/story-bible/import-manuscript', {
       method: 'POST',
       body: formData,
-      signal: controller.signal,
     });
 
     const contentType = response.headers.get('content-type') ?? '';
     if (!contentType.includes('application/json')) {
-      if (response.status === 504 || response.status === 502 || response.status === 503) {
-        return {
-          success: false as const,
-          error:
-            'The server timed out while reading that manuscript. Try a smaller file (or .txt instead of .pdf), keep this tab open, and try again.',
-        };
-      }
       return { success: false as const, error: `Import failed (server error ${response.status}). Please try again.` };
     }
 
     const body = (await response.json()) as {
       success: boolean;
-      data?: ManuscriptImportResult;
+      data?: { jobId?: string; fileName?: string; bookId?: string };
       error?: string;
     };
-    if (!response.ok && body.success !== true) {
-      return {
-        success: false as const,
-        error: body.error || `Import failed (server error ${response.status}). Please try again.`,
-      };
+    if (!response.ok || body.success !== true) {
+      return { success: false as const, error: body.error || `Import failed (server error ${response.status}). Please try again.` };
     }
-    return body;
+
+    const jobId = body.data?.jobId;
+    if (!jobId) {
+      // Legacy/direct response (should not happen with the async route):
+      return { success: false as const, error: 'The import did not return a job id. Please refresh and retry.' };
+    }
+
+    // Poll the job until it reaches a terminal state.
+    const maxWaitMs = 40 * 60 * 1000; // give a 500k-char novel ~40 minutes
+    const pollEveryMs = 5000;
+    const started = Date.now();
+
+    while (Date.now() - started < maxWaitMs) {
+      await new Promise((resolve) => setTimeout(resolve, pollEveryMs));
+
+      let poll: Response;
+      try {
+        poll = await fetch(`/api/story-bible/import-manuscript?jobId=${encodeURIComponent(jobId)}`);
+      } catch {
+        continue; // transient network blip — keep polling
+      }
+
+      const pollBody = (await poll.json().catch(() => null)) as {
+        success?: boolean;
+        status?: string;
+        error?: string;
+        data?: ManuscriptImportResult;
+        progressMessage?: string;
+        progressPercent?: number;
+      } | null;
+
+      if (!pollBody) continue;
+
+      if (pollBody.status === 'completed' && pollBody.data) {
+        return { success: true as const, data: pollBody.data };
+      }
+      if (pollBody.status === 'failed') {
+        return { success: false as const, error: pollBody.error || 'The manuscript import failed. Please try again.' };
+      }
+      if (pollBody.status === 'queued' || pollBody.status === 'active') {
+        // Still running — keep waiting. Progress is visible server-side.
+        continue;
+      }
+    }
+
+    return {
+      success: false as const,
+      error: 'The import is taking longer than expected. Keep this tab open, or refresh the Story Bible in a few minutes to see the results.',
+    };
   } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') {
-      return {
-        success: false as const,
-        error:
-          'The import is taking longer than expected and was stopped. Try a smaller file (or .txt instead of .pdf) and keep this tab open while it processes.',
-      };
-    }
     return {
       success: false as const,
       error:
-        'Lost connection to the server during upload (network changed or dropped). Check your connection, keep this tab open, and try again.',
+        err instanceof Error && err.name === 'AbortError'
+          ? 'The import was stopped. Try again with the tab kept open.'
+          : 'Lost connection to the server during upload (network changed or dropped). Check your connection and try again.',
     };
-  } finally {
-    clearTimeout(timeout);
   }
 }
 

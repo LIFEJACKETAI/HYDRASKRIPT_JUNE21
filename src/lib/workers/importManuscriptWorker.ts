@@ -148,6 +148,15 @@ export async function importManuscriptWorker(job: { id: string }): Promise<void>
   const state = parseState(jobRow.result);
   if (!state.text) throw new Error(`Import job ${job.id} has no manuscript payload`);
 
+  // Lazily compute the window count on the first claim (POST only stores the
+  // text; the windowing grid is cheap and deterministic to recompute).
+  if (state.windowsTotal === 0) {
+    state.windowsTotal = splitManuscriptWindows(state.text, WINDOW_CHARS, OVERLAP_CHARS).length;
+    if (state.windowsTotal === 0) {
+      throw new Error('Manuscript text is empty — nothing to analyze.');
+    }
+  }
+
   // ── Phase 1: mine windows one at a time ───────────────────────────────────
   if (state.nextWindow < state.windowsTotal) {
     const windows = splitManuscriptWindows(state.text, WINDOW_CHARS, OVERLAP_CHARS);
