@@ -12,7 +12,7 @@ export type ChapterStatus = 'pending' | 'writing' | 'reviewing' | 'completed' | 
 export type JobStatus = 'queued' | 'active' | 'completed' | 'failed';
 export type JobType = 'generate_outline' | 'write_chapter' | 'generate_image' | 'generate_audiobook' | 'export_pdf' | 'finalize_book' | 'editorial_review' | 'import_manuscript';
 export type AssetType = 'cover' | 'illustration' | 'coloring_page' | 'audiobook_chapter' | 'audiobook_complete' | 'pdf_export';
-export type Genre = 'fiction' | 'non-fiction' | 'fantasy' | 'sci-fi' | 'mystery' | 'romance' | 'horror' | 'children' | 'young-adult' | 'coloring' | 'poetry' | 'self-help' | 'biography';
+export type Genre = 'fiction' | 'non-fiction' | 'fantasy' | 'sci-fi' | 'mystery' | 'romance' | 'horror' | 'children' | 'young-adult' | 'coloring' | 'poetry' | 'self-help' | 'biography' | 'noir' | 'thriller';
 
 export type ColoringTheme = 'mandalas' | 'undersea-creatures' | 'birds' | 'animals-of-the-wild' | 'famous-landmarks' | 'exotic-sports-cars' | 'flowers-gardens' | 'fantasy-dragons' | 'zen-patterns' | 'architectural-details' | 'butterflies-insects' | 'vintage-botanicals';
 
@@ -270,6 +270,18 @@ export const GENERATION_FLAVOR: Record<string, string[]> = {
     'The detective is following leads...',
     'Secrets are lurking in the shadows...',
     'The truth is slowly unraveling...',
+  ],
+  noir: [
+    'Shadows lengthen on rain-slicked streets...',
+    'A cigarette burns in the dark...',
+    'The dame walked in with trouble in her eyes...',
+    'The city keeps its secrets close...',
+  ],
+  thriller: [
+    'The clock is ticking...',
+    'Every corner hides a threat...',
+    'The hunter becomes the hunted...',
+    'The truth is more dangerous than the lie...',
   ],
   children: [
     'Rainbows are painting the sky...',

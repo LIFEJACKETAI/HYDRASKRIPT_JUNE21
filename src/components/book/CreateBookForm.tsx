@@ -28,6 +28,8 @@ const GENRES: { value: Genre; label: string }[] = [
   { value: 'fantasy',   label: 'Fantasy' },
   { value: 'sci-fi',    label: 'Science Fiction' },
   { value: 'mystery',   label: 'Mystery' },
+  { value: 'thriller',  label: 'Thriller' },
+  { value: 'noir',      label: 'Noir' },
   { value: 'romance',   label: 'Romance' },
   { value: 'horror',    label: 'Horror' },
   { value: 'children',  label: "Children's" },

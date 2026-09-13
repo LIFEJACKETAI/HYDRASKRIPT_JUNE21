@@ -88,6 +88,8 @@ const GENRES = [
   { value: 'fantasy', label: 'Fantasy' },
   { value: 'sci-fi', label: 'Science Fiction' },
   { value: 'mystery', label: 'Mystery' },
+  { value: 'thriller', label: 'Thriller' },
+  { value: 'noir', label: 'Noir' },
   { value: 'romance', label: 'Romance' },
   { value: 'horror', label: 'Horror' },
   { value: 'children', label: "Children's" },
@@ -96,7 +98,6 @@ const GENRES = [
   { value: 'non-fiction', label: 'Non-Fiction' },
   { value: 'self-help', label: 'Self-Help' },
   { value: 'biography', label: 'Biography' },
-  { value: 'thriller', label: 'Thriller' },
 ];
 
 const AUDIENCES = [

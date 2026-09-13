@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Plus, RefreshCw, Trash2, Pencil, Library, BookOpen, Upload, FileText, Loader2 } from 'lucide-react';
+import { Plus, RefreshCw, Trash2, Pencil, Library, BookOpen, Upload, FileText, Loader2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -18,6 +18,7 @@ import {
   listStoryBibleEntities,
   deleteStoryBibleEntity,
   importManuscriptToStoryBible,
+  autoPopulateStoryBibleAndUniverse,
   type BookData,
   type StoryBibleEntity,
   type StoryBibleKind,
@@ -63,10 +64,13 @@ export default function StoryBible() {
   const [activeKind, setActiveKind] = useState<StoryBibleKind>('CHARACTER');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const [editorOpen, setEditorOpen] = useState(false);
+const [editorOpen, setEditorOpen] = useState(false);
   const [editingEntity, setEditingEntity] = useState<StoryBibleEntity | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<StoryBibleEntity | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Auto-populate
+  const [autoPopulating, setAutoPopulating] = useState(false);
 
   // Manuscript upload
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -117,6 +121,25 @@ export default function StoryBible() {
           ? ` · still empty: ${data.emptyKinds.map((k) => KIND_CONFIG[k]?.label ?? k).join(', ')}`
           : ''),
     });
+  };
+
+  const handleAutoPopulate = async () => {
+    if (!selectedBookId) return;
+    setAutoPopulating(true);
+    try {
+      const result = await autoPopulateStoryBibleAndUniverse(selectedBookId);
+      toast({
+        title: 'Auto-populate started!',
+        description: `Story Bible extraction and Editorial Review (Universe) have been queued. This may take a few minutes — keep the tab open.`,
+      });
+      // Refresh after a short delay to show new entities
+      setTimeout(() => reload(), 3000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Auto-populate failed';
+      toast({ title: 'Auto-populate failed', description: msg, variant: 'destructive' });
+    } finally {
+      setAutoPopulating(false);
+    }
   };
 
   const currentBook = books.find((b) => b.id === selectedBookId) ?? null;
@@ -471,9 +494,25 @@ export default function StoryBible() {
               </>
             )}
           </Button>
-          <Button onClick={() => { setEditingEntity(null); setEditorOpen(true); }} className="btn-gradient">
-            <Plus className="h-4 w-4 mr-2" /> Add {cfg.singular}
-          </Button>
+          {currentBook && (
+            <Button
+              variant="outline"
+              onClick={handleAutoPopulate}
+              disabled={autoPopulating || uploading}
+              className="border-purple-500/40 text-purple-300 hover:bg-purple-500/10"
+              title="Assemble manuscript from chapters and auto-populate Story Bible + Universe (Editorial Review)"
+            >
+              {autoPopulating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Auto-populating…
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4 mr-2" /> Auto-populate
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 

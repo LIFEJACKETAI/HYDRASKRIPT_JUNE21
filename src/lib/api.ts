@@ -643,3 +643,21 @@ export async function deleteEditorialReview(id: string) {
     method: 'DELETE',
   });
 }
+
+export interface AutoPopulateResult {
+  storyBibleJobId: string;
+  editorialReviewId: string | null;
+}
+
+export async function autoPopulateStoryBibleAndUniverse(bookId: string): Promise<AutoPopulateResult> {
+  const response = await fetch('/api/story-bible/auto-populate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bookId }),
+  });
+  const body = await response.json();
+  if (!response.ok || !body.success) {
+    throw new Error(body.error || 'Auto-populate failed');
+  }
+  return body.data;
+}
