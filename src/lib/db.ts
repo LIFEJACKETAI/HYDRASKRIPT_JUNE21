@@ -13,6 +13,8 @@ const globalForPrisma = globalThis as unknown as {
 // uselibpqcompat=true restores standard libpq semantics where sslmode=require
 // means "encrypt, do not verify". We rewrite the connection string at runtime
 // so this works regardless of what is stored in DATABASE_URL.
+// CRITICAL: For Vercel/serverless, USE TRANSACTION POOLER (port 6543), not
+// direct connection (port 5432). Session mode has 15-connection hard limit.
 export function resolveConnectionString(raw?: string): string | undefined {
   if (!raw) return undefined
   if (!/supabase\.(co|com)/.test(raw)) return raw
@@ -20,6 +22,11 @@ export function resolveConnectionString(raw?: string): string | undefined {
     const u = new URL(raw)
     u.searchParams.set('sslmode', 'require')
     u.searchParams.set('uselibpqcompat', 'true')
+    // Force transaction pooler for serverless: port 6543 instead of 5432
+    // This avoids the "max clients reached" error in session mode
+    if (u.port === '5432' || u.port === '') {
+      u.port = '6543'
+    }
     return u.toString()
   } catch {
     return raw
@@ -28,8 +35,8 @@ export function resolveConnectionString(raw?: string): string | undefined {
 
 // Prisma 7+ - Requires a driver adapter for PostgreSQL
 // Configure connection pool for Supabase
-// Supabase free tier: ~60 connections, paid: 100-500+
-// Reserve connections for: API routes (10), Queue workers (5), Prisma (15), Buffer (5)
+// Supabase free tier: ~60 connections via transaction pooler (port 6543)
+// For Vercel serverless: keep pool small (1-3) per instance
 const pool = new Pool({
   connectionString: resolveConnectionString(process.env.DATABASE_URL),
   // Belt and braces: if the URL rewrite above ever fails to parse, this still
@@ -38,9 +45,9 @@ const pool = new Pool({
     ? { rejectUnauthorized: false }
     : undefined,
   min: 1,
-  max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10),
-  idleTimeoutMillis: 60000,
-  connectionTimeoutMillis: 30000,
+  max: parseInt(process.env.DATABASE_POOL_MAX || '3', 10), // Reduced for serverless
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 15000,
 })
 
 const adapter = new PrismaPg(pool)

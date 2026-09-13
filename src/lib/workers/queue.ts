@@ -65,7 +65,7 @@ export function kickQueuePump(): void {
 
 class PersistentJobQueue {
   private isProcessing = false;
-  private maxConcurrent = 2;
+  private maxConcurrent = 1; // Reduced from 2 to limit DB connections on serverless
   private activeJobs = 0;
   private bootstrapped = false;
   private loopStarted = false;
