@@ -470,10 +470,14 @@ export async function importManuscriptToStoryBible(bookId: string | null, file: 
       return { success: false as const, error: body.error || `Import failed (server error ${response.status}). Please try again.` };
     }
 
-    jobId = body.data?.jobId!;
-    fileName = body.data?.fileName!;
-    resolvedBookId = body.data?.bookId!;
-    newBookCreated = body.data?.newBookCreated ?? false;
+    if (!body.data?.jobId || !body.data?.fileName || !body.data?.bookId) {
+      return { success: false as const, error: 'The import did not return required data. Please refresh and retry.' };
+    }
+
+    jobId = body.data.jobId;
+    fileName = body.data.fileName;
+    resolvedBookId = body.data.bookId;
+    newBookCreated = body.data.newBookCreated ?? false;
   }
 
   if (!jobId) {

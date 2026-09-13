@@ -14,13 +14,13 @@ const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'hydraskr
 
 // ─── Cloudflare R2 ──────────────────────────────────────────────────────────
 
-function isR2Enabled() {
+export function isR2Enabled() {
   return Boolean(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_KEY);
 }
 
 let _r2Client: S3Client | null = null;
 
-function getR2Client(): S3Client {
+export function getR2Client(): S3Client {
   if (!_r2Client) {
     _r2Client = new S3Client({
       region: 'auto',
@@ -34,7 +34,7 @@ function getR2Client(): S3Client {
   return _r2Client;
 }
 
-function getR2PublicUrl(): string {
+export function getR2PublicUrl(): string {
   return process.env.R2_PUBLIC_URL || '';
 }
 

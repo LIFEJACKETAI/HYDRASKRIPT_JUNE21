@@ -5,7 +5,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { generateFilename } from '@/lib/utils/storage';
+import { generateFilename, getR2Client, isR2Enabled, getR2PublicUrl } from '@/lib/utils/storage';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,19 +77,9 @@ export async function POST(request: NextRequest) {
       uploadUrl = data.signedUrl;
       publicUrl = `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${storagePath}`;
       storageProvider = 'supabase';
-    } else if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_KEY) {
+    } else if (isR2Enabled()) {
       // Use Cloudflare R2 presigned URL
-      const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
-      const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
-
-      const r2Client = new S3Client({
-        region: 'auto',
-        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-        credentials: {
-          accessKeyId: process.env.R2_ACCESS_KEY_ID,
-          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-        },
-      });
+      const r2Client = getR2Client();
 
       const command = new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_KEY,
@@ -96,7 +88,7 @@ export async function POST(request: NextRequest) {
       });
 
       uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 3600 }); // 1 hour
-      publicUrl = `${process.env.R2_PUBLIC_URL}/${storagePath}`;
+      publicUrl = `${getR2PublicUrl()}/${storagePath}`;
       storageProvider = 'r2';
     } else {
       // Local development fallback - return a local upload endpoint
