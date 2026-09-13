@@ -1,6 +1,10 @@
+
 // HydraSkript - LLM Client
 // Uses OpenRouter REST API directly (no SDK required)
 // MUST be used in backend code only
+
+import { getAppBaseUrl } from '@/lib/stripe';
+
 
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
@@ -98,7 +102,7 @@ export async function generateCompletion(options: CompletionOptions): Promise<st
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'http://localhost:3000', // Required by OpenRouter
+          'HTTP-Referer': getAppBaseUrl(), // Required by OpenRouter — must match the running server's port
           'X-Title': 'HydraSkript', // Optional but recommended
         },
         body: JSON.stringify({
