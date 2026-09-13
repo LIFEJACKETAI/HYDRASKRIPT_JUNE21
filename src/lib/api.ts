@@ -355,27 +355,102 @@ export interface ManuscriptImportResult {
   truncated?: boolean;
   /** Story-bible sections (kinds) that still have no entries after the import. */
   emptyKinds?: StoryBibleKind[];
+  /** Storage path of the original uploaded file (for reference). */
+  storagePath?: string;
 }
 
 export async function importManuscriptToStoryBible(bookId: string | null, file: File) {
-  // Fail fast on oversized files instead of hanging until the proxy 504s.
-  // Vercel caps serverless request payloads at 4.5 MB, so keep this under it.
-  if (file.size > 4 * 1024 * 1024) {
+  const MAX_DIRECT_UPLOAD = 4 * 1024 * 1024; // 4 MB - Vercel serverless limit
+  const MAX_PRESIGNED_UPLOAD = 25 * 1024 * 1024; // 25 MB - presigned URL limit
+
+  if (file.size > MAX_PRESIGNED_UPLOAD) {
     return {
       success: false as const,
-      error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — this hosting accepts manuscripts up to 4 MB. Try splitting the file into parts, converting to .txt, or trimming it.`,
+      error: `That file is ${(file.size / 1024 / 1024).toFixed(1)} MB — the maximum supported size is 25 MB. Try splitting the file or converting to .txt.`,
     };
   }
 
-  const formData = new FormData();
-  if (bookId) formData.append('bookId', bookId);
-  formData.append('file', file);
+  // For files larger than 4 MB, use presigned URL upload to bypass Vercel's payload limit
+  const usePresignedUrl = file.size > MAX_DIRECT_UPLOAD;
 
-  // POST is async now: the route enqueues a background job and returns a jobId
-  // immediately. We then poll until the job completes (a full novel can take
-  // several minutes, split across many queue invocations). No request is ever
-  // held open past the serverless budget, so no more 504 timeouts.
-  try {
+  let jobId: string;
+  let fileName: string;
+  let resolvedBookId: string;
+  let newBookCreated: boolean;
+
+  if (usePresignedUrl) {
+    // Step 1: Get presigned upload URL
+    const uploadUrlResponse = await fetch('/api/story-bible/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileSize: file.size,
+        contentType: file.type,
+      }),
+    });
+
+    const uploadUrlData = await uploadUrlResponse.json();
+    if (!uploadUrlResponse.ok || !uploadUrlData.success) {
+      return { success: false as const, error: uploadUrlData.error || 'Failed to get upload URL' };
+    }
+
+    const { uploadUrl, publicUrl, storagePath, storageProvider } = uploadUrlData.data;
+
+    // Step 2: Upload file directly to storage
+    let uploadResponse: Response;
+    if (storageProvider === 'local') {
+      // Local endpoint expects multipart/form-data
+      const formData = new FormData();
+      formData.append('file', file);
+      if (bookId) formData.append('bookId', bookId);
+      formData.append('storagePath', storagePath);
+      uploadResponse = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData,
+      });
+    } else {
+      // Supabase (POST) or R2 (PUT) - file directly in body
+      uploadResponse = await fetch(uploadUrl, {
+        method: storageProvider === 'supabase' ? 'POST' : 'PUT',
+        body: file,
+        headers: storageProvider === 'supabase' ? {} : { 'Content-Type': file.type },
+      });
+    }
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error('[importManuscriptToStoryBible] Storage upload failed:', errorText);
+      return { success: false as const, error: 'Failed to upload file to storage. Please try again.' };
+    }
+
+    // Step 3: Call import endpoint with storage path
+    const importResponse = await fetch('/api/story-bible/import-manuscript', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        bookId,
+        storagePath,
+        fileName: file.name,
+        fileSize: file.size,
+      }),
+    });
+
+    const importResult = await importResponse.json();
+    if (!importResponse.ok || !importResult.success) {
+      return { success: false as const, error: importResult.error || 'Import failed' };
+    }
+
+    jobId = importResult.data.jobId;
+    fileName = importResult.data.fileName;
+    resolvedBookId = importResult.data.bookId;
+    newBookCreated = importResult.data.newBookCreated;
+  } else {
+    // Direct upload for small files (≤ 4 MB)
+    const formData = new FormData();
+    if (bookId) formData.append('bookId', bookId);
+    formData.append('file', file);
+
     const response = await fetch('/api/story-bible/import-manuscript', {
       method: 'POST',
       body: formData,
@@ -388,70 +463,65 @@ export async function importManuscriptToStoryBible(bookId: string | null, file: 
 
     const body = (await response.json()) as {
       success: boolean;
-      data?: { jobId?: string; fileName?: string; bookId?: string };
+      data?: { jobId?: string; fileName?: string; bookId?: string; newBookCreated?: boolean };
       error?: string;
     };
     if (!response.ok || body.success !== true) {
       return { success: false as const, error: body.error || `Import failed (server error ${response.status}). Please try again.` };
     }
 
-    const jobId = body.data?.jobId;
-    if (!jobId) {
-      // Legacy/direct response (should not happen with the async route):
-      return { success: false as const, error: 'The import did not return a job id. Please refresh and retry.' };
-    }
-
-    // Poll the job until it reaches a terminal state.
-    const maxWaitMs = 40 * 60 * 1000; // give a 500k-char novel ~40 minutes
-    const pollEveryMs = 5000;
-    const started = Date.now();
-
-    while (Date.now() - started < maxWaitMs) {
-      await new Promise((resolve) => setTimeout(resolve, pollEveryMs));
-
-      let poll: Response;
-      try {
-        poll = await fetch(`/api/story-bible/import-manuscript?jobId=${encodeURIComponent(jobId)}`);
-      } catch {
-        continue; // transient network blip — keep polling
-      }
-
-      const pollBody = (await poll.json().catch(() => null)) as {
-        success?: boolean;
-        status?: string;
-        error?: string;
-        data?: ManuscriptImportResult;
-        progressMessage?: string;
-        progressPercent?: number;
-      } | null;
-
-      if (!pollBody) continue;
-
-      if (pollBody.status === 'completed' && pollBody.data) {
-        return { success: true as const, data: pollBody.data };
-      }
-      if (pollBody.status === 'failed') {
-        return { success: false as const, error: pollBody.error || 'The manuscript import failed. Please try again.' };
-      }
-      if (pollBody.status === 'queued' || pollBody.status === 'active') {
-        // Still running — keep waiting. Progress is visible server-side.
-        continue;
-      }
-    }
-
-    return {
-      success: false as const,
-      error: 'The import is taking longer than expected. Keep this tab open, or refresh the Story Bible in a few minutes to see the results.',
-    };
-  } catch (err) {
-    return {
-      success: false as const,
-      error:
-        err instanceof Error && err.name === 'AbortError'
-          ? 'The import was stopped. Try again with the tab kept open.'
-          : 'Lost connection to the server during upload (network changed or dropped). Check your connection and try again.',
-    };
+    jobId = body.data?.jobId!;
+    fileName = body.data?.fileName!;
+    resolvedBookId = body.data?.bookId!;
+    newBookCreated = body.data?.newBookCreated ?? false;
   }
+
+  if (!jobId) {
+    return { success: false as const, error: 'The import did not return a job id. Please refresh and retry.' };
+  }
+
+  // Poll the job until it reaches a terminal state.
+  const maxWaitMs = 40 * 60 * 1000; // give a 500k-char novel ~40 minutes
+  const pollEveryMs = 5000;
+  const started = Date.now();
+
+  while (Date.now() - started < maxWaitMs) {
+    await new Promise((resolve) => setTimeout(resolve, pollEveryMs));
+
+    let poll: Response;
+    try {
+      poll = await fetch(`/api/story-bible/import-manuscript?jobId=${encodeURIComponent(jobId)}`);
+    } catch {
+      continue; // transient network blip — keep polling
+    }
+
+    const pollBody = (await poll.json().catch(() => null)) as {
+      success?: boolean;
+      status?: string;
+      error?: string;
+      data?: ManuscriptImportResult;
+      progressMessage?: string;
+      progressPercent?: number;
+    } | null;
+
+    if (!pollBody) continue;
+
+    if (pollBody.status === 'completed' && pollBody.data) {
+      return { success: true as const, data: pollBody.data };
+    }
+    if (pollBody.status === 'failed') {
+      return { success: false as const, error: pollBody.error || 'The manuscript import failed. Please try again.' };
+    }
+    if (pollBody.status === 'queued' || pollBody.status === 'active') {
+      // Still running — keep waiting. Progress is visible server-side.
+      continue;
+    }
+  }
+
+  return {
+    success: false as const,
+    error: 'The import is taking longer than expected. Keep this tab open, or refresh the Story Bible in a few minutes to see the results.',
+  };
 }
 
 export interface IdeaTransferInput {

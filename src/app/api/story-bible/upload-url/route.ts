@@ -1,0 +1,126 @@
+// HydraSkript - Presigned Upload URL for Manuscripts
+// Returns a presigned URL for direct upload to Supabase Storage or R2,
+// bypassing the 4.5 MB Vercel serverless payload limit.
+
+import { NextRequest, NextResponse } from 'next/server';
+import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
+import { supabaseAdmin } from '@/lib/supabase';
+import { generateFilename } from '@/lib/utils/storage';
+
+export const dynamic = 'force-dynamic';
+
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
+const SUPPORTED_EXTENSIONS = new Set(['txt', 'pdf', 'docx']);
+
+export async function POST(request: NextRequest) {
+  try {
+    const { profile } = await requireProfile(request);
+
+    const body = await request.json();
+    const { fileName, fileSize, contentType } = body as {
+      fileName: string;
+      fileSize: number;
+      contentType?: string;
+    };
+
+    if (!fileName || typeof fileName !== 'string') {
+      return NextResponse.json({ success: false, error: 'fileName is required' }, { status: 400 });
+    }
+
+    if (!fileSize || typeof fileSize !== 'number') {
+      return NextResponse.json({ success: false, error: 'fileSize is required' }, { status: 400 });
+    }
+
+    if (fileSize > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { success: false, error: `File size ${(fileSize / 1024 / 1024).toFixed(1)} MB exceeds the 25 MB limit.` },
+        { status: 413 }
+      );
+    }
+
+    const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+    if (!SUPPORTED_EXTENSIONS.has(extension)) {
+      return NextResponse.json(
+        { success: false, error: 'Unsupported file type. Please upload a .txt, .pdf, or .docx file.' },
+        { status: 400 }
+      );
+    }
+
+    // Generate a unique storage path: manuscripts/{userId}/{timestamp}_{random}.{ext}
+    const uniqueFileName = generateFilename(`manuscript_${profile.id}`, extension);
+    const storagePath = `manuscripts/${profile.id}/${uniqueFileName}`;
+
+    let uploadUrl: string;
+    let publicUrl: string;
+    let storageProvider: 'supabase' | 'r2' | 'local';
+
+    // Priority: Supabase Storage → R2 → Local
+    const supabaseBucket = process.env.SUPABASE_STORAGE_BUCKET || 'hydraskript-assets';
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (supabaseUrl && supabaseServiceKey) {
+      // Use Supabase Storage signed URL
+      const { data, error } = await supabaseAdmin.storage
+        .from(supabaseBucket)
+        .createSignedUploadUrl(storagePath, {
+          upsert: false,
+        });
+
+      if (error || !data?.signedUrl) {
+        console.error('[UploadURL] Supabase signed URL failed:', error?.message);
+        throw new Error('Failed to create upload URL');
+      }
+
+      uploadUrl = data.signedUrl;
+      publicUrl = `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${storagePath}`;
+      storageProvider = 'supabase';
+    } else if (process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_KEY) {
+      // Use Cloudflare R2 presigned URL
+      const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+      const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+
+      const r2Client = new S3Client({
+        region: 'auto',
+        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        },
+      });
+
+      const command = new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_KEY,
+        Key: storagePath,
+        ContentType: contentType || 'application/octet-stream',
+      });
+
+      uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 3600 }); // 1 hour
+      publicUrl = `${process.env.R2_PUBLIC_URL}/${storagePath}`;
+      storageProvider = 'r2';
+    } else {
+      // Local development fallback - return a local upload endpoint
+      uploadUrl = `/api/story-bible/upload-local?path=${encodeURIComponent(storagePath)}`;
+      publicUrl = `/assets/${storagePath}`;
+      storageProvider = 'local';
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        uploadUrl,
+        publicUrl,
+        storagePath,
+        storageProvider,
+        expiresIn: 3600, // seconds
+      },
+    });
+  } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return unauthorizedResponse();
+    }
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[API/story-bible/upload-url] Failed:', message);
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}

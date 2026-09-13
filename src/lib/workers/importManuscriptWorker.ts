@@ -39,6 +39,8 @@ export interface ManuscriptImportState {
   text: string;
   bookId: string | null;
   newBookCreated: boolean;
+  /** Optional storage path for the original uploaded file (for reference). */
+  storagePath?: string;
   /** Index of the next window to mine (0-based). */
   nextWindow: number;
   windowsTotal: number;
@@ -66,6 +68,7 @@ function defaultState(): ManuscriptImportState {
     text: '',
     bookId: null,
     newBookCreated: false,
+    storagePath: undefined,
     nextWindow: 0,
     windowsTotal: 0,
     windowsFailed: 0,
@@ -86,6 +89,7 @@ function parseState(raw: string | null): ManuscriptImportState {
     state.text = parsed.text ?? '';
     state.bookId = parsed.bookId ?? null;
     state.newBookCreated = Boolean(parsed.newBookCreated);
+    state.storagePath = parsed.storagePath;
     state.nextWindow = Number(parsed.nextWindow) || 0;
     state.windowsTotal = Number(parsed.windowsTotal) || 0;
     state.windowsFailed = Number(parsed.windowsFailed) || 0;
@@ -318,6 +322,7 @@ async function finalizeImport(
     truncated: state.truncatedChars,
     emptyKinds,
     bookId: targetBookId,
+    storagePath: state.storagePath,
   };
 
   // Auto-populate the Universe (Editorial Review) for this manuscript. Non-fatal.

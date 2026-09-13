@@ -11,6 +11,18 @@ export async function extractTextFromManuscript(file: File, extension: string): 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
+  return extractTextFromBuffer(buffer, extension);
+}
+
+/**
+ * Extract text from a Buffer (for files downloaded from storage).
+ * Used by the import-manuscript worker when processing presigned URL uploads.
+ */
+export async function extractTextFromBuffer(buffer: Buffer, extension: string): Promise<string> {
+  if (extension === 'txt') {
+    return buffer.toString('utf-8');
+  }
+
   if (extension === 'docx') {
     const mammoth = await import('mammoth');
     const result = await mammoth.extractRawText({ buffer });
