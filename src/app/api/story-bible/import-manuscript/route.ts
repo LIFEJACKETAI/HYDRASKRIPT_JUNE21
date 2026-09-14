@@ -158,6 +158,7 @@ export async function POST(request: NextRequest) {
 
     // Mode 1: Direct multipart upload (small files ≤ 4 MB)
     if (contentType.includes('multipart/form-data')) {
+      try {
       const formData = await request.formData();
       const bookIdRaw = formData.get('bookId');
       const file = formData.get('file');
@@ -207,6 +208,7 @@ export async function POST(request: NextRequest) {
 
     // Mode 2: Presigned URL upload (JSON with storagePath) — for files up to 25 MB
     if (contentType.includes('application/json')) {
+      try {
       const body = await request.json();
       const { bookId, storagePath, fileName, fileSize } = body as {
         bookId?: string;
@@ -268,6 +270,7 @@ export async function POST(request: NextRequest) {
       const msg = uploadError instanceof Error ? uploadError.message : String(uploadError);
       console.error('[API/story-bible/import-manuscript] Presigned upload failed:', msg, uploadError instanceof Error ? uploadError.stack : '');
       return NextResponse.json({ success: false, error: msg }, { status: 500 });
+    }
     }
 
     return NextResponse.json({ success: false, error: 'Unsupported content type. Use multipart/form-data or application/json.' }, { status: 400 });

@@ -191,3 +191,26 @@ export async function askLLMJSON<T>(
     return JSON.parse(content) as T;
   });
 }
+
+/**
+ * Generate free-form text (chapter prose).
+ * Matches the askLLM(provider) interface used by fallback.ts across all
+ * providers (NVIDIA NIM, OpenRouter, Google Gemini, Mistral).
+ */
+export async function askLLM(
+  systemPrompt: string,
+  userPrompt: string,
+  temperature: number = 0.7,
+  model?: string,
+  maxTokens?: number
+): Promise<string> {
+  return generateCompletion({
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ],
+    temperature,
+    model,
+    maxTokens,
+  });
+}
