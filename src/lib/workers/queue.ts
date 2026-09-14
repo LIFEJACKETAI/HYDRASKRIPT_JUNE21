@@ -12,6 +12,9 @@ const HEARTBEAT_INTERVAL_MS = 60_000;
 const MAX_TRANSACTION_RETRIES = 3;
 const BASE_RETRY_DELAY_MS = 100;
 const MAX_RETRY_DELAY_MS = 2000;
+// Queue transaction timeout - LLM operations (editorial review, manuscript import) can take 60-120s
+// Uses same env var as Prisma client for consistency
+const QUEUE_TRANSACTION_TIMEOUT = parseInt(process.env.PRISMA_TRANSACTION_TIMEOUT || '120000', 10);
 
 type QueueWorkerJob = {
   id: string;
@@ -89,7 +92,7 @@ class PersistentJobQueue {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         return await db.$transaction(operation, {
-          timeout: 15000,
+          timeout: QUEUE_TRANSACTION_TIMEOUT,
           isolationLevel: 'ReadCommitted',
         });
       } catch (error) {

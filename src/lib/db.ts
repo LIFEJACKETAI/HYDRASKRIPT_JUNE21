@@ -58,8 +58,10 @@ const logConfig =
     : ['warn', 'error']
 
 // Transaction timeout: default 5s, increase for queue operations under load
+// LLM operations (editorial review, manuscript import) can take 60-120s
+// Set timeout to 120s to accommodate long-running operations
 const transactionOptions = {
-  timeout: parseInt(process.env.PRISMA_TRANSACTION_TIMEOUT || '15000', 10),
+  timeout: parseInt(process.env.PRISMA_TRANSACTION_TIMEOUT || '120000', 10),
   isolationLevel: 'ReadCommitted' as const,
 }
 
