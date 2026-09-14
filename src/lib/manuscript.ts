@@ -1,9 +1,10 @@
 // HydraSkript - Manuscript text extraction
 // Shared helper for extracting raw text from uploaded manuscript files.
 
-export const SUPPORTED_MANUSCRIPT_EXTENSIONS = new Set(['txt', 'pdf', 'docx']);
+// CRITICAL: Import DOMMatrix polyfill BEFORE pdf-parse/pdfjs-dist
+import '@/lib/dom-matrix-polyfill';
 
-export async function extractTextFromManuscript(file: File, extension: string): Promise<string> {
+export const SUPPORTED_MANUSCRIPT_EXTENSIONS = new Set(['txt', 'pdf', 'docx']);
   if (extension === 'txt') {
     return file.text();
   }
@@ -30,14 +31,20 @@ export async function extractTextFromBuffer(buffer: Buffer, extension: string): 
   }
 
   if (extension === 'pdf') {
-    const { PDFParse } = await import('pdf-parse');
-    const parser = new PDFParse({ data: new Uint8Array(buffer) });
-
     try {
-      const result = await parser.getText();
-      return result.text;
-    } finally {
-      await parser.destroy();
+      const { PDFParse } = await import('pdf-parse');
+      const parser = new PDFParse({ data: new Uint8Array(buffer) });
+
+      try {
+        const result = await parser.getText();
+        return result.text;
+      } finally {
+        await parser.destroy();
+      }
+    } catch (pdfError) {
+      const msg = pdfError instanceof Error ? pdfError.message : String(pdfError);
+      console.error('[extractTextFromBuffer] PDF parsing failed:', msg);
+      throw new Error(`Failed to parse PDF: ${msg}. The PDF may be corrupted, password-protected, or use unsupported features.`);
     }
   }
 

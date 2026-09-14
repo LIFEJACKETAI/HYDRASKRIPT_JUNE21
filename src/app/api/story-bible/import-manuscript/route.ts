@@ -198,6 +198,11 @@ export async function POST(request: NextRequest) {
           async: true,
         },
       });
+    } catch (uploadError) {
+      const msg = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      console.error('[API/story-bible/import-manuscript] Direct upload failed:', msg, uploadError instanceof Error ? uploadError.stack : '');
+      return NextResponse.json({ success: false, error: msg }, { status: 500 });
+    }
     }
 
     // Mode 2: Presigned URL upload (JSON with storagePath) — for files up to 25 MB
@@ -259,6 +264,10 @@ export async function POST(request: NextRequest) {
           async: true,
         },
       });
+    } catch (uploadError) {
+      const msg = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      console.error('[API/story-bible/import-manuscript] Presigned upload failed:', msg, uploadError instanceof Error ? uploadError.stack : '');
+      return NextResponse.json({ success: false, error: msg }, { status: 500 });
     }
 
     return NextResponse.json({ success: false, error: 'Unsupported content type. Use multipart/form-data or application/json.' }, { status: 400 });

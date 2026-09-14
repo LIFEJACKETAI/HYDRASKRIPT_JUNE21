@@ -1,5 +1,5 @@
 // HydraSkript - LLM fallback
-// Primary provider: NVIDIA NIM. Secondary: OpenRouter. Tertiary: Google Gemini.
+// Primary provider: NVIDIA NIM. Secondary: OpenRouter. Tertiary: Google Gemini. Quaternary: Mistral.
 // Used for both structured JSON generation and free-form text (chapter prose).
 //
 // Instead of trusting a single model id (which 410s when NVIDIA retires a model
@@ -10,6 +10,7 @@
 import { askLLMJSON, askLLM } from '@/lib/llm/openrouter';
 import { askLLMJSON as askLLMGeminiJSON, askLLM as askLLMGemini } from '@/lib/llm/google-gemini';
 import { askLLMJSON as askLLMNimJSON, askLLM as askLLMNim } from '@/lib/llm/nvidia-nim';
+import { askLLMJSON as askLLMMistralJSON, askLLM as askLLMMistral } from '@/lib/llm/mistral';
 
 // Model lists verified against the NVIDIA NIM, OpenRouter and Gemini catalogs
 // (live-tested 12 Sep 2026). Retired/renamed ids such as
@@ -54,6 +55,14 @@ const GEMINI_CHAIN = [
   process.env.GEMINI_TEXT_MODEL,
   'gemini-3.6-flash',
   'gemini-flash-latest',
+];
+
+// Mistral is the fourth provider — excellent for structured JSON and editorial tasks.
+// mistral-large-2411 is the current flagship; mistral-small-2503 is faster/cheaper.
+const MISTRAL_CHAIN = [
+  process.env.MISTRAL_MODEL,
+  'mistral-large-2411',
+  'mistral-small-2503',
 ];
 
 function buildChain(...models: (string | undefined | null)[]): string[] {
@@ -106,6 +115,7 @@ export async function askLLMJSONWithFallback<T>(
   const nimModels = buildChain(preferredModel, ...NIM_JSON_CHAIN);
   const orModels = buildChain(...OPENROUTER_JSON_CHAIN);
   const geminiModels = buildChain(...GEMINI_CHAIN);
+  const mistralModels = buildChain(...MISTRAL_CHAIN);
 
   try {
     return await tryModelChain('NVIDIA NIM', nimModels, (m) =>
@@ -129,19 +139,28 @@ export async function askLLMJSONWithFallback<T>(
         );
       } catch (geminiError) {
         const geminiMessage = geminiError instanceof Error ? geminiError.message : String(geminiError);
+        console.warn('[LLM] Gemini chain exhausted, falling back to Mistral:', geminiMessage);
 
-        // Surface a friendly safety-filter error if any attempt was content-blocked.
-        const safety = safetyMessage([nimMessage, orMessage, geminiMessage]);
-        if (safety) {
+        try {
+          return await tryModelChain('Mistral', mistralModels, (m) =>
+            askLLMMistralJSON<T>(systemPrompt, userPrompt, temperature, m)
+          );
+        } catch (mistralError) {
+          const mistralMessage = mistralError instanceof Error ? mistralError.message : String(mistralError);
+
+          // Surface a friendly safety-filter error if any attempt was content-blocked.
+          const safety = safetyMessage([nimMessage, orMessage, geminiMessage, mistralMessage]);
+          if (safety) {
+            throw new Error(
+              `Content flagged by safety filter: ${safety}. Try adjusting book themes or descriptions.`
+            );
+          }
+
           throw new Error(
-            `Content flagged by safety filter: ${safety}. Try adjusting book themes or descriptions.`
+            `Text generation failed across all providers. NVIDIA NIM: ${nimMessage}. ` +
+            `OpenRouter: ${orMessage}. Google Gemini: ${geminiMessage}. Mistral: ${mistralMessage}.`
           );
         }
-
-        throw new Error(
-          `Text generation failed across all providers. NVIDIA NIM: ${nimMessage}. ` +
-          `OpenRouter: ${orMessage}. Google Gemini: ${geminiMessage}.`
-        );
       }
     }
   }
@@ -149,7 +168,7 @@ export async function askLLMJSONWithFallback<T>(
 
 /**
  * Free-form text generation (chapter prose). Rotates through prose-optimized
- * models across NVIDIA NIM, OpenRouter, then Google Gemini. `maxTokens` must be
+ * models across NVIDIA NIM, OpenRouter, then Google Gemini, then Mistral. `maxTokens` must be
  * large enough for a full chapter.
  */
 export async function askLLMWithFallback(
@@ -162,6 +181,7 @@ export async function askLLMWithFallback(
   const nimModels = buildChain(preferredModel, ...NIM_PROSE_CHAIN);
   const orModels = buildChain(...OPENROUTER_PROSE_CHAIN);
   const geminiModels = buildChain(...GEMINI_CHAIN);
+  const mistralModels = buildChain(...MISTRAL_CHAIN);
 
   try {
     return await tryModelChain('NVIDIA NIM', nimModels, (m) =>
@@ -185,17 +205,26 @@ export async function askLLMWithFallback(
         );
       } catch (geminiError) {
         const geminiMessage = geminiError instanceof Error ? geminiError.message : String(geminiError);
-        const safety = safetyMessage([nimMessage, orMessage, geminiMessage]);
-        if (safety) {
+        console.warn('[LLM] Gemini prose chain exhausted, falling back to Mistral:', geminiMessage);
+
+        try {
+          return await tryModelChain('Mistral', mistralModels, (m) =>
+            askLLMMistral(systemPrompt, userPrompt, temperature, m, maxTokens)
+          );
+        } catch (mistralError) {
+          const mistralMessage = mistralError instanceof Error ? mistralError.message : String(mistralError);
+          const safety = safetyMessage([nimMessage, orMessage, geminiMessage, mistralMessage]);
+          if (safety) {
+            throw new Error(
+              `Content flagged by safety filter: ${safety}. Try adjusting book themes or descriptions.`
+            );
+          }
+
           throw new Error(
-            `Content flagged by safety filter: ${safety}. Try adjusting book themes or descriptions.`
+            `Text generation failed across all providers. NVIDIA NIM: ${nimMessage}. ` +
+            `OpenRouter: ${orMessage}. Google Gemini: ${geminiMessage}. Mistral: ${mistralMessage}.`
           );
         }
-
-        throw new Error(
-          `Text generation failed across all providers. NVIDIA NIM: ${nimMessage}. ` +
-          `OpenRouter: ${orMessage}. Google Gemini: ${geminiMessage}.`
-        );
       }
     }
   }

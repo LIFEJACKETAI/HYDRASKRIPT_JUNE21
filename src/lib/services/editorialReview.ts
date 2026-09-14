@@ -37,7 +37,7 @@ const MAX_PRIOR_CONTEXT_CHARS = 6000;
 const MAX_LEDGER_CHARS = 50000;
 const MAX_FINDINGS = 300;
 
-const REVIEW_MODEL = process.env.EDITORIAL_REVIEW_MODEL;
+const REVIEW_MODEL = process.env.EDITORIAL_REVIEW_MODEL || 'mistral-large-2411';
 
 // ─── Manuscript assembly ──────────────────────────────────────────────────────
 
