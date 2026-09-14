@@ -5,6 +5,8 @@
 import '@/lib/dom-matrix-polyfill';
 
 export const SUPPORTED_MANUSCRIPT_EXTENSIONS = new Set(['txt', 'pdf', 'docx']);
+
+export async function extractTextFromManuscript(file: File, extension: string): Promise<string> {
   if (extension === 'txt') {
     return file.text();
   }
