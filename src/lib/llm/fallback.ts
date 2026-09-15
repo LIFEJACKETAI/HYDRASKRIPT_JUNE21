@@ -18,19 +18,33 @@ import { askLLMJSON as askLLMMistralJSON, askLLM as askLLMMistral } from '@/lib/
 // and `mistralai/mistral-large-2-instruct` (404 on NIM), `minimax/minimax-m3:free`
 // (no longer free on OpenRouter) and `gemini-2.5-flash` (404 for new Google AI
 // projects) must NOT be used.
+//
+// IMPORTANT: NVIDIA NIM model IDs MUST include a provider prefix (e.g.
+// "nvidia/nemotron-3-super-120b-a12b", "google/gemma-4-31b-it").  A bare model
+// name like "mistral-large-2411" is a Mistral AI model — NOT a valid NIM ID —
+// and will 404 on the NIM endpoint.  The `isValidNimModel` guard below ensures
+// such values are filtered out of the NIM chains even when the env var is
+// misconfigured in production.
+
+function isValidNimModel(model: string): boolean {
+  // NIM model IDs always contain a "/" provider prefix.
+  return model.includes('/');
+}
 
 // NVIDIA NIM model chains (prefer the newest, strongest instruction followers).
+// Env vars are validated — a bare name like "mistral-large-2411" (which belongs
+// to the Mistral provider, not NIM) is silently dropped so the chain still works.
 const NIM_JSON_CHAIN = [
   process.env.NVIDIA_NIM_MODEL_JSON,
   'nvidia/nemotron-3-super-120b-a12b',
   'google/gemma-4-31b-it',
-];
+].filter((m) => !m || isValidNimModel(m));
 
 const NIM_PROSE_CHAIN = [
   process.env.NVIDIA_NIM_MODEL,
   'nvidia/nemotron-3-super-120b-a12b',
   'google/gemma-4-31b-it',
-];
+].filter((m) => !m || isValidNimModel(m));
 
 // OpenRouter free-tier model chains (these rotate as free models get rate-limited).
 const OPENROUTER_JSON_CHAIN = [
@@ -59,6 +73,9 @@ const GEMINI_CHAIN = [
 
 // Mistral is the fourth provider — excellent for structured JSON and editorial tasks.
 // mistral-large-2411 is the current flagship; mistral-small-2503 is faster/cheaper.
+// NOTE: mistral-large-2411 is a BARE model name (no provider prefix) — valid for the
+// Mistral API but invalid for NVIDIA NIM.  This chain is only used with the Mistral
+// provider, so bare names are correct here.
 const MISTRAL_CHAIN = [
   process.env.MISTRAL_MODEL,
   'mistral-large-2411',

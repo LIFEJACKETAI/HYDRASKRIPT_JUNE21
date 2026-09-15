@@ -43,7 +43,8 @@ export async function getBookWithChapters(bookId: string, ownerId: string) {
 }
 
 /**
- * List all books for a user.
+ * List all books for a user, including chapter metadata so the dashboard
+ * can display titles, statuses, and word counts without a second API call.
  */
 export async function listUserBooks(ownerId: string) {
   return db.book.findMany({
@@ -60,6 +61,19 @@ export async function listUserBooks(ownerId: string) {
       createdAt: true,
       _count: {
         select: { chapters: true },
+      },
+      chapters: {
+        orderBy: { index: 'asc' },
+        select: {
+          id: true,
+          index: true,
+          title: true,
+          synopsis: true,
+          wordTarget: true,
+          content: true,
+          wordCount: true,
+          status: true,
+        },
       },
     },
     orderBy: { createdAt: 'desc' },

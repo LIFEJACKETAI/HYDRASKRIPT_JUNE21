@@ -25,10 +25,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: books.map((book: (typeof books)[number]) => ({
         ...book,
-        chapters: Array.from({ length: book._count.chapters }, (_, index) => ({
-          id: `${book.id}-ch-${index}`,
-          index,
-        })),
+        chapters: book.chapters || [],
       })),
     });
   } catch (error) {

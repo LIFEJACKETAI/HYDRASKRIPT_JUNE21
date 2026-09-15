@@ -14,11 +14,31 @@ function getApiKey(): string {
   return apiKey;
 }
 
+// NVIDIA NIM model IDs always include a provider prefix, e.g. "nvidia/",
+// "google/", "mistralai/".  A bare name like "mistral-large-2411" is a raw
+// Mistral AI model — NOT valid for the NIM endpoint — and will 404.  This
+// guard ensures we never send a non-NIM model to the NIM API, even when the
+// env var is misconfigured (which has happened in production).
+function isValidNimModel(model: string): boolean {
+  return model.includes('/');
+}
+
 function getModel(): string {
   // Valid NVIDIA NIM models (Sep 2026). NOTE: meta/llama-3.1-8b-instruct and
   // meta/llama-3.1-70b-instruct have been retired (410 Gone). The fallback chain
   // in fallback.ts rotates through multiple valid models anyway.
-  return process.env.NVIDIA_NIM_MODEL || 'nvidia/nemotron-3-super-120b-a12b';
+  const envModel = process.env.NVIDIA_NIM_MODEL;
+  if (envModel && !isValidNimModel(envModel)) {
+    // The env var was set to a bare model name (e.g. "mistral-large-2411").
+    // That belongs to the Mistral provider, not NIM.  Fall back to the default
+    // so the fallback chain still works instead of 404-ing on the first try.
+    console.warn(
+      `[LLM] NVIDIA_NIM_MODEL="${envModel}" is not a valid NIM model ID ` +
+      '(missing provider prefix like "nvidia/"). Using default instead.'
+    );
+    return 'nvidia/nemotron-3-super-120b-a12b';
+  }
+  return envModel || 'nvidia/nemotron-3-super-120b-a12b';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────
