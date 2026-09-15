@@ -72,14 +72,19 @@ const GEMINI_CHAIN = [
 ];
 
 // Mistral is the fourth provider — excellent for structured JSON and editorial tasks.
-// mistral-large-2411 is the current flagship; mistral-small-2503 is faster/cheaper.
-// NOTE: mistral-large-2411 is a BARE model name (no provider prefix) — valid for the
-// Mistral API but invalid for NVIDIA NIM.  This chain is only used with the Mistral
+// Live-tested 14 Sep 2026 against api.mistral.ai:
+//   - `mistral-large-2411` returns HTTP 400 "Invalid model" — DO NOT USE.
+//   - `mistral-medium-latest`, `mistral-small-2503`, `mistral-small-latest` are valid
+//     (they reach rate-limiting, not model validation).
+//   - `mistral-large-latest` returns 403 tier_not_allowed on free/lower tiers.
+// NOTE: these are BARE model names (no provider prefix) — valid for the Mistral
+// API but invalid for NVIDIA NIM.  This chain is only used with the Mistral
 // provider, so bare names are correct here.
 const MISTRAL_CHAIN = [
   process.env.MISTRAL_MODEL,
-  'mistral-large-2411',
+  'mistral-medium-latest',
   'mistral-small-2503',
+  'mistral-small-latest',
 ];
 
 function buildChain(...models: (string | undefined | null)[]): string[] {
@@ -129,10 +134,15 @@ export async function askLLMJSONWithFallback<T>(
   temperature: number = 0.2,
   preferredModel?: string
 ): Promise<T> {
-  const nimModels = buildChain(preferredModel, ...NIM_JSON_CHAIN);
+  // `preferredModel` is a caller-curated model id (e.g. EDITORIAL_REVIEW_MODEL,
+  // usually a bare Mistral name). Bare names are ONLY valid for the Mistral API —
+  // sending them to NVIDIA NIM 404s (this was the production 404 noise). Guard
+  // the NIM chain from it, and prepend it to the Mistral chain where it belongs.
+  const nimPreferred = preferredModel && isValidNimModel(preferredModel) ? preferredModel : undefined;
+  const nimModels = buildChain(nimPreferred, ...NIM_JSON_CHAIN);
   const orModels = buildChain(...OPENROUTER_JSON_CHAIN);
   const geminiModels = buildChain(...GEMINI_CHAIN);
-  const mistralModels = buildChain(...MISTRAL_CHAIN);
+  const mistralModels = buildChain(preferredModel, ...MISTRAL_CHAIN);
 
   try {
     return await tryModelChain('NVIDIA NIM', nimModels, (m) =>
@@ -195,10 +205,13 @@ export async function askLLMWithFallback(
   maxTokens: number = 8192,
   preferredModel?: string
 ): Promise<string> {
-  const nimModels = buildChain(preferredModel, ...NIM_PROSE_CHAIN);
+  // Same guard as askLLMJSONWithFallback: never send a bare (non-NIM) model id
+  // to the NVIDIA NIM chain; prefer it on the Mistral chain instead.
+  const nimPreferred = preferredModel && isValidNimModel(preferredModel) ? preferredModel : undefined;
+  const nimModels = buildChain(nimPreferred, ...NIM_PROSE_CHAIN);
   const orModels = buildChain(...OPENROUTER_PROSE_CHAIN);
   const geminiModels = buildChain(...GEMINI_CHAIN);
-  const mistralModels = buildChain(...MISTRAL_CHAIN);
+  const mistralModels = buildChain(preferredModel, ...MISTRAL_CHAIN);
 
   try {
     return await tryModelChain('NVIDIA NIM', nimModels, (m) =>

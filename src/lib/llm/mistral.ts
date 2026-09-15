@@ -15,10 +15,10 @@ function getApiKey(): string {
 }
 
 function getModel(): string {
-  // Valid Mistral models (Sep 2026):
-  // mistral-large-2411 (latest large), mistral-small-2503, mistral-embed
-  // Codestral for code: codestral-2501
-  return process.env.MISTRAL_MODEL || 'mistral-large-2411';
+  // Valid Mistral models (live-tested 14 Sep 2026):
+  // mistral-medium-latest, mistral-small-2503, mistral-small-latest
+  // (`mistral-large-2411` returns HTTP 400 "Invalid model" — retired/renamed).
+  return process.env.MISTRAL_MODEL || 'mistral-medium-latest';
 }
 
 // ─── Retry with Exponential Backoff ───────────────────────────────────────────

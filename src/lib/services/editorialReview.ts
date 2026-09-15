@@ -37,7 +37,9 @@ const MAX_PRIOR_CONTEXT_CHARS = 6000;
 const MAX_LEDGER_CHARS = 50000;
 const MAX_FINDINGS = 300;
 
-const REVIEW_MODEL = process.env.EDITORIAL_REVIEW_MODEL || 'mistral-large-2411';
+// Live-verified 14 Sep 2026: `mistral-large-2411` is NOT a valid Mistral API id
+// (HTTP 400 "Invalid model"). `mistral-medium-latest` is valid and is the default.
+const REVIEW_MODEL = process.env.EDITORIAL_REVIEW_MODEL || 'mistral-medium-latest';
 
 // ─── Manuscript assembly ──────────────────────────────────────────────────────
 
