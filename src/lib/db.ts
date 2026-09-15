@@ -4,6 +4,16 @@ import { Pool } from 'pg'
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
+  pgPool: Pool | undefined
+}
+
+function isServerlessRuntime(): boolean {
+  return Boolean(
+    process.env.VERCEL ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.AWS_EXECUTION_ENV ||
+      process.env.FUNCTION_TARGET
+  )
 }
 
 // Modern `pg` treats sslmode=require as verify-full (full cert-chain
@@ -11,10 +21,12 @@ const globalForPrisma = globalThis as unknown as {
 // `ssl` option set in code. Supabase serves Postgres TLS from its own CA, so
 // Node rejects it ("self-signed certificate in certificate chain").
 // uselibpqcompat=true restores standard libpq semantics where sslmode=require
-// means "encrypt, do not verify". We rewrite the connection string at runtime
-// so this works regardless of what is stored in DATABASE_URL.
-// CRITICAL: For Vercel/serverless, USE TRANSACTION POOLER (port 6543), not
-// direct connection (port 5432). Session mode has 15-connection hard limit.
+// means "encrypt, do not verify".
+//
+// Direct connections (`db.<ref>.supabase.co:5432`) have a tiny session limit
+// (~15). On serverless we rewrite ONLY that host to the transaction pooler
+// port (6543). Session-mode pooler URLs (`*.pooler.supabase.com:5432`) and
+// URLs that are already on 6543 are left alone.
 export function resolveConnectionString(raw?: string): string | undefined {
   if (!raw) return undefined
   if (!/supabase\.(co|com)/.test(raw)) return raw
@@ -22,9 +34,8 @@ export function resolveConnectionString(raw?: string): string | undefined {
     const u = new URL(raw)
     u.searchParams.set('sslmode', 'require')
     u.searchParams.set('uselibpqcompat', 'true')
-    // Force transaction pooler for serverless: port 6543 instead of 5432
-    // This avoids the "max clients reached" error in session mode
-    if (u.port === '5432' || u.port === '') {
+    const isDirectDbHost = /^db\./i.test(u.hostname)
+    if (isDirectDbHost && (u.port === '5432' || u.port === '')) {
       u.port = '6543'
     }
     return u.toString()
@@ -33,28 +44,30 @@ export function resolveConnectionString(raw?: string): string | undefined {
   }
 }
 
-// Prisma 7+ - Requires a driver adapter for PostgreSQL
-// Configure connection pool for Supabase
-// Supabase free tier: ~60 connections via transaction pooler (port 6543)
-// For Vercel serverless: 6-10 per instance is safe for moderate traffic.
-const pool = new Pool({
-  connectionString: resolveConnectionString(process.env.DATABASE_URL),
-  // Belt and braces: if the URL rewrite above ever fails to parse, this still
-  // relaxes chain verification for Supabase hosts.
-  ssl: /supabase\.(co|com)/.test(process.env.DATABASE_URL ?? '')
-    ? { rejectUnauthorized: false }
-    : undefined,
-  min: 1,
-  max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10),
-  idleTimeoutMillis: 30000,
-  // How long the pg pool waits to establish a NEW physical connection before
-  // giving up. When the pool is saturated, new requests queue here first —
-  // if this is shorter than PRISMA_TRANSACTION_TIMEOUT, you get P2028 even
-  // though the Prisma transaction timeout is long enough.
-  // Keep this >= PRISMA_TRANSACTION_TIMEOUT so the connection timeout never
-  // fires before the transaction timeout.
-  connectionTimeoutMillis: parseInt(process.env.PRISMA_CONNECTION_TIMEOUT || process.env.PRISMA_TRANSACTION_TIMEOUT || '60000', 10),
-})
+function createPool(): Pool {
+  const serverless = isServerlessRuntime()
+  // One or two connections per serverless instance. A pool of 10 * dozens of
+  // warm lambdas exhausts Supabase and surfaces as Prisma P2028
+  // ("Unable to start a transaction in the given time").
+  const max = parseInt(
+    process.env.DATABASE_POOL_MAX || (serverless ? '2' : '10'),
+    10
+  )
+  return new Pool({
+    connectionString: resolveConnectionString(process.env.DATABASE_URL),
+    ssl: /supabase\.(co|com)/.test(process.env.DATABASE_URL ?? '')
+      ? { rejectUnauthorized: false }
+      : undefined,
+    min: 0,
+    max: Number.isFinite(max) && max > 0 ? max : serverless ? 2 : 10,
+    idleTimeoutMillis: serverless ? 10_000 : 30_000,
+    connectionTimeoutMillis: parseInt(process.env.PRISMA_CONNECTION_TIMEOUT || '10000', 10),
+    allowExitOnIdle: serverless,
+  })
+}
+
+const pool = globalForPrisma.pgPool ?? createPool()
+globalForPrisma.pgPool = pool
 
 const adapter = new PrismaPg(pool)
 
@@ -63,11 +76,12 @@ const logConfig =
     ? ['query', 'warn', 'error']
     : ['warn', 'error']
 
-// Transaction timeout: default 5s, increase for queue operations under load
-// LLM operations (editorial review, manuscript import) can take 60-120s
-// Set timeout to 120s to accommodate long-running operations
+// These options apply only to interactive `$transaction(async tx => ...)`
+// calls. LLM work must NEVER run inside a Prisma transaction — a 120s
+// timeout was holding pool connections and causing P2028 on heartbeats.
 const transactionOptions = {
-  timeout: parseInt(process.env.PRISMA_TRANSACTION_TIMEOUT || '120000', 10),
+  maxWait: parseInt(process.env.PRISMA_TRANSACTION_MAX_WAIT || '10000', 10),
+  timeout: parseInt(process.env.PRISMA_TRANSACTION_TIMEOUT || '15000', 10),
   isolationLevel: 'ReadCommitted' as const,
 }
 
@@ -79,16 +93,17 @@ export const db =
     transactionOptions,
   })
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+// Always cache on globalThis. Next.js (dev AND serverless) can evaluate this
+// module more than once per process; without the cache each evaluation opens
+// another pg Pool and we hit "max clients reached" / P2028.
+globalForPrisma.prisma = db
 
-// Export for use in queue - allows overriding timeout per-operation
 export { transactionOptions }
 
-// Graceful shutdown for pool
 if (process.env.NODE_ENV !== 'production') {
   const shutdown = async () => {
-    await pool.end();
-  };
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
+    await pool.end()
+  }
+  process.on('SIGTERM', shutdown)
+  process.on('SIGINT', shutdown)
 }

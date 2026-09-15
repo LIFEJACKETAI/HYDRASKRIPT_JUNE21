@@ -26,6 +26,24 @@ export async function updateChapterStatus(chapterId: string, status: ChapterStat
 }
 
 /**
+ * A book is exportable when it has chapter prose, or when generation marked
+ * it completed (coloring books may have illustrations with empty content).
+ */
+export function isBookExportable(book: {
+  status: string;
+  chapters?: { content?: string | null; illustrationUrl?: string | null }[];
+}): { ok: true } | { ok: false; error: string } {
+  const chapters = book.chapters ?? [];
+  const hasProse = chapters.some((c) => (c.content ?? '').trim().length > 0);
+  const hasArt = chapters.some((c) => Boolean(c.illustrationUrl));
+  if (hasProse || hasArt || book.status === 'completed') return { ok: true };
+  return {
+    ok: false,
+    error: 'This book has no chapter content to export yet. Generate the book or upload a manuscript first.',
+  };
+}
+
+/**
  * Get a book with all its chapters.
  */
 export async function getBookWithChapters(bookId: string, ownerId: string) {

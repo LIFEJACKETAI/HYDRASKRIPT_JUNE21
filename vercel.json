@@ -13,7 +13,7 @@
   "crons": [
     {
       "path": "/api/queue/pump",
-      "schedule": "0 6 * * *"
+      "schedule": "* * * * *"
     }
   ]
 }

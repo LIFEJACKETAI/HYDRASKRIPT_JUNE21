@@ -77,6 +77,7 @@ const [editorOpen, setEditorOpen] = useState(false);
   const newProjectFileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [newProjectUploading, setNewProjectUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ message?: string; percent?: number } | null>(null);
   const [uploadResult, setUploadResult] = useState<{
     fileName: string;
     counts: Record<string, number>;
@@ -84,6 +85,7 @@ const [editorOpen, setEditorOpen] = useState(false);
     duplicatesSkipped: number;
     portionsSkipped: number;
     emptyKinds: StoryBibleKind[];
+    chaptersSaved: number;
   } | null>(null);
 
   // ── Import result helpers ──────────────────────────────────────────────────
@@ -99,16 +101,24 @@ const [editorOpen, setEditorOpen] = useState(false);
       duplicatesSkipped: data.duplicatesSkipped ?? 0,
       portionsSkipped: data.portionsSkipped ?? 0,
       emptyKinds: data.emptyKinds ?? [],
+      chaptersSaved: data.chaptersSaved ?? 0,
     });
   };
+
+  const chapterNote = (data: ManuscriptImportResult) =>
+    data.chaptersSaved
+      ? ` · ${data.chaptersSaved} chapter${data.chaptersSaved === 1 ? '' : 's'} saved for PDF/EPUB/DOCX export`
+      : '';
 
   const toastImportResult = (data: ManuscriptImportResult) => {
     if (data.total === 0) {
       toast({
-        title: data.duplicatesSkipped ? 'Already in the story bible' : 'Nothing new found',
+        title: data.duplicatesSkipped ? 'Already in the story bible' : data.chaptersSaved ? 'Manuscript saved as chapters' : 'Nothing new found',
         description: data.duplicatesSkipped
-          ? `All ${data.duplicatesSkipped} entities from "${data.fileName}" already exist for this book — nothing new was added.`
-          : `The AI did not find any story bible entities in "${data.fileName}". Check the file and try again.`,
+          ? `All ${data.duplicatesSkipped} entities from "${data.fileName}" already exist for this book — nothing new was added.${chapterNote(data)}`
+          : data.chaptersSaved
+            ? `"${data.fileName}" is now available to export.${chapterNote(data)}`
+            : `The AI did not find any story bible entities in "${data.fileName}". Check the file and try again.`,
       });
       return;
     }
@@ -117,6 +127,7 @@ const [editorOpen, setEditorOpen] = useState(false);
       description:
         `${data.total} story bible entities added from "${data.fileName}"` +
         (data.duplicatesSkipped ? ` · ${data.duplicatesSkipped} duplicates skipped` : '') +
+        chapterNote(data) +
         (data.emptyKinds?.length
           ? ` · still empty: ${data.emptyKinds.map((k) => KIND_CONFIG[k]?.label ?? k).join(', ')}`
           : ''),
@@ -156,6 +167,16 @@ const [editorOpen, setEditorOpen] = useState(false);
       cancelled = true;
     };
   }, []);
+
+  // Stale selectedBookId (deleted book / HTML select showing the first option
+  // while the stored id doesn't match) is what produced "Import failed: Book not found"
+  // with the subtitle still reading "Select a book to manage its lore."
+  useEffect(() => {
+    if (booksLoading) return;
+    if (selectedBookId && !books.some((b) => b.id === selectedBookId)) {
+      setStoryBibleBookId(null);
+    }
+  }, [booksLoading, books, selectedBookId, setStoryBibleBookId]);
 
   const reload = useCallback(async () => {
     if (!selectedBookId) {
@@ -216,7 +237,15 @@ const [editorOpen, setEditorOpen] = useState(false);
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
-    if (!selectedBookId) return;
+    const targetBookId = currentBook?.id ?? null;
+    if (!targetBookId) {
+      toast({
+        title: 'Pick a book first',
+        description: 'Select the book this manuscript belongs to, or use New Project to create one from the file.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
     if (!['txt', 'pdf', 'docx'].includes(extension)) {
@@ -230,8 +259,9 @@ const [editorOpen, setEditorOpen] = useState(false);
 
     setUploading(true);
     setUploadResult(null);
+    setUploadProgress({ message: 'Uploading manuscript…', percent: 0 });
     try {
-      const result = await importManuscriptToStoryBible(selectedBookId, file);
+      const result = await importManuscriptToStoryBible(targetBookId, file, setUploadProgress);
       if (result.success && result.data) {
         saveUploadResult(result.data);
         toastImportResult(result.data);
@@ -244,6 +274,7 @@ const [editorOpen, setEditorOpen] = useState(false);
       toast({ title: 'Import failed', description: msg, variant: 'destructive' });
     } finally {
       setUploading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -264,16 +295,19 @@ const [editorOpen, setEditorOpen] = useState(false);
 
     setNewProjectUploading(true);
     setUploadResult(null);
+    setUploadProgress({ message: 'Uploading manuscript…', percent: 0 });
     try {
-      const result = await importManuscriptToStoryBible(null, file);
+      const result = await importManuscriptToStoryBible(null, file, setUploadProgress);
       if (result.success && result.data) {
         saveUploadResult(result.data);
         toast({
           title: result.data.total > 0 ? 'New project created!' : 'New project created — story bible is empty',
           description:
             result.data.total > 0
-              ? `${result.data.total} story bible entities added from "${result.data.fileName}".`
-              : `The AI did not find any story bible entities in "${result.data.fileName}".`,
+              ? `${result.data.total} story bible entities added from "${result.data.fileName}".${result.data.chaptersSaved ? ` ${result.data.chaptersSaved} chapters saved for export.` : ''}`
+              : result.data.chaptersSaved
+                ? `No new story bible entities, but ${result.data.chaptersSaved} chapters were saved for PDF/EPUB/DOCX export.`
+                : `The AI did not find any story bible entities in "${result.data.fileName}".`,
         });
         // Refresh the book list and auto-select the newly created book.
         const updatedBooks = await listBooks();
@@ -289,6 +323,7 @@ const [editorOpen, setEditorOpen] = useState(false);
       toast({ title: 'Import failed', description: msg, variant: 'destructive' });
     } finally {
       setNewProjectUploading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -335,6 +370,8 @@ const [editorOpen, setEditorOpen] = useState(false);
             )}
           </Button>
         </div>
+
+        {uploadProgress && <UploadProgressBanner progress={uploadProgress} />}
 
         {booksLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -451,11 +488,16 @@ const [editorOpen, setEditorOpen] = useState(false);
         </div>
         <div className="flex items-center gap-2">
           <select
-            value={selectedBookId}
+            value={currentBook?.id ?? ''}
             onChange={(e) => setStoryBibleBookId(e.target.value || null)}
             className="bg-[#0d0d10] border border-[#312839] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50 max-w-[220px]"
             aria-label="Switch book"
           >
+            {!currentBook && (
+              <option value="" className="bg-[#0d0d10]">
+                Select a book
+              </option>
+            )}
             {books.map((book) => (
               <option key={book.id} value={book.id} className="bg-[#0d0d10]">
                 {book.title}
@@ -486,7 +528,10 @@ const [editorOpen, setEditorOpen] = useState(false);
           >
             {uploading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Importing… (may take a few min — keep tab open)
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />{' '}
+                {typeof uploadProgress?.percent === 'number'
+                  ? `Importing… ${uploadProgress.percent}%`
+                  : 'Importing… (keep tab open)'}
               </>
             ) : (
               <>
@@ -515,6 +560,8 @@ const [editorOpen, setEditorOpen] = useState(false);
           )}
         </div>
       </div>
+
+      {uploadProgress && <UploadProgressBanner progress={uploadProgress} />}
 
       {/* Manuscript upload result */}
       {uploadResult && (
@@ -693,6 +740,32 @@ interface DeleteDialogProps {
   entityName: string;
   deleting: boolean;
   onConfirm: () => void;
+}
+
+function UploadProgressBanner({
+  progress,
+}: {
+  progress: { message?: string; percent?: number };
+}) {
+  const percent = Math.max(0, Math.min(100, progress.percent ?? 0));
+  return (
+    <div className="rounded-2xl bg-cyan-500/10 border border-cyan-500/30 px-5 py-4">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-sm font-semibold text-cyan-200 flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {progress.message || 'Importing manuscript…'}
+        </p>
+        <p className="text-xs text-cyan-300 font-bold">{percent}%</p>
+      </div>
+      <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+        <div
+          className="bg-gradient-to-r from-purple-500 to-cyan-400 h-full rounded-full transition-all duration-500"
+          style={{ width: `${Math.max(percent, 4)}%` }}
+        />
+      </div>
+      <p className="text-[10px] mt-2 text-white/40">Keep this tab open — analysis runs in the background.</p>
+    </div>
+  );
 }
 
 function DeleteDialog({ open, onOpenChange, entityName, deleting, onConfirm }: DeleteDialogProps) {

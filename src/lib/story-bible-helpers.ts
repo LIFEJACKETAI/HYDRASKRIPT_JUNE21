@@ -3,6 +3,7 @@
 
 import type { StoryBibleEntity } from '@prisma/client';
 import { db } from '@/lib/db';
+import { isUuid } from '@/lib/uuid';
 
 export const STORY_BIBLE_KINDS = [
   'CHARACTER',
@@ -85,7 +86,8 @@ export function toDTO(entity: StoryBibleEntity): StoryBibleEntityDTO {
 }
 
 export async function assertBookOwnership(bookId: string, ownerId: string) {
-  const book = await db.book.findUnique({
+  if (!isUuid(bookId)) throw new Error('Book not found');
+  const book = await db.book.findFirst({
     where: { id: bookId },
     select: { id: true, ownerId: true, title: true },
   });
