@@ -41,11 +41,27 @@ export default function GenerationProgress({ jobId, genre, estimatedDuration, on
   useEffect(() => {
     let cancelled = false;
     let interval: ReturnType<typeof setInterval> | null = null;
+    let currentPollMs = 5000;
+
+    function scheduleNext() {
+      if (interval) clearInterval(interval);
+      interval = setInterval(poll, currentPollMs);
+    }
 
     async function poll() {
+      if (cancelled) return;
       const data = await getJob(jobId);
       if (!cancelled && data) {
         setJob(data);
+        // Adaptive back-off: once the job is actually active (not just queued),
+        // back off to ~12s because the queue cron pumps every 5s anyway.
+        if (data.status === 'queued' && currentPollMs > 5000) {
+          currentPollMs = 5000;
+          scheduleNext();
+        } else if ((data.status === 'active' || data.status === 'processing') && currentPollMs < 12000) {
+          currentPollMs = 12000;
+          scheduleNext();
+        }
         if (data.status === 'completed') {
           if (interval) clearInterval(interval);
           onCompleteRef.current?.();
@@ -57,7 +73,7 @@ export default function GenerationProgress({ jobId, genre, estimatedDuration, on
     }
 
     poll();
-    interval = setInterval(poll, 5000);
+    interval = setInterval(poll, currentPollMs);
     return () => {
       cancelled = true;
       if (interval) clearInterval(interval);

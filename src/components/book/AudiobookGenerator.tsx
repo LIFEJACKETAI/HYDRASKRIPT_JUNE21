@@ -194,10 +194,26 @@ function GenerationDisplay({ jobId, selectedVoice, onComplete, onError }: Genera
     let cancelled = false;
     let interval: ReturnType<typeof setInterval> | null = null;
 
+    let currentPollMs = 5000;
+
+    function scheduleNext() {
+      if (interval) clearInterval(interval);
+      interval = setInterval(poll, currentPollMs);
+    }
+
     async function poll() {
+      if (cancelled) return;
       const data = await getJob(jobId);
       if (!cancelled && data) {
         setJob(data);
+        // Adaptive back-off: once active, back off to ~12s (the queue cron pumps every 5s)
+        if (data.status === 'queued' && currentPollMs > 5000) {
+          currentPollMs = 5000;
+          scheduleNext();
+        } else if ((data.status === 'active' || data.status === 'processing') && currentPollMs < 12000) {
+          currentPollMs = 12000;
+          scheduleNext();
+        }
         if (data.status === 'completed') {
           if (interval) clearInterval(interval);
           onCompleteRef.current(data);
@@ -209,7 +225,7 @@ function GenerationDisplay({ jobId, selectedVoice, onComplete, onError }: Genera
     }
 
     poll();
-    interval = setInterval(poll, 5000);
+    interval = setInterval(poll, currentPollMs);
     return () => {
       cancelled = true;
       if (interval) clearInterval(interval);

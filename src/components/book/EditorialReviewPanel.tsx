@@ -153,15 +153,30 @@ export default function EditorialReviewPanel({ books, onReviewsChanged }: Editor
     if (!runningJobId) return;
     let cancelled = false;
     let interval: ReturnType<typeof setInterval> | undefined;
+    let currentPollMs = 5000;
+
+    function scheduleNext() {
+      if (interval) clearInterval(interval);
+      interval = setInterval(poll, currentPollMs);
+    }
 
     const poll = async () => {
+      if (cancelled) return;
       const job = await getJob(runningJobId);
-      if (cancelled || !job) return;
+      if (!job) return;
       setJobStatus({
         progress: job.progressPercent || 0,
         message: job.progressMessage || 'Reviewing...',
         failed: job.status === 'failed' ? job.errorMessage || 'Review failed.' : null,
       });
+      // Adaptive back-off: once active, back off to ~12s (the queue cron pumps every 5s)
+      if (job.status === 'queued' && currentPollMs > 5000) {
+        currentPollMs = 5000;
+        scheduleNext();
+      } else if ((job.status === 'active' || job.status === 'processing') && currentPollMs < 12000) {
+        currentPollMs = 12000;
+        scheduleNext();
+      }
       if (job.status === 'completed' || job.status === 'failed') {
         if (interval) clearInterval(interval);
         setRunningJobId(null);
@@ -178,7 +193,7 @@ export default function EditorialReviewPanel({ books, onReviewsChanged }: Editor
     };
 
     poll();
-    interval = setInterval(poll, 5000);
+    interval = setInterval(poll, currentPollMs);
     return () => { cancelled = true; if (interval) clearInterval(interval); };
   }, [runningJobId, runningReviewId, loadReviews, loadDetail]);
 
