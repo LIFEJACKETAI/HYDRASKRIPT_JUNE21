@@ -36,7 +36,7 @@ export function resolveConnectionString(raw?: string): string | undefined {
 // Prisma 7+ - Requires a driver adapter for PostgreSQL
 // Configure connection pool for Supabase
 // Supabase free tier: ~60 connections via transaction pooler (port 6543)
-// For Vercel serverless: keep pool small (1-3) per instance
+// For Vercel serverless: 6-10 per instance is safe for moderate traffic.
 const pool = new Pool({
   connectionString: resolveConnectionString(process.env.DATABASE_URL),
   // Belt and braces: if the URL rewrite above ever fails to parse, this still
@@ -45,9 +45,15 @@ const pool = new Pool({
     ? { rejectUnauthorized: false }
     : undefined,
   min: 1,
-  max: parseInt(process.env.DATABASE_POOL_MAX || '3', 10), // Reduced for serverless
+  max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10),
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 15000,
+  // How long the pg pool waits to establish a NEW physical connection before
+  // giving up. When the pool is saturated, new requests queue here first —
+  // if this is shorter than PRISMA_TRANSACTION_TIMEOUT, you get P2028 even
+  // though the Prisma transaction timeout is long enough.
+  // Keep this >= PRISMA_TRANSACTION_TIMEOUT so the connection timeout never
+  // fires before the transaction timeout.
+  connectionTimeoutMillis: parseInt(process.env.PRISMA_CONNECTION_TIMEOUT || process.env.PRISMA_TRANSACTION_TIMEOUT || '60000', 10),
 })
 
 const adapter = new PrismaPg(pool)
