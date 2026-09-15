@@ -4,7 +4,7 @@
 
 import PDFDocument from 'pdfkit';
 import { saveFile, generateFilename, createMediaAsset } from '@/lib/utils/storage';
-import { getBookWithChapters } from '@/lib/utils/bookHelpers';
+import { getBookWithChapters, isBookExportable } from '@/lib/utils/bookHelpers';
 import axios from 'axios';
 
 // ─── Layout Constants ──────────────────────────────────────────────────────────
@@ -201,9 +201,8 @@ export async function generatePDFBuffer(
   const book = await getBookWithChapters(bookId, ownerId);
 
   if (!book) return { success: false, error: 'Book not found' };
-  if (book.status !== 'completed') {
-    return { success: false, error: 'Book must be completed before exporting' };
-  }
+  const exportable = isBookExportable(book);
+  if (!exportable.ok) return { success: false, error: exportable.error };
 
   try {
     const { buffer, pageCount } = await renderPDF(book);

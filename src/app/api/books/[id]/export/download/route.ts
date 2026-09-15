@@ -22,6 +22,8 @@ import fs from 'fs';
 import path from 'path';
 import { db } from '@/lib/db';
 
+export const maxDuration = 60;
+
 const STORAGE_DIR = path.join(process.cwd(), 'public', 'assets');
 
 function contentTypeFor(format: string): string {

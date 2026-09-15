@@ -331,11 +331,51 @@ export default function StyleUploader() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!['txt', 'pdf', 'docx'].includes(extension)) {
+      toast({
+        title: 'Unsupported file type',
+        description: 'Please upload a .txt, .pdf, or .docx file.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setUploadedFile(file);
-    toast({ title: 'File uploaded', description: `${file.name} ready for training.` });
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const response = await fetch('/api/manuscript/extract', { method: 'POST', body: form });
+      const body = await response.json();
+      if (!response.ok || !body.success || !body.data?.text) {
+        throw new Error(body.error || 'Could not read that file.');
+      }
+      const extracted = body.data.text as string;
+      setExemplarTexts((prev) => {
+        const next = [...prev];
+        const emptyIndex = next.findIndex((t) => !t.trim());
+        if (emptyIndex >= 0) next[emptyIndex] = extracted;
+        else if (next.length < 5) next.push(extracted);
+        else next[next.length - 1] = extracted;
+        return next;
+      });
+      toast({
+        title: 'Manuscript loaded',
+        description: body.data.truncated
+          ? `${file.name} was truncated to the first 20,000 characters for style training.`
+          : `${file.name} was added as an exemplar.`,
+      });
+    } catch (err) {
+      setUploadedFile(null);
+      toast({
+        title: 'Could not read file',
+        description: err instanceof Error ? err.message : 'Try a .txt export of the manuscript.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const previewToneScene = (scene: string) => {

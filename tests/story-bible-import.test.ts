@@ -22,10 +22,14 @@ type EntityRow = {
 };
 
 let idCounter = 0;
-const nextId = (prefix: string) => `${prefix}-${++idCounter}`;
+const nextId = () => {
+  const n = ++idCounter;
+  return `36000000-0000-4000-8000-${n.toString(16).padStart(12, '0')}`;
+};
 
 const books: Record<string, { id: string; ownerId: string; title: string; genre: string; targetAudience: string; status: string }> = {};
 const entities: EntityRow[] = [];
+const chapters: { bookId: string; index: number; title: string; content: string }[] = [];
 
 // Minimal in-memory `Job` store so the worker and the poll GET can run end-to-end.
 type JobRow = {
@@ -44,7 +48,7 @@ const jobs: Record<string, JobRow> = {};
 const fakeDb = {
   book: {
     create: async ({ data }: { data: Record<string, unknown> }) => {
-      const book = { id: nextId('book'), ownerId: '', genre: 'fiction', targetAudience: 'adult', status: 'draft', ...data } as (typeof books)[string];
+      const book = { id: nextId(), ownerId: '', genre: 'fiction', targetAudience: 'adult', status: 'draft', ...data } as (typeof books)[string];
       books[book.id] = book;
       return { ...book };
     },
@@ -53,6 +57,37 @@ const fakeDb = {
       if (!b) return null;
       if (where.ownerId && b.ownerId !== where.ownerId) return null;
       return { ...b };
+    },
+    findFirst: async ({ where }: { where: { id: string; ownerId?: string } }) => {
+      const b = books[where.id];
+      if (!b) return null;
+      if (where.ownerId && b.ownerId !== where.ownerId) return null;
+      return { ...b };
+    },
+    update: async ({ where, data }: { where: { id: string }; data: Record<string, unknown> }) => {
+      const b = books[where.id];
+      if (!b) throw new Error('book not found');
+      Object.assign(b, data);
+      return { ...b };
+    },
+  },
+  chapter: {
+    count: async ({ where }: { where: { bookId: string } }) =>
+      chapters.filter((c) => c.bookId === where.bookId).length,
+    findMany: async ({ where, select }: { where: { bookId: string }; select?: { content: boolean } }) =>
+      chapters
+        .filter((c) => c.bookId === where.bookId)
+        .map((c) => (select?.content ? { content: c.content } : { ...c })),
+    deleteMany: async ({ where }: { where: { bookId: string } }) => {
+      const before = chapters.length;
+      for (let i = chapters.length - 1; i >= 0; i--) {
+        if (chapters[i].bookId === where.bookId) chapters.splice(i, 1);
+      }
+      return { count: before - chapters.length };
+    },
+    createMany: async ({ data }: { data: { bookId: string; index: number; title: string; content: string }[] }) => {
+      chapters.push(...data);
+      return { count: data.length };
     },
   },
   job: {
@@ -72,7 +107,7 @@ const fakeDb = {
     },
     create: async ({ data }: { data: Omit<EntityRow, 'id' | 'createdAt' | 'updatedAt'> }) => {
       const row: EntityRow = {
-        id: nextId('sb'),
+        id: nextId(),
         portraitUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -86,6 +121,10 @@ const fakeDb = {
 };
 
 jest.mock('@/lib/db', () => ({ db: fakeDb }));
+jest.mock('@/lib/supabase', () => ({
+  supabase: {},
+  supabaseAdmin: { storage: { from: () => ({ download: async () => ({ data: null, error: { message: 'no' } }) }) } },
+}));
 jest.mock('@/lib/api-auth', () => ({
   requireProfile: async () => ({ email: 'test@example.com', profile: { id: 'profile-1' } }),
   unauthorizedResponse: () => ({ status: 401 }),
@@ -130,6 +169,7 @@ const mockQueue = {
     progressPercent?: number;
     errorMessage?: string;
     result?: unknown;
+    mergeResult?: boolean;
   }) => {
     const job = jobs[jobId];
     if (!job) throw new Error(`no such job ${jobId}`);
@@ -138,7 +178,15 @@ const mockQueue = {
     if (update.progressPercent !== undefined) job.progressPercent = update.progressPercent;
     if (update.errorMessage) job.errorMessage = update.errorMessage;
     if (update.result !== undefined) {
-      job.result = typeof update.result === 'string' ? update.result : JSON.stringify(update.result);
+      const incoming = typeof update.result === 'string' ? update.result : JSON.stringify(update.result);
+      if (update.mergeResult) {
+        let parsed: Record<string, unknown> = {};
+        try { parsed = JSON.parse(job.result) as Record<string, unknown>; } catch { parsed = {}; }
+        const next = typeof update.result === 'string' ? JSON.parse(update.result) : update.result;
+        job.result = JSON.stringify({ ...parsed, ...(next as object) });
+      } else {
+        job.result = incoming;
+      }
     }
   },
 };
@@ -238,6 +286,7 @@ async function pollImport(jobId: string): Promise<{ status?: string; data?: any;
 describe('Story Bible manuscript import', () => {
   beforeEach(() => {
     entities.length = 0;
+    chapters.length = 0;
     Object.keys(books).forEach((k) => delete books[k]);
     Object.keys(jobs).forEach((k) => delete jobs[k]);
     llmCalls.length = 0;

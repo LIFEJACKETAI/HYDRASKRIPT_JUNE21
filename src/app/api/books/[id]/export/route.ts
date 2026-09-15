@@ -7,6 +7,8 @@ import { exportBookAsEPUB } from '@/lib/services/epubService';
 import { exportBookAsDOCX } from '@/lib/services/docxService';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
+export const maxDuration = 60;
+
 function downloadUrlFor(id: string, format: string, persistedUrl?: string): string {
   // When the export was persisted to external storage, point straight at it.
   // Otherwise fall back to the streaming download route, which generates and

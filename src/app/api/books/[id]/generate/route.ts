@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { getAuthEmail } from '@/lib/auth-helpers';
 
+export const maxDuration = 300;
+export const dynamic = 'force-dynamic';
+
 // POST - Start book generation
 export async function POST(
   request: NextRequest,

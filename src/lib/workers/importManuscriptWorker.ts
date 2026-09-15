@@ -31,6 +31,7 @@ import {
 import { validateOrThrow } from '@/lib/llm/schema';
 import { enqueueEditorialReview } from '@/lib/services/editorialReview';
 import { toDTO } from '@/lib/story-bible-helpers';
+import { splitManuscriptIntoChapters, wordCount } from '@/lib/manuscript';
 
 /** Serializable per-job progress. Persisted to `job.result` after every batch. */
 export interface ManuscriptImportState {
@@ -133,12 +134,18 @@ async function checkpoint(
   message: string,
   percent: number
 ): Promise<void> {
+  // Never rewrite `result.text` on checkpoints. Replacing a 100k–500k char
+  // payload on every window was starving the heartbeat UPDATE on the same row
+  // and surfacing as Prisma P2028 ("Unable to start a transaction").
+  const { text: _omitText, ...rest } = state
+  void _omitText
   await jobQueue.updateJobStatus(jobId, {
     status: 'queued', // re-queue self: next claim resumes from this checkpoint
     progressMessage: message,
     progressPercent: percent,
-    result: state as unknown as Record<string, unknown>,
-  });
+    result: rest as unknown as Record<string, unknown>,
+    mergeResult: true,
+  })
 }
 
 /**
@@ -248,6 +255,35 @@ async function finalizeImport(
   const candidates = [...map.values()].slice(0, MAX_ENTITIES);
 
   if (candidates.length === 0) {
+    let chaptersSavedOnEmpty = 0;
+    try {
+      chaptersSavedOnEmpty = await persistManuscriptAsChapters(targetBookId, state.text, state.fileName);
+    } catch (e) {
+      console.warn('[ImportWorker] Persisting manuscript as chapters failed (non-fatal):', e);
+    }
+
+    if (chaptersSavedOnEmpty > 0) {
+      await jobQueue.updateJobStatus(jobId, {
+        status: 'completed',
+        progressMessage: `Saved ${chaptersSavedOnEmpty} chapter${chaptersSavedOnEmpty === 1 ? '' : 's'} for export. The AI did not find new story bible entities.`,
+        progressPercent: 100,
+        result: {
+          fileName: state.fileName,
+          entities: [],
+          counts: {},
+          total: 0,
+          duplicatesSkipped: 0,
+          portionsSkipped: state.windowsFailed,
+          truncated: state.truncatedChars,
+          emptyKinds: [...EXTRACTION_KINDS],
+          bookId: targetBookId,
+          storagePath: state.storagePath,
+          chaptersSaved: chaptersSavedOnEmpty,
+        },
+      });
+      return;
+    }
+
     const message =
       state.windowsFailed === state.windowsTotal
         ? `The AI could not analyze the manuscript (${state.windowsFailed}/${state.windowsTotal} portions failed). Check that your AI provider keys are configured, then retry.`
@@ -265,8 +301,10 @@ async function finalizeImport(
     where: { bookId: targetBookId },
     select: { kind: true, name: true },
   });
-  const existingKinds = new Set(existing.map((e) => e.kind));
-  const seen = new Set(existing.map((e) => `${e.kind}:${e.name.toLowerCase().trim()}`));
+  const existingKinds = new Set(existing.map((e: { kind: string }) => e.kind));
+  const seen = new Set(
+    existing.map((e: { kind: string; name: string }) => `${e.kind}:${e.name.toLowerCase().trim()}`)
+  );
   const entitiesToCreate = candidates.filter(
     (e) => !seen.has(`${e.kind}:${e.name.toLowerCase().trim()}`)
   );
@@ -304,13 +342,20 @@ async function finalizeImport(
         )
       : [];
 
-  const counts = created.reduce<Record<string, number>>((acc, entity) => {
+  const counts = created.reduce<Record<string, number>>((acc: Record<string, number>, entity: { kind: string }) => {
     acc[entity.kind] = (acc[entity.kind] ?? 0) + 1;
     return acc;
   }, {});
 
-  const presentKinds = new Set([...existingKinds, ...created.map((e) => e.kind)]);
+  const presentKinds = new Set([...existingKinds, ...created.map((e: { kind: string }) => e.kind)]);
   const emptyKinds = EXTRACTION_KINDS.filter((k) => !presentKinds.has(k));
+
+  let chaptersSaved = 0;
+  try {
+    chaptersSaved = await persistManuscriptAsChapters(targetBookId, state.text, state.fileName);
+  } catch (e) {
+    console.warn('[ImportWorker] Persisting manuscript as chapters failed (non-fatal):', e);
+  }
 
   const finalResult = {
     fileName: state.fileName,
@@ -323,6 +368,7 @@ async function finalizeImport(
     emptyKinds,
     bookId: targetBookId,
     storagePath: state.storagePath,
+    chaptersSaved,
   };
 
   // Auto-populate the Universe (Editorial Review) for this manuscript. Non-fatal.
@@ -339,12 +385,17 @@ async function finalizeImport(
     console.error('[Universe] Auto-review enqueue failed (non-fatal):', e);
   }
 
+  const chapterNote =
+    chaptersSaved > 0
+      ? ` Saved ${chaptersSaved} chapter${chaptersSaved === 1 ? '' : 's'} for PDF/EPUB/DOCX export.`
+      : '';
+
   await jobQueue.updateJobStatus(jobId, {
     status: 'completed',
     progressMessage:
       created.length === 0
-        ? 'Import complete — nothing new to add.'
-        : `Import complete — added ${created.length} story bible entit${created.length === 1 ? 'y' : 'ies'}.`,
+        ? `Import complete — nothing new to add.${chapterNote}`
+        : `Import complete — added ${created.length} story bible entit${created.length === 1 ? 'y' : 'ies'}.${chapterNote}`,
     progressPercent: 100,
     result: finalResult,
   });
@@ -353,4 +404,64 @@ async function finalizeImport(
     `[ImportWorker] Import job ${jobId} complete: ${created.length}/${candidates.length} novel entities saved.`,
     counts
   );
+}
+
+/**
+ * Turn the uploaded manuscript into real book chapters so Export Hub / PDF
+ * generation have something to render. Skips books that already have chapters
+ * (we never overwrite generated prose).
+ */
+async function persistManuscriptAsChapters(
+  bookId: string,
+  text: string,
+  fileName: string
+): Promise<number> {
+  const existing = await db.chapter.findMany({
+    where: { bookId },
+    select: { content: true },
+  })
+  if (existing.some((c: { content?: string | null }) => (c.content ?? '').trim().length > 0)) {
+    return 0
+  }
+  if (existing.length > 0) {
+    await db.chapter.deleteMany({ where: { bookId } })
+  }
+
+  const parts = splitManuscriptIntoChapters(text);
+  if (parts.length === 0) return 0;
+
+  await db.chapter.createMany({
+    data: parts.map((part, index) => {
+      const words = wordCount(part.content);
+      return {
+        bookId,
+        index,
+        title: part.title,
+        synopsis: part.content.slice(0, 280),
+        content: part.content,
+        wordTarget: words,
+        wordCount: words,
+        status: 'completed',
+        approvalStatus: 'approved',
+      };
+    }),
+  });
+
+  await db.book.update({
+    where: { id: bookId },
+    data: {
+      status: 'completed',
+      outline: JSON.stringify({
+        title: fileName,
+        chapters: parts.map((part) => ({
+          title: part.title,
+          synopsis: part.content.slice(0, 280),
+          wordTarget: wordCount(part.content),
+        })),
+      }),
+    },
+  });
+
+  console.log(`[ImportWorker] Saved ${parts.length} chapters from manuscript into book ${bookId}`);
+  return parts.length;
 }

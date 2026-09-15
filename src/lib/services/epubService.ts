@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { db } from '@/lib/db';
 import { saveFile, generateFilename, createMediaAsset } from '@/lib/utils/storage';
-import { getBookWithChapters } from '@/lib/utils/bookHelpers';
+import { getBookWithChapters, isBookExportable } from '@/lib/utils/bookHelpers';
 
 // ─── ZIP builder (EPUB is a ZIP file) ─────────────────────────────────────────
 // We use a minimal ZIP implementation because Node has no built-in ZIP writer.
@@ -268,9 +268,8 @@ export async function generateEPUBBuffer(
   const book = await getBookWithChapters(bookId, ownerId);
 
   if (!book) return { success: false, error: 'Book not found' };
-  if (book.status !== 'completed') {
-    return { success: false, error: 'Book must be completed before exporting' };
-  }
+  const exportable = isBookExportable(book);
+  if (!exportable.ok) return { success: false, error: exportable.error };
 
   try {
     const chapters = book.chapters.slice().sort((a: any, b: any) => a.index - b.index);

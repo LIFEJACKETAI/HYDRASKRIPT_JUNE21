@@ -26,6 +26,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getJobQueue } from '@/lib/workers/queue';
+import { isPumpRequestAuthorized, pumpAuthToken, resolvePumpUrl } from '@/lib/workers/queue-pump-client';
 
 // Long-running job types (e.g. manuscript import) mine one LLM window per
 // invocation, so give the pump a comfortable budget (Vercel Pro honors 300s).
@@ -35,20 +36,7 @@ export const dynamic = 'force-dynamic';
 const DEADLINE_MS = 270_000; // leave headroom under maxDuration for the response
 
 function isAuthorized(req: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET;
-
-  // Local/dev (no secret configured) — allow so the queue driver works out of
-  // the box. In production a CRON_SECRET is mandatory (Vercel auto-injects it
-  // once a cron is declared), preventing anyone from triggering job runs.
-  if (!secret) return process.env.NODE_ENV !== 'production';
-
-  // Vercel Cron sends: Authorization: Bearer <CRON_SECRET>
-  if (req.headers.get('authorization') === `Bearer ${secret}`) return true;
-
-  // Self-kick / queue kicks use an explicit header.
-  if (req.headers.get('x-queue-pump-secret') === secret) return true;
-
-  return false;
+  return isPumpRequestAuthorized(req);
 }
 
 /**
@@ -60,8 +48,7 @@ async function reconcileStuckBooks(): Promise<number> {
   try {
     const stuck = await db.book.findMany({
       where: {
-        status: { in: ['writing', 'finalizing'] },
-        chapters: { some: {} },
+        status: { in: ['outlining', 'writing', 'finalizing'] },
       },
       include: {
         jobs: { where: { status: { in: ['queued', 'active'] } }, select: { id: true } },
@@ -73,12 +60,31 @@ async function reconcileStuckBooks(): Promise<number> {
     for (const book of stuck) {
       if (book.jobs.length > 0) continue; // already has a driver
 
-      if (book.status === 'writing') {
+      if (book.status === 'outlining') {
+        await db.job.create({
+          data: {
+            bookId: book.id,
+            ownerId: book.ownerId,
+            jobType: 'generate_outline',
+            status: 'queued',
+            progressMessage: 'Recovered interrupted book — resuming outline.',
+            progressPercent: 0,
+            creditsReserved: 0,
+            creditsConsumed: 0,
+            stepIndex: 0,
+            retryCount: 0,
+            maxRetries: 3,
+            result: '{}',
+          },
+        });
+        enqueued++;
+      } else if (book.status === 'writing') {
+        if (!book.chapters.length) continue
         // Next chapter that still needs writing (pending, or failed -> retry).
-        const next = book.chapters.find((c) => c.status === 'pending' || c.status === 'failed');
+        const next = book.chapters.find((c: { status: string }) => c.status === 'pending' || c.status === 'failed');
         if (next) {
           const autoApprove = book.chapters.some(
-            (c) => c.status === 'awaiting_approval' && c.approvalStatus !== 'approved'
+            (c: { status: string; approvalStatus?: string }) => c.status === 'awaiting_approval' && c.approvalStatus !== 'approved'
           )
             ? false
             : true; // only keep auto-chaining when there is nothing awaiting review
@@ -157,25 +163,21 @@ async function reconcileStuckBooks(): Promise<number> {
  * freezes. Uses an absolute URL (this runs server-side; Vercel routes the
  * deployment hostname correctly).
  */
-function appBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`;
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
-  return 'http://localhost:3002';
-}
-
 function kickNextPump(): void {
   try {
-    const secret = process.env.CRON_SECRET || '';
-    const url = `${appBaseUrl()}/api/queue/pump`;
+    const url = `${resolvePumpUrl()}/api/queue/pump`;
     void fetch(url, {
       method: 'POST',
       headers: {
-        'x-queue-pump-secret': secret || 'local-dev',
+        'x-queue-pump-secret': pumpAuthToken(),
         'cache-control': 'no-cache',
       },
-      // Don't await; never let the kick block or crash the current response.
-    }).catch((e) => console.warn('[QueuePump] self-kick failed:', e));
+      signal: AbortSignal.timeout(8000),
+    }).catch((e) => {
+      const name = e instanceof Error ? e.name : '';
+      if (name === 'TimeoutError' || name === 'AbortError') return;
+      console.warn('[QueuePump] self-kick failed:', e);
+    });
   } catch (e) {
     console.warn('[QueuePump] kickNextPump error:', e);
   }
@@ -208,34 +210,40 @@ async function runPump(): Promise<{ ran: number; recovered: number }> {
   return { ran, recovered };
 }
 
-export async function GET(req: NextRequest) {
+async function handlePump(req: NextRequest) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
+
+  // Return 202 immediately and keep working after the response. Kick callers
+  // (import POST, job poll, cron) otherwise wait on runPump() — up to 270s —
+  // and Vercel kills the *caller* while the pump itself never finishes.
   try {
-    const result = await runPump();
-    return NextResponse.json({ success: true, ...result });
-  } catch (error) {
-    console.error('[QueuePump] GET failed:', error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'pump failed' },
-      { status: 500 }
+    after(() =>
+      runPump().catch((error) => {
+        console.error('[QueuePump] background run failed:', error);
+      })
     );
+    return NextResponse.json({ success: true, accepted: true });
+  } catch (scheduleError) {
+    console.warn('[QueuePump] after() unavailable, running inline:', scheduleError);
+    try {
+      const result = await runPump();
+      return NextResponse.json({ success: true, ...result });
+    } catch (error) {
+      console.error('[QueuePump] failed:', error);
+      return NextResponse.json(
+        { success: false, error: error instanceof Error ? error.message : 'pump failed' },
+        { status: 500 }
+      );
+    }
   }
 }
 
+export async function GET(req: NextRequest) {
+  return handlePump(req);
+}
+
 export async function POST(req: NextRequest) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-  }
-  try {
-    const result = await runPump();
-    return NextResponse.json({ success: true, ...result });
-  } catch (error) {
-    console.error('[QueuePump] POST failed:', error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'pump failed' },
-      { status: 500 }
-    );
-  }
+  return handlePump(req);
 }

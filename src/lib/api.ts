@@ -357,9 +357,15 @@ export interface ManuscriptImportResult {
   emptyKinds?: StoryBibleKind[];
   /** Storage path of the original uploaded file (for reference). */
   storagePath?: string;
+  /** Chapters persisted from the manuscript so the book can be exported. */
+  chaptersSaved?: number;
 }
 
-export async function importManuscriptToStoryBible(bookId: string | null, file: File) {
+export async function importManuscriptToStoryBible(
+  bookId: string | null,
+  file: File,
+  onProgress?: (progress: { message?: string; percent?: number }) => void
+) {
   const MAX_DIRECT_UPLOAD = 4 * 1024 * 1024; // 4 MB - Vercel serverless limit
   const MAX_PRESIGNED_UPLOAD = 25 * 1024 * 1024; // 25 MB - presigned URL limit
 
@@ -490,12 +496,11 @@ export async function importManuscriptToStoryBible(bookId: string | null, file: 
   const started = Date.now();
 
   while (Date.now() - started < maxWaitMs) {
-    await new Promise((resolve) => setTimeout(resolve, pollEveryMs));
-
     let poll: Response;
     try {
       poll = await fetch(`/api/story-bible/import-manuscript?jobId=${encodeURIComponent(jobId)}`);
     } catch {
+      await new Promise((resolve) => setTimeout(resolve, pollEveryMs));
       continue; // transient network blip — keep polling
     }
 
@@ -508,18 +513,23 @@ export async function importManuscriptToStoryBible(bookId: string | null, file: 
       progressPercent?: number;
     } | null;
 
-    if (!pollBody) continue;
+    if (pollBody) {
+      if (pollBody.status === 'completed' && pollBody.data) {
+        onProgress?.({ message: 'Import complete', percent: 100 });
+        return { success: true as const, data: pollBody.data };
+      }
+      if (pollBody.status === 'failed') {
+        return { success: false as const, error: pollBody.error || 'The manuscript import failed. Please try again.' };
+      }
+      if (pollBody.status === 'queued' || pollBody.status === 'active') {
+        onProgress?.({
+          message: pollBody.progressMessage,
+          percent: pollBody.progressPercent,
+        });
+      }
+    }
 
-    if (pollBody.status === 'completed' && pollBody.data) {
-      return { success: true as const, data: pollBody.data };
-    }
-    if (pollBody.status === 'failed') {
-      return { success: false as const, error: pollBody.error || 'The manuscript import failed. Please try again.' };
-    }
-    if (pollBody.status === 'queued' || pollBody.status === 'active') {
-      // Still running — keep waiting. Progress is visible server-side.
-      continue;
-    }
+    await new Promise((resolve) => setTimeout(resolve, pollEveryMs));
   }
 
   return {

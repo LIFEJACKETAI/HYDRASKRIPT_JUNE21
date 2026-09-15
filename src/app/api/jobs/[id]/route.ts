@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 import { isUuid } from '@/lib/uuid';
+import { publicJobResult } from '@/lib/job-public';
+import { maybeKickQueueForJob } from '@/lib/workers/queue-pump-client';
 
 // GET - Get job progress
 export async function GET(
@@ -28,6 +30,8 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Job not found' }, { status: 404 });
     }
 
+    maybeKickQueueForJob(job.status);
+
     return NextResponse.json({
       success: true,
       data: {
@@ -39,7 +43,7 @@ export async function GET(
         creditsReserved: job.creditsReserved,
         creditsConsumed: job.creditsConsumed,
         errorMessage: job.errorMessage,
-        result: (() => { try { return job.result ? JSON.parse(job.result) : null; } catch { return job.result; } })(),
+        result: publicJobResult(job.result),
         startedAt: job.startedAt,
         completedAt: job.completedAt,
         createdAt: job.createdAt,

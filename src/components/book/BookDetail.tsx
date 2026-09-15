@@ -95,6 +95,18 @@ export default function BookDetail() {
     fetchBook();
   }, [fetchBook]);
 
+  // Resume the progress UI after refresh / navigation: generation used to look
+  // "stuck on Queued" because the job id lived only in React state.
+  useEffect(() => {
+    if (!book) return;
+    const latest = book.jobs?.[0];
+    if (!latest) return;
+    if ((latest.status === 'queued' || latest.status === 'active') && !generationJobId) {
+      setGenerationJobId(latest.id);
+      setActiveJobId(latest.id);
+    }
+  }, [book, generationJobId, setActiveJobId]);
+
   // While auto-completing, keep polling the book until the whole chain finishes.
   // The backend chains every remaining chapter automatically; this keeps the UI
   // in sync through the last chapter and finalization.
@@ -319,6 +331,9 @@ const handleAutoApproveAll = async () => {
   const isDraft = book.status === 'draft';
   const isCompleted = book.status === 'completed';
   const isFailed = book.status === 'failed';
+  const hasExportableContent =
+    isCompleted ||
+    (book.chapters?.some((c) => (c.content || '').trim().length > 0 || Boolean(c.illustrationUrl)) ?? false);
 
   const gradientSeed = book.id.charCodeAt(0) % 6;
   const gradients = [
@@ -371,7 +386,7 @@ const handleAutoApproveAll = async () => {
               Retry
             </Button>
           )}
-          {isCompleted && (
+          {hasExportableContent && (
             <Button onClick={handleExport} disabled={isExporting} className="bg-[#1e1e1e] text-cyan-300 hover:bg-[#252525] border border-cyan-500/30">
               <Download className="h-4 w-4 mr-2" />
               {isExporting ? 'Exporting...' : 'Export PDF'}

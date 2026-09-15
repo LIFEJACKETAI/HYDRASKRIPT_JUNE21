@@ -14,7 +14,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 import { assertBookOwnership } from '@/lib/story-bible-helpers';
-import { extractTextFromManuscript, extractTextFromBuffer, SUPPORTED_MANUSCRIPT_EXTENSIONS, truncateManuscript } from '@/lib/manuscript';
+import { extractTextFromBuffer, SUPPORTED_MANUSCRIPT_EXTENSIONS, truncateManuscript, ManuscriptValidationError } from '@/lib/manuscript';
+import { maybeKickQueueForJob } from '@/lib/workers/queue-pump-client';
+import { publicJobResult } from '@/lib/job-public';
 import { isUuid } from '@/lib/uuid';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getR2Client, isR2Enabled, getR2PublicUrl } from '@/lib/utils/storage';
@@ -22,7 +24,7 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 export const dynamic = 'force-dynamic';
 // Enqueue path is cheap now (text extraction only, no LLM work in-request).
-export const maxDuration = 30;
+export const maxDuration = 300;
 
 // Vercel caps serverless request bodies at 4.5 MB; keep the app-side cap below
 // it so oversized files get a friendly error instead of an opaque platform 413.
@@ -88,7 +90,7 @@ async function processManuscriptUpload(
   storagePath?: string
 ): Promise<{ jobId: string; resolvedBookId: string; newBookCreated: boolean }> {
   // If no bookId provided, auto-create a Draft Book from the manuscript.
-  let resolvedBookId = bookId;
+  let resolvedBookId: string | null = bookId;
   let newBookCreated = false;
   if (!resolvedBookId) {
     const titleFromFilename = fileName.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ').trim() || 'Untitled Manuscript';
@@ -109,7 +111,7 @@ async function processManuscriptUpload(
   }
 
   if (!SUPPORTED_MANUSCRIPT_EXTENSIONS.has(extension)) {
-    throw new Error('Unsupported manuscript type. Please upload a .txt, .pdf, or .docx file.');
+    throw new ManuscriptValidationError('Unsupported manuscript type. Please upload a .txt, .pdf, or .docx file.');
   }
 
   // Text extraction is fast and local (no LLM) — fine to do in-request. The
@@ -118,7 +120,9 @@ async function processManuscriptUpload(
   const manuscript = truncateManuscript(rawText, MAX_MANUSCRIPT_CHARS);
 
   if (!manuscript) {
-    throw new Error(`Uploaded ${extension.toUpperCase()} manuscript did not contain readable text.`);
+    throw new ManuscriptValidationError(
+      `Uploaded ${extension.toUpperCase()} manuscript did not contain readable text.`
+    );
   }
 
   console.log(
@@ -130,6 +134,10 @@ async function processManuscriptUpload(
   // would only duplicate a batch that already reached its checkpoint.
   const { getJobQueue } = await import('@/lib/workers/queue');
   const jobQueue = getJobQueue();
+  if (!resolvedBookId) {
+    throw new ManuscriptValidationError('Could not resolve a book for this manuscript.');
+  }
+
   const jobId = await jobQueue.createJob({
     ownerId: profileId,
     bookId: resolvedBookId,
@@ -200,9 +208,22 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (uploadError) {
+      if (uploadError instanceof Error && (uploadError.message === 'Book not found' || uploadError.message === 'Forbidden')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              uploadError.message === 'Book not found'
+                ? 'That book is no longer available. Pick it again from the list and retry.'
+                : 'You do not have access to that book.',
+          },
+          { status: uploadError.message === 'Book not found' ? 404 : 403 }
+        );
+      }
       const msg = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      const status = uploadError instanceof ManuscriptValidationError ? uploadError.status : 500;
       console.error('[API/story-bible/import-manuscript] Direct upload failed:', msg, uploadError instanceof Error ? uploadError.stack : '');
-      return NextResponse.json({ success: false, error: msg }, { status: 500 });
+      return NextResponse.json({ success: false, error: msg }, { status });
     }
     }
 
@@ -267,9 +288,22 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (uploadError) {
+      if (uploadError instanceof Error && (uploadError.message === 'Book not found' || uploadError.message === 'Forbidden')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              uploadError.message === 'Book not found'
+                ? 'That book is no longer available. Pick it again from the list and retry.'
+                : 'You do not have access to that book.',
+          },
+          { status: uploadError.message === 'Book not found' ? 404 : 403 }
+        );
+      }
       const msg = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      const status = uploadError instanceof ManuscriptValidationError ? uploadError.status : 500;
       console.error('[API/story-bible/import-manuscript] Presigned upload failed:', msg, uploadError instanceof Error ? uploadError.stack : '');
-      return NextResponse.json({ success: false, error: msg }, { status: 500 });
+      return NextResponse.json({ success: false, error: msg }, { status });
     }
     }
 
@@ -291,8 +325,9 @@ export async function POST(request: NextRequest) {
       );
     }
     const message = error instanceof Error ? error.message : 'Unknown error';
+    const status = error instanceof ManuscriptValidationError ? error.status : 500;
     console.error('[API/story-bible/import-manuscript] Failed:', message, error instanceof Error ? error.stack : '');
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    return NextResponse.json({ success: false, error: message }, { status });
   }
 }
 
@@ -319,12 +354,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (job.status === 'completed') {
-      let result: unknown = {};
-      try {
-        result = JSON.parse(job.result);
-      } catch {
-        result = {};
-      }
+      const result = publicJobResult(job.result) ?? {};
       return NextResponse.json({ success: true, status: 'completed', data: result });
     }
 
@@ -335,6 +365,8 @@ export async function GET(request: NextRequest) {
         error: job.errorMessage || 'The manuscript import failed. Please try again.',
       });
     }
+
+    maybeKickQueueForJob(job.status);
 
     return NextResponse.json({
       success: true,
