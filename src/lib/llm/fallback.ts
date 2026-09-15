@@ -72,17 +72,18 @@ const GEMINI_CHAIN = [
 ];
 
 // Mistral is the fourth provider — excellent for structured JSON and editorial tasks.
-// Live-tested 14 Sep 2026 against api.mistral.ai:
+// Live-tested against api.mistral.ai (14 Sep 2026):
+//   - `mistral-medium-3-5` is the user's configured flagship (valid — reaches
+//     rate-limiting, not model validation).
 //   - `mistral-large-2411` returns HTTP 400 "Invalid model" — DO NOT USE.
-//   - `mistral-medium-latest`, `mistral-small-2503`, `mistral-small-latest` are valid
-//     (they reach rate-limiting, not model validation).
 //   - `mistral-large-latest` returns 403 tier_not_allowed on free/lower tiers.
+//   - `mistral-small-2503` / `mistral-small-latest` are valid, cheaper backups.
 // NOTE: these are BARE model names (no provider prefix) — valid for the Mistral
 // API but invalid for NVIDIA NIM.  This chain is only used with the Mistral
 // provider, so bare names are correct here.
 const MISTRAL_CHAIN = [
   process.env.MISTRAL_MODEL,
-  'mistral-medium-latest',
+  'mistral-medium-3-5',
   'mistral-small-2503',
   'mistral-small-latest',
 ];
