@@ -13,7 +13,7 @@ export function isServerless(): boolean {
   )
 }
 
-/** Shared secret for cron + self-kicks. Always defined so prod never 401s the pump. */
+/** Shared secret for cron + self-kicks. */
 export function pumpAuthToken(): string {
   return (
     process.env.CRON_SECRET ||
@@ -32,9 +32,10 @@ export function isPumpRequestAuthorized(req: { headers: { get: (name: string) =>
   if (cron && bearer === `Bearer ${cron}`) return true
   if (bearer === `Bearer ${token}`) return true
   if (header && (header === token || (cron && header === cron))) return true
-  if (req.headers.get('x-vercel-cron') === '1') return true
-  const ua = req.headers.get('user-agent') || ''
-  if (/^vercel-cron/i.test(ua)) return true
+
+  // Do not trust x-vercel-cron or User-Agent as authentication. Both headers
+  // can be forged by any external caller; CRON_SECRET or the queue secret is
+  // the credential that protects this public route.
   if (!cron && process.env.NODE_ENV !== 'production') return true
   return false
 }

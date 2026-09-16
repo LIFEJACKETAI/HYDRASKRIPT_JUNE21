@@ -8,12 +8,18 @@ const PROTECTED_PATHS = [
   '/training',
 ];
 
-// API paths that must remain reachable without a session (Stripe webhooks,
-// health checks). Stripe calls /api/stripe/webhook from outside the app, so it
-// must never be subjected to the auth gate.
+// API paths that must remain reachable without a Supabase session. Where
+// authentication is required, the endpoint performs its own check (Stripe
+// signature / queue secret), so these paths must never use the browser gate.
+//
+// The queue pump is called by Vercel Cron and by server-to-server self-kicks.
+// Neither caller has a browser cookie; leaving it out of this list returns the
+// middleware's "Authentication required" before the pump route can inspect its
+// own secret, so every queued job eventually stalls.
 const PUBLIC_API_PATHS = [
   '/api/health',
   '/api/stripe/webhook',
+  '/api/queue/pump',
 ];
 
 // Auth entry points that should never be blocked/redirected by the auth gate.
@@ -39,15 +45,23 @@ function isPublicAuthPath(pathname: string) {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
-  
+  const { pathname } = request.nextUrl;
+
+  // Do not make server-to-server endpoints depend on Supabase Auth being
+  // configured or reachable. The route itself performs its own authentication.
+  // This is intentionally before updateSession(): a cron/self-kick has no
+  // cookie, and a Supabase outage must not disable the queue driver.
+  if (isPublicApiPath(pathname)) {
+    return NextResponse.next({ request });
+  }
+
   try {
     const { supabaseResponse, user } = await updateSession(request);
 
     const isAPI = pathname.startsWith('/api');
 
     // Handle protected paths - if user is authenticated, allow access
-    if (!isProtectedPath(pathname) || isPublicApiPath(pathname) || isPublicAuthPath(pathname)) {
+    if (!isProtectedPath(pathname) || isPublicAuthPath(pathname)) {
       return supabaseResponse;
     }
 
