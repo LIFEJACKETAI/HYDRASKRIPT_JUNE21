@@ -2,6 +2,14 @@
 // Uses NVIDIA NIM REST API directly
 // MUST be used in backend code only
 
+import {
+  clampTimeoutMs,
+  defaultRequestTimeoutMs,
+  hasBudgetForAttempt,
+  LlmBudgetExceededError,
+  providerBackoffMs,
+  sleepWithinBudget,
+} from './budget';
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
 const NVIDIA_NIM_API_URL = process.env.NVIDIA_NIM_API_URL || 'https://integrate.api.nvidia.com/v1/chat/completions';
@@ -75,10 +83,21 @@ async function withRetry<T>(
         throw lastError;
       }
 
-      if (attempt < maxAttempts) {
-        const delay = baseDelayMs * Math.pow(2, attempt - 1);
-        await new Promise(resolve => setTimeout(resolve, delay));
+      // Vercel freezes this instance at `maxDuration`. Retrying past the
+      // claim's budget is what used to leave jobs `active` with an orphaned
+      // lease ("stuck on Queued..."), so bail out with a re-queueable error.
+      if (attempt < maxAttempts && hasBudgetForAttempt()) {
+        const delay = providerBackoffMs(attempt, baseDelayMs);
+        if (await sleepWithinBudget(delay)) {
+          continue;
+        }
       }
+      if (!hasBudgetForAttempt()) {
+        throw new LlmBudgetExceededError(
+          `NVIDIA NIM: no time left in this claim for another attempt (last error: ${lastError.message})`
+        );
+      }
+      throw lastError;
     }
   }
 
@@ -105,13 +124,13 @@ export interface CompletionOptions {
  * Generate a chat completion using NVIDIA NIM REST API.
  */
 export async function generateCompletion(options: CompletionOptions): Promise<string> {
-  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 300000 } = options;
+  const { messages, temperature = 0.7, maxTokens, model, retries = 2, timeoutMs = defaultRequestTimeoutMs() } = options;
   const apiKey = getApiKey();
   const nvidiaModel = model || getModel();
 
   return withRetry(async () => {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const timeout = setTimeout(() => controller.abort(), clampTimeoutMs(timeoutMs));
     try {
       const response = await fetch(NVIDIA_NIM_API_URL, {
         method: 'POST',

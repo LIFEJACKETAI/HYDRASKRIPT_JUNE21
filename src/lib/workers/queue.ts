@@ -6,16 +6,41 @@
 import { db } from '@/lib/db'
 import { WorkerRegistry } from './registry'
 import type { JobType, JobStatus } from '@/types'
-import { isServerless, kickQueuePump } from './queue-pump-client'
+import { isServerless, kickQueuePump, forceKickQueuePump } from './queue-pump-client'
+import {
+  defaultClaimBudgetMs,
+  isLlmBudgetExceeded,
+  isProviderTransientError,
+  runWithLlmBudget,
+} from '@/lib/llm/budget'
 
-export { isServerless, kickQueuePump, maybeKickQueueForJob } from './queue-pump-client'
+export { isServerless, kickQueuePump, forceKickQueuePump, maybeKickQueueForJob } from './queue-pump-client'
+
+function envInt(name: string, fallback: number): number {
+  const raw = process.env[name]
+  if (!raw) return fallback
+  const n = parseInt(raw, 10)
+  return Number.isFinite(n) && n > 0 ? n : fallback
+}
 
 const DEFAULT_MAX_RETRIES = 3
-const LEASE_DURATION_MS = 15 * 60 * 1000
-const HEARTBEAT_INTERVAL_MS = 60_000
 const MAX_RETRIES = 3
 const BASE_RETRY_DELAY_MS = 150
-const MAX_RETRY_DELAY_MS = 2000
+const MAX_RETRY_DELAY_MS = envInt('QUEUE_RETRY_MAX_DELAY_MS', 8_000)
+
+/**
+ * LEASE = how long a claim may go un-confirmed before another pump may take the
+ * job over. It used to be 15 minutes while a Vercel function may only live 5.
+ * So whenever an instance died mid-job (freeze, redeploy, platform kill) the job
+ * was un-recoverable for ~15 minutes — the single biggest cause of "stuck on
+ * Queued...". A lease only has to beat the heartbeat interval by a wide margin:
+ * 2 min of lease refreshed every 30s means a dead worker is reclaimed in <=2min
+ * while a live worker (which renews on every heartbeat) can never be stolen.
+ */
+const LEASE_DURATION_MS = envInt('QUEUE_LEASE_MS', isServerless() ? 120_000 : 15 * 60_000)
+const HEARTBEAT_INTERVAL_MS = envInt('QUEUE_HEARTBEAT_MS', Math.max(15_000, Math.floor(LEASE_DURATION_MS / 4)))
+/** A job re-queued for backoff is not claimable until this many ms have passed. */
+const TRANSIENT_BACKOFF_MS = envInt('QUEUE_BACKOFF_MS', 30_000)
 
 type QueueWorkerJob = {
   id: string
@@ -65,11 +90,16 @@ class PersistentJobQueue {
    * interactive transactions each need a dedicated pooled connection, which
    * under Vercel + PgBouncer is exactly what throws P2028
    * ("Unable to start a transaction in the given time").
+   *
+   * `maxDelayMs` escalates far beyond the normal 2s cap for *terminal* writes
+   * (see settleJobStatus): a lost `completed` update is what made a finished
+   * book look permanently queued in the UI.
    */
   private async withRetry<T>(
     operation: () => Promise<T>,
     context: string,
-    maxRetries = MAX_RETRIES
+    maxRetries = MAX_RETRIES,
+    maxDelayMs = 2_000
   ): Promise<T> {
     let lastError: Error | null = null
 
@@ -91,17 +121,40 @@ class PersistentJobQueue {
 
         const delay = Math.min(
           BASE_RETRY_DELAY_MS * Math.pow(2, attempt) + Math.random() * 100,
-          MAX_RETRY_DELAY_MS
+          maxDelayMs
         )
 
         console.warn(
-          `[Queue] ${context} attempt ${attempt + 1} failed (${lastError.message}), retrying in ${delay}ms...`
+          `[Queue] ${context} attempt ${attempt + 1} failed (${lastError.message}), retrying in ${Math.round(delay)}ms...`
         )
         await this.sleep(delay)
       }
     }
 
     throw lastError
+  }
+
+  /**
+   * Terminal state write (completed / failed / re-queued). These decide what the
+   * user sees, so they retry harder than normal queries AND, uniquely, must
+   * never be swallowed: if the DB is still refusing after ~30s we log at error
+   * level with the job id so it can be reconciled by hand.
+   */
+  async settleJobStatus(
+    jobId: string,
+    update: Parameters<PersistentJobQueue['updateJobStatus']>[1]
+  ): Promise<void> {
+    try {
+      await this.withRetry(() => this.applyJobUpdate(jobId, update), `settleJobStatus(${jobId})`, 8, MAX_RETRY_DELAY_MS)
+    } catch (error) {
+      console.error(
+        `[Queue] CRITICAL: could not persist terminal status "${update.status}" for job ${jobId}. ` +
+          `The lease recovery pass will retry this job. Cause: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+      )
+      throw error
+    }
   }
 
   async createJob(params: {
@@ -143,11 +196,13 @@ class PersistentJobQueue {
     console.log(`[Queue] Job ${jobId} signaled for processing (${jobType})`)
     await this.bootstrap()
 
-    // In a serverless deployment the in-process loop only runs while a function
-    // is warm and serving traffic. Drive the job via the HTTP pump so the chain
-    // survives instance freezes; locally use the in-process loop directly.
+    // A job was just created, so this is a *forced* kick: never throttled.
+    // Locally the in-process loop drives it; on serverless we also run one claim
+    // inside this (already warm, full-budget) invocation via after(), with the
+    // HTTP pump as the durable backup for when this instance freezes.
     if (isServerless()) {
-      kickQueuePump()
+      forceKickQueuePump()
+      scheduleQueueWork()
     } else {
       void this.processNext()
     }
@@ -200,7 +255,31 @@ class PersistentJobQueue {
           result: jobToProcess.result,
         }
 
-        await workerFn(workerJob)
+        // Run the worker inside an explicit work budget (see llm/budget.ts).
+        // Workers that would otherwise be frozen mid-LLM-call now stop early and
+        // are re-queued with backoff, which keeps leases short and the queue
+        // flowing instead of stranding a job in `active`.
+        await runWithLlmBudget(defaultClaimBudgetMs(), () => workerFn(workerJob))
+
+        // Every worker is expected to settle its own job (completed/failed). If it
+        // returned cleanly but the row is still `active`, the write was lost —
+        // usually a P2028 under pool contention. Settle it here, otherwise the
+        // lease expires in 2 minutes, the job is re-claimed, and the user watches
+        // the same chapter generate over and over while the book looks "Queued".
+        const settled = await db.job.findUnique({
+          where: { id: jobToProcess.id },
+          select: { status: true },
+        })
+        if (settled?.status === 'active') {
+          console.warn(
+            `[Queue] Job ${jobToProcess.id} finished but was never settled — marking it completed.`
+          )
+          await this.settleJobStatus(jobToProcess.id, {
+            status: 'completed',
+            progressMessage: 'Done.',
+            progressPercent: 100,
+          })
+        }
       } catch (error) {
         const errMessage = error instanceof Error ? error.message : String(error)
         console.error(`[Queue] Job ${jobToProcess.id} failed:`, errMessage)
@@ -208,15 +287,27 @@ class PersistentJobQueue {
         const nextRetryCount = jobToProcess.retryCount + 1
         const canRetry = nextRetryCount <= jobToProcess.maxRetries
 
+        // "Provider is overloaded" / "out of time in this claim" are not the
+        // book's fault. Re-queue with a backoff so a later (warm, healthy)
+        // claim can succeed, instead of failing the user's generation on a
+        // transient 503 — and instead of the old behaviour of silently sitting
+        // in `active` behind a frozen instance.
+        const transient = isLlmBudgetExceeded(error) || isProviderTransientError(errMessage)
+        const backoffUntil = new Date(Date.now() + TRANSIENT_BACKOFF_MS * nextRetryCount)
+
         try {
-          await this.updateJobStatus(jobToProcess.id, {
+          await this.settleJobStatus(jobToProcess.id, {
             status: canRetry ? 'queued' : 'failed',
-            errorMessage: errMessage,
+            errorMessage: errMessage.slice(0, 2000),
             progressMessage: canRetry
-              ? `Retrying (${nextRetryCount}/${jobToProcess.maxRetries}) after failure: ${errMessage}`
+              ? transient
+                ? `Providers busy — re-queued, retry ${nextRetryCount}/${jobToProcess.maxRetries}.`
+                : `Retrying (${nextRetryCount}/${jobToProcess.maxRetries}) after failure.`
               : `Failed: ${errMessage}`,
             retryCount: nextRetryCount,
-            leaseExpiresAt: null,
+            // Doubles as "don't claim me before this" for queued jobs, and is
+            // cleared by the claim itself.
+            leaseExpiresAt: canRetry && transient ? backoffUntil : null,
             lastHeartbeatAt: null,
           })
         } catch (updateError) {
@@ -242,6 +333,26 @@ class PersistentJobQueue {
     }
   }
 
+  /**
+   * Block until this instance has a free worker slot (or the wait expires).
+   *
+   * WHY: `maxConcurrent` is 1 per instance and the pump used to `break` out of
+   * its loop the moment a claim returned 'busy'. Any job queued behind a
+   * long-running one (an editorial review or a manuscript import can run for
+   * minutes) therefore starved: every 5s poll kicked the pump, every kick saw
+   * the busy flag and did nothing — "Queued..." forever. Waiting here lets the
+   * same invocation pick the job up the instant the slot frees.
+   */
+  async waitForCapacity(maxWaitMs: number, pollMs = 1_500): Promise<boolean> {
+    const until = Date.now() + Math.max(0, maxWaitMs)
+    while (Date.now() < until) {
+      if (this.shutdown) return false
+      if (!this.isProcessing && this.activeJobs < this.maxConcurrent) return true
+      await this.sleep(Math.min(pollMs, Math.max(100, until - Date.now())))
+    }
+    return !this.isProcessing && this.activeJobs < this.maxConcurrent
+  }
+
   private async processNext(): Promise<void> {
     if (this.shutdown) return
     try {
@@ -265,14 +376,36 @@ class PersistentJobQueue {
     result: string | null
   } | null> {
     return this.withRetry(async () => {
+      const now = new Date()
+
       const queuedJob = await db.job.findFirst({
-        where: { status: 'queued' },
+        where: {
+          status: 'queued',
+          // Backoff: a job re-queued after a transient provider failure carries a
+          // future leaseExpiresAt meaning "not claimable yet". Without this
+          // filter, every kick would instantly re-claim a job whose providers are
+          // all 503-ing and spin the queue.
+          OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lte: now } }],
+        },
         orderBy: { createdAt: 'asc' },
+        // Only the columns the dispatcher needs. `result` can hold a 500k-char
+        // manuscript, and this query runs on every pump kick.
+        select: {
+          id: true,
+          bookId: true,
+          ownerId: true,
+          jobType: true,
+          retryCount: true,
+          maxRetries: true,
+          stepIndex: true,
+          creditsConsumed: true,
+          result: true,
+          startedAt: true,
+          progressPercent: true,
+        },
       })
 
       if (!queuedJob) return null
-
-      const now = new Date()
 
       const claimed = await db.job.updateMany({
         where: { id: queuedJob.id, status: 'queued' },
@@ -282,6 +415,9 @@ class PersistentJobQueue {
             queuedJob.retryCount > 0
               ? `Retrying (${queuedJob.retryCount}/${queuedJob.maxRetries})...`
               : 'Processing...',
+          // Move the bar off 0% so the UI can distinguish "claimed, working"
+          // from "nobody has picked this up yet".
+          progressPercent: Math.max(queuedJob.progressPercent, 5),
           startedAt: queuedJob.startedAt ?? now,
           leaseExpiresAt: this.getLeaseExpiry(now),
           lastHeartbeatAt: now,
@@ -325,20 +461,31 @@ class PersistentJobQueue {
   /**
    * Reset any job whose worker died (stale/expired lease) back to `queued` so
    * the next poll can pick it up. Safe to call repeatedly.
+   *
+   * Two independent signals are used, because a Vercel instance frozen mid-job
+   * stops *both* the lease renewal and the heartbeat, and either one alone can
+   * be missing on rows written by older builds:
+   *   - leaseExpiresAt in the past (or null, i.e. never renewed)
+   *   - lastHeartbeatAt older than 4 heartbeat intervals
    */
   private async recoverExpiredLeases(): Promise<void> {
     const now = new Date()
+    const staleHeartbeatBefore = new Date(now.getTime() - HEARTBEAT_INTERVAL_MS * 4)
 
     await this.withRetry(
       async () => {
         await db.job.updateMany({
           where: {
             status: 'active',
-            OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lte: now } }],
+            OR: [
+              { leaseExpiresAt: null },
+              { leaseExpiresAt: { lte: now } },
+              { lastHeartbeatAt: { lte: staleHeartbeatBefore } },
+            ],
           },
           data: {
             status: 'queued',
-            progressMessage: 'Recovering interrupted job...',
+            progressMessage: 'Worker went away mid-job — re-queuing.',
             leaseExpiresAt: null,
             lastHeartbeatAt: null,
           },
@@ -409,6 +556,56 @@ class PersistentJobQueue {
     }
   }
 
+  /**
+   * The raw job UPDATE. Kept free of retry logic so callers can choose how hard
+   * to try (progress = cheap/swallow, terminal = settleJobStatus).
+   */
+  private async applyJobUpdate(
+    jobId: string,
+    update: Parameters<PersistentJobQueue['updateJobStatus']>[1]
+  ): Promise<void> {
+    // jsonb || patch keeps `result.text` in Postgres. Fetching + rewriting
+    // the 500k-char manuscript on every window was locking the job row and
+    // starving heartbeats (P2028).
+    if (update.result !== undefined && update.mergeResult) {
+      const patchJson = JSON.stringify(update.result)
+      await db.$executeRawUnsafe(
+        `UPDATE "jobs" SET result = (COALESCE(NULLIF(result, ''), '{}')::jsonb || $1::jsonb)::text WHERE id = $2::uuid`,
+        patchJson,
+        jobId
+      )
+    }
+
+    const resultPayload =
+      update.result !== undefined && !update.mergeResult
+        ? JSON.stringify(update.result)
+        : undefined
+
+    await db.job.update({
+      where: { id: jobId },
+      data: {
+        ...(update.status && { status: update.status }),
+        ...(update.progressMessage && { progressMessage: update.progressMessage }),
+        ...(update.progressPercent !== undefined && { progressPercent: update.progressPercent }),
+        ...(update.errorMessage && { errorMessage: update.errorMessage }),
+        ...(resultPayload !== undefined && { result: resultPayload }),
+        ...(update.startedAt && { startedAt: update.startedAt }),
+        ...(update.completedAt && { completedAt: update.completedAt }),
+        ...(update.retryCount !== undefined && { retryCount: update.retryCount }),
+        ...(update.leaseExpiresAt !== undefined && { leaseExpiresAt: update.leaseExpiresAt }),
+        ...(update.lastHeartbeatAt !== undefined && { lastHeartbeatAt: update.lastHeartbeatAt }),
+        ...(update.status === 'completed' && {
+          completedAt: new Date(),
+          leaseExpiresAt: null,
+          lastHeartbeatAt: new Date(),
+        }),
+        ...(update.status === 'failed' && {
+          leaseExpiresAt: null,
+        }),
+      },
+    })
+  }
+
   async updateJobStatus(
     jobId: string,
     update: {
@@ -425,52 +622,19 @@ class PersistentJobQueue {
       lastHeartbeatAt?: Date | null
     }
   ): Promise<void> {
+    // Terminal/queued transitions decide whether the chain continues, so they
+    // must surface failures (the caller's catch/refund path depends on it).
+    // Progress messages are cosmetic: a dropped one must never fail a job.
+    const isTerminal = update.status !== undefined
     try {
-      await this.withRetry(async () => {
-        // jsonb || patch keeps `result.text` in Postgres. Fetching + rewriting
-        // the 500k-char manuscript on every window was locking the job row and
-        // starving heartbeats (P2028).
-        if (update.result !== undefined && update.mergeResult) {
-          const patchJson = JSON.stringify(update.result)
-          await db.$executeRawUnsafe(
-            `UPDATE "jobs" SET result = (COALESCE(NULLIF(result, ''), '{}')::jsonb || $1::jsonb)::text WHERE id = $2::uuid`,
-            patchJson,
-            jobId
-          )
-        }
-
-        const resultPayload =
-          update.result !== undefined && !update.mergeResult
-            ? JSON.stringify(update.result)
-            : undefined
-
-        await db.job.update({
-          where: { id: jobId },
-          data: {
-            ...(update.status && { status: update.status }),
-            ...(update.progressMessage && { progressMessage: update.progressMessage }),
-            ...(update.progressPercent !== undefined && { progressPercent: update.progressPercent }),
-            ...(update.errorMessage && { errorMessage: update.errorMessage }),
-            ...(resultPayload !== undefined && { result: resultPayload }),
-            ...(update.startedAt && { startedAt: update.startedAt }),
-            ...(update.completedAt && { completedAt: update.completedAt }),
-            ...(update.retryCount !== undefined && { retryCount: update.retryCount }),
-            ...(update.leaseExpiresAt !== undefined && { leaseExpiresAt: update.leaseExpiresAt }),
-            ...(update.lastHeartbeatAt !== undefined && { lastHeartbeatAt: update.lastHeartbeatAt }),
-            ...(update.status === 'completed' && {
-              completedAt: new Date(),
-              leaseExpiresAt: null,
-              lastHeartbeatAt: new Date(),
-            }),
-            ...(update.status === 'failed' && {
-              leaseExpiresAt: null,
-            }),
-          },
-        })
-      }, `updateJobStatus(${jobId})`)
+      if (isTerminal) {
+        await this.settleJobStatus(jobId, update)
+        return
+      }
+      await this.withRetry(() => this.applyJobUpdate(jobId, update), `updateJobStatus(${jobId})`)
     } catch (error) {
       console.error(`[Queue] Failed to update job ${jobId}:`, error)
-      if (update.status) throw error
+      if (isTerminal) throw error
     }
   }
 
@@ -538,10 +702,13 @@ export function scheduleQueueWork(): void {
       const queue = getJobQueue()
       await queue.bootstrap()
       const state = await queue.processOneQueuedJob()
-      if (state === 'ran' || state === 'busy') kickQueuePump()
+      // 'ran' -> more jobs may be chained; 'busy' -> this instance is mid-job and
+      // its own post-job self-kick will keep the chain moving. Either way the pump
+      // has to be re-armed so nothing is left waiting on a frozen isolate.
+      if (state === 'ran' || state === 'busy') forceKickQueuePump()
     } catch (e) {
       console.error('[Queue] scheduleQueueWork failed:', e)
-      kickQueuePump()
+      forceKickQueuePump()
     }
   }
 
@@ -575,6 +742,8 @@ export async function initializeJobQueue(): Promise<PersistentJobQueue> {
     const queue = getJobQueue()
     await queue.bootstrap()
     if (isServerless()) {
+      // Cold start: sweep anything an earlier instance left behind, then hand the
+      // work to the HTTP pump (throttled kick - this is not a fresh job).
       kickQueuePump()
     } else {
       queue.startLoop()

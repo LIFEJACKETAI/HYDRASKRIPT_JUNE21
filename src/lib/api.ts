@@ -181,6 +181,9 @@ export interface JobData {
   creditsReserved: number;
   creditsConsumed: number;
   errorMessage: string | null;
+  /** Transient-failure attempts so far / attempts allowed before the job fails. */
+  retryCount: number;
+  maxRetries: number;
   result: Record<string, unknown> | null;
   startedAt: string | null;
   completedAt: string | null;

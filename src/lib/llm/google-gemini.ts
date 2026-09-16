@@ -2,6 +2,14 @@
 // Uses Google AI Studio REST API directly (no SDK required)
 // MUST be used in backend code only
 
+import {
+  clampTimeoutMs,
+  defaultRequestTimeoutMs,
+  hasBudgetForAttempt,
+  LlmBudgetExceededError,
+  providerBackoffMs,
+  sleepWithinBudget,
+} from './budget';
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
@@ -44,10 +52,21 @@ async function withRetry<T>(
         throw lastError;
       }
 
-      if (attempt < maxAttempts) {
-        const delay = baseDelayMs * Math.pow(2, attempt - 1);
-        await new Promise(resolve => setTimeout(resolve, delay));
+      // Vercel freezes this instance at `maxDuration`. Retrying past the
+      // claim's budget is what used to leave jobs `active` with an orphaned
+      // lease ("stuck on Queued..."), so bail out with a re-queueable error.
+      if (attempt < maxAttempts && hasBudgetForAttempt()) {
+        const delay = providerBackoffMs(attempt, baseDelayMs);
+        if (await sleepWithinBudget(delay)) {
+          continue;
+        }
       }
+      if (!hasBudgetForAttempt()) {
+        throw new LlmBudgetExceededError(
+          `Gemini: no time left in this claim for another attempt (last error: ${lastError.message})`
+        );
+      }
+      throw lastError;
     }
   }
 
@@ -75,13 +94,13 @@ export interface CompletionOptions {
  * Converts OpenAI-style messages to Gemini's generateContent format.
  */
 export async function generateCompletion(options: CompletionOptions): Promise<string> {
-  const { messages, temperature = 0.7, maxTokens, model, retries = 3, timeoutMs = 300000 } = options;
+  const { messages, temperature = 0.7, maxTokens, model, retries = 2, timeoutMs = defaultRequestTimeoutMs() } = options;
   const apiKey = getApiKey();
   const geminiModel = model || getModel();
 
   return withRetry(async () => {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const timeout = setTimeout(() => controller.abort(), clampTimeoutMs(timeoutMs));
     try {
       // Convert OpenAI-style messages to Gemini format
       // Gemini uses 'user' and 'model' roles, with systemInstruction at top level

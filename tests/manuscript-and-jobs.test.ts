@@ -75,3 +75,82 @@ describe('isBookExportable', () => {
     expect(isBookExportable({ status: 'completed', chapters: [] }).ok).toBe(true)
   })
 })
+
+describe('extractPdfTextFromBuffer', () => {
+  test('rejects with a typed PdfReadError instead of a bare 500 message', async () => {
+    const { extractPdfTextFromBuffer, PdfReadError } = await import('@/lib/manuscript')
+    const err = await extractPdfTextFromBuffer(Buffer.from('this is not a pdf at all')).catch((e) => e)
+    expect(err).toBeInstanceOf(PdfReadError)
+    // Whichever way it is classified, the user must get an actionable sentence.
+    expect(err.message).toMatch(/could not read that pdf|could not start on this server/i)
+  })
+
+  test('a missing pdf.js worker is labelled a deployment problem, a bad file is not', () => {
+    // This is the exact production string from the Vercel logs. It used to be
+    // reported as "The PDF may be corrupted" - sending users off re-exporting a
+    // perfectly good file while the real bug (worker not in the bundle) stayed.
+    const { isPdfWorkerUnavailableMessage } = require('@/lib/manuscript')
+    expect(
+      isPdfWorkerUnavailableMessage(
+        'Failed to parse PDF: Setting up fake worker failed: "Cannot find module ' +
+          "'/var/task/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs'" +
+          '" imported from /var/task/node_modules/pdfjs-dist/legacy/build/pdf.mjs'
+      )
+    ).toBe(true)
+    expect(isPdfWorkerUnavailableMessage('Invalid PDF structure.')).toBe(false)
+  })
+})
+
+describe('bookAccessFailure', () => {
+  test('maps a deleted book to 404 so a stale client id is not an incident', async () => {
+    const { bookAccessFailure } = await import('@/lib/story-bible-helpers')
+    expect(bookAccessFailure(new Error('Book not found'))).toEqual({
+      status: 404,
+      message: expect.stringMatching(/no longer exists/i),
+    })
+    expect(bookAccessFailure(new Error('Forbidden'))?.status).toBe(403)
+    expect(bookAccessFailure(new Error('Connection terminated'))).toBeNull()
+  })
+})
+
+describe('supabase browser client (build-safety)', () => {
+  const keys = ['NEXT_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'] as const
+
+  test('an unconfigured env returns an inert client instead of throwing during prerender', async () => {
+    const saved = keys.map((k) => process.env[k])
+    keys.forEach((k) => delete process.env[k])
+    jest.resetModules()
+    try {
+      const { createClient, isSupabaseBrowserConfigured } = await import('@/lib/supabase/client')
+      expect(isSupabaseBrowserConfigured()).toBe(false)
+      // This is the call that used to abort `next build` at
+      // `Error occurred prerendering page "/_not-found"`.
+      const supabase = createClient()
+      expect(() => (supabase as { auth: unknown }).auth).not.toThrow()
+      const res = await (supabase as any).auth.getSession()
+      expect(res.data).toBeNull()
+      expect((res.error as Error).message).toMatch(/not configured/i)
+    } finally {
+      keys.forEach((k, i) => {
+        if (saved[i] !== undefined) process.env[k] = saved[i]
+      })
+      jest.resetModules()
+    }
+  })
+
+  test('a configured env keeps using the real browser client', async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co'
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key'
+    jest.resetModules()
+    try {
+      const { createClient, isSupabaseBrowserConfigured } = await import('@/lib/supabase/client')
+      expect(isSupabaseBrowserConfigured()).toBe(true)
+      const supabase = createClient() as { auth?: unknown }
+      expect(supabase.auth).toBeDefined()
+    } finally {
+      delete process.env.NEXT_PUBLIC_SUPABASE_URL
+      delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      jest.resetModules()
+    }
+  })
+})

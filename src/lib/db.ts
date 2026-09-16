@@ -50,18 +50,33 @@ function createPool(): Pool {
   // warm lambdas exhausts Supabase and surfaces as Prisma P2028
   // ("Unable to start a transaction in the given time").
   const max = parseInt(
-    process.env.DATABASE_POOL_MAX || (serverless ? '2' : '10'),
+    process.env.DATABASE_POOL_MAX || (serverless ? '3' : '10'),
+    10
+  )
+  // How long a query waits for a pooled connection before Prisma throws
+  // P2028. The queue's status writes MUST survive short bursts of contention
+  // (a poll storm, a big `jobs.result` update), so waiting beats failing: a
+  // failed `completed` write is exactly what strands a finished book at
+  // "Queued...". Keep it below the platform's function timeout.
+  const connectionTimeoutMs = parseInt(
+    process.env.PRISMA_CONNECTION_TIMEOUT || (serverless ? '20000' : '10000'),
     10
   )
   return new Pool({
+    application_name: 'hydraskript-web',
     connectionString: resolveConnectionString(process.env.DATABASE_URL),
     ssl: /supabase\.(co|com)/.test(process.env.DATABASE_URL ?? '')
       ? { rejectUnauthorized: false }
       : undefined,
     min: 0,
-    max: Number.isFinite(max) && max > 0 ? max : serverless ? 2 : 10,
-    idleTimeoutMillis: serverless ? 10_000 : 30_000,
-    connectionTimeoutMillis: parseInt(process.env.PRISMA_CONNECTION_TIMEOUT || '10000', 10),
+    max: Number.isFinite(max) && max > 0 ? max : serverless ? 3 : 10,
+    idleTimeoutMillis: serverless ? 20_000 : 30_000,
+    connectionTimeoutMillis: connectionTimeoutMs,
+    // Reap dead TCP sockets quickly: a Supabase pooler connection that died
+    // during an instance freeze otherwise sits "checked out" and stalls the
+    // next query behind it until the connect timeout expires.
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
     allowExitOnIdle: serverless,
   })
 }
@@ -79,9 +94,14 @@ const logConfig =
 // These options apply only to interactive `$transaction(async tx => ...)`
 // calls. LLM work must NEVER run inside a Prisma transaction — a 120s
 // timeout was holding pool connections and causing P2028 on heartbeats.
+//
+// `maxWait` is how long Prisma will wait for a connection before throwing
+// P2028 ("Unable to start a transaction in the given time"). It must be >=
+// the pg pool's connectionTimeoutMillis, otherwise Prisma gives up first and
+// the queue's status writes fail even though a connection was 2s away.
 const transactionOptions = {
-  maxWait: parseInt(process.env.PRISMA_TRANSACTION_MAX_WAIT || '10000', 10),
-  timeout: parseInt(process.env.PRISMA_TRANSACTION_TIMEOUT || '15000', 10),
+  maxWait: parseInt(process.env.PRISMA_TRANSACTION_MAX_WAIT || '25000', 10),
+  timeout: parseInt(process.env.PRISMA_TRANSACTION_TIMEOUT || '30000', 10),
   isolationLevel: 'ReadCommitted' as const,
 }
 

@@ -83,11 +83,32 @@ async function firePumpKick(): Promise<void> {
 }
 
 /**
+ * Minimum gap between *poll-driven* kicks.
+ *
+ * WHY: every GET /api/jobs/[id] used to kick the pump. With a handful of users
+ * each polling every 5s that is a steady stream of POSTs into a 300s-capable
+ * function that then bootstraps the queue, reconciles stuck books and opens a
+ * Prisma connection on every warm lambda — and that DB contention is exactly
+ * what surfaces as P2028 ("Unable to start a transaction in the given time")
+ * on the very status updates the queue needs to make. `kickQueuePump({force})`
+ * still fires immediately when a job is created or a claim fails, so nothing
+ * ever waits for the throttle to be released.
+ */
+const MIN_KICK_INTERVAL_MS = parseInt(process.env.QUEUE_KICK_THROTTLE_MS || '12000', 10)
+
+const g = globalThis as unknown as { __hydraLastPumpKick?: number }
+
+/**
  * Fire-and-forget HTTP kick to the durable queue pump. Prefers Next.js `after()`
  * so the outbound request survives the current function returning.
  */
-export function kickQueuePump(): void {
+export function kickQueuePump(opts: { force?: boolean } = {}): void {
   if (!isServerless()) return
+  const now = Date.now()
+  if (!opts.force && g.__hydraLastPumpKick && now - g.__hydraLastPumpKick < MIN_KICK_INTERVAL_MS) {
+    return
+  }
+  g.__hydraLastPumpKick = now
   try {
     const task = firePumpKick()
     void import('next/server')
@@ -113,4 +134,9 @@ export function kickQueuePump(): void {
 /** Nudge the pump when a client is polling a job that still needs a worker. */
 export function maybeKickQueueForJob(status: string): void {
   if (status === 'queued' || status === 'active') kickQueuePump()
+}
+
+/** Kick that ignores the throttle — use right after enqueuing a job. */
+export function forceKickQueuePump(): void {
+  kickQueuePump({ force: true })
 }

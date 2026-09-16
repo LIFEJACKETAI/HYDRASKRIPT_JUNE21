@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 import { assertBookOwnership } from '@/lib/story-bible-helpers';
-import { extractTextFromBuffer, SUPPORTED_MANUSCRIPT_EXTENSIONS, truncateManuscript, ManuscriptValidationError } from '@/lib/manuscript';
+import { extractTextFromBuffer, PdfReadError, SUPPORTED_MANUSCRIPT_EXTENSIONS, truncateManuscript, ManuscriptValidationError } from '@/lib/manuscript';
 import { maybeKickQueueForJob } from '@/lib/workers/queue-pump-client';
 import { publicJobResult } from '@/lib/job-public';
 import { isUuid } from '@/lib/uuid';
@@ -221,6 +221,16 @@ export async function POST(request: NextRequest) {
         );
       }
       const msg = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      // A PDF the server cannot read is not the user's fault, and a broken PDF
+      // is not a server fault — say which one it is (both used to be a bare 500
+      // "Failed to parse PDF: ...", which sent users off debugging their files).
+      if (uploadError instanceof PdfReadError) {
+        console.error('[API/story-bible/import-manuscript] PDF extraction failed:', msg);
+        return NextResponse.json(
+          { success: false, error: msg },
+          { status: uploadError.infrastructure ? 503 : 400 }
+        );
+      }
       const status = uploadError instanceof ManuscriptValidationError ? uploadError.status : 500;
       console.error('[API/story-bible/import-manuscript] Direct upload failed:', msg, uploadError instanceof Error ? uploadError.stack : '');
       return NextResponse.json({ success: false, error: msg }, { status });
@@ -301,6 +311,13 @@ export async function POST(request: NextRequest) {
         );
       }
       const msg = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      if (uploadError instanceof PdfReadError) {
+        console.error('[API/story-bible/import-manuscript] PDF extraction failed:', msg);
+        return NextResponse.json(
+          { success: false, error: msg },
+          { status: uploadError.infrastructure ? 503 : 400 }
+        );
+      }
       const status = uploadError instanceof ManuscriptValidationError ? uploadError.status : 500;
       console.error('[API/story-bible/import-manuscript] Presigned upload failed:', msg, uploadError instanceof Error ? uploadError.stack : '');
       return NextResponse.json({ success: false, error: msg }, { status });

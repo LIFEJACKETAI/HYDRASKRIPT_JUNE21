@@ -267,6 +267,12 @@ model Job {
   editorialReviews EditorialReview[]
 
   @@index([status, leaseExpiresAt])
+  // The queue claim is `WHERE status = 'queued' AND (lease null or expired)
+  // ORDER BY createdAt ASC LIMIT 1`. Without this index Postgres sorts the
+  // whole queued set on every claim — i.e. every 5s poll and every pump kick —
+  // which is CPU the pooled connection spends inside the query instead of
+  // handing it to the next status update (P2028).
+  @@index([status, createdAt])
   @@index([ownerId])
   @@index([bookId])
   @@map("jobs")

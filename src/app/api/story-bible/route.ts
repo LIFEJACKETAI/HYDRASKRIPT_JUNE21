@@ -10,6 +10,7 @@ import {
   isStoryBibleKind,
   toDTO,
   assertBookOwnership,
+  bookAccessFailure,
   type StoryBibleKind,
 } from '@/lib/story-bible-helpers';
 
@@ -45,6 +46,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     if (isUnauthorizedError(error)) return unauthorizedResponse();
+    const access = bookAccessFailure(error);
+    if (access) {
+      // A stale/deleted book id from the client is expected, not an incident.
+      return NextResponse.json({ success: false, error: access.message }, { status: access.status });
+    }
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API] story-bible list failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
