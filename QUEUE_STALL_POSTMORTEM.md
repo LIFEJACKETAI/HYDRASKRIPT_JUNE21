@@ -42,17 +42,41 @@ Everything below is about (a) the two things that blocked PR #14 from deploying 
 
 ## 1. Two deploy blockers (why `main` never shipped)
 
-### 1a. `vercel.json` cron frequency — Hobby rejects the whole deploy
+### 1a. `vercel.json` platform config — Vercel rejects the deploy before it builds
 PR #14 changed the pump cron to `* * * * *`. On a Hobby project Vercel refuses to create
 the deployment at all:
 
 > Hobby accounts are limited to daily Cron Jobs. This cron expression (\* \* \* \* \*)
 > would run more than once per day.
 
-This fails **before** any build step, which matches the 4-second red status.
+This fails **before** any build step, which matches the 4-second red status on `main`.
+It also explains a second data point: after the cron was made daily, the *branch*
+deployment still failed **at the same second it was created** (`created_at ==
+updated_at == 02:38:16Z`), i.e. again nothing compiled. Both fields in `vercel.json` that
+Vercel validates at deploy time — `crons` (plan-limited) and `regions` (Pro-only on some
+accounts) — are therefore **removed**; the file now contains only framework/build keys.
 
-**Fixed:** back to `0 6 * * *` (daily backstop). The queue no longer depends on the cron
-for normal operation — see §2. On Pro you can tighten it again.
+The pump does not need cron: job creation forces a kick, each claim self-kicks the pump
+after it, and `after()` keeps work alive past the response. `iad1` was already the default
+region. If you want the backstop anyway, prefer the dashboard (Settings → Cron Jobs, where
+the plan limit is visible) over `vercel.json`; the equivalent file form is:
+
+```json
+"crons": [{ "path": "/api/queue/pump", "schedule": "0 6 * * *" }]
+```
+
+On Pro, `* * * * *` is fine there and recovers interrupted chains within a minute.
+
+> **If the next deploy also fails within seconds of being created, it is account-level,
+> not code-level.** Vercel's own hint is the fastest look:
+> `npx vercel inspect dpl_7vVQWFRKZjjkAvj1etcC14zSwUAC --logs`
+> (or open the deployment URL from the failing commit status). Common instant rejections:
+> project paused for usage, cron slots exhausted, or deployment concurrency on Hobby.
+
+For the record, the app **does** compile: a local `next build` gets through webpack for all
+routes (`Compiled with warnings`, the warnings being only the intentional dynamic
+`require.resolve` in `manuscript.ts`); it stops at `tsc` solely because the Prisma client
+cannot be generated in a sandbox without network access to `binaries.prisma.sh`. On Pro you can tighten it again.
 
 ### 1b. `src/app/api/queue/pump/route.ts` called a non-existent global
 ```ts

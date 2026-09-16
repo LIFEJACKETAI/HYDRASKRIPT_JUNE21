@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+// TEMP-BUILD-PROBE: fonts removed (no network in sandbox)
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { RecoveryHandler } from "@/components/auth/RecoveryHandler";
 import RouteTransitionIndicator from "@/components/layout/RouteTransitionIndicator";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = { variable: "", className: "" };
+const geistMono = { variable: "", className: "" };
 
 export const metadata: Metadata = {
   title: "HydraSkript — AI-Powered Book Generation Platform",
