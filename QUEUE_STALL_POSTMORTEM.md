@@ -208,3 +208,26 @@ problem; if you see nothing after "signaled", check the pump's authorization/`AP
   than up and keep `PRISMA_TRANSACTION_MAX_WAIT` generous.
 * `jobs.result` stores up to 500 k chars per manuscript-import job; move window text to its
   own table if import jobs stay frequent.
+
+---
+
+## 7. Reading the Vercel build log (`npx vercel inspect dpl_... --logs`)
+
+Both the `main` deploy and this branch's first deploy were rejected *at deploy
+creation* (removed by dropping `crons`/`regions` from `vercel.json`). The branch
+deploy that followed got into the build for a few minutes and then failed, which is
+a different class of problem. What each candidate looks like, and what to do:
+
+| Log says | Meaning | Fix |
+| --- | --- | --- |
+| `Serverless Functions must have a maxDuration between 1 and 60 for plan hobby` / `Builder returned invalid maxDuration value` | the project is on the **legacy (non-Fluid) runtime**, where 300 s is not declarable on Hobby. Note `aec810f0` shipped fine with `maxDuration = 300` on the pump, so this is only possible if that setting regressed | Vercel → Settings → Functions → **enable Fluid Compute** (300 s on Hobby, and I/O wait isn't billed — ideal for LLM calls). Do **not** lower `maxDuration` in code: the pump's 270 s deadline and `JOB_BUDGET_MS` assume ≥300 s |
+| `TransactionTimeout`/`Command "npx prisma generate" exited with 1`, `Failed to download binary` | build-time Prisma failure (engine download / schema) | re-run deploy; if the schema is at fault, `npx prisma validate` locally. `prisma generate` needs no DB, so `DATABASE_URL` is not the cause |
+| `Killed` / `JavaScript heap out of memory` | build OOM (this repo is large) | Settings → Functions → higher build machine, or set `NODE_OPTIONS=--max-old-space-size=8192` in build env vars |
+| `Failed to compile.` + a `TS####` line | a real type error in the build env (my sandbox can't run `prisma generate`, so Prisma-typed errors are invisible locally) | paste it here — one line is enough |
+| `npm error ERESOLVE` / lockfile mismatch | `installCommand: npm install` fighting a stale lock | switch the project's install command to `npm ci`, or commit the refreshed lockfile |
+| no build log at all, "Deployment failed" instantly | account-level: usage cap, paused project, or cron slots | Settings → Usage / Cron Jobs |
+
+If it's a `TS####` from code in this PR: the two places worth eyeballing are the
+`select`-shaped claim in `src/lib/workers/queue.ts` and the `book: { is: null }`
+filter in `src/app/api/queue/pump/route.ts` — both typecheck only against a
+*generated* Prisma client, which is exactly what the sandbox lacks.
