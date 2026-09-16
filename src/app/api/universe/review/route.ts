@@ -3,6 +3,7 @@
 // GET  /api/universe/review   list the caller's past reviews
 
 import { NextRequest, NextResponse } from 'next/server';
+import { bookAccessFailure } from '@/lib/story-bible-helpers';
 import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 import { assertBookOwnership } from '@/lib/story-bible-helpers';
@@ -115,6 +116,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: { reviewId: review.id, jobId } });
   } catch (error) {
     if (isUnauthorizedError(error)) return unauthorizedResponse();
+    const createAccess = bookAccessFailure(error);
+    if (createAccess) {
+      return NextResponse.json({ success: false, error: createAccess.message }, { status: createAccess.status });
+    }
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API/universe/review] Create failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
@@ -149,6 +154,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     if (isUnauthorizedError(error)) return unauthorizedResponse();
+    const listAccess = bookAccessFailure(error);
+    if (listAccess) {
+      return NextResponse.json({ success: false, error: listAccess.message }, { status: listAccess.status });
+    }
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API/universe/review] List failed:', message);
     return NextResponse.json({ success: false, error: message }, { status: 500 });

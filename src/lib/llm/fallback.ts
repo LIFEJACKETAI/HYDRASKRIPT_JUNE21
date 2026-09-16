@@ -7,6 +7,13 @@
 // through a CHAIN of currently-valid models per provider, then across providers.
 // An explicitly requested model is tried first, then the configured chain.
 
+import {
+  hasBudgetForAttempt,
+  LLM_BUDGET_EXCEEDED_CODE,
+  isLlmBudgetExceeded,
+  isProviderTransientError,
+  LlmBudgetExceededError,
+} from '@/lib/llm/budget';
 import { askLLMJSON, askLLM } from '@/lib/llm/openrouter';
 import { askLLMJSON as askLLMGeminiJSON, askLLM as askLLMGemini } from '@/lib/llm/google-gemini';
 import { askLLMJSON as askLLMNimJSON, askLLM as askLLMNim } from '@/lib/llm/nvidia-nim';
@@ -109,16 +116,51 @@ async function tryModelChain<T>(
 ): Promise<T> {
   const errors: string[] = [];
   for (const model of models) {
+    // Budget guard: rotating through another model that cannot possibly finish
+    // before the platform freezes this function is worse than stopping — the
+    // freeze orphans the job's lease and the UI sits on "Queued...". Throwing
+    // here lets the queue re-queue the job (with backoff) and resume from the
+    // worker's own checkpoint on the next claim.
+    if (!hasBudgetForAttempt()) {
+      throw new LlmBudgetExceededError(
+        `LLM_BUDGET_EXCEEDED: claim window closed while rotating ${label} ` +
+          `(${models.length} model(s), ${errors.length} already failed -> ${errors.join(' | ')})`
+      );
+    }
     try {
       return await fn(model);
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       errors.push(`${model}: ${msg}`);
       console.warn(`[LLM] ${label} model ${model} failed:`, msg);
+      // A budget error is not a model problem — propagate immediately instead
+      // of burning the remaining chain on it.
+      if (isLlmBudgetExceeded(error)) throw error;
       // Continue to the next model in the chain.
     }
   }
   throw new Error(`${label}: all ${models.length} model(s) failed -> ${errors.join(' | ')}`);
+}
+
+/**
+ * Turn the 4-provider aggregate failure into something a user can act on.
+ * `allProvidersTransient` is re-exported from budget.ts for the busy check.
+ */
+function friendlyAllProviderError(errors: string[]): string {
+  if (errors.some((e) => isProviderTransientError(e)) && errors.every((e) => isProviderTransientError(e))) {
+    return (
+      'All AI providers are temporarily overloaded (HTTP 503/429). ' +
+      'This is not a problem with your book — retry generation in a few minutes. ' +
+      'Details: ' +
+      errors.map((e) => e.slice(0, 160)).join(' | ')
+    );
+  }
+  return (
+    'Text generation failed across all providers. NVIDIA NIM: ' + errors[0] +
+    '. OpenRouter: ' + (errors[1] ?? 'n/a') +
+    '. Google Gemini: ' + (errors[2] ?? 'n/a') +
+    '. Mistral: ' + (errors[3] ?? 'n/a') + '.'
+  );
 }
 
 function safetyMessage(errors: string[]): string | null {
@@ -184,10 +226,16 @@ export async function askLLMJSONWithFallback<T>(
             );
           }
 
-          throw new Error(
-            `Text generation failed across all providers. NVIDIA NIM: ${nimMessage}. ` +
-            `OpenRouter: ${orMessage}. Google Gemini: ${geminiMessage}. Mistral: ${mistralMessage}.`
-          );
+          const all = [nimMessage, orMessage, geminiMessage, mistralMessage];
+          // Out-of-budget is a platform signal, not a content/model failure: keep
+          // it as LlmBudgetExceededError so the queue re-queues (with backoff)
+          // instead of treating the book as permanently failed.
+          if (all.some((m) => isLlmBudgetExceeded(m))) {
+            throw new LlmBudgetExceededError(
+              `${LLM_BUDGET_EXCEEDED_CODE}: this request ran out of its time window -> ${all[0]}`
+            );
+          }
+          throw new Error(friendlyAllProviderError(all));
         }
       }
     }
@@ -251,10 +299,16 @@ export async function askLLMWithFallback(
             );
           }
 
-          throw new Error(
-            `Text generation failed across all providers. NVIDIA NIM: ${nimMessage}. ` +
-            `OpenRouter: ${orMessage}. Google Gemini: ${geminiMessage}. Mistral: ${mistralMessage}.`
-          );
+          const all = [nimMessage, orMessage, geminiMessage, mistralMessage];
+          // Out-of-budget is a platform signal, not a content/model failure: keep
+          // it as LlmBudgetExceededError so the queue re-queues (with backoff)
+          // instead of treating the book as permanently failed.
+          if (all.some((m) => isLlmBudgetExceeded(m))) {
+            throw new LlmBudgetExceededError(
+              `${LLM_BUDGET_EXCEEDED_CODE}: this request ran out of its time window -> ${all[0]}`
+            );
+          }
+          throw new Error(friendlyAllProviderError(all));
         }
       }
     }

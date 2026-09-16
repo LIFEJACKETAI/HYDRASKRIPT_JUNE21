@@ -86,15 +86,11 @@ async function extractTextFromUpload(file: File, extension: string) {
   }
 
   if (extension === 'pdf') {
-    const { PDFParse } = await import('pdf-parse');
-    const parser = new PDFParse({ data: new Uint8Array(buffer) });
-
-    try {
-      const result = await parser.getText();
-      return result.text;
-    } finally {
-      await parser.destroy();
-    }
+    // Shared extractor: it points pdf.js at its worker file and distinguishes
+    // "this PDF is unreadable" from "this deployment is missing the pdf.js
+    // worker" — the local `new PDFParse(...)` copy could only report the former.
+    const { extractPdfTextFromBuffer } = await import('@/lib/manuscript');
+    return extractPdfTextFromBuffer(buffer);
   }
 
   throw new Error(`Unsupported manuscript type: .${extension}`);

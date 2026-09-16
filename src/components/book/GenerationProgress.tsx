@@ -174,6 +174,21 @@ export default function GenerationProgress({ jobId, genre, estimatedDuration, on
           <p className="text-xs text-red-300">{job.errorMessage}</p>
         </div>
       )}
+
+      {/* "Queued..." used to be a black box: the queue could sit there while a
+          worker was frozen or the AI providers were 503-ing, and the user had no
+          way to tell waiting from broken. Name the state and what happens next. */}
+      {job.status === 'queued' && elapsedSeconds >= 45 && (
+        <div className="rounded bg-amber-500/10 border border-amber-500/20 p-3">
+          <p className="text-xs text-amber-200/90">
+            Still waiting for a free generator slot
+            {job.retryCount ? ` (attempt ${job.retryCount + 1})` : ''}. HydraSkript re-tries
+            automatically every few seconds — if the AI providers are reporting themselves
+            busy, the next attempt usually lands within a minute. Nothing is lost; your
+            credits stay reserved until this finishes.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

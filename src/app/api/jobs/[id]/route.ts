@@ -43,6 +43,8 @@ export async function GET(
         creditsReserved: job.creditsReserved,
         creditsConsumed: job.creditsConsumed,
         errorMessage: job.errorMessage,
+        retryCount: job.retryCount,
+        maxRetries: job.maxRetries,
         result: publicJobResult(job.result),
         startedAt: job.startedAt,
         completedAt: job.completedAt,

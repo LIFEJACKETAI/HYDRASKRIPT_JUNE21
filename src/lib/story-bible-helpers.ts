@@ -95,3 +95,24 @@ export async function assertBookOwnership(bookId: string, ownerId: string) {
   if (book.ownerId !== ownerId) throw new Error('Forbidden');
   return book;
 }
+
+/**
+ * Translate an `assertBookOwnership` failure into the right HTTP status.
+ *
+ * A missing book is a 404, not a 500. The Story Bible page keeps a selected
+ * book id in localStorage, so after a book is deleted every list/import
+ * request comes in with a dangling id — which used to surface as a 500 in
+ * Vercel logs (and as a scary "Import failed" toast) even though nothing was
+ * wrong with the server. Returning 404 lets the client clear the selection and
+ * keeps the API's error rate honest.
+ */
+export function bookAccessFailure(error: unknown): { status: 404 | 403; message: string } | null {
+  const message = error instanceof Error ? error.message : String(error ?? '');
+  if (message === 'Book not found') {
+    return { status: 404, message: 'That book no longer exists. Pick a book from the list and try again.' };
+  }
+  if (message === 'Forbidden') {
+    return { status: 403, message: 'You do not have access to that book.' };
+  }
+  return null;
+}
