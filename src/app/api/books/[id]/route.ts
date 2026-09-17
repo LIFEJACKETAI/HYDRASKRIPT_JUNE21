@@ -8,6 +8,7 @@ import { db } from '@/lib/db';
 import { getOrCreateProfile } from '@/lib/utils/bookHelpers';
 import { refundOutstandingReservation } from '@/lib/utils/credits';
 import { isUuid } from '@/lib/uuid';
+import { maybeKickQueueForJob } from '@/lib/workers/queue-pump-client';
 
 // GET /api/books/[id] - Get a single book
 export async function GET(
@@ -47,6 +48,14 @@ export async function GET(
 
     if (!book) {
       return NextResponse.json({ success: false, error: 'Book not found' }, { status: 404 });
+    }
+
+    // Keep the queue pump active while the book is in progress or has queued/active jobs
+    const latestJob = book.jobs?.[0];
+    if (latestJob && (latestJob.status === 'queued' || latestJob.status === 'active')) {
+      maybeKickQueueForJob(latestJob.status);
+    } else if (['outlining', 'writing', 'finalizing'].includes(book.status)) {
+      maybeKickQueueForJob('queued');
     }
 
     return NextResponse.json({ success: true, data: book });
