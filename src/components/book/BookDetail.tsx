@@ -164,8 +164,11 @@ export default function BookDetail() {
     setActiveJobId(null);
     setGenerationJobId(null);
     setIsAutoCompleting(false);
+    // Refresh so the failed chapter badge (and its Retry button) renders.
+    // Without this the UI keeps showing the last pre-failure state.
+    fetchBook();
     toast({ title: 'Generation failed', description: error, variant: 'destructive' });
-  }, [setIsGenerating, setActiveJobId]);
+  }, [setIsGenerating, setActiveJobId, fetchBook]);
 
   const handleApproveOutline = async (updatedOutline: any) => {
     try {
@@ -183,6 +186,17 @@ export default function BookDetail() {
       }
       const result = await response.json();
       if (result.success) {
+        // The approve endpoint returns the first chapter's jobId. Wire it
+        // into the progress UI so polling resumes instead of going dark.
+        const jobId = result.data?.jobId as string | undefined;
+        if (jobId) {
+          setGenerationJobId(jobId);
+          setActiveJobId(jobId);
+          setIsGenerating(true);
+          const isChildrenBook = book ? ['0-5', '6-9', '10-14'].includes(book.targetAudience) : false;
+          const hasIllustrations = isChildrenBook && book?.genre !== 'coloring';
+          setEstimatedDuration(estimateGenerationTime(1, book?.targetAudience ?? 'adult', hasIllustrations));
+        }
         toast({ title: 'Outline approved!', description: 'The AI is now writing your first chapter.' });
         fetchBook();
       } else {
@@ -224,6 +238,26 @@ const handleAutoApproveAll = async () => {
        setAutoApprovePending(false);
      }
    };
+
+  // Chapter approved from the ChapterEditor: the API returns the next
+  // chapter's (or the finalize) jobId. Resume the progress UI on it and
+  // refresh the book so statuses stay in sync.
+  const handleChapterApproved = useCallback((jobId?: string) => {
+    if (jobId) {
+      setGenerationJobId(jobId);
+      setActiveJobId(jobId);
+    }
+    fetchBook();
+  }, [fetchBook, setActiveJobId]);
+
+  // Failed chapter retried from the ChapterEditor: a fresh write_chapter job
+  // was created. Point the progress UI at it so polling resumes.
+  const handleChapterRetried = useCallback((jobId: string) => {
+    setGenerationJobId(jobId);
+    setActiveJobId(jobId);
+    setIsGenerating(true);
+    fetchBook();
+  }, [fetchBook, setActiveJobId, setIsGenerating]);
 
   const handleStartGeneration = async () => {
     if (!selectedBookId) return;
@@ -537,6 +571,23 @@ const handleAutoApproveAll = async () => {
         </Card>
       )}
 
+      {/* Failed-chapter recovery hint: the book can be Writing while an
+          individual chapter is Failed. Point the user at the per-chapter
+          Retry button so the failure is recoverable from this screen. */}
+      {book.chapters?.some((c) => c.status === 'failed') && (
+        <Card className="bg-red-500/5 border-red-500/30">
+          <CardContent className="p-4">
+            <p className="text-sm text-red-200">
+              {book.chapters.filter((c) => c.status === 'failed').length} chapter
+              {book.chapters.filter((c) => c.status === 'failed').length === 1 ? '' : 's'} failed to generate.
+            </p>
+            <p className="text-xs text-red-300/70 mt-1">
+              Expand the failed chapter below and choose Retry / Regenerate Chapter to restart it. The rest of your book is unaffected.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Chapters */}
       <Card className="bg-[#2a2a2a] border-gray-800">
         <CardHeader>
@@ -546,7 +597,12 @@ const handleAutoApproveAll = async () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ChapterEditor chapters={book.chapters || []} bookId={selectedBookId || ''} />
+          <ChapterEditor
+            chapters={book.chapters || []}
+            bookId={selectedBookId || ''}
+            onChapterApproved={handleChapterApproved}
+            onChapterRetried={handleChapterRetried}
+          />
         </CardContent>
       </Card>
 
