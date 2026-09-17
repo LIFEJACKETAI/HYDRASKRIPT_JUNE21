@@ -218,28 +218,41 @@ async function settleOrphanedGenerationJobs(): Promise<number> {
 }
 
 /**
- * Fire-and-forget self-kick. The request lands on a fresh function instance
- * with a fresh timeout, so the job chain continues even after this instance
- * freezes. Uses an absolute URL (this runs server-side; Vercel routes the
- * deployment hostname correctly).
+ * Self-kick helper. The request lands on a fresh function instance with a fresh
+ * timeout, so the job chain continues even after this instance finishes.
  */
-function kickNextPump(): void {
-  try {
-    const url = `${resolvePumpUrl()}/api/queue/pump`;
-    void fetch(url, {
-      method: 'POST',
-      headers: {
-        'x-queue-pump-secret': pumpAuthToken(),
-        'cache-control': 'no-cache',
-      },
-      signal: AbortSignal.timeout(8000),
-    }).catch((e) => {
+async function kickNextPump(): Promise<void> {
+  const primaryUrl = resolvePumpUrl();
+  const token = pumpAuthToken();
+
+  const urls = [primaryUrl];
+  const vercelCandidate = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`
+    : '';
+  if (vercelCandidate && !urls.includes(vercelCandidate)) {
+    urls.push(vercelCandidate);
+  }
+
+  for (const baseUrl of urls) {
+    const url = `${baseUrl}/api/queue/pump`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'x-queue-pump-secret': token,
+          'cache-control': 'no-cache',
+        },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (res.ok || res.status === 202) {
+        return;
+      }
+      console.warn(`[QueuePump] self-kick returned status ${res.status} on ${url}`);
+    } catch (e) {
       const name = e instanceof Error ? e.name : '';
       if (name === 'TimeoutError' || name === 'AbortError') return;
-      console.warn('[QueuePump] self-kick failed:', e);
-    });
-  } catch (e) {
-    console.warn('[QueuePump] kickNextPump error:', e);
+      console.warn(`[QueuePump] self-kick failed on ${url}:`, e);
+    }
   }
 }
 
@@ -280,7 +293,7 @@ async function runPump(): Promise<{ ran: number; recovered: number }> {
     ran++;
 
     // Re-kick so the chain survives this instance freezing. Cheap and idempotent.
-    kickNextPump();
+    await kickNextPump();
   }
 
   return { ran, recovered };

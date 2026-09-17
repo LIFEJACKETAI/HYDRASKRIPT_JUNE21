@@ -4,6 +4,7 @@
 // singleton enforcement, serverless pump (no in-process loop on Vercel).
 
 import { db } from '@/lib/db'
+import { after } from 'next/server'
 import { WorkerRegistry } from './registry'
 import type { JobType, JobStatus } from '@/types'
 import { isServerless, kickQueuePump, forceKickQueuePump } from './queue-pump-client'
@@ -718,21 +719,14 @@ export function scheduleQueueWork(): void {
   }
 
   kickQueuePump()
-  void import('next/server')
-    .then((mod) => {
-      if (typeof mod.after === 'function') {
-        try {
-          mod.after(run)
-          return
-        } catch {
-          // outside a request scope
-        }
-      }
-      void run()
+  try {
+    after(async () => {
+      await run()
     })
-    .catch(() => {
-      void run()
-    })
+  } catch {
+    // Outside request context (e.g. server startup / instrumentation)
+    void run()
+  }
 }
 
 export async function initializeJobQueue(): Promise<PersistentJobQueue> {

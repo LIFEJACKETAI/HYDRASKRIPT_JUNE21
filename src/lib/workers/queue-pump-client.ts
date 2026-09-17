@@ -1,3 +1,5 @@
+import { after } from 'next/server'
+
 /**
  * Lightweight pump kicker. Intentionally has NO dependency on the worker
  * registry / Prisma queue class so job-poll API routes can nudge the pump
@@ -40,68 +42,84 @@ export function isPumpRequestAuthorized(req: { headers: { get: (name: string) =>
   return false
 }
 
-/**
- * Absolute origin for server-to-self pump kicks.
- * On Vercel prefer VERCEL_URL — NEXT_PUBLIC_APP_URL is often localhost or an
- * old domain, and kicking that is why jobs sit at "Queued..." forever.
- */
-export function resolvePumpUrl(): string {
-  const vercel = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`
-    : ''
-  const candidates = [process.env.APP_URL, process.env.NEXT_PUBLIC_APP_URL, vercel]
-    .map((s) => (s || '').replace(/\/$/, ''))
-    .filter(Boolean)
-  const nonLocal = candidates.filter((u) => !/localhost|127\.0\.0\.1/i.test(u))
-
-  if (isServerless()) {
-    if (vercel) return vercel
-    if (nonLocal[0]) return nonLocal[0]
+function normalizeUrl(raw?: string): string | null {
+  if (!raw) return null
+  let trimmed = raw.trim().replace(/\/$/, '')
+  if (!trimmed) return null
+  if (!/^https?:\/\//i.test(trimmed)) {
+    trimmed = `https://${trimmed}`
   }
-  return nonLocal[0] || candidates[0] || 'http://localhost:3002'
+  return trimmed
 }
 
-async function firePumpKick(): Promise<void> {
-  const url = `${resolvePumpUrl()}/api/queue/pump`
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'x-queue-pump-secret': pumpAuthToken(),
-        'cache-control': 'no-cache',
-      },
-      // Don't wait for the pump to finish — just make sure the request lands.
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!res.ok && res.status !== 0) {
-      console.warn('[Queue] pump kick status', res.status)
+/**
+ * Absolute origin for server-to-self pump kicks.
+ * Resolves the canonical app URL first (e.g. https://www.hydraskript.com),
+ * falling back to Vercel system URLs and localhost.
+ */
+export function resolvePumpUrl(): string {
+  const configuredAppUrl = normalizeUrl(process.env.APP_URL)
+  const configuredPublicUrl = normalizeUrl(process.env.NEXT_PUBLIC_APP_URL)
+  for (const candidate of [configuredAppUrl, configuredPublicUrl]) {
+    if (candidate && !/localhost|127\.0\.0\.1/i.test(candidate)) {
+      return candidate
     }
-  } catch (e) {
-    const name = e instanceof Error ? e.name : ''
-    if (name === 'TimeoutError' || name === 'AbortError') return
-    console.warn('[Queue] pump kick failed:', e)
+  }
+
+  const vercelProd = normalizeUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL)
+  if (vercelProd) return vercelProd
+
+  const vercelUrl = normalizeUrl(process.env.VERCEL_URL)
+  if (vercelUrl) return vercelUrl
+
+  return configuredPublicUrl || configuredAppUrl || 'http://localhost:3002'
+}
+
+export async function firePumpKick(): Promise<void> {
+  const primaryUrl = resolvePumpUrl()
+  const token = pumpAuthToken()
+
+  const urls = [primaryUrl]
+  const vercelCandidate = normalizeUrl(process.env.VERCEL_URL)
+  if (vercelCandidate && !urls.includes(vercelCandidate)) {
+    urls.push(vercelCandidate)
+  }
+
+  for (const baseUrl of urls) {
+    const url = `${baseUrl}/api/queue/pump`
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'x-queue-pump-secret': token,
+          'cache-control': 'no-cache',
+        },
+        // Don't wait for the pump to finish — just make sure the request lands.
+        signal: AbortSignal.timeout(10000),
+      })
+      if (res.ok || res.status === 202) {
+        return
+      }
+      console.warn(`[Queue] pump kick status ${res.status} on ${url}`)
+    } catch (e) {
+      const name = e instanceof Error ? e.name : ''
+      if (name === 'TimeoutError' || name === 'AbortError') return
+      console.warn(`[Queue] pump kick failed on ${url}:`, e)
+    }
   }
 }
 
 /**
  * Minimum gap between *poll-driven* kicks.
- *
- * WHY: every GET /api/jobs/[id] used to kick the pump. With a handful of users
- * each polling every 5s that is a steady stream of POSTs into a 300s-capable
- * function that then bootstraps the queue, reconciles stuck books and opens a
- * Prisma connection on every warm lambda — and that DB contention is exactly
- * what surfaces as P2028 ("Unable to start a transaction in the given time")
- * on the very status updates the queue needs to make. `kickQueuePump({force})`
- * still fires immediately when a job is created or a claim fails, so nothing
- * ever waits for the throttle to be released.
  */
 const MIN_KICK_INTERVAL_MS = parseInt(process.env.QUEUE_KICK_THROTTLE_MS || '12000', 10)
 
 const g = globalThis as unknown as { __hydraLastPumpKick?: number }
 
 /**
- * Fire-and-forget HTTP kick to the durable queue pump. Prefers Next.js `after()`
- * so the outbound request survives the current function returning.
+ * Fire-and-forget HTTP kick to the durable queue pump. Uses Next.js `after()`
+ * synchronously inside request handlers so Vercel keeps the lambda alive until
+ * the outbound request lands.
  */
 export function kickQueuePump(opts: { force?: boolean } = {}): void {
   if (!isServerless()) return
@@ -111,24 +129,12 @@ export function kickQueuePump(opts: { force?: boolean } = {}): void {
   }
   g.__hydraLastPumpKick = now
   try {
-    const task = firePumpKick()
-    void import('next/server')
-      .then((mod) => {
-        if (typeof mod.after === 'function') {
-          try {
-            mod.after(() => task)
-            return
-          } catch {
-            // outside a request scope
-          }
-        }
-        void task
-      })
-      .catch(() => {
-        void task
-      })
-  } catch (e) {
-    console.warn('[Queue] kickQueuePump error:', e)
+    after(async () => {
+      await firePumpKick()
+    })
+  } catch {
+    // Outside a request scope (e.g. background worker or server startup)
+    void firePumpKick()
   }
 }
 
