@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, FileText, ImageIcon, Clock, CheckCircle, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import { ChevronDown, FileText, ImageIcon, Clock, CheckCircle, AlertCircle, Loader2, Sparkles, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import type { ChapterData } from '@/lib/api';
+import { retryChapter } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 const chapterStatusConfig: Record<string, { label: string; icon: React.ElementType; className: string }> = {
@@ -21,12 +22,14 @@ const chapterStatusConfig: Record<string, { label: string; icon: React.ElementTy
 interface ChapterEditorProps {
   chapters: ChapterData[];
   bookId: string;
-  onChapterApproved?: () => void;
+  onChapterApproved?: (jobId?: string) => void;
+  onChapterRetried?: (jobId: string) => void;
 }
 
-export default function ChapterEditor({ chapters, bookId, onChapterApproved }: ChapterEditorProps) {
+export default function ChapterEditor({ chapters, bookId, onChapterApproved, onChapterRetried }: ChapterEditorProps) {
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
   const [approvingChapter, setApprovingChapter] = useState<string | null>(null);
+  const [retryingChapter, setRetryingChapter] = useState<string | null>(null);
   const [localChapters, setLocalChapters] = useState<ChapterData[]>(chapters);
 
   useEffect(() => {
@@ -56,7 +59,11 @@ export default function ChapterEditor({ chapters, bookId, onChapterApproved }: C
           )
         );
         setExpandedChapter(null);
-        onChapterApproved?.();
+        // The approve endpoint returns the next chapter's jobId (or the
+        // finalize jobId). Hand it to the parent so the progress UI resumes
+        // polling instead of going dark while the next chapter writes.
+        const nextJobId = result.data?.jobId as string | undefined;
+        onChapterApproved?.(nextJobId);
       } else {
         toast({ title: 'Approval failed', description: result.error, variant: 'destructive' });
       }
@@ -64,6 +71,30 @@ export default function ChapterEditor({ chapters, bookId, onChapterApproved }: C
       toast({ title: 'Error', description: 'Failed to approve chapter.', variant: 'destructive' });
     } finally {
       setApprovingChapter(null);
+    }
+  };
+
+  const handleRetry = async (chapterId: string, index: number) => {
+    setRetryingChapter(chapterId);
+    try {
+      const result = await retryChapter(bookId, index);
+      if (result.success && result.data) {
+        toast({ title: 'Retrying chapter...', description: 'Generation has been restarted for this chapter.' });
+        setLocalChapters(prev =>
+          prev.map(ch =>
+            ch.index === index
+              ? { ...ch, status: 'writing' as const, approvalStatus: 'pending', content: '', wordCount: 0 }
+              : ch
+          )
+        );
+        onChapterRetried?.(result.data.jobId);
+      } else {
+        toast({ title: 'Retry failed', description: result.error || 'Could not restart chapter generation.', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to retry chapter.', variant: 'destructive' });
+    } finally {
+      setRetryingChapter(null);
     }
   };
 
@@ -155,6 +186,31 @@ export default function ChapterEditor({ chapters, bookId, onChapterApproved }: C
                           </div>
                         )}
 
+                        {chapter.status === 'failed' && (
+                          <div className="rounded bg-red-500/10 border border-red-500/20 p-3 space-y-3">
+                            <div className="flex items-start gap-2">
+                              <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                              <div>
+                                <p className="text-sm font-medium text-red-200">This chapter failed to generate</p>
+                                <p className="text-xs text-red-300/70 mt-0.5">
+                                  The rest of your book is safe. Retry to restart generation for this chapter only.
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              onClick={() => handleRetry(chapter.id, chapter.index)}
+                              disabled={retryingChapter === chapter.id}
+                              className="w-full h-10 text-sm bg-red-500/20 text-red-100 hover:bg-red-500/30 border border-red-500/30"
+                            >
+                              {retryingChapter === chapter.id ? (
+                                <><Loader2 className="h-3 w-3 mr-2 animate-spin" /> Restarting...</>
+                              ) : (
+                                <><RefreshCw className="h-3 w-3 mr-2" /> Retry / Regenerate Chapter</>
+                              )}
+                            </Button>
+                          </div>
+                        )}
+
                         {chapter.content ? (
                           <div className="space-y-4">
                             <div>
@@ -178,9 +234,11 @@ export default function ChapterEditor({ chapters, bookId, onChapterApproved }: C
                             )}
                           </div>
                         ) : (
-                          <p className="text-sm text-gray-500 italic">
-                            Content not yet generated.
-                          </p>
+                          chapter.status !== 'failed' && (
+                            <p className="text-sm text-gray-500 italic">
+                              Content not yet generated.
+                            </p>
+                          )
                         )}
                       </div>
                     </motion.div>

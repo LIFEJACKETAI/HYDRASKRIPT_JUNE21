@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
+import { retryFailedChapter } from '@/lib/services/chapterRetry';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 // Approving kicks off chapter generation: allow the function room beyond the
@@ -125,6 +126,26 @@ export async function POST(
         await db.book.update({ where: { id }, data: { status: 'finalizing' } });
 
         return NextResponse.json({ success: true, data: { jobId, status: 'finalizing' } });
+      }
+    }
+
+    if (type === 'retry_chapter') {
+      if (chapterIndex === undefined) {
+        return NextResponse.json({ success: false, error: 'chapterIndex is required for chapter retry' }, { status: 400 });
+      }
+
+      try {
+        const data = await retryFailedChapter(id, profile.id, chapterIndex);
+        return NextResponse.json({ success: true, data });
+      } catch (retryError) {
+        const retryMessage = retryError instanceof Error ? retryError.message : 'Retry failed';
+        const status =
+          retryMessage === 'Book not found' || retryMessage.includes('not found')
+            ? 404
+            : retryMessage === 'Only failed chapters can be retried'
+              ? 400
+              : 500;
+        return NextResponse.json({ success: false, error: retryMessage }, { status });
       }
     }
 

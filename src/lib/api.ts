@@ -108,6 +108,7 @@ export interface ChapterData {
   content: string;
   wordCount: number;
   status: string;
+  approvalStatus?: string;
   charactersIntroduced: string;
   summaryForNext: string;
   illustrationUrl: string | null;
@@ -167,6 +168,13 @@ export async function exportBook(bookId: string, format: string = 'pdf') {
   return apiFetch<{ downloadUrl: string; format: string }>(`/books/${bookId}/export`, {
     method: 'POST',
     body: JSON.stringify({ format }),
+  });
+}
+
+export async function retryChapter(bookId: string, chapterIndex: number) {
+  return apiFetch<{ jobId: string; chapterIndex: number }>(`/books/${bookId}/retry-chapter`, {
+    method: 'POST',
+    body: JSON.stringify({ chapterIndex }),
   });
 }
 
