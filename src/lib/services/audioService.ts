@@ -4,6 +4,18 @@
 import { saveFile, generateFilename, createMediaAsset } from '@/lib/utils/storage';
 import { audioBase64ToPlayableBuffer } from '@/lib/services/audioFormat';
 
+/** Audiobooks use Gemini only; never reuse the text-generation provider key. */
+export function getGeminiTtsConfig() {
+  const apiKey = process.env.GOOGLE_AI_API_KEY?.trim() || process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error('Gemini TTS requires GOOGLE_AI_API_KEY or GEMINI_API_KEY; NVIDIA_NIM_API_KEY cannot be used for audiobook speech.');
+  }
+  return {
+    apiKey,
+    model: process.env.GEMINI_TTS_MODEL?.trim() || 'gemini-3.1-flash-tts-preview',
+  };
+}
+
 /**
  * Gemini TTS uses prebuilt voice names, not Google Cloud Text-to-Speech voice
  * IDs. The old implementation sent values such as `en-US-Neural2-C` to the
@@ -215,10 +227,7 @@ export async function generateAudioChunk(
 ): Promise<{ success: boolean; audioBase64?: string; audioMimeType?: string; error?: string }> {
   try {
     return await withRetry(async () => {
-      const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY;
-      if (!apiKey) throw new Error('GOOGLE_AI_API_KEY is not configured');
-
-      const model = process.env.GEMINI_TTS_MODEL || 'gemini-3.1-flash-tts-preview';
+      const { apiKey, model } = getGeminiTtsConfig();
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
         {

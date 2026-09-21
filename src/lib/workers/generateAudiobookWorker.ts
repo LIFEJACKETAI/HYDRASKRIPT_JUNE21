@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
 import {
   chunkText,
+  getGeminiTtsConfig,
   generateAudioChunk,
   normalizeVoiceId,
   saveAudioChunk,
@@ -82,6 +83,13 @@ export async function generateAudiobookWorker(jobId: string) {
   const job = await db.job.findUnique({ where: { id: jobId } });
   if (!job) throw new Error('Invalid audiobook job');
 
+  const { model } = getGeminiTtsConfig();
+  await db.job.update({
+    where: { id: jobId },
+    data: { provider: 'Gemini TTS', modelName: model },
+  });
+  console.info(`[AudiobookWorker] Job ${jobId}: Gemini TTS (${model})`);
+
   const payload = parseJobPayload(job.result);
   const selectedVoice = normalizeVoiceId(payload.voiceId);
   let bookId: string | undefined = job.bookId ?? undefined;
@@ -139,7 +147,7 @@ export async function generateAudiobookWorker(jobId: string) {
     let segmentIndex = 0;
 
     await jobQueue.updateJobStatus(jobId, {
-      progressMessage: 'Preparing audiobook pipeline...',
+      progressMessage: `Preparing Gemini TTS audiobook (${model})...`,
       progressPercent: 5,
     });
     await jobQueue.heartbeat(jobId);
