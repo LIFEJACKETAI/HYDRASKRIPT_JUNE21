@@ -50,8 +50,8 @@ export interface StyleProfileData {
 export interface CreditCostTable {
   chapterPerThousandWords: number;  // 5 credits per 1000 words
   image: number;                    // 10 credits each
-  audiobookBase: number;            // 50 credits base
-  audiobookPerMinute: number;       // 1 credit per minute
+  audiobookBase: number;            // 20 credits base
+  audiobookPerMinute: number;       // 2 credits per minute
   exportPdf: number;                // 2 credits
   outlineGeneration: number;        // 3 credits
 }
@@ -355,16 +355,16 @@ export type JobListItem = JobData & {
 // ─── Audiobook Voices ─────────────────────────────────────────────────────────
 
 export const AUDIOBOOK_VOICES = [
-  { id: 'en-US-Neural2-C', label: 'Aurora',   gender: 'female' as const, style: 'Warm & Storytelling' },
-  { id: 'en-US-Neural2-E', label: 'Sage',     gender: 'female' as const, style: 'Clear & Professional' },
-  { id: 'en-US-Neural2-F', label: 'Luna',     gender: 'female' as const, style: 'Soft & Gentle' },
-  { id: 'en-GB-Neural2-A', label: 'Iris',     gender: 'female' as const, style: 'British & Sophisticated' },
-  { id: 'en-AU-Neural2-A', label: 'Skye',     gender: 'female' as const, style: 'Australian & Lively' },
-  { id: 'en-US-Neural2-D', label: 'Atlas',    gender: 'male'   as const, style: 'Deep & Authoritative' },
-  { id: 'en-US-Neural2-J', label: 'River',    gender: 'male'   as const, style: 'Casual & Warm' },
-  { id: 'en-US-Neural2-A', label: 'Orion',    gender: 'male'   as const, style: 'Clear & Dynamic' },
-  { id: 'en-GB-Neural2-B', label: 'Alistair', gender: 'male'   as const, style: 'British & Classic' },
-  { id: 'en-AU-Neural2-B', label: 'Hunter',   gender: 'male'   as const, style: 'Australian & Bold' },
+  { id: 'Aoede',         label: 'Aurora',   gender: 'female' as const, style: 'Warm & Storytelling' },
+  { id: 'Iapetus',       label: 'Sage',     gender: 'female' as const, style: 'Clear & Professional' },
+  { id: 'Achernar',      label: 'Luna',     gender: 'female' as const, style: 'Soft & Gentle' },
+  { id: 'Sulafat',       label: 'Iris',     gender: 'female' as const, style: 'British & Sophisticated' },
+  { id: 'Laomedeia',     label: 'Skye',     gender: 'female' as const, style: 'Bright & Lively' },
+  { id: 'Charon',        label: 'Atlas',    gender: 'male'   as const, style: 'Informative & Authoritative' },
+  { id: 'Zubenelgenubi', label: 'River',    gender: 'male'   as const, style: 'Casual & Warm' },
+  { id: 'Orus',          label: 'Orion',    gender: 'male'   as const, style: 'Firm & Dynamic' },
+  { id: 'Sadaltager',    label: 'Alistair', gender: 'male'   as const, style: 'Knowledgeable & Classic' },
+  { id: 'Fenrir',        label: 'Hunter',   gender: 'male'   as const, style: 'Excitable & Bold' },
 ] as const;
 
 

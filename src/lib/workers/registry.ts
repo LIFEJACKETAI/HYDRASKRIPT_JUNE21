@@ -49,7 +49,8 @@ export const WorkerRegistry: Record<string, WorkerFunction> = {
   },
 
   generate_audiobook: async (job) => {
-    if (!job.bookId) throw new Error('Missing bookId for generate_audiobook');
+    // Upload-mode audiobooks intentionally have no Book row; their extracted
+    // chapters live in the durable job payload and are handled by the worker.
     await generateAudiobookWorker(job.id);
   },
 

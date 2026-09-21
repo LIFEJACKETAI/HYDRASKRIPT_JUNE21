@@ -44,7 +44,10 @@ export async function POST(
     }
 
     // Calculate total word count from completed chapters
-    const totalWords = book.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
+    const totalWords = book.chapters.reduce(
+      (sum, chapter) => sum + (chapter.wordCount || chapter.content.split(/\s+/).filter(Boolean).length),
+      0
+    );
 
     if (totalWords === 0) {
       return NextResponse.json(

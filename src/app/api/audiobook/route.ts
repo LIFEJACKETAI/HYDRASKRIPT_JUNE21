@@ -4,9 +4,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
-import { CREDIT_COSTS } from '@/types';
+import { calculateAudiobookCost, reserveCredits } from '@/lib/utils/credits';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
-import { reserveCredits } from '@/lib/utils/credits';
 
 const SUPPORTED_UPLOAD_EXTENSIONS = new Set(['txt', 'pdf', 'docx']);
 
@@ -248,8 +247,21 @@ export async function POST(request: NextRequest) {
     const totalWords = chapterList.reduce((sum, ch) => {
       return sum + (ch.content ? ch.content.split(/\s+/).length : 0);
     }, 0);
-    const estimatedMinutes = Math.max(1, Math.ceil(totalWords / 150));
-    const creditCost = CREDIT_COSTS.audiobookBase + estimatedMinutes * CREDIT_COSTS.audiobookPerMinute;
+    const creditCost = calculateAudiobookCost(totalWords);
+
+    // Keep the selected voice in the durable job payload. The worker may run in
+    // a different process (or after the upload request has finished), so it
+    // cannot rely on component state or request-local variables.
+    const jobPayload = {
+      voiceId,
+      source,
+      ...(source === 'upload'
+        ? {
+            bookTitle,
+            chapters: chapterList,
+          }
+        : {}),
+    };
 
     // ── Create job record ──────────────────────────────────────────────────────
 
@@ -258,6 +270,7 @@ export async function POST(request: NextRequest) {
       ownerId: profile.id,
       jobType: 'generate_audiobook',
       creditsReserved: creditCost,
+      result: JSON.stringify(jobPayload),
     });
 
     const reserved = await reserveCredits(profile.id, creditCost, jobId, 'Audiobook generation');
@@ -275,7 +288,7 @@ export async function POST(request: NextRequest) {
 
     // ── Enqueue async worker ───────────────────────────────────────────────────
 
-    jobQueue.startJob(jobId, 'generate_audiobook');
+    await jobQueue.startJob(jobId, 'generate_audiobook');
 
     return NextResponse.json({
       success: true,
