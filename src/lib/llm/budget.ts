@@ -142,3 +142,13 @@ export function providerBackoffMs(attempt: number, baseMs = 1000, maxMs = 20_000
   const exp = Math.min(baseMs * Math.pow(2, Math.max(0, attempt - 1)), maxMs)
   return Math.round(exp / 2 + Math.random() * exp)
 }
+
+/** Keep internal claim exhaustion distinct from actual provider failures. */
+export function transientProgressMessage(error: unknown, retry: number, maxRetries: number, jobType?: string): string {
+  const reason = isLlmBudgetExceeded(error)
+    ? 'Processing time limit reached'
+    : jobType === 'generate_audiobook'
+      ? 'Gemini TTS temporarily unavailable or rate-limited'
+      : 'AI provider temporarily unavailable or rate-limited';
+  return `${reason} — re-queued, retry ${retry}/${maxRetries}.`;
+}

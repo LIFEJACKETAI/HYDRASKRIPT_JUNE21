@@ -58,3 +58,54 @@ describe('audiobook text and voice preparation', () => {
     else process.env.GOOGLE_AI_API_KEY = previousKey;
   });
 });
+
+describe('Gemini-only TTS provider routing', () => {
+  const originalEnv = { ...process.env };
+  const originalFetch = global.fetch;
+
+  beforeEach(() => {
+    delete process.env.GOOGLE_AI_API_KEY;
+    delete process.env.GEMINI_API_KEY;
+    delete process.env.GEMINI_TTS_MODEL;
+    process.env.NVIDIA_NIM_API_KEY = 'nvidia-must-not-be-used';
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ candidates: [{ content: { parts: [
+        { inlineData: { data: 'AAECAw==', mimeType: 'audio/L16;rate=24000' } },
+      ] } }] }),
+    });
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+    global.fetch = originalFetch;
+    jest.restoreAllMocks();
+  });
+
+  it('rejects a NVIDIA-only configuration without making an API call', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    const result = await generateAudioChunk('Existing ebook text.', 'Aoede');
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('GOOGLE_AI_API_KEY or GEMINI_API_KEY');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it.each(['GOOGLE_AI_API_KEY', 'GEMINI_API_KEY'])('uses %s for the requested TTS model, never NVIDIA', async (key) => {
+    process.env[key] = 'google-test-key';
+    process.env.GEMINI_TTS_MODEL = 'gemini-3.1-flash-tts-preview';
+    expect((await generateAudioChunk('Existing ebook text.', 'Charon')).success).toBe(true);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const [url, init] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(url).toBe('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent');
+    expect(init.headers['x-goog-api-key']).toBe('google-test-key');
+    expect(JSON.parse(init.body).generationConfig.responseModalities).toEqual(['AUDIO']);
+    expect(JSON.parse(init.body).contents[0].parts[0].text).toBe('Existing ebook text.');
+  });
+
+  it('honors an explicit model override', async () => {
+    process.env.GEMINI_API_KEY = 'google-test-key';
+    process.env.GEMINI_TTS_MODEL = 'test-tts-model';
+    await generateAudioChunk('Text.', 'Aoede');
+    expect((global.fetch as jest.Mock).mock.calls[0][0]).toContain('/models/test-tts-model:generateContent');
+  });
+});
