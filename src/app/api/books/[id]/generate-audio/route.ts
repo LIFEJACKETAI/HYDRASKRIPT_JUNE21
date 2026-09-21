@@ -50,10 +50,13 @@ export async function POST(
 
     // Get voice preference from request body
     const body = await request.json();
-    const voiceId = body.voiceId || 'en-US-Neural2-C';
+    const voiceId = body.voiceId || 'Aoede';
 
     // Calculate total word count from completed chapters
-    const totalWords = book.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
+    const totalWords = book.chapters.reduce(
+      (sum, chapter) => sum + (chapter.wordCount || chapter.content.split(/\s+/).filter(Boolean).length),
+      0
+    );
 
     if (totalWords === 0) {
       return NextResponse.json(

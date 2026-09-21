@@ -92,8 +92,7 @@ export function calculateAudiobookCost(wordCount: number): number {
   // Average reading speed: ~150 words per minute
   const estimatedMinutes = Math.ceil(wordCount / 150);
   
-  // Base cost + Variable cost per minute
-  // Example: 10 credits base + 5 credits per minute
+  // Base cost + variable cost per minute, shared by every audiobook endpoint.
   const cost = CREDIT_COSTS.audiobookBase + CREDIT_COSTS.audiobookPerMinute * estimatedMinutes;
   
   return cost;
