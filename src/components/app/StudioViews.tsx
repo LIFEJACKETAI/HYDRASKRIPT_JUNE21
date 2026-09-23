@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Download, Loader2, Shield, Store, Coins } from 'lucide-react';
+import { BookOpen, Download, Loader2, Shield, Store, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -270,6 +270,7 @@ type Listing = {
   price: number;
   format: string;
   fileUrl?: string | null;
+  coverUrl?: string | null;
 };
 
 export function BookstoreView() {
@@ -279,6 +280,7 @@ export function BookstoreView() {
   const [author, setAuthor] = useState('');
   const [price, setPrice] = useState('9.99');
   const [file, setFile] = useState<File | null>(null);
+  const [cover, setCover] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -307,6 +309,7 @@ export function BookstoreView() {
     form.append('price', price);
     form.append('format', 'ebook');
     form.append('file', file);
+    if (cover) form.append('cover', cover);
     const response = await fetch('/api/bookstore/listings', { method: 'POST', body: form });
     const result = await response.json();
     if (result.success) {
@@ -314,6 +317,7 @@ export function BookstoreView() {
       setTitle('');
       setAuthor('');
       setFile(null);
+      setCover(null);
       await load();
     } else {
       toast({ title: 'Listing failed', description: result.error, variant: 'destructive' });
@@ -348,6 +352,16 @@ export function BookstoreView() {
           <Label>File (PDF, EPUB, DOCX…)</Label>
           <Input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="bg-black border-[#312839] text-white" />
         </div>
+        <div className="space-y-1.5">
+          <Label>Front cover (optional)</Label>
+          <Input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => setCover(e.target.files?.[0] ?? null)}
+            className="bg-black border-[#312839] text-white"
+          />
+          <p className="text-xs text-slate-500">JPG, PNG, or WebP · up to 10MB · shown as the marketplace thumbnail.</p>
+        </div>
         <Button type="submit" className="btn-gradient" disabled={saving}>
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Publish listing'}
         </Button>
@@ -369,6 +383,18 @@ function ListingGrid({ title, items }: { title: string; items: Listing[] }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => (
             <div key={item.id} className="rounded-2xl border border-[#312839] bg-[#0d0d10] p-5">
+              {item.coverUrl ? (
+                <img
+                  src={item.coverUrl}
+                  alt={`${item.title} cover`}
+                  loading="lazy"
+                  className="w-full aspect-[2/3] rounded-lg object-cover mb-3"
+                />
+              ) : (
+                <div className="w-full aspect-[2/3] rounded-lg bg-gradient-to-br from-purple-600/40 to-cyan-600/30 flex items-center justify-center mb-3">
+                  <BookOpen className="h-8 w-8 text-purple-300/60" />
+                </div>
+              )}
               <p className="font-semibold text-white">{item.title}</p>
               <p className="text-xs text-slate-500 mt-1">{item.author || 'Unknown author'} · {item.format}</p>
               <p className="text-purple-300 font-bold mt-3">${item.price.toFixed(2)}</p>

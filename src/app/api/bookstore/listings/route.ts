@@ -9,6 +9,13 @@ import { saveFile, generateFilename } from '@/lib/utils/storage';
 
 const SUPPORTED_LISTING_EXTENSIONS = new Set(['pdf', 'epub', 'mp3', 'm4b', 'txt', 'docx']);
 const MAX_FILE_BYTES = 500 * 1024 * 1024; // 500MB
+const SUPPORTED_COVER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const MAX_COVER_BYTES = 10 * 1024 * 1024; // 10MB
+const COVER_EXTENSION: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,6 +83,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'File exceeds the 500MB limit.' }, { status: 400 });
     }
 
+    let coverUrl: string | null = null;
+    const cover = formData.get('cover');
+    if (cover instanceof File && cover.size > 0) {
+      const mime = cover.type || '';
+      if (!SUPPORTED_COVER_TYPES.has(mime)) {
+        return NextResponse.json(
+          { success: false, error: 'Cover image must be a JPG, PNG, or WebP file.' },
+          { status: 400 }
+        );
+      }
+      if (cover.size > MAX_COVER_BYTES) {
+        return NextResponse.json({ success: false, error: 'Cover image exceeds the 10MB limit.' }, { status: 400 });
+      }
+      const coverBuffer = Buffer.from(await cover.arrayBuffer());
+      const storedName = generateFilename('cover', COVER_EXTENSION[mime]);
+      coverUrl = await saveFile('listings', storedName, coverBuffer, { contentType: mime });
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
     const storedName = generateFilename('listing', extension);
     const publicUrl = await saveFile('listings', storedName, buffer, {
@@ -92,6 +117,7 @@ export async function POST(request: NextRequest) {
         format,
         fileName: file.name,
         fileUrl: publicUrl,
+        coverUrl,
         status: 'active',
       },
     });
