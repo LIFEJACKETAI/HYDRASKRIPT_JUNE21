@@ -73,7 +73,7 @@ function isRetryableDbError(error: Error): boolean {
 
 class PersistentJobQueue {
   private isProcessing = false
-  private maxConcurrent = 1
+  private maxConcurrent = parseInt(process.env.QUEUE_MAX_CONCURRENT || '1', 10) || 1
   private activeJobs = 0
   private bootstrapped = false
   private loopStarted = false

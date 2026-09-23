@@ -71,6 +71,11 @@ export default function CreateBookForm() {
   const [generationGenre, setGenerationGenre] = useState<string>('');
 
   const isKids = isKidsAudience(targetAudience);
+  const isColoringBook = genre === 'coloring';
+  // "Personalise the Story" (adventure setting, hero/friend names) only makes
+  // sense for storybooks. Coloring books are page-based — the audience just
+  // decides how many pages/line-art images to generate.
+  const showKidsPersonalization = isKids && !isColoringBook;
 
   const handleGenreChange = (value: string) => {
     setGenre(value);
@@ -142,13 +147,13 @@ export default function CreateBookForm() {
       toast({ title: 'Theme required', description: 'Please select a coloring theme.', variant: 'destructive' });
       return;
     }
-    if (isKids && !adventureType) {
+    if (showKidsPersonalization && !adventureType) {
       toast({ title: 'Adventure required', description: 'Please choose an adventure setting for your kids book.', variant: 'destructive' });
       return;
     }
 
     // Build character names array
-    const characterNames = isKids
+    const characterNames = showKidsPersonalization
       ? [heroName.trim(), ...friendNames.map(n => n.trim())].filter(Boolean)
       : [];
 
@@ -162,7 +167,7 @@ export default function CreateBookForm() {
         coloringTheme: genre === 'coloring' && coloringTheme ? coloringTheme : undefined,
         styleProfileId: styleProfileId || undefined,
         chapterCount: chapterCount || undefined,
-        adventureType: isKids && adventureType ? adventureType : undefined,
+        adventureType: showKidsPersonalization && adventureType ? adventureType : undefined,
         characterNames: characterNames.length > 0 ? characterNames : undefined,
       });
 
@@ -342,7 +347,7 @@ export default function CreateBookForm() {
         </Card>
 
         {/* ── Kids Book Personalisation ── only for kids audiences */}
-        {isKids && (
+        {showKidsPersonalization && (
           <Card className="bg-[#2a2a2a] border-purple-500/20">
             <CardHeader>
               <CardTitle className="text-white text-base flex items-center gap-2">
@@ -500,7 +505,7 @@ export default function CreateBookForm() {
               </div>
             )}
 
-            {isKids && !adventureType && (
+            {showKidsPersonalization && !adventureType && (
               <div className="rounded-lg bg-cyan-500/5 border border-cyan-500/20 p-3">
                 <p className="text-xs text-cyan-300">Please choose an adventure setting above to continue.</p>
               </div>
@@ -514,7 +519,7 @@ export default function CreateBookForm() {
                 !genre ||
                 !targetAudience ||
                 (genre === 'coloring' && !coloringTheme) ||
-                (isKids && !adventureType)
+                (showKidsPersonalization && !adventureType)
               }
               className="w-full btn-gradient h-11"
             >
