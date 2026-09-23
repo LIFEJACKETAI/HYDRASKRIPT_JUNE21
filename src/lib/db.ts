@@ -50,7 +50,7 @@ function createPool(): Pool {
   // warm lambdas exhausts Supabase and surfaces as Prisma P2028
   // ("Unable to start a transaction in the given time").
   const max = parseInt(
-    process.env.DATABASE_POOL_MAX || (serverless ? '3' : '10'),
+    process.env.DATABASE_POOL_MAX || (serverless ? '5' : '10'),
     10
   )
   // How long a query waits for a pooled connection before Prisma throws
@@ -58,8 +58,15 @@ function createPool(): Pool {
   // (a poll storm, a big `jobs.result` update), so waiting beats failing: a
   // failed `completed` write is exactly what strands a finished book at
   // "Queued...". Keep it below the platform's function timeout.
+  //
+  // Long-running jobs (an audiobook narrates each segment through TTS, which
+  // can take 30-60s per chunk) leave the pool idle between DB writes. The idle
+  // timeout below must therefore exceed the longest provider call, or the only
+  // warm connection is torn down mid-job and every later write pays a cold
+  // reconnect — which is how "Connection terminated due to connection timeout"
+  // shows up on an otherwise healthy database.
   const connectionTimeoutMs = parseInt(
-    process.env.PRISMA_CONNECTION_TIMEOUT || (serverless ? '20000' : '10000'),
+    process.env.PRISMA_CONNECTION_TIMEOUT || (serverless ? '30000' : '10000'),
     10
   )
   return new Pool({
@@ -69,8 +76,8 @@ function createPool(): Pool {
       ? { rejectUnauthorized: false }
       : undefined,
     min: 0,
-    max: Number.isFinite(max) && max > 0 ? max : serverless ? 3 : 10,
-    idleTimeoutMillis: serverless ? 20_000 : 30_000,
+    max: Number.isFinite(max) && max > 0 ? max : serverless ? 5 : 10,
+    idleTimeoutMillis: serverless ? 60_000 : 30_000,
     connectionTimeoutMillis: connectionTimeoutMs,
     // Reap dead TCP sockets quickly: a Supabase pooler connection that died
     // during an instance freeze otherwise sits "checked out" and stalls the

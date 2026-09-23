@@ -10,7 +10,11 @@ import {
   normalizeVoiceId,
   saveAudioChunk,
 } from '@/lib/services/audioService';
-import { audioBase64ToPlayableBuffer, concatenateWavBuffers } from '@/lib/services/audioFormat';
+import {
+  audioBase64ToPlayableBuffer,
+  concatenateWavBuffers,
+  type PlayableAudio,
+} from '@/lib/services/audioFormat';
 import { consumeCredits } from '@/lib/utils/credits';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -33,6 +37,7 @@ interface AudioJobPayload {
   source?: 'book' | 'upload';
   bookTitle?: string;
   chapters?: AudioChapter[];
+  audiobookProgress?: unknown;
 }
 
 interface LocalAudioSegment {
@@ -47,6 +52,110 @@ function parseJobPayload(raw: string | null | undefined): AudioJobPayload {
     return parsed && typeof parsed === 'object' ? (parsed as AudioJobPayload) : {};
   } catch {
     return {};
+  }
+}
+
+/**
+ * Resumable-audiobook checkpointing.
+ *
+ * The durable queue re-claims a job whenever the function running it is killed
+ * (Vercel function cap, a Prisma pool timeout, a redeploy). Without a
+ * checkpoint every retry re-generates EVERY TTS segment from scratch — slow
+ * and wasteful enough that a long book can loop on "generating" forever. Each
+ * completed segment is persisted into `job.result` under `audiobookProgress`;
+ * a later claim skips segments already produced and re-downloads their bytes
+ * for the final assembly instead of re-running TTS.
+ */
+interface SegmentProgress {
+  segmentIndex: number;
+  chapterIndex: number;
+  chapterPosition: number;
+  chunkPosition: number;
+  title: string;
+  publicUrl: string;
+  extension: string;
+  mimeType: string;
+}
+
+interface AudiobookProgress {
+  fingerprint: string;
+  segments: SegmentProgress[];
+}
+
+/**
+ * Cheap structural fingerprint of the chapter layout. Content is identified by
+ * length (not copied), so audio saved for a *different* chapter arrangement is
+ * never reused — a book whose text changed must re-narrate from scratch.
+ */
+function chapterFingerprint(chapters: AudioChapter[]): string {
+  return chapters
+    .map((chapter) => `${chapter.index}:${chapter.title}:${chapter.content.length}`)
+    .join('|');
+}
+
+function parseAudiobookProgress(raw: unknown, fingerprint: string): SegmentProgress[] | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const record = raw as { fingerprint?: unknown; segments?: unknown };
+  if (record.fingerprint !== fingerprint || !Array.isArray(record.segments)) return null;
+
+  const segments: SegmentProgress[] = [];
+  for (const entry of record.segments) {
+    const s = entry as Record<string, unknown>;
+    if (
+      typeof s.publicUrl !== 'string' ||
+      typeof s.extension !== 'string' ||
+      typeof s.mimeType !== 'string' ||
+      typeof s.chapterIndex !== 'number' ||
+      typeof s.chapterPosition !== 'number' ||
+      typeof s.chunkPosition !== 'number' ||
+      typeof s.segmentIndex !== 'number' ||
+      typeof s.title !== 'string'
+    ) {
+      return null;
+    }
+    segments.push({
+      segmentIndex: s.segmentIndex,
+      chapterIndex: s.chapterIndex,
+      chapterPosition: s.chapterPosition,
+      chunkPosition: s.chunkPosition,
+      title: s.title,
+      publicUrl: s.publicUrl,
+      extension: s.extension,
+      mimeType: s.mimeType,
+    });
+  }
+  return segments.length > 0 ? segments : null;
+}
+
+async function persistAudiobookProgress(
+  jobId: string,
+  fingerprint: string,
+  segments: SegmentProgress[],
+  progressMessage: string,
+  progressPercent: number
+): Promise<void> {
+  await jobQueue.updateJobStatus(jobId, {
+    progressMessage,
+    progressPercent,
+    result: { audiobookProgress: { fingerprint, segments } },
+    mergeResult: true,
+  });
+}
+
+async function fetchSegmentBuffer(publicUrl: string): Promise<Buffer> {
+  if (!/^https?:\/\//.test(publicUrl)) {
+    throw new Error(`Cannot resume audio segment "${publicUrl}": not an absolute URL.`);
+  }
+  try {
+    const response = await fetch(publicUrl);
+    if (!response.ok) {
+      throw new Error(`resume fetch returned HTTP ${response.status}`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  } catch (error) {
+    throw new Error(
+      `Failed to re-download resumed audio segment (${error instanceof Error ? error.message : String(error)}).`
+    );
   }
 }
 
@@ -145,6 +254,23 @@ export async function generateAudiobookWorker(jobId: string) {
     const chapterAssets: { chapterIndex: number; title: string; publicUrl: string }[] = [];
     let segmentIndex = 0;
 
+    // Resume support: reuse audio produced by an earlier, interrupted claim
+    // instead of regenerating every TTS segment from the beginning.
+    const fingerprint = chapterFingerprint(chapters);
+    const savedSegments = parseAudiobookProgress(payload.audiobookProgress, fingerprint);
+    const resumeByKey = new Map<string, SegmentProgress>();
+    const progressSegments: SegmentProgress[] = [];
+    for (const saved of savedSegments ?? []) {
+      resumeByKey.set(`${saved.chapterPosition}:${saved.chunkPosition}`, saved);
+      progressSegments.push(saved);
+    }
+    segmentIndex = progressSegments.length;
+    if (progressSegments.length > 0) {
+      console.info(
+        `[AudiobookWorker] Job ${jobId}: resuming with ${progressSegments.length} segment(s) already produced.`
+      );
+    }
+
     await jobQueue.updateJobStatus(jobId, {
       progressMessage: `Preparing TTS audiobook...`,
       progressPercent: 5,
@@ -161,6 +287,29 @@ export async function generateAudiobookWorker(jobId: string) {
 
       for (let chunkPosition = 0; chunkPosition < chapterChunks.length; chunkPosition++) {
         const progress = 5 + Math.floor(((chapterPosition + chunkPosition / chapterChunks.length) / chapters.length) * 80);
+
+        // Checkpoint hit? A previous claim already narrated this exact segment
+        // (same chapter layout fingerprint). Reuse its bytes instead of paying
+        // for TTS again.
+        const resumed = resumeByKey.get(`${chapterPosition}:${chunkPosition}`);
+        if (resumed) {
+          await jobQueue.updateJobStatus(jobId, {
+            progressMessage: `Resuming existing audio for ${chapter.title} (${chunkPosition + 1}/${chapterChunks.length})...`,
+            progressPercent: Math.min(progress, 85),
+          });
+          await jobQueue.heartbeat(jobId);
+
+          const buffer = await fetchSegmentBuffer(resumed.publicUrl);
+          segments.push({ buffer, extension: resumed.extension });
+          chapterAssets.push({
+            chapterIndex: chapter.index,
+            title: chapterChunks.length > 1 ? `${chapter.title} — Part ${chunkPosition + 1}` : chapter.title,
+            publicUrl: resumed.publicUrl,
+          });
+          segmentIndex++;
+          continue;
+        }
+
         await jobQueue.updateJobStatus(jobId, {
           progressMessage: `Generating audio for ${chapter.title} (${chunkPosition + 1}/${chapterChunks.length})...`,
           progressPercent: Math.min(progress, 85),
@@ -185,7 +334,7 @@ export async function generateAudiobookWorker(jobId: string) {
           console.info(`[AudiobookWorker] Job ${jobId}: ${activeProvider} (${activeModel})`);
         }
 
-        const playable = audioBase64ToPlayableBuffer(result.audioBase64, result.audioMimeType);
+        const playable: PlayableAudio = audioBase64ToPlayableBuffer(result.audioBase64, result.audioMimeType);
         segments.push({ buffer: playable.buffer, extension: playable.extension });
 
         const saveResult = await saveAudioChunk(ownerId, bookId, segmentIndex, result.audioBase64, {
@@ -202,6 +351,26 @@ export async function generateAudiobookWorker(jobId: string) {
         if (!saveResult.success || !saveResult.publicUrl) {
           throw new Error(`Failed to save audio segment: ${saveResult.error || 'unknown storage error'}`);
         }
+
+        // Checkpoint BEFORE any other step can kill this claim, so the next
+        // recovery resumes from here instead of regenerating the book.
+        progressSegments.push({
+          segmentIndex,
+          chapterIndex: chapter.index,
+          chapterPosition,
+          chunkPosition,
+          title: chapter.title,
+          publicUrl: saveResult.publicUrl,
+          extension: playable.extension,
+          mimeType: playable.mimeType,
+        });
+        await persistAudiobookProgress(
+          jobId,
+          fingerprint,
+          progressSegments,
+          `Saved audio for ${chapter.title} (${chunkPosition + 1}/${chapterChunks.length}) — ${progressSegments.length} segment(s) so far.`,
+          Math.min(progress, 85)
+        );
 
         chapterAssets.push({
           chapterIndex: chapter.index,
