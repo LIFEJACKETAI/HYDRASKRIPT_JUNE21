@@ -34,23 +34,15 @@ import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/lib/store';
 import { listBooks, getJob, getUserEmail } from '@/lib/api';
 import type { BookData, JobData } from '@/lib/api';
+import { AUDIOBOOK_VOICES } from '@/types';
 import { toast } from '@/hooks/use-toast';
 
 // ─── Voice Data ───────────────────────────────────────────────────────────────
 
-const VOICES = [
-  { id: 'en-US-Neural2-C', label: 'Aurora',   gender: 'female' as const, style: 'Warm & Storytelling' },
-  { id: 'en-US-Neural2-E', label: 'Sage',     gender: 'female' as const, style: 'Clear & Professional' },
-  { id: 'en-US-Neural2-F', label: 'Luna',     gender: 'female' as const, style: 'Soft & Gentle' },
-  { id: 'en-GB-Neural2-A', label: 'Iris',     gender: 'female' as const, style: 'British & Sophisticated' },
-  { id: 'en-AU-Neural2-A', label: 'Skye',     gender: 'female' as const, style: 'Australian & Lively' },
-  { id: 'en-US-Neural2-D', label: 'Atlas',    gender: 'male'   as const, style: 'Deep & Authoritative' },
-  { id: 'en-US-Neural2-J', label: 'River',    gender: 'male'   as const, style: 'Casual & Warm' },
-  { id: 'en-US-Neural2-A', label: 'Orion',    gender: 'male'   as const, style: 'Clear & Dynamic' },
-  { id: 'en-GB-Neural2-B', label: 'Alistair', gender: 'male'   as const, style: 'British & Classic' },
-  { id: 'en-AU-Neural2-B', label: 'Hunter',   gender: 'male'   as const, style: 'Australian & Bold' },
-];
-
+// AUDIOBOOK_VOICES contains Gemini TTS names, rather than Google Cloud
+// `en-US-Neural2-*` ids. Keeping the list shared with the server prevents the
+// UI from offering voice ids the worker cannot send to Gemini.
+const VOICES = AUDIOBOOK_VOICES;
 type Voice = typeof VOICES[number];
 type StepId = 1 | 2 | 3;
 type Source = 'book' | 'upload';
@@ -318,7 +310,12 @@ interface DownloadResultsProps {
 function DownloadResults({ job, voiceName }: DownloadResultsProps) {
   type ResultShape = {
     chapters?: { chapterIndex: number; title: string; publicUrl: string }[];
+    // `publicUrl` is the canonical worker response; `fullAudiobook` is kept for
+    // compatibility with older completed jobs.
+    publicUrl?: string;
     fullAudiobook?: string;
+    fileName?: string;
+    format?: string;
     simulated?: boolean;
   };
 
@@ -333,18 +330,21 @@ function DownloadResults({ job, voiceName }: DownloadResultsProps) {
     );
   }
 
+  const fullAudiobook = result.publicUrl ?? result.fullAudiobook;
+  const format = (result.format || result.fileName?.split('.').pop() || 'audio').toUpperCase();
+
   return (
     <div className="space-y-4">
       {result.simulated && (
         <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
           <p className="text-xs text-amber-300">
-            Running in simulation mode — no Google TTS API key detected. In production, real MP3 files would be generated.
+            Running in simulation mode — no Google TTS API key detected. In production, real audio files would be generated.
           </p>
         </div>
       )}
 
       {/* Full audiobook */}
-      {result.fullAudiobook && (
+      {fullAudiobook && (
         <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shrink-0">
@@ -352,16 +352,16 @@ function DownloadResults({ job, voiceName }: DownloadResultsProps) {
             </div>
             <div>
               <p className="text-sm font-semibold text-white">Complete Audiobook</p>
-              <p className="text-xs text-gray-400">M4B format — narrated by {voiceName}</p>
+              <p className="text-xs text-gray-400">{format} format — narrated by {voiceName}</p>
             </div>
           </div>
           <Button
             size="sm"
             className="btn-gradient"
-            onClick={() => window.open(result.fullAudiobook, '_blank')}
+            onClick={() => window.open(fullAudiobook, '_blank')}
           >
             <Download className="h-3.5 w-3.5 mr-1.5" />
-            Download M4B
+            Download {format}
           </Button>
         </div>
       )}

@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { jobQueue } from '@/lib/workers/queue';
-import { reserveCredits } from '@/lib/utils/credits';
+import { calculateAudiobookCost, reserveCredits } from '@/lib/utils/credits';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
 
 export async function GET(
@@ -107,7 +107,8 @@ export async function POST(
       where: { id: bookId, ownerId: profile.id },
       include: {
         chapters: {
-          select: { wordCount: true },
+          where: { status: 'completed' },
+          select: { wordCount: true, content: true },
         },
       },
     });
@@ -120,15 +121,32 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Book must be completed before generating audiobook' }, { status: 400 });
     }
 
-    const totalWords = book.chapters.reduce((sum, ch) => sum + (ch.wordCount || 0), 0);
-    const estimatedMinutes = Math.ceil(totalWords / 150);
-    const estimatedCredits = 50 + estimatedMinutes;
+    const totalWords = book.chapters.reduce(
+      (sum, chapter) => sum + (chapter.wordCount || chapter.content.split(/\s+/).filter(Boolean).length),
+      0
+    );
+    if (totalWords === 0) {
+      return NextResponse.json(
+        { success: false, error: 'This book has no completed chapter text to narrate' },
+        { status: 400 }
+      );
+    }
+
+    const estimatedCredits = calculateAudiobookCost(totalWords);
+    let voiceId = 'Aoede';
+    try {
+      const body = await request.json();
+      if (typeof body?.voiceId === 'string' && body.voiceId.trim()) voiceId = body.voiceId.trim();
+    } catch {
+      // No body is valid for this legacy endpoint; use the default narrator.
+    }
 
     const jobId = await jobQueue.createJob({
       bookId,
       ownerId: profile.id,
       jobType: 'generate_audiobook',
       creditsReserved: estimatedCredits,
+      result: JSON.stringify({ voiceId, source: 'book' }),
     });
 
     const reserved = await reserveCredits(profile.id, estimatedCredits, jobId, 'Audiobook generation');

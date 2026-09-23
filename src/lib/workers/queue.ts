@@ -13,6 +13,7 @@ import {
   isLlmBudgetExceeded,
   isProviderTransientError,
   runWithLlmBudget,
+  transientProgressMessage,
 } from '@/lib/llm/budget'
 
 export { isServerless, kickQueuePump, forceKickQueuePump, maybeKickQueueForJob } from './queue-pump-client'
@@ -302,7 +303,7 @@ class PersistentJobQueue {
             errorMessage: errMessage.slice(0, 2000),
             progressMessage: canRetry
               ? transient
-                ? `Providers busy — re-queued, retry ${nextRetryCount}/${jobToProcess.maxRetries}.`
+                ? transientProgressMessage(error, nextRetryCount, jobToProcess.maxRetries, jobToProcess.jobType)
                 : `Retrying (${nextRetryCount}/${jobToProcess.maxRetries}) after failure.`
               : `Failed: ${errMessage}`,
             retryCount: nextRetryCount,

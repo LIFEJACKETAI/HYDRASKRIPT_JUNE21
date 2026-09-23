@@ -40,12 +40,53 @@ export function getR2PublicUrl(): string {
 
 // ─── Supabase Storage ───────────────────────────────────────────────────────
 
-function isSupabaseStorageEnabled() {
-  return Boolean(
-    process.env.SUPABASE_URL &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY &&
-    SUPABASE_STORAGE_BUCKET
+/**
+ * Resolve the Supabase project URL.
+ *
+ * WHY BOTH NAMES: this check used to read ONLY `process.env.SUPABASE_URL`, but
+ * every other module in the codebase (`lib/supabase.ts`, `lib/supabase/server.ts`,
+ * `lib/supabase/middleware.ts`) and `.env.example` use `NEXT_PUBLIC_SUPABASE_URL`.
+ * A deployment configured exactly as documented therefore had a working Supabase
+ * client but `isSupabaseStorageEnabled() === false`, so `saveFile()` silently fell
+ * through to the local-filesystem branch and died on Vercel's read-only
+ * `/var/task/public/assets/...`. Accept either name.
+ */
+export function getSupabaseUrl(): string | undefined {
+  return (
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    process.env.SUPABASE_URL?.trim() ||
+    undefined
   );
+}
+
+export function getSupabaseStorageBucket(): string {
+  return process.env.SUPABASE_STORAGE_BUCKET?.trim() || SUPABASE_STORAGE_BUCKET;
+}
+
+export function isSupabaseStorageEnabled(): boolean {
+  return Boolean(getSupabaseUrl() && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+/**
+ * Human-readable storage configuration, used in the error below so a failed
+ * upload names the missing variable instead of surfacing as a filesystem error.
+ */
+export function getStorageConfigReport(): string {
+  const r2 = isR2Enabled()
+    ? 'R2: configured'
+    : 'R2: missing (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_KEY)';
+
+  let supabase: string;
+  if (isSupabaseStorageEnabled()) {
+    supabase = `Supabase Storage: configured (bucket "${getSupabaseStorageBucket()}")`;
+  } else {
+    const missing: string[] = [];
+    if (!getSupabaseUrl()) missing.push('NEXT_PUBLIC_SUPABASE_URL');
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+    supabase = `Supabase Storage: missing (${missing.join(', ')})`;
+  }
+
+  return `${r2} | ${supabase}`;
 }
 
 // Lazy import to avoid circular dependency at module load
@@ -55,6 +96,19 @@ async function getSupabaseAdmin() {
 }
 
 // ─── Local filesystem (dev only) ────────────────────────────────────────────
+
+/**
+ * Serverless runtimes (Vercel, Lambda, Cloud Run) mount a READ-ONLY filesystem.
+ * Mirrors the detection already used in `lib/db.ts` and `lib/llm/budget.ts`.
+ */
+function isServerlessRuntime(): boolean {
+  return Boolean(
+    process.env.VERCEL ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.AWS_EXECUTION_ENV ||
+      process.env.FUNCTION_TARGET
+  );
+}
 
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
@@ -112,7 +166,7 @@ export async function saveFile(
     const supabase = await getSupabaseAdmin();
     const objectPath = `${subfolder}/${filename}`;
     const { error } = await supabase.storage
-      .from(SUPABASE_STORAGE_BUCKET)
+      .from(getSupabaseStorageBucket())
       .upload(objectPath, buffer, {
         upsert: true,
         contentType,
@@ -123,7 +177,7 @@ export async function saveFile(
     }
 
     const { data } = supabase.storage
-      .from(SUPABASE_STORAGE_BUCKET)
+      .from(getSupabaseStorageBucket())
       .getPublicUrl(objectPath);
 
     console.log(`[Storage] Uploaded to Supabase: ${objectPath}`);
@@ -131,6 +185,16 @@ export async function saveFile(
   }
 
   // 3. Local filesystem (dev only)
+  if (isServerlessRuntime()) {
+    throw new Error(
+      `Refusing to write "${subfolder}/${filename}" to the local filesystem: this ` +
+        `runtime mounts a read-only disk, so the file would be lost even if the ` +
+        `write succeeded. Configure cloud storage instead — ${getStorageConfigReport()}. ` +
+        `On Vercel set NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (or the ` +
+        `R2_* variables) for the Production scope, then redeploy.`
+    );
+  }
+
   const dir = path.join(STORAGE_DIR, subfolder);
   ensureDir(dir);
   const filePath = path.join(dir, filename);
@@ -182,13 +246,13 @@ export async function deleteFile(publicUrl: string): Promise<boolean> {
     // Supabase URLs
     if (isSupabaseStorageEnabled()) {
       const supabase = await getSupabaseAdmin();
-      const marker = `/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/`;
+      const marker = `/storage/v1/object/public/${getSupabaseStorageBucket()}/`;
       const markerIndex = publicUrl.indexOf(marker);
       if (markerIndex === -1) return false;
 
       const objectPath = publicUrl.slice(markerIndex + marker.length);
       const { error } = await supabase.storage
-        .from(SUPABASE_STORAGE_BUCKET)
+        .from(getSupabaseStorageBucket())
         .remove([objectPath]);
 
       if (error) {
@@ -236,7 +300,7 @@ export async function fileExists(publicUrl: string): Promise<boolean> {
     // Supabase
     if (isSupabaseStorageEnabled()) {
       const supabase = await getSupabaseAdmin();
-      const marker = `/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/`;
+      const marker = `/storage/v1/object/public/${getSupabaseStorageBucket()}/`;
       const markerIndex = publicUrl.indexOf(marker);
       if (markerIndex === -1) return false;
 
@@ -245,7 +309,7 @@ export async function fileExists(publicUrl: string): Promise<boolean> {
       const fileName = objectPath.includes('/') ? objectPath.slice(objectPath.lastIndexOf('/') + 1) : objectPath;
 
       const { data, error } = await supabase.storage
-        .from(SUPABASE_STORAGE_BUCKET)
+        .from(getSupabaseStorageBucket())
         .list(directory, { search: fileName });
 
       if (error) return false;
