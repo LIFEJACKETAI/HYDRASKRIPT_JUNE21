@@ -1,5 +1,6 @@
 // HydraSkript - Audio Service
-// Handles text-to-speech generation using Google AI Studio (Gemini)
+// Text-to-speech generation. Primary provider: Fish Audio.
+// Backup provider: Google AI Studio (Gemini).
 // Includes text chunking and voice mapping logic
 
 // ... existing imports
@@ -107,13 +108,81 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, baseDelayMs =
 }
 
 /**
+ * Calls the Fish Audio TTS API to generate audio for a chunk of text.
+ * Returns the base64 audio data.
+ *
+ * https://api.fish.audio/v1/tts
+ * Content-Type: application/json, model sent as a request header.
+ */
+export async function generateAudioChunkWithFishAudio(
+  text: string
+): Promise<{ success: boolean; audioBase64?: string; error?: string; provider?: string }> {
+  const apiKey = process.env.FISH_AUDIO_API_KEY;
+  const referenceId = process.env.FISH_AUDIO_REFERENCE_ID;
+  const model = process.env.FISH_AUDIO_MODEL || 's2.1-pro';
+
+  if (!apiKey) {
+    return { success: false, error: 'FISH_AUDIO_API_KEY is not configured' };
+  }
+
+  try {
+    return await withRetry(async () => {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        model,
+      };
+
+      const body: Record<string, unknown> = {
+        text,
+        format: 'mp3',
+        chunk_length: 200,
+        normalize: true,
+        latency: 'balanced',
+      };
+      if (referenceId) body.reference_id = referenceId;
+
+      const response = await fetch('https://api.fish.audio/v1/tts', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        const message =
+          errData?.error?.message || errData?.message || errData?.detail || response.statusText;
+        const error = new Error(`Fish Audio TTS API error: ${message}`);
+        (error as any).status = response.status;
+        throw error;
+      }
+
+      const content = await response.arrayBuffer();
+      if (!content.byteLength) throw new Error('No audio content returned from Fish Audio API');
+
+      return {
+        success: true,
+        audioBase64: Buffer.from(content).toString('base64'),
+        provider: 'fish',
+      };
+    });
+  } catch (error) {
+    console.error('[AudioService] generateAudioChunkWithFishAudio failed after retries:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown Fish Audio generation error',
+    };
+  }
+}
+
+/**
  * Calls Google AI Studio (Gemini) TTS API to generate audio for a chunk of text.
  * Returns the base64 audio data.
  */
-export async function generateAudioChunk(
+export async function generateAudioChunkWithGemini(
   text: string,
   voiceId: string
-): Promise<{ success: boolean; audioBase64?: string; error?: string }> {
+): Promise<{ success: boolean; audioBase64?: string; error?: string; provider?: string }> {
   try {
     return await withRetry(async () => {
       const apiKey = process.env.GOOGLE_AI_API_KEY;
@@ -140,15 +209,32 @@ export async function generateAudioChunk(
       const data = await response.json();
       if (!data.audioContent) throw new Error('No audio content returned from API');
 
-      return { success: true, audioBase64: data.audioContent };
+      return { success: true, audioBase64: data.audioContent, provider: 'gemini' };
     });
   } catch (error) {
-    console.error('[AudioService] generateAudioChunk failed after retries:', error);
+    console.error('[AudioService] generateAudioChunkWithGemini failed after retries:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown audio generation error'
+      error: error instanceof Error ? error.message : 'Unknown audio generation error',
     };
   }
+}
+
+/**
+ * Generates audio for a chunk of text.
+ * Primary provider: Fish Audio. Fallback: Google AI Studio (Gemini).
+ */
+export async function generateAudioChunk(
+  text: string,
+  voiceId: string
+): Promise<{ success: boolean; audioBase64?: string; error?: string; provider?: string }> {
+  const fishResult = await generateAudioChunkWithFishAudio(text);
+  if (fishResult.success) {
+    return fishResult;
+  }
+
+  console.warn('[AudioService] Fish Audio unavailable, falling back to Gemini:', fishResult.error);
+  return generateAudioChunkWithGemini(text, voiceId);
 }
 
 /**

@@ -88,15 +88,23 @@ export async function saveFile(
   if (isR2Enabled()) {
     const key = `${subfolder}/${filename}`;
     const client = getR2Client();
-    await client.send(new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_KEY,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-    }));
-    const publicUrl = `${getR2PublicUrl()}/${key}`;
-    console.log(`[Storage] Uploaded to R2: ${key}`);
-    return publicUrl;
+    try {
+      await client.send(new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_KEY,
+        Key: key,
+        Body: buffer,
+        ContentType: contentType,
+      }));
+      const publicUrl = `${getR2PublicUrl()}/${key}`;
+      console.log(`[Storage] Uploaded to R2: ${key}`);
+      return publicUrl;
+    } catch (error) {
+      // Fall through to the next provider rather than failing the whole write.
+      console.warn(
+        `[Storage] R2 upload failed (${error instanceof Error ? error.message : String(error)}), ` +
+          `falling back to Supabase Storage / local disk.`
+      );
+    }
   }
 
   // 2. Supabase Storage
