@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib/api-auth';
-import { saveFile, generateFilename } from '@/lib/utils/storage';
+import { saveFile, deleteFile, generateFilename } from '@/lib/utils/storage';
 
 const SUPPORTED_LISTING_EXTENSIONS = new Set(['pdf', 'epub', 'mp3', 'm4b', 'txt', 'docx']);
 const MAX_FILE_BYTES = 500 * 1024 * 1024; // 500MB
@@ -129,6 +129,43 @@ export async function POST(request: NextRequest) {
     if (isUnauthorizedError(error)) return unauthorizedResponse();
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API/bookstore/listings] POST failed:', message, error instanceof Error ? error.stack : '');
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { profile } = await requireProfile(request);
+    const id = request.nextUrl.searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Listing ID is required.' }, { status: 400 });
+    }
+
+    const listing = await db.bookListing.findUnique({ where: { id } });
+    if (!listing) {
+      return NextResponse.json({ success: false, error: 'Listing not found.' }, { status: 404 });
+    }
+
+    if (listing.ownerId !== profile.id) {
+      return NextResponse.json(
+        { success: false, error: 'You can only delete your own listings.' },
+        { status: 403 }
+      );
+    }
+
+    await db.bookListing.delete({ where: { id } });
+
+    const fileCleanups = [listing.fileUrl, listing.coverUrl].filter((url): url is string => Boolean(url));
+    await Promise.allSettled(fileCleanups.map((url) => deleteFile(url)));
+
+    console.log(`[API/bookstore/listings] Deleted listing ${listing.id} ("${listing.title}") for ${profile.id}`);
+
+    return NextResponse.json({ success: true, data: { id: listing.id } });
+  } catch (error) {
+    if (isUnauthorizedError(error)) return unauthorizedResponse();
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[API/bookstore/listings] DELETE failed:', message, error instanceof Error ? error.stack : '');
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

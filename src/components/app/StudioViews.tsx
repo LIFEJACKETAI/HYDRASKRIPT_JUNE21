@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BookOpen, Download, Loader2, Shield, Store, Coins } from 'lucide-react';
+import { BookOpen, Download, Loader2, Shield, Store, Coins, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -296,6 +296,18 @@ export function BookstoreView() {
     void load();
   }, []);
 
+  const handleDelete = async (listing: Listing) => {
+    if (!window.confirm(`Delete "${listing.title}" from the bookstore?`)) return;
+    const response = await fetch(`/api/bookstore/listings?id=${encodeURIComponent(listing.id)}`, { method: 'DELETE' });
+    const result = await response.json();
+    if (result.success) {
+      toast({ title: 'Listing deleted' });
+      await load();
+    } else {
+      toast({ title: 'Delete failed', description: result.error, variant: 'destructive' });
+    }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !title.trim()) {
@@ -367,13 +379,13 @@ export function BookstoreView() {
         </Button>
       </form>
 
-      <ListingGrid title="Your listings" items={mine} />
+      <ListingGrid title="Your listings" items={mine} onDelete={handleDelete} />
       <ListingGrid title="Marketplace" items={market} />
     </div>
   );
 }
 
-function ListingGrid({ title, items }: { title: string; items: Listing[] }) {
+function ListingGrid({ title, items, onDelete }: { title: string; items: Listing[]; onDelete?: (item: Listing) => void }) {
   return (
     <div>
       <h2 className="text-lg font-bold text-white mb-3">{title}</h2>
@@ -397,7 +409,18 @@ function ListingGrid({ title, items }: { title: string; items: Listing[] }) {
               )}
               <p className="font-semibold text-white">{item.title}</p>
               <p className="text-xs text-slate-500 mt-1">{item.author || 'Unknown author'} · {item.format}</p>
-              <p className="text-purple-300 font-bold mt-3">${item.price.toFixed(2)}</p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-purple-300 font-bold">${item.price.toFixed(2)}</p>
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={() => onDelete(item)}
+                    className="text-xs text-rose-400 hover:text-rose-300 inline-flex items-center gap-1"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                )}
+              </div>
               {item.fileUrl && (
                 <a href={item.fileUrl} className="text-xs text-cyan-400 mt-2 inline-block" target="_blank" rel="noreferrer">
                   Open file
