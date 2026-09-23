@@ -7,6 +7,7 @@ import { isUnauthorizedError, requireProfile, unauthorizedResponse } from '@/lib
 import { isUuid } from '@/lib/uuid';
 import { publicJobResult } from '@/lib/job-public';
 import { maybeKickQueueForJob } from '@/lib/workers/queue-pump-client';
+import { computeAudiobookTracker } from '@/lib/audiobook-progress';
 
 // GET - Get job progress
 export async function GET(
@@ -32,6 +33,12 @@ export async function GET(
 
     maybeKickQueueForJob(job.status);
 
+    const result = publicJobResult(job.result);
+    const audiobookProgress =
+      result && typeof result === 'object' && !Array.isArray(result)
+        ? (result as Record<string, unknown>).audiobookProgress
+        : undefined;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -45,10 +52,21 @@ export async function GET(
         errorMessage: job.errorMessage,
         retryCount: job.retryCount,
         maxRetries: job.maxRetries,
-        result: publicJobResult(job.result),
+        result,
         startedAt: job.startedAt,
         completedAt: job.completedAt,
         createdAt: job.createdAt,
+        // Realtime audiobook progress (percent done, percent left, ETA) for the
+        // completion tracker. Only present while the job is producing audio.
+        tracker:
+          job.jobType === 'generate_audiobook'
+            ? computeAudiobookTracker({
+                status: job.status,
+                progressPercent: job.progressPercent,
+                startedAt: job.startedAt,
+                audiobookProgress,
+              })
+            : null,
       },
     });
   } catch (error) {

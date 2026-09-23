@@ -60,6 +60,16 @@ const NARRATION_MESSAGES = [
   (_: string) => `Almost there, stitching chapters together...`,
 ];
 
+function formatEta(seconds: number | null): string | null {
+  if (seconds === null || !Number.isFinite(seconds) || seconds < 0) return null;
+  if (seconds < 30) return 'under a minute left';
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `~${minutes} min left`;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  return remainder > 0 ? `~${hours} hr ${remainder} min left` : `~${hours} hr left`;
+}
+
 // ─── Step Indicator ───────────────────────────────────────────────────────────
 
 function StepIndicator({ current, total }: { current: StepId; total: number }) {
@@ -168,18 +178,9 @@ function GenerationDisplay({ jobId, selectedVoice, onComplete, onError }: Genera
   const [messageIndex, setMessageIndex] = useState(0);
   const onCompleteRef = useRef(onComplete);
   const onErrorRef = useRef(onError);
-  const chapterRef = useRef(1);
 
   useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
   useEffect(() => { onErrorRef.current = onError; }, [onError]);
-
-  // Derive chapter hint from progress percent
-  useEffect(() => {
-    if (job && job.progressPercent > 0) {
-      const ch = Math.max(1, Math.round((job.progressPercent / 90) * 10));
-      chapterRef.current = ch;
-    }
-  }, [job?.progressPercent]);
 
   // Poll for job updates every 3 seconds
   useEffect(() => {
@@ -238,11 +239,28 @@ function GenerationDisplay({ jobId, selectedVoice, onComplete, onError }: Genera
   const isFailed = job?.status === 'failed';
   const isActive = !isComplete && !isFailed;
 
-  const currentChapter = job && job.progressPercent > 0
-    ? Math.max(1, Math.round((job.progressPercent / 90) * 10))
-    : 1;
+  const tracker = job?.tracker ?? null;
+  const percentComplete =
+    tracker?.percentComplete ?? job?.progressPercent ?? 0;
+  const percentRemaining = isComplete
+    ? 0
+    : tracker?.percentRemaining ?? Math.max(0, 100 - percentComplete);
 
-  const currentMessage = NARRATION_MESSAGES[messageIndex](selectedVoice.label, currentChapter);
+  const currentTitle = isActive ? (tracker?.currentChapterTitle ?? null) : null;
+  const currentChapterNo =
+    tracker !== null && tracker.chapterCount > 0
+      ? Math.min(tracker.chapterCount, (tracker.segmentsDone || 0) + 1)
+      : null;
+
+  const currentMessage = currentTitle
+    ? `${selectedVoice.label} is narrating ${currentTitle}...`
+    : NARRATION_MESSAGES[messageIndex](selectedVoice.label, currentChapterNo ?? 1);
+
+  const etaText = isActive ? formatEta(tracker?.remainingSeconds ?? null) : null;
+  const segmentsLabel =
+    tracker !== null && tracker.segmentsTotal !== null
+      ? `${tracker.segmentsDone} / ${tracker.segmentsTotal} segments narrated`
+      : null;
 
   if (!job) {
     return (
@@ -282,13 +300,33 @@ function GenerationDisplay({ jobId, selectedVoice, onComplete, onError }: Genera
       </div>
 
       <div className="space-y-2">
-        <Progress value={job.progressPercent || 0} className="h-2 progress-gradient" />
-        <div className="flex justify-between text-xs text-gray-500">
-          <span>{job.progressPercent || 0}% complete</span>
-          {isActive && (
-            <span className="text-purple-400">{selectedVoice.label} is narrating</span>
+        <Progress value={percentComplete} className="h-2 progress-gradient" />
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-xs text-gray-500">
+          <span>
+            {percentComplete}% complete
+            {!isComplete && <span className="text-gray-600"> &middot; {percentRemaining}% left</span>}
+          </span>
+          {isActive && etaText && (
+            <span className="text-purple-400 font-medium">{etaText}</span>
           )}
         </div>
+
+        {isActive && (segmentsLabel || tracker?.currentChunk) && (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
+            {segmentsLabel && <span>{segmentsLabel}</span>}
+            {tracker?.currentChunk && tracker?.currentChapterChunks ? (
+              <span>
+                Part {tracker.currentChunk}
+                {tracker.currentChapterChunks > 1
+                  ? `/${tracker.currentChapterChunks} of current chapter`
+                  : ' of current chapter'}
+              </span>
+            ) : null}
+            {tracker?.avgSecondsPerSegment != null && (
+              <span>~{tracker.avgSecondsPerSegment}s per segment</span>
+            )}
+          </div>
+        )}
       </div>
 
       {isFailed && job.errorMessage && (

@@ -75,10 +75,23 @@ interface SegmentProgress {
   publicUrl: string;
   extension: string;
   mimeType: string;
+  /** ISO timestamp of when this segment's audio finished saving to storage.
+   *  Older checkpoints (pre-tracker) lack it; the estimator simply skips them. */
+  updatedAt?: string;
+}
+
+interface ChapterPlanEntry {
+  chapterPosition: number;
+  chapterIndex: number;
+  title: string;
+  chunkCount: number;
 }
 
 interface AudiobookProgress {
   fingerprint: string;
+  /** Total TTS segments across all chapters, known up-front from the chunker. */
+  totalSegments?: number;
+  chapterPlan?: ChapterPlanEntry[];
   segments: SegmentProgress[];
 }
 
@@ -122,6 +135,9 @@ function parseAudiobookProgress(raw: unknown, fingerprint: string): SegmentProgr
       publicUrl: s.publicUrl,
       extension: s.extension,
       mimeType: s.mimeType,
+      // Older checkpoints have no timestamp; the rate estimator simply skips
+      // them until freshly-produced segments (with times) take over.
+      ...(typeof s.updatedAt === 'string' ? { updatedAt: s.updatedAt } : {}),
     });
   }
   return segments.length > 0 ? segments : null;
@@ -132,12 +148,20 @@ async function persistAudiobookProgress(
   fingerprint: string,
   segments: SegmentProgress[],
   progressMessage: string,
-  progressPercent: number
+  progressPercent: number,
+  meta?: { totalSegments?: number; chapterPlan?: ChapterPlanEntry[] }
 ): Promise<void> {
   await jobQueue.updateJobStatus(jobId, {
     progressMessage,
     progressPercent,
-    result: { audiobookProgress: { fingerprint, segments } },
+    result: {
+      audiobookProgress: {
+        fingerprint,
+        ...(meta?.totalSegments !== undefined ? { totalSegments: meta.totalSegments } : {}),
+        ...(meta?.chapterPlan !== undefined ? { chapterPlan: meta.chapterPlan } : {}),
+        segments,
+      },
+    },
     mergeResult: true,
   });
 }
@@ -271,8 +295,21 @@ export async function generateAudiobookWorker(jobId: string) {
       );
     }
 
+    // The chunker is deterministic, so tally the exact narration plan up-front.
+    // This is what powers the realtime tracker (percent done, segments left).
+    const chapterPlan: ChapterPlanEntry[] = chapters.map((chapter, chapterPosition) => ({
+      chapterPosition,
+      chapterIndex: chapter.index,
+      title: chapter.title,
+      chunkCount: chunkText(chapter.content).length,
+    }));
+    const totalSegments = chapterPlan.reduce((sum, chapter) => sum + chapter.chunkCount, 0);
+
     await jobQueue.updateJobStatus(jobId, {
-      progressMessage: `Preparing TTS audiobook...`,
+      progressMessage:
+        totalSegments > 0
+          ? `Preparing TTS for ${chapters.length} chapter(s), ~${totalSegments} segment(s)...`
+          : `Preparing TTS audiobook...`,
       progressPercent: 5,
     });
     await jobQueue.heartbeat(jobId);
@@ -286,7 +323,7 @@ export async function generateAudiobookWorker(jobId: string) {
       }
 
       for (let chunkPosition = 0; chunkPosition < chapterChunks.length; chunkPosition++) {
-        const progress = 5 + Math.floor(((chapterPosition + chunkPosition / chapterChunks.length) / chapters.length) * 80);
+        const progress = 5 + Math.floor((segmentIndex / Math.max(totalSegments, 1)) * 80);
 
         // Checkpoint hit? A previous claim already narrated this exact segment
         // (same chapter layout fingerprint). Reuse its bytes instead of paying
@@ -353,7 +390,8 @@ export async function generateAudiobookWorker(jobId: string) {
         }
 
         // Checkpoint BEFORE any other step can kill this claim, so the next
-        // recovery resumes from here instead of regenerating the book.
+        // recovery resumes from here instead of regenerating the book. The
+        // timestamp lets the realtime tracker estimate remaining time.
         progressSegments.push({
           segmentIndex,
           chapterIndex: chapter.index,
@@ -363,13 +401,15 @@ export async function generateAudiobookWorker(jobId: string) {
           publicUrl: saveResult.publicUrl,
           extension: playable.extension,
           mimeType: playable.mimeType,
+          updatedAt: new Date().toISOString(),
         });
         await persistAudiobookProgress(
           jobId,
           fingerprint,
           progressSegments,
           `Saved audio for ${chapter.title} (${chunkPosition + 1}/${chapterChunks.length}) — ${progressSegments.length} segment(s) so far.`,
-          Math.min(progress, 85)
+          Math.min(progress, 85),
+          { totalSegments, chapterPlan }
         );
 
         chapterAssets.push({

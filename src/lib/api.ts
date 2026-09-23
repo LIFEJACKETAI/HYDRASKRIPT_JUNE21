@@ -180,6 +180,22 @@ export async function retryChapter(bookId: string, chapterIndex: number) {
 
 // ─── Jobs API ─────────────────────────────────────────────────────────────────
 
+export interface AudiobookTracker {
+  segmentsDone: number;
+  segmentsTotal: number | null;
+  percentComplete: number;
+  percentRemaining: number;
+  elapsedSeconds: number;
+  avgSecondsPerSegment: number | null;
+  remainingSegments: number | null;
+  remainingSeconds: number | null;
+  etaUtc: string | null;
+  currentChapterTitle: string | null;
+  currentChunk: number | null;
+  currentChapterChunks: number | null;
+  chapterCount: number;
+}
+
 export interface JobData {
   id: string;
   jobType: string;
@@ -196,6 +212,8 @@ export interface JobData {
   startedAt: string | null;
   completedAt: string | null;
   createdAt: string;
+  /** Audiobook jobs only: realtime percent/remaining/ETA while narrating. */
+  tracker?: AudiobookTracker | null;
 }
 
 export async function getJob(jobId: string): Promise<JobData | null> {
