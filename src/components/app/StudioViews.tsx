@@ -315,26 +315,90 @@ export function BookstoreView() {
       return;
     }
     setSaving(true);
-    const form = new FormData();
-    form.append('title', title.trim());
-    form.append('author', author.trim());
-    form.append('price', price);
-    form.append('format', 'ebook');
-    form.append('file', file);
-    if (cover) form.append('cover', cover);
-    const response = await fetch('/api/bookstore/listings', { method: 'POST', body: form });
-    const result = await response.json();
-    if (result.success) {
+    try {
+      // Vercel caps serverless request bodies at ~4.5 MB. For any larger file,
+      // upload directly to storage via a signed URL, then create the listing
+      // with a small JSON payload.
+      const MAX_DIRECT_UPLOAD = 4 * 1024 * 1024;
+      const needsDirectUpload = file.size > MAX_DIRECT_UPLOAD || (cover !== null && cover.size > MAX_DIRECT_UPLOAD);
+
+      if (needsDirectUpload) {
+        const fileUrl = await uploadListingAsset(file);
+        const coverUrl = cover ? await uploadListingAsset(cover) : null;
+        const response = await fetch('/api/bookstore/listings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: title.trim(),
+            author: author.trim(),
+            description: '',
+            price: Number(price),
+            format: 'ebook',
+            fileName: file.name,
+            fileSize: file.size,
+            fileUrl,
+            coverUrl,
+          }),
+        });
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || 'Listing failed');
+      } else {
+        const form = new FormData();
+        form.append('title', title.trim());
+        form.append('author', author.trim());
+        form.append('price', price);
+        form.append('format', 'ebook');
+        form.append('file', file);
+        if (cover) form.append('cover', cover);
+        const response = await fetch('/api/bookstore/listings', { method: 'POST', body: form });
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error || 'Listing failed');
+      }
+
       toast({ title: 'Listed in the bookstore' });
       setTitle('');
       setAuthor('');
       setFile(null);
       setCover(null);
       await load();
-    } else {
-      toast({ title: 'Listing failed', description: result.error, variant: 'destructive' });
+    } catch (error) {
+      toast({
+        title: 'Listing failed',
+        description: error instanceof Error ? error.message : 'Try again.',
+        variant: 'destructive',
+      });
     }
     setSaving(false);
+  };
+
+  const uploadListingAsset = async (f: File): Promise<string> => {
+    const urlResponse = await fetch('/api/bookstore/listings/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName: f.name, fileSize: f.size, contentType: f.type }),
+    });
+    const urlData = await urlResponse.json();
+    if (!urlResponse.ok || !urlData.success) {
+      throw new Error(urlData.error || 'Failed to get upload URL');
+    }
+
+    const { uploadUrl, publicUrl, storagePath, storageProvider } = urlData.data;
+    let uploadResponse: Response;
+    if (storageProvider === 'local') {
+      const form = new FormData();
+      form.append('file', f);
+      form.append('storagePath', storagePath);
+      uploadResponse = await fetch(uploadUrl, { method: 'POST', body: form });
+    } else {
+      uploadResponse = await fetch(uploadUrl, {
+        method: storageProvider === 'supabase' ? 'POST' : 'PUT',
+        body: f,
+        headers: storageProvider === 'supabase' ? {} : { 'Content-Type': f.type },
+      });
+    }
+
+    if (!uploadResponse.ok) throw new Error('Upload to storage failed. Please try again.');
+    return publicUrl;
   };
 
   return (

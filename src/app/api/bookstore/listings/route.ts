@@ -46,6 +46,56 @@ export async function POST(request: NextRequest) {
   try {
     const { profile } = await requireProfile(request);
 
+    // Large files bypass the serverless payload limit via direct-to-storage
+    // upload; such requests arrive as JSON with the pre-uploaded URLs.
+    if ((request.headers.get('content-type') ?? '').includes('application/json')) {
+      const body = await request.json() as {
+        title?: string;
+        author?: string;
+        description?: string;
+        price?: number | string;
+        format?: string;
+        fileName?: string;
+        fileUrl?: string;
+        coverUrl?: string | null;
+      };
+
+      const title = body.title?.trim();
+      if (!title) {
+        return NextResponse.json({ success: false, error: 'Book title is required.' }, { status: 400 });
+      }
+      if (typeof body.fileUrl !== 'string' || !body.fileUrl) {
+        return NextResponse.json({ success: false, error: 'Uploaded file URL is required.' }, { status: 400 });
+      }
+
+      const price = typeof body.price === 'string' ? parseFloat(body.price) : Number(body.price);
+      if (isNaN(price) || price < 0) {
+        return NextResponse.json({ success: false, error: 'A valid price (USD) is required.' }, { status: 400 });
+      }
+      if (body.format && !['ebook', 'audiobook', 'both'].includes(body.format)) {
+        return NextResponse.json({ success: false, error: 'Invalid format selected.' }, { status: 400 });
+      }
+
+      const listing = await db.bookListing.create({
+        data: {
+          ownerId: profile.id,
+          title,
+          author: body.author?.trim() ?? '',
+          description: body.description ?? '',
+          price,
+          format: body.format || 'ebook',
+          fileName: body.fileName ?? null,
+          fileUrl: body.fileUrl,
+          coverUrl: body.coverUrl ?? null,
+          status: 'active',
+        },
+      });
+
+      console.log(`[API/bookstore/listings] Created listing ${listing.id} ("${title}") for ${profile.id} (direct upload)`);
+
+      return NextResponse.json({ success: true, data: listing });
+    }
+
     const formData = await request.formData();
     const title = (formData.get('title') as string | null)?.trim();
     const author = (formData.get('author') as string | null)?.trim() ?? '';
