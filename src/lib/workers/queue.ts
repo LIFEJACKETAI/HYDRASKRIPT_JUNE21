@@ -54,18 +54,23 @@ type QueueWorkerJob = {
 }
 
 function isRetryableDbError(error: Error): boolean {
-  const msg = error.message
+  // Prisma/pg wrap the same failure in several wordings; lowercase everything
+  // so "Connection terminated due to connection timeout", P2024, etc. all match.
+  const msg = error.message.toLowerCase()
   return (
-    msg.includes('P2028') ||
-    msg.includes('Unable to start a transaction') ||
-    msg.includes('Transaction API error') ||
-    msg.includes('P1001') ||
-    msg.includes("Can't reach database") ||
-    msg.includes('ECONNREFUSED') ||
-    msg.includes('ECONNRESET') ||
+    msg.includes('p2028') ||
+    msg.includes('unable to start a transaction') ||
+    msg.includes('transaction api error') ||
+    msg.includes('p1001') ||
+    msg.includes("can't reach database") ||
+    msg.includes('econnrefused') ||
+    msg.includes('econnreset') ||
     msg.includes('connection timed out') ||
     msg.includes('timeout exceeded when trying to connect') ||
-    msg.includes('MaxClientsInSessionMode') ||
+    msg.includes('connection terminated due to connection timeout') ||
+    msg.includes('connection terminated unexpectedly') ||
+    msg.includes('connect timeout') ||
+    msg.includes('maxclientsinsessionmode') ||
     msg.includes('remaining connection slots') ||
     msg.includes('too many clients')
   )
