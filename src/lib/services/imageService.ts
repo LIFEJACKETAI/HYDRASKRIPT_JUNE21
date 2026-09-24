@@ -22,6 +22,45 @@ export interface GeneratedImageResult {
   error?: string;
 }
 
+const LINE_ART_STYLES = new Set(['lineart', 'lineart-adult']);
+
+/**
+ * Convert a colored/illustrated image into clean black-and-white line art.
+ *
+ * The preferred image backends (Stability, Gemini) honor "black and white line
+ * art" prompts, but the Pollinations fallback does not and returns full-color
+ * pictures — which is why coloring books were coming out as ordinary colored
+ * illustrations. This runs a pencil-sketch + threshold pass so the stored asset
+ * is guaranteed to be colorable line art regardless of which backend produced it.
+ *
+ * Returns null when the image is already grayscale (nothing to fix), so good
+ * line art from capable backends is left untouched.
+ */
+async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base64: string; mimeType: string } | null> {
+  try {
+    const sharp = (await import('sharp')).default;
+    const input = Buffer.from(base64, 'base64');
+
+    // Detect color: for grayscale art the R/G/B channel means are ~identical.
+    const stats = await sharp(input).stats();
+    const means = stats.channels.slice(0, 3).map((c) => c.mean);
+    const spread = Math.max(...means) - Math.min(...means);
+    if (!Number.isFinite(spread) || spread <= 6) return null;
+
+    const gray = await sharp(input).grayscale().normalise().toBuffer();
+    const invertedBlur = await sharp(gray).negate().blur(2.5).toBuffer();
+    const sketch = await sharp(gray)
+      .composite([{ input: invertedBlur, blend: 'colour-dodge' }])
+      .toBuffer();
+    const lineArt = await sharp(sketch).grayscale().normalise().threshold(200).png().toBuffer();
+
+    return { base64: lineArt.toString('base64'), mimeType: 'image/png' };
+  } catch (error) {
+    console.error('[imageService] Line-art post-processing failed (non-fatal):', error instanceof Error ? error.message : String(error));
+    return null;
+  }
+}
+
 /**
  * Persist a generated base64 image and register a media asset.
  */
@@ -35,7 +74,18 @@ async function persistAsset(params: {
   prompt: string;
 }): Promise<GeneratedImageResult> {
   try {
-    const { base64, mimeType, assetType, style, ownerId, bookId, prompt } = params;
+    const { assetType, style, ownerId, bookId, prompt } = params;
+    let { base64, mimeType } = params;
+
+    // Guarantee line art for coloring pages / lineart styles.
+    if (assetType === 'coloring_page' || LINE_ART_STYLES.has(style)) {
+      const converted = await toLineArtBase64(base64, mimeType);
+      if (converted) {
+        base64 = converted.base64;
+        mimeType = converted.mimeType;
+      }
+    }
+
     const ext = mimeType.includes('png') ? 'png' : mimeType.includes('jpeg') || mimeType.includes('jpg') ? 'jpg' : 'png';
     const filename = generateFilename(`${assetType}_${style}`, ext);
     const publicUrl = await saveBase64File(
@@ -152,7 +202,12 @@ async function generateWithPollinations(prompt: string, size: ImageSize, options
   // A stable per-book seed keeps characters/art consistent across chapters.
   const seed = hashString(`${options.bookId ?? options.ownerId}:${options.assetType}`);
   const model = process.env.POLLINATIONS_MODEL || 'flux';
-  const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&model=${model}&seed=${seed}&nologo=true`;
+  // Pollinations ignores "no color" instructions in the positive prompt, so pass
+  // an explicit negative prompt for line-art styles to bias it toward outlines.
+  const negative = LINE_ART_STYLES.has(options.style || '')
+    ? `&negative_prompt=${encodeURIComponent('color, colorful, shading, gradient, grayscale, painting, 3d, photorealistic, filled')}`
+    : '';
+  const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&model=${model}&seed=${seed}&nologo=true${negative}`;
 
   const maxRetries = 3;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -359,7 +414,7 @@ export async function generateColoringPage(bookId: string, ownerId: string, chap
     : 'simple composition, thick outlines, for children to color';
 
   const promptPrefix = themeConfig ? themeConfig.pagePromptPrefix : 'Coloring book page:';
-  const prompt = `${promptPrefix} ${subject}. ${adultStyleAddon}. Pure black and white line art, clean white background, no shading, no grayscale, no color, high contrast.`;
+  const prompt = `Black and white coloring book line art, clean black outlines on a pure white background. ${promptPrefix} ${subject}. ${adultStyleAddon}. No color, no shading, no grayscale, no gradients, no fill, line drawing only.`;
 
   return generateImage({
     prompt,

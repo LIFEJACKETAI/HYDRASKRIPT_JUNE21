@@ -401,8 +401,10 @@ export async function generateChapter(bookId: string, ownerId: string, jobId: st
       } catch (e) { console.error('Illustration failed', e); }
     } else if (isColoringBook) {
       try {
-        // Use AI-generated content as the image subject if available; synopsis is the fallback
-        const coloringSubject = chapterResult.content?.trim() || chapter.synopsis;
+        // For coloring books the synopsis is the art-director's visual brief; the
+        // chapter "content" is poetic facing-page text that mentions colors/mood
+        // and pushes the image model toward a full-color scene. Prefer the synopsis.
+        const coloringSubject = chapter.synopsis?.trim() || chapterResult.content?.trim();
         const coloringPage = await generateColoringPage(bookId, ownerId, chapterIndex, coloringSubject, coloringTheme);
         if (coloringPage.success && coloringPage.publicUrl) {
           await db.chapter.update({ where: { id: chapter.id }, data: { illustrationUrl: coloringPage.publicUrl } });

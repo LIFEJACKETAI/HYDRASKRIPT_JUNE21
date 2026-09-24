@@ -29,9 +29,11 @@ export async function generateImageWorker(jobId: string, assetParams: {
       result = await generateBookCover(bookId, ownerId, bookTitle, genre || 'fiction', targetAudience || 'adult', coloringTheme);
     } else if (type === 'coloring_page') {
       if (chapterIndex === undefined) throw new Error('chapterIndex is required for coloring pages');
-      // Prefer the AI-generated content as the subject for a richer image; fall back to synopsis
+      // The synopsis is the art-director's visual brief for a coloring page; the
+      // chapter content is poetic facing-page text that would push the model
+      // toward a full-color scene. Prefer the synopsis.
       const chapter = await db.chapter.findFirst({ where: { bookId, index: chapterIndex } });
-      const subject = chapter?.content?.trim() || chapter?.synopsis || 'A beautiful scene';
+      const subject = chapter?.synopsis?.trim() || chapter?.content?.trim() || 'A beautiful scene';
       result = await generateColoringPage(bookId, ownerId, chapterIndex, subject, coloringTheme as ColoringTheme | null | undefined);
     } else {
       // Illustration
