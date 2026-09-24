@@ -25,34 +25,45 @@ export interface GeneratedImageResult {
 const LINE_ART_STYLES = new Set(['lineart', 'lineart-adult']);
 
 /**
- * Convert a colored/illustrated image into clean black-and-white line art.
+ * Convert a colored OR shaded-grayscale image into clean black-and-white line art.
  *
- * The preferred image backends (Stability, Gemini) honor "black and white line
- * art" prompts, but the Pollinations fallback does not and returns full-color
- * pictures — which is why coloring books were coming out as ordinary colored
- * illustrations. This runs a pencil-sketch + threshold pass so the stored asset
- * is guaranteed to be colorable line art regardless of which backend produced it.
+ * The image backends are asked for "black and white line art", but they often
+ * return a *shaded* picture instead — full color from Pollinations, or a
+ * grayscale illustration with gradients/shadows from a model that half-followed
+ * the prompt. Neither is colorable. Two things were wrong before:
+ *   1. The old guard skipped any image whose RGB channel means were close
+ *      (i.e. grayscale), so a shaded grayscale image was stored untouched — the
+ *      exact "black and white but not colorable" complaint.
+ *   2. A plain threshold turns every shaded region into a solid black blob.
  *
- * Returns null when the image is already grayscale (nothing to fix), so good
- * line art from capable backends is left untouched.
+ * Instead we run a Difference of Gaussians: the local mean minus the image keeps
+ * thin dark contours while cancelling large-scale shading, so shadows do not
+ * fill in. We then thicken the hairlines so there is room to color between them.
+ *
+ * Returns null only when the image already looks like clean line art (light and
+ * near-grayscale), so good output from a capable backend is left untouched.
  */
 async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base64: string; mimeType: string } | null> {
   try {
     const sharp = (await import('sharp')).default;
     const input = Buffer.from(base64, 'base64');
 
-    // Detect color: for grayscale art the R/G/B channel means are ~identical.
     const stats = await sharp(input).stats();
     const means = stats.channels.slice(0, 3).map((c) => c.mean);
     const spread = Math.max(...means) - Math.min(...means);
-    if (!Number.isFinite(spread) || spread <= 6) return null;
+    const luminance = means.reduce((sum, m) => sum + m, 0) / means.length;
+    // Already light line art (like the reference pages): leave it alone.
+    if (Number.isFinite(spread) && spread <= 10 && luminance >= 190) return null;
 
-    const gray = await sharp(input).grayscale().normalise().toBuffer();
-    const invertedBlur = await sharp(gray).negate().blur(2.5).toBuffer();
-    const sketch = await sharp(gray)
-      .composite([{ input: invertedBlur, blend: 'colour-dodge' }])
+    const gray = await sharp(input).grayscale().toBuffer();
+    const localMean = await sharp(gray).blur(6).toBuffer();
+    const dog = await sharp(localMean)
+      .composite([{ input: gray, blend: 'difference' }])
       .toBuffer();
-    const lineArt = await sharp(sketch).grayscale().normalise().threshold(200).png().toBuffer();
+    const lines = await sharp(dog).linear(6, 0).threshold(45).toBuffer();
+    // Thicken the hairline contours so there is room to color between them.
+    const thickened = await sharp(lines).blur(0.7).threshold(60).toBuffer();
+    const lineArt = await sharp(thickened).negate().png().toBuffer();
 
     return { base64: lineArt.toString('base64'), mimeType: 'image/png' };
   } catch (error) {
@@ -410,11 +421,11 @@ export async function generateColoringPage(bookId: string, ownerId: string, chap
   const themeConfig = theme ? COLORING_THEMES[theme] : null;
 
   const adultStyleAddon = isAdultTheme
-    ? 'intricate details, fine lines, professional quality line art, detailed patterns, suitable for adult coloring'
-    : 'simple composition, thick outlines, for children to color';
+    ? 'intricate fine detail, evenly weighted continuous lines, ornate patterns, professional adult coloring-book quality'
+    : 'simple bold outlines, thick continuous lines, large open areas, for children to color';
 
   const promptPrefix = themeConfig ? themeConfig.pagePromptPrefix : 'Coloring book page:';
-  const prompt = `Black and white coloring book line art, clean black outlines on a pure white background. ${promptPrefix} ${subject}. ${adultStyleAddon}. No color, no shading, no grayscale, no gradients, no fill, line drawing only.`;
+  const prompt = `Coloring book page: ${promptPrefix} ${subject}. ${adultStyleAddon}. Render as clean black contour lines on a pure white background — a professional coloring-book outline drawing. Absolutely no color, no grayscale tones, no shading, no shadows, no gradients, no hatching, no cross-hatching, no stippling, no solid filled black areas, no texture, no photorealism, no pencil sketch. Only crisp continuous black outlines with white space left to color in.`;
 
   return generateImage({
     prompt,
