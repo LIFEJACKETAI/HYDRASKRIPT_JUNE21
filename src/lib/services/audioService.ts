@@ -6,6 +6,13 @@
 import { Buffer } from 'node:buffer';
 import { saveFile, generateFilename, createMediaAsset } from '@/lib/utils/storage';
 import { audioBase64ToPlayableBuffer } from '@/lib/services/audioFormat';
+import {
+  clampTimeoutMs,
+  defaultRequestTimeoutMs,
+  hasBudgetForAttempt,
+  LlmBudgetExceededError,
+  sleepWithinBudget,
+} from '@/lib/llm/budget';
 
 interface AudioChunkResult {
   success: boolean;
@@ -193,6 +200,9 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, baseDelayMs =
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (!hasBudgetForAttempt()) {
+      throw new LlmBudgetExceededError('TTS attempt skipped: claim budget exhausted.');
+    }
     try {
       return await fn();
     } catch (error) {
@@ -205,7 +215,9 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, baseDelayMs =
 
       const delay = baseDelayMs * Math.pow(2, attempt - 1);
       console.warn(`[AudioService] Transient TTS error ${status ?? 'API'}. Retrying in ${delay}ms (attempt ${attempt}/${maxAttempts})...`);
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      if (!(await sleepWithinBudget(delay))) {
+        throw new LlmBudgetExceededError('TTS retry backoff exceeded the claim budget.');
+      }
     }
   }
 
@@ -266,6 +278,10 @@ export async function generateAudioChunkWithFishAudio(text: string): Promise<Aud
         method: 'POST',
         headers,
         body: JSON.stringify(body),
+        // No timeout here used to let a stalled Fish Audio request block past
+        // the Vercel function cap, so the worker never returned to its claim
+        // budget check and the job livelocked the queue. Clamp to the claim.
+        signal: AbortSignal.timeout(clampTimeoutMs(defaultRequestTimeoutMs())),
       });
 
       if (!response.ok) {
