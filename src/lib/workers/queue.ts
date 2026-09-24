@@ -397,7 +397,12 @@ class PersistentJobQueue {
           // all 503-ing and spin the queue.
           OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lte: now } }],
         },
-        orderBy: { createdAt: 'asc' },
+        // Prefer fresh work (retryCount 0) over jobs already stuck in a retry
+        // loop, then oldest-first within each tier. A single pathological job
+        // (e.g. an audiobook whose TTS segment keeps failing) otherwise stays the
+        // oldest, is re-claimed every cycle, and head-of-line-blocks every newer
+        // job behind it — because a ~240s claim outlives any short backoff.
+        orderBy: [{ retryCount: 'asc' }, { createdAt: 'asc' }],
         // Only the columns the dispatcher needs. `result` can hold a 500k-char
         // manuscript, and this query runs on every pump kick.
         select: {
