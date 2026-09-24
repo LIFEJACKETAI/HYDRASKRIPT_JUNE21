@@ -51,9 +51,25 @@ async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base
     const stats = await sharp(input).stats();
     const means = stats.channels.slice(0, 3).map((c) => c.mean);
     const spread = Math.max(...means) - Math.min(...means);
-    const luminance = means.reduce((sum, m) => sum + m, 0) / means.length;
-    // Already light line art (like the reference pages): leave it alone.
-    if (Number.isFinite(spread) && spread <= 10 && luminance >= 190) return null;
+
+    // Distinguish genuine line art from a shaded or faint illustration. Both can
+    // be near-grayscale and light, so luminance alone is not enough: only real
+    // line art already has a healthy amount of solid black (the contours) next
+    // to a mostly-white page. A faint wash has almost no true black; a shaded
+    // picture has too much ink. Re-running the extractor on good line art fills
+    // it into a black blob, so this skip matters.
+    const grayRaw = await sharp(input).grayscale().raw().toBuffer();
+    let black = 0;
+    let white = 0;
+    for (const v of grayRaw) {
+      if (v < 40) black++;
+      else if (v >= 230) white++;
+    }
+    const blackFraction = black / grayRaw.length;
+    const whiteFraction = white / grayRaw.length;
+    const alreadyLineArt = Number.isFinite(spread) && spread <= 10
+      && blackFraction >= 0.01 && blackFraction <= 0.2 && whiteFraction >= 0.35;
+    if (alreadyLineArt) return null;
 
     const gray = await sharp(input).grayscale().toBuffer();
     const localMean = await sharp(gray).blur(6).toBuffer();
