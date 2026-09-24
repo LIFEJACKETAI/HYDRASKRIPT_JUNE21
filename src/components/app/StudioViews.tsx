@@ -391,9 +391,9 @@ export function BookstoreView() {
       uploadResponse = await fetch(uploadUrl, { method: 'POST', body: form });
     } else {
       uploadResponse = await fetch(uploadUrl, {
-        method: storageProvider === 'supabase' ? 'POST' : 'PUT',
+        method: 'PUT',
         body: f,
-        headers: storageProvider === 'supabase' ? {} : { 'Content-Type': f.type },
+        headers: { 'Content-Type': f.type || 'application/octet-stream' },
       });
     }
 
