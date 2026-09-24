@@ -10,6 +10,7 @@ import {
   clampTimeoutMs,
   defaultRequestTimeoutMs,
   hasBudgetForAttempt,
+  isLlmBudgetExceeded,
   LlmBudgetExceededError,
   sleepWithinBudget,
 } from '@/lib/llm/budget';
@@ -304,6 +305,10 @@ export async function generateAudioChunkWithFishAudio(text: string): Promise<Aud
       };
     });
   } catch (error) {
+    // Never mask a claim-budget bail as a provider failure: the queue must see
+    // it so it re-queues with backoff instead of hot-looping this job ahead of
+    // newer work.
+    if (isLlmBudgetExceeded(error)) throw error;
     console.error('[AudioService] generateAudioChunkWithFishAudio failed after retries:', error);
     return {
       success: false,
@@ -372,6 +377,7 @@ export async function generateAudioChunkWithGemini(
       };
     });
   } catch (error) {
+    if (isLlmBudgetExceeded(error)) throw error;
     console.error('[AudioService] generateAudioChunkWithGemini failed after retries:', error);
     return {
       success: false,

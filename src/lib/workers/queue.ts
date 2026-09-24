@@ -313,8 +313,11 @@ class PersistentJobQueue {
               : `Failed: ${errMessage}`,
             retryCount: nextRetryCount,
             // Doubles as "don't claim me before this" for queued jobs, and is
-            // cleared by the claim itself.
-            leaseExpiresAt: canRetry && transient ? backoffUntil : null,
+            // cleared by the claim itself. Applied to EVERY retry, not just
+            // transient ones: a job that keeps failing (or keeps burning its
+            // whole claim budget) is always the oldest and would otherwise be
+            // re-claimed immediately, starving every newer job behind it.
+            leaseExpiresAt: canRetry ? backoffUntil : null,
             lastHeartbeatAt: null,
           })
         } catch (updateError) {

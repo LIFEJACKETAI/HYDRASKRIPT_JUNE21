@@ -16,7 +16,12 @@ import {
   type PlayableAudio,
 } from '@/lib/services/audioFormat';
 import { consumeCredits } from '@/lib/utils/credits';
-import { hasBudgetForAttempt, LlmBudgetExceededError } from '@/lib/llm/budget';
+import {
+  clampTimeoutMs,
+  defaultRequestTimeoutMs,
+  hasBudgetForAttempt,
+  LlmBudgetExceededError,
+} from '@/lib/llm/budget';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import fs from 'node:fs/promises';
@@ -172,7 +177,10 @@ async function fetchSegmentBuffer(publicUrl: string): Promise<Buffer> {
     throw new Error(`Cannot resume audio segment "${publicUrl}": not an absolute URL.`);
   }
   try {
-    const response = await fetch(publicUrl);
+    // Bounded so one stalled storage fetch cannot block the claim forever.
+    const response = await fetch(publicUrl, {
+      signal: AbortSignal.timeout(clampTimeoutMs(defaultRequestTimeoutMs())),
+    });
     if (!response.ok) {
       throw new Error(`resume fetch returned HTTP ${response.status}`);
     }
