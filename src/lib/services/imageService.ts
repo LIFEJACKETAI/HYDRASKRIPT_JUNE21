@@ -25,6 +25,102 @@ export interface GeneratedImageResult {
 const LINE_ART_STYLES = new Set(['lineart', 'lineart-adult']);
 
 /**
+ * Detect a degenerate generation: a flat, near-contentless image (a uniform gray
+ * or blank wash). Pollinations periodically returns these for line-art prompts,
+ * and no amount of post-processing can pull colorable contours out of them, so
+ * they must be rejected and regenerated with a different seed.
+ */
+async function isDegenerateImage(buffer: Buffer): Promise<boolean> {
+  try {
+    const sharp = (await import('sharp')).default;
+    const stats = await sharp(buffer).stats();
+    // A flat gray/white/black wash has almost no tonal variation (stdev ~0-30),
+    // while a drawing — even a faint sketch — spans a wide tonal range. Real
+    // line-art input measures ~40+ stdev, so anything flatter than 32 is a
+    // contentless box that no post-processing can turn into a coloring page.
+    return stats.channels[0].stdev < 32;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Post-conversion gate: a usable coloring page has a healthy line density
+ * (about 0.8-12% black, matching real coloring-book page coverage) over a
+ * mostly-white page. Below that it reads as blank; above it as a blob. Also
+ * rejects pages with solid black bands (e.g. a Pollinations caption strip or a
+ * baked-in shadow bar), which padding with ink cannot fix.
+ */
+async function isLineArtUsable(pngBuffer: Buffer): Promise<boolean> {
+  try {
+    const sharp = (await import('sharp')).default;
+    const meta = await sharp(pngBuffer).metadata();
+    const gray = await sharp(pngBuffer).flatten({ background: '#fff' }).grayscale().raw().toBuffer();
+    const { width: W, height: H } = meta;
+    let black = 0;
+    let white = 0;
+    for (const v of gray) {
+      if (v < 40) black++;
+      else if (v >= 230) white++;
+    }
+    const blackFraction = black / gray.length;
+    const whiteFraction = white / gray.length;
+    if (blackFraction < 0.008 || blackFraction > 0.12 || whiteFraction < 0.7) return false;
+
+    let run = 0;
+    for (let y = 0; y < H; y++) {
+      let rowBlack = 0;
+      for (let x = 0; x < W; x++) {
+        if (gray[y * W + x] < 40) rowBlack++;
+      }
+      if (rowBlack / W > 0.55) {
+        run++;
+        if (run > Math.max(4, H * 0.02)) return false;
+      } else {
+        run = 0;
+      }
+    }
+
+    // Full-height solid strips (the vertical frame edge Pollinations often
+    // bakes into the image). Two adjacent columns that are >80% dark for the
+    // entire height is a border, not a drawing.
+    run = 0;
+    for (let x = 0; x < W; x++) {
+      let colBlack = 0;
+      for (let y = 0; y < H; y++) {
+        if (gray[y * W + x] < 40) colBlack++;
+      }
+      if (colBlack / H > 0.8) {
+        run++;
+        if (run >= 2) return false;
+      } else {
+        run = 0;
+      }
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Find the gray value at which the darkest `fraction` of pixels sit. Keeps line
+ * strokes at a healthy, visible thickness instead of the hairline edges that a
+ * pure edge detector leaves behind on faint Pollinations sketches.
+ */
+function percentileThreshold(grayRaw: Buffer, fraction: number): number {
+  const hist = new Float64Array(256);
+  for (const v of grayRaw) hist[v]++;
+  let target = Math.floor(grayRaw.length * fraction);
+  let acc = 0;
+  for (let v = 0; v < 256; v++) {
+    acc += hist[v];
+    if (acc >= target) return v;
+  }
+  return 255;
+}
+
+/**
  * Convert a colored OR shaded-grayscale image into clean black-and-white line art.
  *
  * The image backends are asked for "black and white line art", but they often
@@ -68,7 +164,7 @@ async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base
     const blackFraction = black / grayRaw.length;
     const whiteFraction = white / grayRaw.length;
     const alreadyLineArt = Number.isFinite(spread) && spread <= 10
-      && blackFraction >= 0.01 && blackFraction <= 0.2 && whiteFraction >= 0.35;
+      && blackFraction >= 0.008 && blackFraction <= 0.2 && whiteFraction >= 0.35;
     if (alreadyLineArt) return null;
 
     const gray = await sharp(input).grayscale().toBuffer();
@@ -76,9 +172,23 @@ async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base
     const dog = await sharp(localMean)
       .composite([{ input: gray, blend: 'difference' }])
       .toBuffer();
-    const lines = await sharp(dog).linear(6, 0).threshold(45).toBuffer();
-    // Thicken the hairline contours so there is room to color between them.
-    const thickened = await sharp(lines).blur(0.7).threshold(60).toBuffer();
+    const edges = await sharp(dog).linear(6, 0).threshold(30).toBuffer();
+
+    let union: Buffer;
+    if (blackFraction >= 0.015) {
+      // Darker illustration with real ink: keep only contours so fills, shadows
+      // and baked-in black bands never turn into solid blobs.
+      union = edges;
+    } else {
+      // Faint/mid sketch: keep the darkest ~4% as thick visible strokes, then
+      // union with the contours so interior detail survives.
+      const t = percentileThreshold(grayRaw, 0.04);
+      const ink = await sharp(gray).threshold(t).negate().toBuffer();
+      union = await sharp(edges).composite([{ input: ink, blend: 'lighten' }]).toBuffer();
+    }
+
+    // Thicken the contours so there is room to color between them.
+    const thickened = await sharp(union).blur(1.2).threshold(55).toBuffer();
     const lineArt = await sharp(thickened).negate().png().toBuffer();
 
     return { base64: lineArt.toString('base64'), mimeType: 'image/png' };
@@ -226,18 +336,22 @@ async function generateWithPollinations(prompt: string, size: ImageSize, options
   // Pollinations uses URL-encoded prompts
   const encodedPrompt = encodeURIComponent(prompt);
   const { width, height } = pollinationsSize(size);
-  // A stable per-book seed keeps characters/art consistent across chapters.
-  const seed = hashString(`${options.bookId ?? options.ownerId}:${options.assetType}`);
   const model = process.env.POLLINATIONS_MODEL || 'flux';
   // Pollinations ignores "no color" instructions in the positive prompt, so pass
   // an explicit negative prompt for line-art styles to bias it toward outlines.
   const negative = LINE_ART_STYLES.has(options.style || '')
     ? `&negative_prompt=${encodeURIComponent('color, colorful, shading, gradient, grayscale, painting, 3d, photorealistic, filled')}`
     : '';
-  const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&model=${model}&seed=${seed}&nologo=true${negative}`;
 
-  const maxRetries = 3;
+  const maxRetries = 4;
+  const baseSeed = hashString(`${options.bookId ?? options.ownerId}:${options.assetType}`);
+  let lastError = '';
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    // Vary the seed per attempt: Pollinations occasionally returns a flat,
+    // degenerate image for line-art prompts, and a fresh seed nearly always
+    // yields a usable one.
+    const seed = (baseSeed + attempt * 7919) % 2147483647;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&model=${model}&seed=${seed}&nologo=true${negative}`;
     try {
       const response = await fetchWithTimeout(pollinationsUrl, 60_000);
       if (!response.ok) {
@@ -250,8 +364,38 @@ async function generateWithPollinations(prompt: string, size: ImageSize, options
         throw new Error(`Pollinations returned non-image content-type: ${contentType}`);
       }
 
-      const buffer = await response.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
+      const buffer = Buffer.from(await response.arrayBuffer());
+
+      // Reject flat washes outright — nothing to extract.
+      if (await isDegenerateImage(buffer)) {
+        lastError = `Pollinations returned a flat image (attempt ${attempt}/${maxRetries})`;
+        console.warn(`[imageService] ${lastError}; retrying with a new seed...`);
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        continue;
+      }
+
+      const base64 = buffer.toString('base64');
+
+      // Convert to line art and verify the result actually looks like a
+      // coloring page before persisting. Too-faint output needs a new seed.
+      const converted = await toLineArtBase64(base64, contentType);
+      if (converted) {
+        if (!(await isLineArtUsable(Buffer.from(converted.base64, 'base64')))) {
+          lastError = `Pollinations line art came out blank/faint (attempt ${attempt}/${maxRetries})`;
+          console.warn(`[imageService] ${lastError}; retrying with a new seed...`);
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          continue;
+        }
+        return persistAsset({
+          base64: converted.base64,
+          mimeType: converted.mimeType,
+          assetType: options.assetType,
+          style: options.style || 'pixar',
+          ownerId: options.ownerId,
+          bookId: options.bookId,
+          prompt,
+        });
+      }
 
       return persistAsset({
         base64,
@@ -263,15 +407,16 @@ async function generateWithPollinations(prompt: string, size: ImageSize, options
         prompt,
       });
     } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
       if (attempt === maxRetries) {
-        return { success: false, error: error instanceof Error ? error.message : String(error) };
+        return { success: false, error: lastError };
       }
-      console.warn(`[imageService] Pollinations failed (attempt ${attempt}/${maxRetries}):`, error instanceof Error ? error.message : String(error));
+      console.warn(`[imageService] Pollinations failed (attempt ${attempt}/${maxRetries}):`, lastError);
       await new Promise(resolve => setTimeout(resolve, 1500 * attempt));
     }
   }
 
-  return { success: false, error: `Pollinations generation failed after ${maxRetries} attempts` };
+  return { success: false, error: `Pollinations generation failed after ${maxRetries} attempts: ${lastError}` };
 }
 
 /**
