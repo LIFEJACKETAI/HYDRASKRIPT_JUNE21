@@ -16,6 +16,7 @@ import {
   type PlayableAudio,
 } from '@/lib/services/audioFormat';
 import { consumeCredits } from '@/lib/utils/credits';
+import { hasBudgetForAttempt, LlmBudgetExceededError } from '@/lib/llm/budget';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import fs from 'node:fs/promises';
@@ -323,6 +324,18 @@ export async function generateAudiobookWorker(jobId: string) {
       }
 
       for (let chunkPosition = 0; chunkPosition < chapterChunks.length; chunkPosition++) {
+        // Stop cleanly at a segment boundary when the per-claim window is nearly
+        // spent. Without this the loop keeps making short-timeout TTS calls until
+        // Vercel hard-kills the function at maxDuration, leaving the job `active`
+        // until lease recovery and re-claiming it oldest-first — which starves
+        // every newer job behind it. Throwing here makes the queue re-queue with
+        // backoff; the checkpoint resumes from this exact segment next claim.
+        if (!hasBudgetForAttempt()) {
+          throw new LlmBudgetExceededError(
+            `Audiobook claim budget exhausted after ${segmentIndex}/${Math.max(totalSegments, 1)} segment(s) — re-queued to resume.`
+          );
+        }
+
         const progress = 5 + Math.floor((segmentIndex / Math.max(totalSegments, 1)) * 80);
 
         // Checkpoint hit? A previous claim already narrated this exact segment
