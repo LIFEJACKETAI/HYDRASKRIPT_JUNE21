@@ -8,7 +8,11 @@ import { z } from 'zod';
 export const OutlineChapterSchema = z.object({
   title: z.string().min(1, 'Chapter title is required'),
   synopsis: z.string().min(10, 'Synopsis must be at least 10 characters'),
-  wordTarget: z.number().int().positive().min(50).max(5000),
+  // Lower bound is 1 (not 50) because coloring-book outlines are instructed to
+  // emit `wordTarget: 10` ("ignored for coloring books, but required by the
+  // format"). Coerce so a model emitting "10" as a string still parses — a
+  // strict number schema used to fail every coloring book here.
+  wordTarget: z.coerce.number().int().min(1).max(5000),
 });
 
 export const BookOutlineSchema = z.object({
