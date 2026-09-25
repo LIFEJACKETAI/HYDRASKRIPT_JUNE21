@@ -65,7 +65,10 @@ async function isLineArtUsable(pngBuffer: Buffer): Promise<boolean> {
     }
     const blackFraction = black / gray.length;
     const whiteFraction = white / gray.length;
-    if (blackFraction < 0.008 || blackFraction > 0.12 || whiteFraction < 0.7) return false;
+    if (blackFraction < 0.008 || blackFraction > 0.12 || whiteFraction < 0.7) {
+      console.warn(`[gate-debug] density reject: black=${(blackFraction * 100).toFixed(1)}% white=${(whiteFraction * 100).toFixed(1)}%`);
+      return false;
+    }
 
     let run = 0;
     for (let y = 0; y < H; y++) {
@@ -75,7 +78,7 @@ async function isLineArtUsable(pngBuffer: Buffer): Promise<boolean> {
       }
       if (rowBlack / W > 0.55) {
         run++;
-        if (run > Math.max(4, H * 0.02)) return false;
+        if (run > Math.max(4, H * 0.02)) { console.warn(`[gate-debug] row-band reject: ${run} rows at row=${y}`); return false; }
       } else {
         run = 0;
       }
@@ -92,7 +95,7 @@ async function isLineArtUsable(pngBuffer: Buffer): Promise<boolean> {
       }
       if (colBlack / H > 0.8) {
         run++;
-        if (run >= 2) return false;
+        if (run >= 2) { console.warn(`[gate-debug] col-strip reject: ${run} cols at x=${x}`); return false; }
       } else {
         run = 0;
       }
@@ -118,6 +121,49 @@ function percentileThreshold(grayRaw: Buffer, fraction: number): number {
     if (acc >= target) return v;
   }
   return 255;
+}
+
+/**
+ * Fraction of mid-tone pixels (not near-black, not near-white) that do NOT sit
+ * near any black ink. Real line art: mid pixels are anti-aliasing along dark
+ * contours, so they always touch black. A shaded grayscale illustration: mid
+ * pixels form broad regions far from any line. This is what tells the two
+ * apart — RGB channel spread can't, because every grayscale image scores ~0.
+ * Buckets pixels into 4x4 blocks and checks a 3x3 block neighborhood.
+ */
+function shadedMidFraction(grayRaw: Buffer, width: number, height: number): number {
+  const bw = Math.ceil(width / 4);
+  const bh = Math.ceil(height / 4);
+  const dark = new Uint8Array(bw * bh);
+  for (let y = 0; y < height; y++) {
+    const off = y * width;
+    for (let x = 0; x < width; x++) {
+      if (grayRaw[off + x] < 40) dark[(y >> 2) * bw + (x >> 2)] = 1;
+    }
+  }
+  let mid = 0;
+  let midFar = 0;
+  for (let y = 0; y < height; y++) {
+    const off = y * width;
+    const by = y >> 2;
+    for (let x = 0; x < width; x++) {
+      const v = grayRaw[off + x];
+      if (v < 40 || v >= 230) continue;
+      mid++;
+      const bx = x >> 2;
+      let near = 0;
+      for (let dy = -1; dy <= 1 && !near; dy++) {
+        const yy = by + dy;
+        if (yy < 0 || yy >= bh) continue;
+        for (let dx = -1; dx <= 1; dx++) {
+          const xx = bx + dx;
+          if (xx >= 0 && xx < bw && dark[yy * bw + xx]) { near = 1; break; }
+        }
+      }
+      if (!near) midFar++;
+    }
+  }
+  return mid > 0 ? midFar / mid : 0;
 }
 
 /**
@@ -155,6 +201,7 @@ async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base
     // picture has too much ink. Re-running the extractor on good line art fills
     // it into a black blob, so this skip matters.
     const grayRaw = await sharp(input).grayscale().raw().toBuffer();
+    const meta = await sharp(input).metadata();
     let black = 0;
     let white = 0;
     for (const v of grayRaw) {
@@ -163,16 +210,19 @@ async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base
     }
     const blackFraction = black / grayRaw.length;
     const whiteFraction = white / grayRaw.length;
+    const midFar = meta.width && meta.height ? shadedMidFraction(grayRaw, meta.width, meta.height) : 1;
     const alreadyLineArt = Number.isFinite(spread) && spread <= 10
-      && blackFraction >= 0.008 && blackFraction <= 0.2 && whiteFraction >= 0.35;
+      && blackFraction >= 0.008 && blackFraction <= 0.2 && whiteFraction >= 0.6
+      && midFar <= 0.45;
     if (alreadyLineArt) return null;
 
-    const gray = await sharp(input).grayscale().toBuffer();
-    const localMean = await sharp(gray).blur(6).toBuffer();
+    const gray = await sharp(input).grayscale().png().toBuffer();
+    const localMean = await sharp(gray).blur(6).png().toBuffer();
     const dog = await sharp(localMean)
       .composite([{ input: gray, blend: 'difference' }])
+      .png()
       .toBuffer();
-    const edges = await sharp(dog).linear(6, 0).threshold(30).toBuffer();
+    const edges = await sharp(dog).linear(6, 0).threshold(30).png().toBuffer();
 
     let union: Buffer;
     if (blackFraction >= 0.015) {
@@ -183,12 +233,15 @@ async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base
       // Faint/mid sketch: keep the darkest ~4% as thick visible strokes, then
       // union with the contours so interior detail survives.
       const t = percentileThreshold(grayRaw, 0.04);
-      const ink = await sharp(gray).threshold(t).negate().toBuffer();
-      union = await sharp(edges).composite([{ input: ink, blend: 'lighten' }]).toBuffer();
+      const ink = await sharp(gray).threshold(t).negate().png().toBuffer();
+      union = await sharp(edges).composite([{ input: ink, blend: 'lighten' }]).png().toBuffer();
     }
 
-    // Thicken the contours so there is room to color between them.
-    const thickened = await sharp(union).blur(1.2).threshold(55).toBuffer();
+    // Thicken the contours so there is room to color between them. Every step
+    // above must stay lossless PNG: sharp re-encodes intermediates in the input
+    // file's format by default, and JPEG ringing smears thresholded binary
+    // output back into gray mush.
+    const thickened = await sharp(union).blur(1.2).threshold(55).png().toBuffer();
     const lineArt = await sharp(thickened).negate().png().toBuffer();
 
     return { base64: lineArt.toString('base64'), mimeType: 'image/png' };
@@ -355,12 +408,21 @@ async function generateWithPollinations(prompt: string, size: ImageSize, options
     try {
       const response = await fetchWithTimeout(pollinationsUrl, 60_000);
       if (!response.ok) {
+        const body = await response.text().catch(() => '');
+        if (/insufficient balance|insufficient_balance|top up|pollen/i.test(body)) {
+          // Account has zero Pollen — no seed retry can succeed; stop burning time.
+          return { success: false, error: 'Pollinations account has no balance (Insufficient balance). Top up at enter.pollinations.ai or fund another image backend.' };
+        }
         throw new Error(`Pollinations API error: ${response.status}`);
       }
 
       const contentType = response.headers.get('content-type') || 'image/png';
       // Guard against Pollinations returning a non-image (e.g. an error page).
       if (!contentType.includes('image')) {
+        const body = await response.text().catch(() => '');
+        if (/insufficient balance|insufficient_balance|top up|pollen/i.test(body)) {
+          return { success: false, error: 'Pollinations account has no balance (Insufficient balance). Top up at enter.pollinations.ai or fund another image backend.' };
+        }
         throw new Error(`Pollinations returned non-image content-type: ${contentType}`);
       }
 
@@ -376,30 +438,21 @@ async function generateWithPollinations(prompt: string, size: ImageSize, options
 
       const base64 = buffer.toString('base64');
 
-      // Convert to line art and verify the result actually looks like a
-      // coloring page before persisting. Too-faint output needs a new seed.
+      // Convert to line art (or keep if already clean) and verify the result
+      // actually looks like a coloring page before persisting — on both
+      // branches. Anything faint, blank or banded needs a fresh seed.
       const converted = await toLineArtBase64(base64, contentType);
-      if (converted) {
-        if (!(await isLineArtUsable(Buffer.from(converted.base64, 'base64')))) {
-          lastError = `Pollinations line art came out blank/faint (attempt ${attempt}/${maxRetries})`;
-          console.warn(`[imageService] ${lastError}; retrying with a new seed...`);
-          await new Promise((resolve) => setTimeout(resolve, 800));
-          continue;
-        }
-        return persistAsset({
-          base64: converted.base64,
-          mimeType: converted.mimeType,
-          assetType: options.assetType,
-          style: options.style || 'pixar',
-          ownerId: options.ownerId,
-          bookId: options.bookId,
-          prompt,
-        });
+      const finalBase64 = converted ? converted.base64 : base64;
+      const finalMime = converted ? converted.mimeType : contentType;
+      if (!(await isLineArtUsable(Buffer.from(finalBase64, 'base64')))) {
+        lastError = `Pollinations image failed the quality gate (attempt ${attempt}/${maxRetries})`;
+        console.warn(`[imageService] ${lastError}; retrying with a new seed...`);
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        continue;
       }
-
       return persistAsset({
-        base64,
-        mimeType: contentType,
+        base64: finalBase64,
+        mimeType: finalMime,
         assetType: options.assetType,
         style: options.style || 'pixar',
         ownerId: options.ownerId,
@@ -417,6 +470,135 @@ async function generateWithPollinations(prompt: string, size: ImageSize, options
   }
 
   return { success: false, error: `Pollinations generation failed after ${maxRetries} attempts: ${lastError}` };
+}
+
+/**
+ * Backend 3: Pruna AI (P-Image). Cheap (~$0.005/image), ~1s latency, and the
+ * only image backend with a funded balance since Pollinations went paid-anon-
+ * disabled and Stability ran out of credits. Submit + optional status poll,
+ * download the delivery URL, then run the same conversion + quality gate as
+ * the Pollinations path.
+ */
+function prunaAspectRatio(size: ImageSize): string {
+  const [w, h] = size.split('x').map((n) => parseInt(n, 10));
+  if (!Number.isFinite(w) || !Number.isFinite(h) || h <= 0) return '1:1';
+  if (w === h) return '1:1';
+  const ratio = w / h;
+  if (ratio >= 1.55) return '16:9';
+  if (ratio >= 1.15) return '4:3';
+  if (ratio <= 0.5) return '9:16';
+  if (ratio <= 0.87) return '3:4';
+  return '1:1';
+}
+
+async function pollPrunaStatus(statusUrl: string, apiKey: string): Promise<string | undefined> {
+  for (let i = 0; i < 45; i++) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch(statusUrl, { headers: { apikey: apiKey }, signal: AbortSignal.timeout(15_000) });
+      if (!response.ok) continue;
+      const data = (await response.json()) as { generation_url?: string; output_url?: string; status?: string };
+      if (data.generation_url) return data.generation_url;
+      if (data.output_url) return data.output_url;
+      if (data.status === 'failed' || data.status === 'cancelled') return undefined;
+    } catch {
+      // transient poll error — keep polling
+    }
+  }
+  return undefined;
+}
+
+async function generateWithPruna(prompt: string, size: ImageSize, options: GenerateImageOptions): Promise<GeneratedImageResult> {
+  const apiKey = process.env.PRUNA_AI_API_KEY;
+  if (!apiKey) return { success: false, error: 'No Pruna API key configured' };
+
+  const aspect_ratio = prunaAspectRatio(size);
+  const baseSeed = hashString(`${options.bookId ?? options.ownerId}:${options.assetType}`);
+  const maxRetries = 4;
+  let lastError = '';
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const seed = (baseSeed + attempt * 7919) % 2147483647;
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 90_000);
+      let submission: Record<string, unknown>;
+      try {
+        const response = await fetch('https://api.pruna.ai/v1/predictions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': apiKey,
+            'Model': 'p-image',
+            'Try-Sync': 'true',
+          },
+          body: JSON.stringify({ input: { prompt, aspect_ratio, seed } }),
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          let detail = '';
+          try {
+            const err = (await response.json()) as { message?: string };
+            detail = err?.message || JSON.stringify(err);
+          } catch { /* non-JSON error body */ }
+          throw new Error(`Pruna API error: ${response.status} ${detail}`.trim());
+        }
+        submission = (await response.json()) as Record<string, unknown>;
+      } finally {
+        clearTimeout(timer);
+      }
+
+      // Try-Sync usually resolves inline; async submissions carry get_url.
+      let imageUrl = (submission.generation_url || submission.output_url) as string | undefined;
+      if (!imageUrl && typeof submission.get_url === 'string') {
+        imageUrl = await pollPrunaStatus(submission.get_url, apiKey);
+      }
+      if (!imageUrl) {
+        throw new Error(`Pruna returned no image URL: ${JSON.stringify(submission).slice(0, 200)}`);
+      }
+
+      const imageResponse = await fetch(imageUrl, { signal: AbortSignal.timeout(60_000) });
+      if (!imageResponse.ok) throw new Error(`Pruna image download failed: ${imageResponse.status}`);
+      const buffer = Buffer.from(await imageResponse.arrayBuffer());
+
+      if (await isDegenerateImage(buffer)) {
+        lastError = `Pruna returned a flat image (attempt ${attempt}/${maxRetries})`;
+        console.warn(`[imageService] ${lastError}; retrying with a new seed...`);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        continue;
+      }
+
+      const contentType = imageResponse.headers.get('content-type') || (imageUrl.includes('.png') ? 'image/png' : 'image/jpeg');
+      const base64 = buffer.toString('base64');
+      const converted = await toLineArtBase64(base64, contentType);
+      const finalBase64 = converted ? converted.base64 : base64;
+      const finalMime = converted ? converted.mimeType : contentType;
+      if (!(await isLineArtUsable(Buffer.from(finalBase64, 'base64')))) {
+        console.warn(`[gate-debug] attempt ${attempt}: converted=${!!converted} mime=${finalMime} len=${finalBase64.length}`);
+        lastError = `Pruna image failed the quality gate (attempt ${attempt}/${maxRetries})`;
+        console.warn(`[imageService] ${lastError}; retrying with a new seed...`);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        continue;
+      }
+
+      return persistAsset({
+        base64: finalBase64,
+        mimeType: finalMime,
+        assetType: options.assetType,
+        style: options.style || 'pixar',
+        ownerId: options.ownerId,
+        bookId: options.bookId,
+        prompt,
+      });
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+      if (attempt === maxRetries) break;
+      console.warn(`[imageService] Pruna failed (attempt ${attempt}/${maxRetries}): ${lastError}`);
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+
+  return { success: false, error: `Pruna generation failed after ${maxRetries} attempts: ${lastError}` };
 }
 
 /**
@@ -480,6 +662,10 @@ async function generateWithStability(prompt: string, size: ImageSize, options: G
           const err: any = await response.json();
           detail = err?.message || (Array.isArray(err?.errors) ? err.errors.join(', ') : '') || '';
         } catch {}
+        if (response.status === 402) {
+          // Out of credits — retrying with the same key can never succeed.
+          return { success: false, error: `Stability API error: 402 ${detail}`.trim() };
+        }
         throw new Error(`Stability API error: ${response.status} ${detail}`.trim());
       }
 
@@ -524,7 +710,14 @@ export async function generateImage(options: GenerateImageOptions): Promise<Gene
     console.error('[imageService] Stability image generation failed:', stabilityResult.error);
   }
 
-  // Secondary: Gemini
+  // Secondary: Pruna AI (P-Image) — funded, cheap, ~1s/image.
+  if (process.env.PRUNA_AI_API_KEY) {
+    const prunaResult = await generateWithPruna(enhancedPrompt, size, { ...options, prompt: enhancedPrompt });
+    if (prunaResult.success) return prunaResult;
+    console.error('[imageService] Pruna image generation failed:', prunaResult.error);
+  }
+
+  // Tertiary: Gemini
   if (process.env.GOOGLE_AI_API_KEY) {
     const geminiResult = await generateWithGemini(enhancedPrompt, { ...options, prompt: enhancedPrompt });
     if (geminiResult.success) return geminiResult;
