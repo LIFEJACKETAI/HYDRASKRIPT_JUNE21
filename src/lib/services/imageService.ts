@@ -70,6 +70,33 @@ async function isLineArtUsable(pngBuffer: Buffer): Promise<boolean> {
       return false;
     }
 
+    // Median horizontal stroke width. The reader renders a 1024px page at about
+    // half size, so 1px hairlines wash out to nothing and the page reads as a
+    // blank sheet. A usable page keeps its median stroke at 2px or more.
+    const widths: number[] = [];
+    for (let y = 0; y < H; y++) {
+      let run = 0;
+      for (let x = 0; x <= W; x++) {
+        const black = x < W && gray[y * W + x] < 128;
+        if (black) {
+          run++;
+        } else if (run > 0) {
+          widths.push(run);
+          run = 0;
+        }
+      }
+    }
+    if (widths.length < 50) {
+      console.warn(`[gate-debug] too-few-strokes reject: ${widths.length}`);
+      return false;
+    }
+    widths.sort((a, b) => a - b);
+    const medianWidth = widths[Math.floor(widths.length / 2)];
+    if (medianWidth < 2) {
+      console.warn(`[gate-debug] hairline reject: median stroke ${medianWidth}px`);
+      return false;
+    }
+
     let run = 0;
     for (let y = 0; y < H; y++) {
       let rowBlack = 0;
@@ -240,8 +267,9 @@ async function toLineArtBase64(base64: string, mimeType: string): Promise<{ base
     // Thicken the contours so there is room to color between them. Every step
     // above must stay lossless PNG: sharp re-encodes intermediates in the input
     // file's format by default, and JPEG ringing smears thresholded binary
-    // output back into gray mush.
-    const thickened = await sharp(union).blur(1.2).threshold(55).png().toBuffer();
+    // output back into gray mush. The blur radius also sets stroke width, which
+    // has to survive the reader downscaling a 1024px page to roughly half size.
+    const thickened = await sharp(union).blur(1.8).threshold(55).png().toBuffer();
     const lineArt = await sharp(thickened).negate().png().toBuffer();
 
     return { base64: lineArt.toString('base64'), mimeType: 'image/png' };
@@ -768,18 +796,45 @@ export async function generateChapterIllustration(bookId: string, ownerId: strin
 }
 
 /**
+ * Strip color and lighting vocabulary from a scene description.
+ *
+ * The subject briefs the outline writer produces are written as prose — "golden
+ * shafts", "silvery fish", "gradient sky", "long shadows". Image models weight
+ * that content far more heavily than a list of negations appended after it, so
+ * a coloring page prompt that keeps the color words reliably comes back as a
+ * painted scene instead of line art. Removing the color words from the content
+ * itself is what actually flips the backend into outline mode.
+ */
+function scrubColorWords(subject: string): string {
+  return subject
+    .replace(
+      /\b(golden|gold|silver|silvery|bronze|copper|blue|azure|navy|teal|turquoise|cyan|green|emerald|olive|red|crimson|scarlet|maroon|pink|rose|magenta|purple|violet|indigo|orange|amber|peach|yellow|brown|tan|beige|cream|grey|gray|white|black|colourful|colorful|vivid|vibrant|bright|dark|dusky|glowing|glow|luminous|shimmering|sparkling|iridescent|rainbow|gradient|gradients|sunset|sunrise|sunlit|dusk|dawn|twilight|halo|light|lighting|shadow|shadows|soft|hazy|misty|atmospheric|tranquil|serene)\b/gi,
+      ''
+    )
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.;:])/g, '$1')
+    .replace(/,\s*,/g, ',')
+    .replace(/([,;:])\s*\1+/g, '$1')
+    .replace(/[,:;]\s*$/, '')
+    .trim();
+}
+
+/**
  * Generate a coloring page with appropriate style for children or adults.
  */
 export async function generateColoringPage(bookId: string, ownerId: string, chapterIndex: number, subject: string, theme?: ColoringTheme | null): Promise<GeneratedImageResult> {
   const isAdultTheme = !!theme;
-  const themeConfig = theme ? COLORING_THEMES[theme] : null;
+  const subjectText = scrubColorWords(subject);
 
-  const adultStyleAddon = isAdultTheme
-    ? 'intricate fine detail, evenly weighted continuous lines, ornate patterns, professional adult coloring-book quality'
-    : 'simple bold outlines, thick continuous lines, large open areas, for children to color';
+  // One short, coherent instruction set. Long stacks of "no X, no Y" repeated
+  // by both this prompt and STYLE_CONFIG diluted the line-art direction and let
+  // the scene description dominate. The theme's own pagePromptPrefix is dropped
+  // for the same reason: it carries more color vocabulary than the subject does.
+  const artDirection = isAdultTheme
+    ? 'Draw the subject as intricate black contour line art: fine, even line weight, ornamental detail, and white space inside every shape so it can be colored in.'
+    : 'Draw the subject as simple bold black outline art: thick even lines, basic shapes, and large open white areas so a child can color them in.';
 
-  const promptPrefix = themeConfig ? themeConfig.pagePromptPrefix : 'Coloring book page:';
-  const prompt = `Coloring book page: ${promptPrefix} ${subject}. ${adultStyleAddon}. Render as clean black contour lines on a pure white background — a professional coloring-book outline drawing. Absolutely no color, no grayscale tones, no shading, no shadows, no gradients, no hatching, no cross-hatching, no stippling, no solid filled black areas, no texture, no photorealism, no pencil sketch. Only crisp continuous black outlines with white space left to color in.`;
+  const prompt = `${isAdultTheme ? 'Adult' : 'Children\'s'} coloring book page, black outline drawing on a pure white background. Subject: ${subjectText}. ${artDirection} Outlines only: no color, no shading, no gradients, no filled areas, no background texture.`;
 
   return generateImage({
     prompt,

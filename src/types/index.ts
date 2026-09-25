@@ -171,11 +171,11 @@ export const STYLE_CONFIG: Record<string, { prompt: string; size: string }> = {
     size: '1344x768',
   },
   lineart: {
-    prompt: "Children's coloring book page. Bold clean black outline drawing on a pure white background, simple shapes, thick continuous lines, large open areas to color. Line art only — no shading, no gray tones, no gradients, no hatching, no cross-hatching, no stippling, no filled black areas, no color, no texture, not a sketch, not a photo.",
+    prompt: 'Clean black outline line art on white, thick even strokes, simple shapes, large white areas to color. No shading or color.',
     size: '1024x1024',
   },
   'lineart-adult': {
-    prompt: 'Adult coloring book page in the style of a professional line-art illustration. Intricate, detailed, evenly weighted black contour lines on a pure white background, ornate fine detail, symmetrical architectural precision. Outline drawing only — no shading, no gray tones, no gradients, no hatching, no cross-hatching, no stippling, no filled black areas, no color, no texture, not a pencil sketch, not a photograph.',
+    prompt: 'Intricate black contour line art on white, fine even line weight, ornamental detail, white areas to color. No shading or color.',
     size: '1024x1024',
   },
   watercolor: {
