@@ -29,7 +29,7 @@ export function getOutlinePrompt(
   if (adventureType) {
     const safeAdventure = adventureType.replace(/[^\w\s]/g, '').toUpperCase();
     adventureToken = `AdventureSettingToken: ${safeAdventure}`;
-    adventureNote = `\nAdventure setting: The story takes place ${adventureType.replace(/-/g, ' ')}. All chapters should be set in this location.\nKEY TOKEN TO INCLUDE IN EVERY CHAPTER: ${adventureToken}`;
+    adventureNote = `\nAdventure setting: The story takes place ${adventureType.replace(/-/g, ' ')}. All chapters should be set in this location.\nKEY TOKEN TO INCLUDE IN EVERY CHAPTER'S SYNOPSIS: ${adventureToken}`;
   }
 
   let descriptionNote = '';

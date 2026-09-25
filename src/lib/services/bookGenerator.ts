@@ -199,7 +199,11 @@ export async function generateOutline(bookId: string, ownerId: string, jobId: st
         const adventureToken = `AdventureSettingToken: ${book.adventureType.replace(/[^\w\s]/g, '').toUpperCase()}`;
         const chaptersWithoutToken = outline.chapters
             .map((chapter, index) => ({ chapter, index }))
-            .filter(({ chapter }) => !chapter.synopsis.toUpperCase().includes(adventureToken));
+            .filter(({ chapter }) => {
+              const titleHasToken = chapter.title?.toUpperCase().includes(adventureToken) ?? false;
+              const synopsisHasToken = chapter.synopsis?.toUpperCase().includes(adventureToken) ?? false;
+              return !titleHasToken && !synopsisHasToken;
+            });
 
         if (chaptersWithoutToken.length > 0) {
             const errMessage = `Adventure setting validation failed: ${chaptersWithoutToken.length} chapters missing adventure token "${adventureToken}". Chapters: ${chaptersWithoutToken.map(c => c.index + 1).join(', ')}`;
