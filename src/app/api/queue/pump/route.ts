@@ -17,8 +17,7 @@
 //      walks job-after-job across invocations instead of dying with one frozen
 //      instance. It also loops in-invocation until `deadlineMs` approaches the
 //      function's maxDuration.
-//   4. vercel.json schedules it as a daily backstop for dead chains (once-a-day
-//      is the most Vercel Hobby allows; on Pro, tighten it to `* * * * *`).
+//   4. vercel.json schedules it as a hourly backstop for dead chains.
 //
 // Triggers: Vercel Cron (Authorization: Bearer $CRON_SECRET), the queue itself
 // (same secret), or — in local/dev — direct calls. Never call jobs directly
@@ -28,19 +27,37 @@ import { after, NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getJobQueue } from '@/lib/workers/queue';
 import { isPumpRequestAuthorized, pumpAuthToken, resolvePumpUrl } from '@/lib/workers/queue-pump-client';
+import { isServerless } from '@/lib/workers/queue';
 
-// Long-running job types (e.g. manuscript import) mine one LLM window per
-// invocation, so give the pump a comfortable budget (Vercel Pro honors 300s;
-// Hobby caps functions at 60s — set QUEUE_PUMP_DEADLINE_MS=30000 there).
+// Detect Vercel plan: Hobby = 60s maxDuration, Pro = 300s.
+// VERCEL_ENV=production + no VERCEL_TEAM_ID typically means Hobby.
+// Allow explicit override via QUEUE_PUMP_MAX_DURATION.
+// NOTE: maxDuration must be a static literal for Next.js config validation.
+// Use QUEUE_PUMP_MAX_DURATION env var to override at runtime if needed.
 export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
+// Runtime max duration (may differ from static config on Hobby)
+function getRuntimeMaxDuration(): number {
+  const explicit = parseInt(process.env.QUEUE_PUMP_MAX_DURATION || '', 10);
+  if (explicit > 0) return explicit;
+  // Heuristic: if we're on Vercel but not on a Team/Enterprise plan, assume Hobby (60s)
+  const isVercel = process.env.VERCEL === '1';
+  const isTeam = Boolean(process.env.VERCEL_TEAM_ID);
+  return isVercel && !isTeam ? 60 : 300;
+}
+
+const RUNTIME_MAX_DURATION = getRuntimeMaxDuration();
+
 /**
  * Stop claiming work this far before the platform kills the function, so the
- * final status write always lands and a lease is never orphaned. Default 270s
- * assumes the 300s `maxDuration` above.
+ * final status write always lands and a lease is never orphaned.
+ * Default: maxDuration - 30s (or 30s on Hobby, 270s on Pro).
  */
-const DEADLINE_MS = parseInt(process.env.QUEUE_PUMP_DEADLINE_MS || '270000', 10);
+const DEADLINE_MS = parseInt(
+  process.env.QUEUE_PUMP_DEADLINE_MS || String(Math.max(30_000, RUNTIME_MAX_DURATION * 1000 - 30_000)),
+  10
+);
 const MAX_BUSY_WAITS = 3; // don't spend a whole invocation waiting on one slow job
 
 function isAuthorized(req: NextRequest): boolean {
@@ -220,6 +237,7 @@ async function settleOrphanedGenerationJobs(): Promise<number> {
 /**
  * Self-kick helper. The request lands on a fresh function instance with a fresh
  * timeout, so the job chain continues even after this instance finishes.
+ * Retries with backoff to handle transient network/auth failures.
  */
 async function kickNextPump(): Promise<void> {
   const primaryUrl = resolvePumpUrl();
@@ -233,27 +251,40 @@ async function kickNextPump(): Promise<void> {
     urls.push(vercelCandidate);
   }
 
+  // Try each URL with retries
   for (const baseUrl of urls) {
     const url = `${baseUrl}/api/queue/pump`;
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'x-queue-pump-secret': token,
-          'cache-control': 'no-cache',
-        },
-        signal: AbortSignal.timeout(10000),
-      });
-      if (res.ok || res.status === 202) {
-        return;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'x-queue-pump-secret': token,
+            'cache-control': 'no-cache',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+        if (res.ok || res.status === 202) {
+          console.log(`[QueuePump] self-kick succeeded on ${url} (attempt ${attempt})`);
+          return;
+        }
+        console.warn(`[QueuePump] self-kick returned status ${res.status} on ${url} (attempt ${attempt})`);
+      } catch (e) {
+        const name = e instanceof Error ? e.name : '';
+        if (name === 'TimeoutError' || name === 'AbortError') {
+          console.warn(`[QueuePump] self-kick timeout on ${url} (attempt ${attempt})`);
+        } else {
+          console.warn(`[QueuePump] self-kick failed on ${url} (attempt ${attempt})`, e);
+        }
       }
-      console.warn(`[QueuePump] self-kick returned status ${res.status} on ${url}`);
-    } catch (e) {
-      const name = e instanceof Error ? e.name : '';
-      if (name === 'TimeoutError' || name === 'AbortError') return;
-      console.warn(`[QueuePump] self-kick failed on ${url}:`, e);
+      // Backoff between retries
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, 1000 * attempt));
+      }
     }
   }
+  // If we get here, all kicks failed - log but don't throw (background work)
+  console.error(`[QueuePump] ALL self-kick attempts failed for all URLs. Chain may stall.`);
 }
 
 async function runPump(): Promise<{ ran: number; recovered: number }> {

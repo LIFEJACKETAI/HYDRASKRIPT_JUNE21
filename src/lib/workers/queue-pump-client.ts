@@ -85,28 +85,41 @@ export async function firePumpKick(): Promise<void> {
     urls.push(vercelCandidate)
   }
 
+  // Try each URL with retries
   for (const baseUrl of urls) {
     const url = `${baseUrl}/api/queue/pump`
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'x-queue-pump-secret': token,
-          'cache-control': 'no-cache',
-        },
-        // Don't wait for the pump to finish — just make sure the request lands.
-        signal: AbortSignal.timeout(10000),
-      })
-      if (res.ok || res.status === 202) {
-        return
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'x-queue-pump-secret': token,
+            'cache-control': 'no-cache',
+          },
+          // Don't wait for the pump to finish — just make sure the request lands.
+          signal: AbortSignal.timeout(10000),
+        })
+        if (res.ok || res.status === 202) {
+          console.log(`[Queue] pump kick succeeded on ${url} (attempt ${attempt})`)
+          return
+        }
+        console.warn(`[Queue] pump kick status ${res.status} on ${url} (attempt ${attempt})`)
+      } catch (e) {
+        const name = e instanceof Error ? e.name : ''
+        if (name === 'TimeoutError' || name === 'AbortError') {
+          console.warn(`[Queue] pump kick timeout on ${url} (attempt ${attempt})`)
+        } else {
+          console.warn(`[Queue] pump kick failed on ${url} (attempt ${attempt})`, e)
+        }
       }
-      console.warn(`[Queue] pump kick status ${res.status} on ${url}`)
-    } catch (e) {
-      const name = e instanceof Error ? e.name : ''
-      if (name === 'TimeoutError' || name === 'AbortError') return
-      console.warn(`[Queue] pump kick failed on ${url}:`, e)
+      // Backoff between retries
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, 1000 * attempt))
+      }
     }
   }
+  // If we get here, all kicks failed - log but don't throw (fire-and-forget)
+  console.error(`[Queue] ALL pump kick attempts failed for all URLs. Chain may stall.`)
 }
 
 /**
