@@ -101,6 +101,21 @@ async function reconcileStuckBooks(): Promise<number> {
       if (book.jobs.length > 0) continue; // already has a driver
 
       if (book.status === 'outlining') {
+        // Check for recent failed outline jobs to prevent infinite retry loops
+        const recentFailedOutline = await db.job.findFirst({
+          where: {
+            bookId: book.id,
+            jobType: 'generate_outline',
+            status: 'failed',
+            createdAt: { gte: new Date(now - 10 * 60 * 1000) }, // last 10 minutes
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+        if (recentFailedOutline) {
+          console.log(`[QueuePump] Skipping outline recovery for book ${book.id} — recent failed outline job ${recentFailedOutline.id} exists.`);
+          continue;
+        }
+
         await db.job.create({
           data: {
             bookId: book.id,
