@@ -471,3 +471,4 @@ Images live in `public/backgrounds/` — see `BACKGROUND_IMAGES.md` for the
 mapping, credits, and alternates; `bash scripts/download-backgrounds.sh`
 refetches them at 1920px. Keep public images web-sized with
 `node scripts/compress-images.mjs`.
+# STACKFORGE_270926
